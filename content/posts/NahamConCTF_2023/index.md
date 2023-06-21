@@ -1,7 +1,6 @@
 ---
 title: "NahamConCTF_2023"
 date: 2023-06-20T20:41:32-05:00
-draft: true
 ---
 ## Warmup
 ### Fast Hands

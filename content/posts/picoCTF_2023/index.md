@@ -1,7 +1,6 @@
 ---
 title: "PicoCTF_2023"
 date: 2023-06-20T21:15:25-05:00
-draft: true
 ---
 ## Binary Exploitation
 ### tic-tac

@@ -1,7 +1,6 @@
 ---
 title: "N00bzCTF_2023"
 date: 2023-06-20T20:25:09-05:00
-draft: true
 ---
 ## Misc
 ### Amazing Song Lyrics

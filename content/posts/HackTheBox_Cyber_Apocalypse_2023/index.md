@@ -1,7 +1,6 @@
 ---
 title: "HackTheBox_Cyber_Apocalypse_2023"
 date: 2023-06-19T19:01:05-05:00
-draft: true
 ---
 ## Forensics
 ### Extraterrestrial Persistence
