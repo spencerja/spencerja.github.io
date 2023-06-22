@@ -1,9 +1,10 @@
 ---
 title: "PicoCTF_2023"
 date: 2023-06-20T21:15:25-05:00
+toc: true
 ---
-## Binary Exploitation
-### tic-tac
+# Binary Exploitation
+## tic-tac
 >Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. `ssh` to `saturn.picoctf.net:62983`, and run the binary named "txtreader" once connected. Login as `ctf-player` with the password, `d137d16e`
 ---
 Upon ssh into machine, we see `txtreader` binary and flag.txt file, however we don't have permissions to read them. Fortunately, they also give us the pre-compiled code for `txtreader` so that we might get a better idea on what's going on:
@@ -113,8 +114,8 @@ Note that despite entering 5 555 555 555, it shows that we entered number 1 260 
 
 `picoCTF{Tw0_Sum_Integer_Bu773R_0v3rfl0w_fe14e9e9}`
 
-## Forensics
-### hideme
+# Forensics
+## hideme
 >Every file gets a flag. The SOC analyst saw one image been sent back and forth between two people. They decided to investigate and found out that there was more than what meets the eye [here](https://artifacts.picoctf.net/c/493/flag.png).
 -------------------
 Downloading the file shows flag.png. Exiftool tells me there's more to this image than first shown:
