@@ -1,6 +1,8 @@
 ---
 title: "NahamConCTF_2023"
-date: 2023-06-20T20:41:32-05:00
+date: 2022-06-18T20:41:32-05:00
+categories: ["CTF"]
+tags: ["Web","Misc","OSINT"]
 ---
 ## Warmup
 ### Fast Hands

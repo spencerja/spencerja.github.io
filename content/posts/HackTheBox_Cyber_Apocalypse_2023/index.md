@@ -1,6 +1,8 @@
 ---
 title: "HackTheBox_Cyber_Apocalypse_2023"
-date: 2023-06-19T19:01:05-05:00
+date: 2023-03-25T19:01:05-05:00
+categories: ["CTF"]
+tags: ["Forensics","Misc","Web","Pwn"]
 ---
 ## Forensics
 ### Extraterrestrial Persistence

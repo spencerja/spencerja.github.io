@@ -1,6 +1,8 @@
 ---
 title: "N00bzCTF_2023"
-date: 2023-06-20T20:25:09-05:00
+date: 2023-06-14T20:25:09-05:00
+categories: ["CTF"]
+tags: ["Misc","OSINT","Web"]
 ---
 ## Misc
 ### Amazing Song Lyrics
