@@ -4,7 +4,7 @@ date: 2023-07-08T09:04:19-05:00
 tags: ["LFI","Arbitrary File Read","Metasploit","ansible"]
 description: "Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root."
 image: "injectlogo2.png"
-category: ["Hack The Box"]
+categories: ["Hack The Box"]
 ---
 ## Initial Enumeration
 Initial nmap:

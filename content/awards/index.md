@@ -1,6 +1,5 @@
 ---
 title: "Trophies"
-date: 2023-06-19T16:43:23-05:00
 toc: true
 ---
 ## CTFs
