@@ -2,7 +2,7 @@
 title: "HackTheBox_Inject"
 date: 2023-07-08T09:04:19-05:00
 tags: ["LFI","Arbitrary File Read","Metasploit","ansible"]
-description: "Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root."
+description: "Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user's group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root."
 image: "injectlogo2.png"
 categories: ["Hack The Box"]
 ---
@@ -396,12 +396,7 @@ We can see this is an ansible playbook, and ansible themselves have [documentati
       cmd: "chmod u+s /bin/bash"
 ```
 
-Running the ansible playbook, invoking --become-user to elevate privileges:
-
-```
-ansible-playbook --become-user playbook playbook_1.yml
-```
-Lastly, we check the newly changed bash file, and become root:
+After a few minutes, we can check the newly changed bash file, and become root:
 
 ```
 ls -al /bin/bash

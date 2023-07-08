@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.'><title>HackTheBox_Inject</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user&#39;s group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.'><title>HackTheBox_Inject</title>
 
 <link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox_inject/'>
 
 <link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox_Inject'>
-<meta property='og:description' content='Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.'>
+<meta property='og:description' content='Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user&#39;s group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.'>
 <meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox_inject/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Metasploit' /><meta property='article:tag' content='ansible' /><meta property='article:published_time' content='2023-07-08T09:04:19-05:00'/><meta property='article:modified_time' content='2023-07-08T09:04:19-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox_inject/injectlogo2.png' />
 <meta name="twitter:title" content="HackTheBox_Inject">
-<meta name="twitter:description" content="Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root."><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user&#39;s group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox_inject/injectlogo2.png' />
     </head>
     <body class="
@@ -250,7 +250,7 @@
     
         
         <h3 class="article-subtitle">
-            Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user owns a directy utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.
+            Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user&#39;s group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.
         </h3>
         
     </div>
@@ -1012,16 +1012,7 @@ Using metasploit module to exploit:</p>
 </span></span><span class="line"><span class="cl">      cmd: &#34;chmod u+s /bin/bash&#34;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>Running the ansible playbook, invoking &ndash;become-user to elevate privileges:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ansible-playbook --become-user playbook playbook_1.yml
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Lastly, we check the newly changed bash file, and become root:</p>
+</div><p>After a few minutes, we can check the newly changed bash file, and become root:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
