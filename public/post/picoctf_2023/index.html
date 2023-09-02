@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="en" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &amp;ldquo;txtreader&amp;rdquo; once connected. Login as ctf-player with the password, d137d16e
 Upon ssh into machine, we see txtreader binary and flag.txt file, however we don&amp;rsquo;t have permissions to read them.'><title>PicoCTF_2023</title>
@@ -326,39 +326,39 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/stat.h&gt;  </span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span>  
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Usage: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &lt;filename&gt;&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Usage: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &lt;filename&gt;&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="n">std</span><span class="o">::</span><span class="n">ifstream</span> <span class="n">file</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="k">struct</span> <span class="nc">stat</span> <span class="n">statbuf</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>  
+</span></span><span class="line"><span class="cl"> <span class="n">std</span><span class="o">::</span><span class="n">ifstream</span> <span class="n">file</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>  
+</span></span><span class="line"><span class="cl"> <span class="k">struct</span> <span class="nc">stat</span> <span class="n">statbuf</span><span class="p">;</span>  
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="c1">// Check the file&#39;s status information.  
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err"> </span><span class="k">if</span> <span class="p">(</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">statbuf</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not retrieve file information&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Check the file&#39;s status information.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">statbuf</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not retrieve file information&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="c1">// Check the file&#39;s owner.  
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err"> </span><span class="k">if</span> <span class="p">(</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_uid</span> <span class="o">!=</span> <span class="n">getuid</span><span class="p">())</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: you don&#39;t own this file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Check the file&#39;s owner.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_uid</span> <span class="o">!=</span> <span class="n">getuid</span><span class="p">())</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: you don&#39;t own this file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="c1">// Read the contents of the file.  
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err"> </span><span class="k">if</span> <span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">is_open</span><span class="p">())</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="k">while</span> <span class="p">(</span><span class="n">getline</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">     </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="p">}</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not open file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err">   </span><span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Read the contents of the file.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">is_open</span><span class="p">())</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">while</span> <span class="p">(</span><span class="n">getline</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">     <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not open file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="err"> </span><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>  
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -1244,32 +1244,32 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span><span class="line"><span class="cl">  
 </span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> <span class="nv">$#</span> !<span class="o">=</span> <span class="m">3</span> <span class="o">]</span>  
 </span></span><span class="line"><span class="cl"><span class="k">then</span>  
-</span></span><span class="line"><span class="cl"> echo <span class="s2">&#34;Read the code first&#34;</span>  
+</span></span><span class="line"><span class="cl"> <span class="nb">echo</span> <span class="s2">&#34;Read the code first&#34;</span>  
 </span></span><span class="line"><span class="cl"><span class="k">else</span>  
-</span></span><span class="line"><span class="cl">       if <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;add&#34;</span> <span class="o">]]</span>  
-</span></span><span class="line"><span class="cl">       then    
-</span></span><span class="line"><span class="cl">         sum<span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">+</span> <span class="nv">$3</span> <span class="k">))</span>  
-</span></span><span class="line"><span class="cl">         echo <span class="s2">&#34;The Sum is: </span><span class="nv">$sum</span><span class="s2">&#34;</span>     
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;add&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">sum</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">+</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The Sum is: </span><span class="nv">$sum</span><span class="s2">&#34;</span>     
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">       elif <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;sub&#34;</span> <span class="o">]]</span>  
-</span></span><span class="line"><span class="cl">       then    
-</span></span><span class="line"><span class="cl">         sub<span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">-</span> <span class="nv">$3</span> <span class="k">))</span>  
-</span></span><span class="line"><span class="cl">         echo <span class="s2">&#34;The Substract is: </span><span class="nv">$sub</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;sub&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">sub</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">-</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The Substract is: </span><span class="nv">$sub</span><span class="s2">&#34;</span>    
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">       elif <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;div&#34;</span> <span class="o">]]</span>  
-</span></span><span class="line"><span class="cl">       then    
-</span></span><span class="line"><span class="cl">         div<span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">/</span> <span class="nv">$3</span> <span class="k">))</span>  
-</span></span><span class="line"><span class="cl">         echo <span class="s2">&#34;The quotient is: </span><span class="nv">$div</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;div&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">div</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">/</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The quotient is: </span><span class="nv">$div</span><span class="s2">&#34;</span>    
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">       elif <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;mul&#34;</span> <span class="o">]]</span>  
-</span></span><span class="line"><span class="cl">       then  
-</span></span><span class="line"><span class="cl">         mul<span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">*</span> <span class="nv">$3</span> <span class="k">))</span>  
-</span></span><span class="line"><span class="cl">         echo <span class="s2">&#34;The product is: </span><span class="nv">$mul</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;mul&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>  
+</span></span><span class="line"><span class="cl">         <span class="nv">mul</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">*</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The product is: </span><span class="nv">$mul</span><span class="s2">&#34;</span>    
 </span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">       else  
-</span></span><span class="line"><span class="cl">         echo <span class="s2">&#34;Read the manual&#34;</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">else</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;Read the manual&#34;</span>  
 </span></span><span class="line"><span class="cl">           
-</span></span><span class="line"><span class="cl">       fi  
+</span></span><span class="line"><span class="cl">       <span class="k">fi</span>  
 </span></span><span class="line"><span class="cl"><span class="k">fi</span>
 </span></span></code></pre></td></tr></table>
 </div>
