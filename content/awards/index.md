@@ -2,6 +2,10 @@
 title: "Trophies"
 toc: true
 ---
+## Certificates
+### OSCP by Offensive Security
+![](images/Cert.png)
+
 ## CTFs
 ### Nahamcon 2023
 74th place out of 2522! My contribution was 3749 points out of the team's 7425 :)
