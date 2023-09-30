@@ -10,7 +10,7 @@
 <meta property='og:description' content='CTF Adventures'>
 <meta property='og:url' content='https://yuwenmichael.netlify.app/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2023-09-23T11:09:31-05:00 '/>
+<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2023-09-30T09:11:52-05:00 '/>
 <meta name="twitter:title" content="Spencer&#39;s Blog">
 <meta name="twitter:description" content="CTF Adventures"><link rel="alternate" type="application/rss&#43;xml" href="https://yuwenmichael.netlify.app/index.xml">
     </head>
@@ -221,6 +221,71 @@
     
 
     <section class="article-list">
+        
+            
+<article class="has-image">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-format/">
+                <img src="/post/hackthebox-format/Format_hucfdd9eb173c0886a8604431711aec1ea_316610_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-format/Format_hucfdd9eb173c0886a8604431711aec1ea_316610_800x0_resize_box_3.png 800w, /post/hackthebox-format/Format_hucfdd9eb173c0886a8604431711aec1ea_316610_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-format/">HackTheBox - Format</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Format is a medium difficulty box with a web blog generator service. An extra open port reveals a git repository with all of the source code and, using this information, we can find an Arbitrary File Write vulnerability, and a web-accessible folder with read/write/execute permissions. The folder is only generated for Pro users, so first we abuse a misconfiguration in nginx&#39;s proxy_pass settings. The misconfiguration allows us to perform Server-Side Request Forgery to the redis database and set the pro flag on our account to true. Using the file write vulnerability, we generate a webshell in the web-accesible folder with read/write/execute permissions, and gain access as www-data. Enumerating the redis database provides us with re-used credentials for a user, and the user can run a custom python script as root. By abusing a flaw in python string&#39;s format function, we can dump all global variables, one of which is the password for the root user.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 30, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+</article>
         
             
 <article class="has-image">
@@ -482,71 +547,6 @@
 </header>
 </article>
         
-            
-<article class="has-image">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/post/hackthebox-busqueda/">
-                <img src="/post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_800x0_resize_box_3.png 800w, /post/hackthebox-busqueda/Busqueda_hucd7cd900a381e6f396b4d3fd74d99876_352215_1600x0_resize_box_3.png 1600w"
-                        width="800" 
-                        height="606" 
-                        loading="lazy"
-                        alt="Featured image of post HackTheBox - Busqueda" />
-                
-            </a>
-        </div>
-    
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/hack-the-box/" >
-                Hack The Box
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/post/hackthebox-busqueda/">HackTheBox - Busqueda</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.
-        </h3>
-        
-    </div>
-
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">Aug 13, 2023</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-</header>
-</article>
-        
     </section>
     <nav class='pagination'>
         
@@ -622,7 +622,7 @@
                     <a href="/archives/#2023">
                         
                             <span class="year">2023</span>
-                            <span class="count">13</span>
+                            <span class="count">14</span>
                         
                     </a> 
                 </div>
@@ -649,7 +649,7 @@
 
     <div class="tagCloud-tags">
         
-            <a href="/categories/hack-the-box/" class="font_size_8">
+            <a href="/categories/hack-the-box/" class="font_size_9">
                 Hack The Box
             </a>
         
@@ -686,16 +686,16 @@
                 Arbitrary File Read
             </a>
         
+            <a href="/tags/python/" class="font_size_4">
+                Python
+            </a>
+        
             <a href="/tags/web/" class="font_size_4">
                 Web
             </a>
         
             <a href="/tags/osint/" class="font_size_3">
                 OSINT
-            </a>
-        
-            <a href="/tags/python/" class="font_size_3">
-                Python
             </a>
         
             <a href="/tags/command-injection/" class="font_size_2">
@@ -710,12 +710,12 @@
                 Forensics
             </a>
         
-            <a href="/tags/gitea/" class="font_size_2">
-                Gitea
+            <a href="/tags/git/" class="font_size_2">
+                git
             </a>
         
-            <a href="/tags/pwn/" class="font_size_2">
-                Pwn
+            <a href="/tags/gitea/" class="font_size_2">
+                Gitea
             </a>
         
     </div>
