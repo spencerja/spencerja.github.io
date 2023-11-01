@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
-	<meta name="generator" content="Hugo 0.118.2"><meta charset='utf-8'>
+	<meta name="generator" content="Hugo 0.119.0"><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='CTF Adventures'><title>Spencer&#39;s Blog</title>
 
 <link rel='canonical' href='https://yuwenmichael.netlify.app/'>
@@ -10,7 +10,7 @@
 <meta property='og:description' content='CTF Adventures'>
 <meta property='og:url' content='https://yuwenmichael.netlify.app/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2023-10-07T10:18:48-05:00 '/>
+<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2023-10-30T17:08:25-05:00 '/>
 <meta name="twitter:title" content="Spencer&#39;s Blog">
 <meta name="twitter:description" content="CTF Adventures"><link rel="alternate" type="application/rss&#43;xml" href="https://yuwenmichael.netlify.app/index.xml">
     </head>
@@ -221,6 +221,71 @@
     
 
     <section class="article-list">
+        
+            
+<article class="has-image">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-onlyforyou/">
+                <img src="/post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_800x0_resize_box_3.png 800w, /post/hackthebox-onlyforyou/OnlyForYou_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-onlyforyou/">HackTheBox - OnlyForYou</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 26, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+</article>
         
             
 <article class="has-image">
@@ -482,71 +547,6 @@
 </header>
 </article>
         
-            
-<article class="has-image">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/post/hackthebox-inject/">
-                <img src="/post/hackthebox-inject/Inject_hu12ac3957f7a126ac06ec9338f7d84355_333068_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-inject/Inject_hu12ac3957f7a126ac06ec9338f7d84355_333068_800x0_resize_box_3.png 800w, /post/hackthebox-inject/Inject_hu12ac3957f7a126ac06ec9338f7d84355_333068_1600x0_resize_box_3.png 1600w"
-                        width="800" 
-                        height="606" 
-                        loading="lazy"
-                        alt="Featured image of post HackTheBox - Inject" />
-                
-            </a>
-        </div>
-    
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/hack-the-box/" >
-                Hack The Box
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/post/hackthebox-inject/">HackTheBox - Inject</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            Inject is an easy difficulty box with a vulnerability in how visitors can view uploaded images. Using LFI techniques for directory traversal, we can read the source code and understand that a particular web plugin is vulnerable to a metasploit exploit. After obtaining a foothold, we find that one user&#39;s group controls a directory utilized by ansible for automated tasks. By supplying a malicious ansible playbook, we are able to escalate privileges to execute commands as root.
-        </h3>
-        
-    </div>
-
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">Jul 08, 2023</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-</header>
-</article>
-        
     </section>
     <nav class='pagination'>
         
@@ -563,6 +563,10 @@
             
             
                     <a class='page-link' href='/page/3/'>3</a>
+                
+            
+            
+                    <a class='page-link' href='/page/4/'>4</a>
                 
             
     </nav>
@@ -622,7 +626,7 @@
                     <a href="/archives/#2023">
                         
                             <span class="year">2023</span>
-                            <span class="count">15</span>
+                            <span class="count">16</span>
                         
                     </a> 
                 </div>
@@ -653,7 +657,7 @@
                 Hack The Box
             </a>
         
-            <a href="/categories/ctf/" class="font_size_5">
+            <a href="/categories/ctf/" class="font_size_6">
                 CTF
             </a>
         
@@ -682,6 +686,10 @@
                 Misc
             </a>
         
+            <a href="/tags/web/" class="font_size_5">
+                Web
+            </a>
+        
             <a href="/tags/arbitrary-file-read/" class="font_size_4">
                 Arbitrary File Read
             </a>
@@ -690,8 +698,8 @@
                 Python
             </a>
         
-            <a href="/tags/web/" class="font_size_4">
-                Web
+            <a href="/tags/forensics/" class="font_size_3">
+                Forensics
             </a>
         
             <a href="/tags/osint/" class="font_size_3">
@@ -704,10 +712,6 @@
         
             <a href="/tags/docker/" class="font_size_2">
                 Docker
-            </a>
-        
-            <a href="/tags/forensics/" class="font_size_2">
-                Forensics
             </a>
         
             <a href="/tags/git/" class="font_size_2">
