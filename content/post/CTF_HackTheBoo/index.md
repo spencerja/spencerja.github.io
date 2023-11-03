@@ -2,7 +2,7 @@
 title: "Hack The Boo 2023"
 date: 2023-10-30T17:08:25-05:00
 categories: ["CTF"]
-tags: ["Web","Forensics"]
+tags: ["Web","Forensics","CSRF","SSTI","Wireshark"]
 description: "Participated in the 2023 Hack The Boo competition. Each category contained 2 challenges, and I managed to complete the web category and part of forensics."
 ---
 ## Web
