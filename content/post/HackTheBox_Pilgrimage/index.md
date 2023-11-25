@@ -440,4 +440,4 @@ whoami
 root
 ```
 ## Reflection
-I particularly enjoy boxes focused around a particular theme, in this situation: image manipulation. I particularly appreciate how this box keeps it mostly simple while showcasing a couple recent CVEs related to extremely common image tools. Retrieving a password from the database directly in this manner was unintuitive for me, as clearly the database file was messy to work with. However with knowing the username we look for, it is easy to identify. 
+I particularly enjoy boxes focused around a particular theme, in this situation: image manipulation. I appreciate how this box keeps it mostly simple while showcasing a couple recent CVEs related to extremely common image tools. Retrieving a password from the database directly in this manner was unintuitive for me, as clearly the database file was messy to work with. However with knowing the username we look for, it is easy to identify. 
