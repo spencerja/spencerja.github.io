@@ -6,6 +6,9 @@ toc: true
 ### OSCP by Offensive Security
 ![](images/Cert.png)
 
+### CompTIA Security+
+![](images/Comptia.png)
+
 ## CTFs
 ### Nahamcon 2023
 74th place out of 2522! My contribution was 3749 points out of the team's 7425 :)
@@ -23,6 +26,11 @@ Achieved Platinum Rank in HTB Seasons Beta I. All Easy, Medium and Hard challeng
 
 ![](images/HTB_Season1.png)
 
+### HTB Seasons III
+Achieved the Holo tier in HTB Seasons III. For this, I completed all box challenges within a week of release, except for the final Insane difficulty machine, over a twelve week period. This is the highest achievement tier possible for this competitive season, and was a very tough challenge!
+
+![](images/holo3.png)
+
 ### Achieved Pro Hacker Rank
 After completing 14/20 active boxes, I earned Pro Hacker rank on HTB
 
@@ -38,3 +46,8 @@ Completed introductory pro lab Dante. Dante is a small network of 14 machines on
 My first cybersecurity "certificate" of completion! The content was fundamental but still had a lot of knowlege to give.
 
 ![](images/THM-D4VXZVJ05K.png)
+
+### Completed TryHackMe's Advent of Cyber 2023
+AoC is quickly becoming my annual tradition; it was very satisfying seeing how far I've come throughout the year, and how much more knowledge I've gained since the previous year's advent.
+
+![](images/THM-4MBPZUYXL6.png)

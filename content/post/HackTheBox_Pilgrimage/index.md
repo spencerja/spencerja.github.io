@@ -392,7 +392,7 @@ blacklist=("Executable script" "Microsoft executable")
         done
 done
 ```
-It appears that, when files are added to the `/shrunk/` folder, this malwarescan script will run `binwalk -e`, extracting components. if there is blacklisted output, the file is removed.
+It appears that, when files are added to the `/shrunk/` folder, this malwarescan script will run `binwalk -e`, extracting components. If there are blacklisted contents in the output, the file is removed.
 Running `binwalk` will get us the version, and we can search for vulnerabilities:
 ```
 emily@pilgrimage:~$ binwalk
