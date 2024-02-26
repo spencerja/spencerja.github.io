@@ -1,7 +1,6 @@
 ---
 title: "HackTheBox - Visual"
-date: 2024-01-04T22:18:54-05:00
-draft: true
+date: 2024-02-24T22:18:54-05:00
 tags: ["Gitea","Visual Studio","FullPowers","GodPotato","dotnet"]
 description: "Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority."
 image: "Visual.png"
@@ -335,5 +334,3 @@ nt authority\system
 PS C:\temp2>
 ```
 Now we have full access to the system.
-## Reflection
-True to their advertisements, Gitea did indeed turn out to be extremely simple and painless to set up. It was a great new opportunity to explore something new, and the pre-build event configuration was a very interesting practice to learn about. The privilege escalation was rather simple, making this box one of the easier Medium difficulty challenges I've experienced.
