@@ -1,6 +1,6 @@
 ---
 title: "HackTheBox - Manager"
-date: 2024-3-16T16:05:15-06:00
+date: 2024-3-16T06:05:15-06:00
 tags: ["Active Directory","Kerbrute","MSSQL","Bloodhound","Active Directory Certificate Services","certipy"]
 description: "Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials."
 image: "Manager.png"
