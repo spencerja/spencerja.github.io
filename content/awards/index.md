@@ -10,6 +10,11 @@ toc: true
 ![](images/Comptia.png)
 
 ## CTFs
+#### HTB Cyber Apocalypse 2024
+120th place out of 5694 teams! This year felt a lot more competitive than last year, but we still managed to get a good placement! It was a very satisfying challenge.
+![](images/HTBCA2024.png)
+
+
 ### Nahamcon 2023
 74th place out of 2522! My contribution was 3749 points out of the team's 7425 :)
 

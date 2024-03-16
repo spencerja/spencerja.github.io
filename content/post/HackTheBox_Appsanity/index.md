@@ -1,6 +1,6 @@
 ---
 title: "HackTheBox - Appsanity"
-date: 2024-11-20T20:49:21-06:00
+date: 2024-03-09T20:49:21-06:00
 tags: ["Cookie","Magic Byte","Upload Bypass","SSRF","LFI","DLL Analysis","dnSpy","Exe Analysis","ProcMon","DLL Hijack"]
 description: "Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."
 image: "Appsanity.png"
