@@ -1,10 +1,9 @@
 ---
 title: "HackTheBox - Analytics"
-date: 2024-10-12T19:35:09-05:00
+date: 2024-03-22T19:35:09-05:00
 tags: ["Remote Code Execution","Metabase","Docker"]
 description: "Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server's docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges."
 image: "Analytics.png"
-draft: true
 categories: ["Hack The Box"]
 ---
 ## Enumeration
@@ -229,5 +228,3 @@ bash-5.1# whoami
 root
 bash-5.1# 
 ```
-## Reflection
-The box is very simple and easy in terms of the number and complexity of steps, with no real amount of depth to them. The path to user was at least unique enough to feel fresh, but the path to root felt stale, and the difficulty was entirely built on the fact that the CVE is not included in the current common kernel exploit scanners (at the time).

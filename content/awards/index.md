@@ -10,7 +10,7 @@ toc: true
 ![](images/Comptia.png)
 
 ## CTFs
-#### HTB Cyber Apocalypse 2024
+### HTB Cyber Apocalypse 2024
 120th place out of 5694 teams! This year felt a lot more competitive than last year, but we still managed to get a good placement! It was a very satisfying challenge.
 ![](images/HTBCA2024.png)
 
