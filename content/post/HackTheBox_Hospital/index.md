@@ -1,6 +1,6 @@
 ---
 title: "HackTheBox - Hospital"
-date: 2024-11-19T17:57:00-06:00
+date: 2024-04-13T17:57:00-06:00
 tags: ["PHP","Upload Filter Bypass","OverlayFS","Hashcat","GhostScript","RDP"]
 description: "Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user's credentials are cracked and we can access the system's web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator."
 image: "Hospital.png"
