@@ -1,33 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Warmups Finders fee You gotta make sure the people who find stuff for you are rewarded well!
-Escalate your privileges and uncover the flag.txt in the finder user&rsquo;s home directory.
-Author: @JohnHammond
-I tried find to locate the flag, only to learn I don&rsquo;t have read permissions. Interesting how find was able to locate, and I learn that it has interesting permissions:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ find . -name &#34;*.txt&#34; 2&gt;/dev/null ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/requires.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/entry_points.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/top_level.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/dependency_links.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/entry_points.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/dependency_links.txt ./usr/lib/python3.12/LICENSE.txt ./home/finder/flag.txt user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ cat /home/finder/flag.txt cat: /home/finder/flag.txt: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /home/finder/flag.txt ls: cannot access &#39;/home/finder/flag.txt&#39;: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ which find /usr/bin/find user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /usr/bin/find -rwxr-sr-x 1 root finder 204264 Apr 8 2024 /usr/bin/find Turns out there is SGID, meaning it executes as finder group.
-'><title>Huntress CTF 2024</title>
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Participated in Huntress CTF, lasting for the month of October. I managed to solve all the web challenges, and our team finished with 127th place! There were a ton of challenges, some good and some bad. I didn&#39;t write on all of the challenges completed, but I wanted to highlight a few of the more interesting challenges, plus a few warmup challenges that were simple to write on.'><title>Huntress CTF 2024</title>
 
-<link rel='canonical' href='http://localhost:1313/post/huntress-ctf-2024/'>
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/huntress-ctf-2024/'>
 
 <link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='Huntress CTF 2024'>
-<meta property='og:description' content='Warmups Finders fee You gotta make sure the people who find stuff for you are rewarded well!
-Escalate your privileges and uncover the flag.txt in the finder user&rsquo;s home directory.
-Author: @JohnHammond
-I tried find to locate the flag, only to learn I don&rsquo;t have read permissions. Interesting how find was able to locate, and I learn that it has interesting permissions:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ find . -name &#34;*.txt&#34; 2&gt;/dev/null ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/requires.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/entry_points.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/top_level.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/dependency_links.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/entry_points.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/dependency_links.txt ./usr/lib/python3.12/LICENSE.txt ./home/finder/flag.txt user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ cat /home/finder/flag.txt cat: /home/finder/flag.txt: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /home/finder/flag.txt ls: cannot access &#39;/home/finder/flag.txt&#39;: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ which find /usr/bin/find user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /usr/bin/find -rwxr-sr-x 1 root finder 204264 Apr 8 2024 /usr/bin/find Turns out there is SGID, meaning it executes as finder group.
-'>
-<meta property='og:url' content='http://localhost:1313/post/huntress-ctf-2024/'>
+<meta property='og:description' content='Participated in Huntress CTF, lasting for the month of October. I managed to solve all the web challenges, and our team finished with 127th place! There were a ton of challenges, some good and some bad. I didn&#39;t write on all of the challenges completed, but I wanted to highlight a few of the more interesting challenges, plus a few warmup challenges that were simple to write on.'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/huntress-ctf-2024/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Malware' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Pickle' /><meta property='article:tag' content='SSTI' /><meta property='article:tag' content='Proxy' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Powershell' /><meta property='article:tag' content='Linux' /><meta property='article:tag' content='Webhook' /><meta property='article:tag' content='API' /><meta property='article:tag' content='ngrok' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='Zip Slip' /><meta property='article:tag' content='Cheat Engine' /><meta property='article:tag' content='Wireshark' /><meta property='article:tag' content='Zimmerman Tools' /><meta property='article:tag' content='Cyberchef' /><meta property='article:published_time' content='2024-11-03T16:15:36-06:00'/><meta property='article:modified_time' content='2024-11-03T16:15:36-06:00'/><meta property='og:image' content='http://localhost:1313/post/huntress-ctf-2024/HuntressCTF_Banner.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Malware' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Pickle' /><meta property='article:tag' content='SSTI' /><meta property='article:tag' content='Proxy' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Powershell' /><meta property='article:tag' content='Linux' /><meta property='article:tag' content='Webhook' /><meta property='article:tag' content='API' /><meta property='article:tag' content='ngrok' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='Zip Slip' /><meta property='article:tag' content='Cheat Engine' /><meta property='article:tag' content='Wireshark' /><meta property='article:tag' content='Zimmerman Tools' /><meta property='article:tag' content='Cyberchef' /><meta property='article:published_time' content='2024-11-03T16:15:36-06:00'/><meta property='article:modified_time' content='2024-11-03T16:15:36-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/huntress-ctf-2024/HuntressCTF_Banner.png' />
 <meta name="twitter:title" content="Huntress CTF 2024">
-<meta name="twitter:description" content="Warmups Finders fee You gotta make sure the people who find stuff for you are rewarded well!
-Escalate your privileges and uncover the flag.txt in the finder user&rsquo;s home directory.
-Author: @JohnHammond
-I tried find to locate the flag, only to learn I don&rsquo;t have read permissions. Interesting how find was able to locate, and I learn that it has interesting permissions:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ find . -name &#34;*.txt&#34; 2&gt;/dev/null ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/requires.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/entry_points.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/top_level.txt ./usr/lib/python3/dist-packages/ssh_import_id-5.11.egg-info/dependency_links.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/entry_points.txt ./usr/lib/python3/dist-packages/distro-1.9.0.dist-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/top_level.txt ./usr/lib/python3/dist-packages/dbus_python-1.3.2.egg-info/dependency_links.txt ./usr/lib/python3.12/LICENSE.txt ./home/finder/flag.txt user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ cat /home/finder/flag.txt cat: /home/finder/flag.txt: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /home/finder/flag.txt ls: cannot access &#39;/home/finder/flag.txt&#39;: Permission denied user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ which find /usr/bin/find user@finders-fee-4e5001a519aad066-699457c45c-9ns4x:/$ ls -al /usr/bin/find -rwxr-sr-x 1 root finder 204264 Apr 8 2024 /usr/bin/find Turns out there is SGID, meaning it executes as finder group.
-"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='http://localhost:1313/post/huntress-ctf-2024/HuntressCTF_Banner.png' />
+<meta name="twitter:description" content="Participated in Huntress CTF, lasting for the month of October. I managed to solve all the web challenges, and our team finished with 127th place! There were a ton of challenges, some good and some bad. I didn&#39;t write on all of the challenges completed, but I wanted to highlight a few of the more interesting challenges, plus a few warmup challenges that were simple to write on."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/huntress-ctf-2024/HuntressCTF_Banner.png' />
     </head>
     <body class="
     article-page
@@ -220,7 +205,7 @@ I tried find to locate the flag, only to learn I don&rsquo;t have read permissio
 
                     <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
                         
-                            <option value="http://localhost:1313/" selected>English</option>
+                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
                         
                     </select>
                 </li>
@@ -282,6 +267,10 @@ I tried find to locate the flag, only to learn I don&rsquo;t have read permissio
             <a href="/post/huntress-ctf-2024/">Huntress CTF 2024</a>
         </h2>
     
+        
+        <h3 class="article-subtitle">
+            Participated in Huntress CTF, lasting for the month of October. I managed to solve all the web challenges, and our team finished with 127th place! There were a ton of challenges, some good and some bad. I didn&#39;t write on all of the challenges completed, but I wanted to highlight a few of the more interesting challenges, plus a few warmup challenges that were simple to write on.
+        </h3>
         
     </div>
 
@@ -2271,41 +2260,57 @@ NOTE: This challenge may take <em>up to two minutes</em> or so to completely sta
 	
 ></p>
 <p>We didn&rsquo;t lose HP, but this may be due to the enemy spider dying. As we don&rsquo;t see our hp value at 9999, I&rsquo;m inclined to believe this is not the HP value. Moving to the 2nd:</p>
-<p><img src="/KnightsQuestCheat4.png"
-	
-	
-	
+<p><img src="/post/huntress-ctf-2024/Images/KnightsQuestCheat4.png"
+	width="535"
+	height="180"
+	srcset="/post/huntress-ctf-2024/Images/KnightsQuestCheat4_hu2734231416763887986.png 480w, /post/huntress-ctf-2024/Images/KnightsQuestCheat4_hu6382517638424555533.png 1024w"
 	loading="lazy"
 	
 		alt="Also worth noting, entry 3 and 4 have turned to very different values. Clearly these are not pointing to hp either."
 	
 	
+		class="gallery-image" 
+		data-flex-grow="297"
+		data-flex-basis="713px"
+	
 >
 Making an attack:</p>
-<p><img src="/KnightsQuestFight4.png"
-	
-	
-	
+<p><img src="/post/huntress-ctf-2024/Images/KnightsQuestFight4.png"
+	width="659"
+	height="334"
+	srcset="/post/huntress-ctf-2024/Images/KnightsQuestFight4_hu10825701314888280068.png 480w, /post/huntress-ctf-2024/Images/KnightsQuestFight4_hu11625629343101499651.png 1024w"
 	loading="lazy"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="197"
+		data-flex-basis="473px"
 	
 ></p>
 <p>Our HP continues to decrease. It looks like the lowest number is pointing to hp. We must check, so setting this value to 9999:</p>
-<p><img src="/KnightsQuestCheat5.png"
-	
-	
-	
+<p><img src="/post/huntress-ctf-2024/Images/KnightsQuestCheat5.png"
+	width="653"
+	height="177"
+	srcset="/post/huntress-ctf-2024/Images/KnightsQuestCheat5_hu8943072673642559580.png 480w, /post/huntress-ctf-2024/Images/KnightsQuestCheat5_hu14540770386519265960.png 1024w"
 	loading="lazy"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="368"
+		data-flex-basis="885px"
 	
 ></p>
 <p>And now we have a massive health pool!</p>
-<p><img src="/KnightsQuestFight5.png"
-	
-	
-	
+<p><img src="/post/huntress-ctf-2024/Images/KnightsQuestFight5.png"
+	width="676"
+	height="321"
+	srcset="/post/huntress-ctf-2024/Images/KnightsQuestFight5_hu9016343021691839343.png 480w, /post/huntress-ctf-2024/Images/KnightsQuestFight5_hu15555676813253211618.png 1024w"
 	loading="lazy"
 	
+	
+		class="gallery-image" 
+		data-flex-grow="210"
+		data-flex-basis="505px"
 	
 ></p>
 <p>Unfortunately, a quick look at the final enemy and I see our &ldquo;infinite&rdquo; health is probably not enough:</p>

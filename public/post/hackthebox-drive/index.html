@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+    <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database&#39;s password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user&#39;s password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority.'><title>HackTheBox - Drive</title>
 
-<link rel='canonical' href='http://localhost:1313/post/hackthebox-drive/'>
+<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-drive/'>
 
 <link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Drive'>
 <meta property='og:description' content='Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database&#39;s password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user&#39;s password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority.'>
-<meta property='og:url' content='http://localhost:1313/post/hackthebox-drive/'>
+<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-drive/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='IDOR' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='msfvenom' /><meta property='article:tag' content='FFUF' /><meta property='article:published_time' content='2024-02-17T19:46:53-06:00'/><meta property='article:modified_time' content='2024-02-17T19:46:53-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-drive/Drive.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='IDOR' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='msfvenom' /><meta property='article:tag' content='FFUF' /><meta property='article:published_time' content='2024-02-17T19:46:53-06:00'/><meta property='article:modified_time' content='2024-02-17T19:46:53-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-drive/Drive.png' />
 <meta name="twitter:title" content="HackTheBox - Drive">
 <meta name="twitter:description" content="Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database&#39;s password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user&#39;s password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-drive/Drive.png' />
+    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-drive/Drive.png' />
     </head>
     <body class="
     article-page
@@ -205,7 +205,7 @@
 
                     <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
                         
-                            <option value="http://localhost:1313/" selected>English</option>
+                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
                         
                     </select>
                 </li>
