@@ -10,6 +10,10 @@ toc: true
 ![](images/Comptia.png)
 
 ## CTFs
+### Huntress CTF 2024
+Everyone has been super busy lately, but a couple of us managed to get into Huntress CTF and snagged a nice 127th place! This ctf lasted 30 days and had a very large challenge pool. Naturally, some challenges were particularly great! I rather enjoyed Permission To Proxy, MOVEable, Zippy, and Palimpsest!
+![](images/Huntress_Certificate_2.png)
+
 ### HTB Cyber Apocalypse 2024
 120th place out of 5694 teams! This year felt a lot more competitive than last year, but we still managed to get a good placement! It was a very satisfying challenge.
 ![](images/HTBCA2024.png)
