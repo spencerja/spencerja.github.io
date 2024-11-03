@@ -13,9 +13,6 @@
 <meta name="twitter:title" content="HackTheBox - PC">
 <meta name="twitter:description" content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-pc/PC.png' />
-  
-
-
     </head>
     <body class="
     article-page
@@ -59,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -243,8 +240,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/post/hackthebox-pc/">
-                <img src="/post/hackthebox-pc/PC_huab04e65fab2e39d7ab0f3d51815d3af7_248053_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-pc/PC_huab04e65fab2e39d7ab0f3d51815d3af7_248053_800x0_resize_box_3.png 800w, /post/hackthebox-pc/PC_huab04e65fab2e39d7ab0f3d51815d3af7_248053_1600x0_resize_box_3.png 1600w"
+                <img src="/post/hackthebox-pc/PC_hu13568507019593117128.png"
+                        srcset="/post/hackthebox-pc/PC_hu13568507019593117128.png 800w, /post/hackthebox-pc/PC_hu9590476779441467652.png 1600w"
                         width="800" 
                         height="606" 
                         loading="lazy"
@@ -396,7 +393,7 @@ While I initially started enumeration with grpc_cli and <a class="link" href="ht
 <img src="/post/hackthebox-pc/Images/PostLaunch.png"
 	width="1283"
 	height="605"
-	srcset="/post/hackthebox-pc/Images/PostLaunch_hu3d5c744d508617588db594d18388e454_64664_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/PostLaunch_hu3d5c744d508617588db594d18388e454_64664_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/PostLaunch_hu17725599815013746604.png 480w, /post/hackthebox-pc/Images/PostLaunch_hu17702051801532864210.png 1024w"
 	loading="lazy"
 	
 		alt="Skipping Postman Registration"
@@ -411,7 +408,7 @@ We can set up our request first by selecting gRPC:
 <img src="/post/hackthebox-pc/Images/setgrpc.png"
 	width="1229"
 	height="458"
-	srcset="/post/hackthebox-pc/Images/setgrpc_hu72a8a8931edf63dc8c9b3b1c3a78fe00_62382_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/setgrpc_hu72a8a8931edf63dc8c9b3b1c3a78fe00_62382_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/setgrpc_hu14976013228948782201.png 480w, /post/hackthebox-pc/Images/setgrpc_hu1444287229680442069.png 1024w"
 	loading="lazy"
 	
 		alt="Selecting gRPC request type"
@@ -426,7 +423,7 @@ Now when we supply the URL, API methods will be loaded automatically thanks to s
 <img src="/post/hackthebox-pc/Images/servicereflection.png"
 	width="898"
 	height="422"
-	srcset="/post/hackthebox-pc/Images/servicereflection_hu4b5d5f5fa55bdc2cf8a797be3a38e70b_30402_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/servicereflection_hu4b5d5f5fa55bdc2cf8a797be3a38e70b_30402_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/servicereflection_hu2934358200560003693.png 480w, /post/hackthebox-pc/Images/servicereflection_hu12958003457715558609.png 1024w"
 	loading="lazy"
 	
 		alt="Viewing SimpleApp&rsquo;s functions"
@@ -441,7 +438,7 @@ First, we can try to register a user. Once again, the query is made easy with Po
 <img src="/post/hackthebox-pc/Images/register.png"
 	width="899"
 	height="628"
-	srcset="/post/hackthebox-pc/Images/register_hu12584aef14832f10d638ef6d2ac62daf_38111_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/register_hu12584aef14832f10d638ef6d2ac62daf_38111_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/register_hu4114810367632773162.png 480w, /post/hackthebox-pc/Images/register_hu17130731597053543787.png 1024w"
 	loading="lazy"
 	
 		alt="Registering asdf"
@@ -456,7 +453,7 @@ Next, we can log in. The server responds with giving us an id number. Notice als
 <img src="/post/hackthebox-pc/Images/login1.png"
 	width="874"
 	height="560"
-	srcset="/post/hackthebox-pc/Images/login1_hu4e54826f7d1d4c4b4ffbe05d9398333e_36263_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/login1_hu4e54826f7d1d4c4b4ffbe05d9398333e_36263_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/login1_hu17949063264710045746.png 480w, /post/hackthebox-pc/Images/login1_hu13189318402216274233.png 1024w"
 	loading="lazy"
 	
 		alt="Logging in as asdf"
@@ -471,7 +468,7 @@ Selecting the Trailers tab we can view:
 <img src="/post/hackthebox-pc/Images/login2.png"
 	width="897"
 	height="184"
-	srcset="/post/hackthebox-pc/Images/login2_hu1730bf8991c4dd9c4c4238b8dc6739b2_18001_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/login2_hu1730bf8991c4dd9c4c4238b8dc6739b2_18001_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/login2_hu2539733810690001311.png 480w, /post/hackthebox-pc/Images/login2_hu11290596841518573609.png 1024w"
 	loading="lazy"
 	
 		alt="Viewing login token"
@@ -486,7 +483,7 @@ To use this token, we can go to the Metadata tab, and add the key as &rsquo;toke
 <img src="/post/hackthebox-pc/Images/login3.png"
 	width="894"
 	height="307"
-	srcset="/post/hackthebox-pc/Images/login3_hu86c693766c84bcddd9ea4d44f1afeca1_26271_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/login3_hu86c693766c84bcddd9ea4d44f1afeca1_26271_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/login3_hu9567145984449782366.png 480w, /post/hackthebox-pc/Images/login3_hu7093317300196708687.png 1024w"
 	loading="lazy"
 	
 		alt="Adding login token to Metadata"
@@ -501,7 +498,7 @@ Finally, we can use the getInfo function. &ldquo;Use Example Message&rdquo; will
 <img src="/post/hackthebox-pc/Images/getinfo1.png"
 	width="870"
 	height="540"
-	srcset="/post/hackthebox-pc/Images/getinfo1_hu2ff9eabd75c2c05a72feee201f910675_33741_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/getinfo1_hu2ff9eabd75c2c05a72feee201f910675_33741_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/getinfo1_hu1956050798097663064.png 480w, /post/hackthebox-pc/Images/getinfo1_hu2208387408921270360.png 1024w"
 	loading="lazy"
 	
 		alt="Checking our number"
@@ -517,7 +514,7 @@ Finally, we can use the getInfo function. &ldquo;Use Example Message&rdquo; will
 <img src="/post/hackthebox-pc/Images/union1.png"
 	width="876"
 	height="549"
-	srcset="/post/hackthebox-pc/Images/union1_hud8b7685cebe1c999427bfbe721c3905a_33923_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union1_hud8b7685cebe1c999427bfbe721c3905a_33923_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union1_hu1963647622275191660.png 480w, /post/hackthebox-pc/Images/union1_hu8502230647594623502.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT 1&ndash; -"
@@ -532,7 +529,7 @@ First, we can determine the database type by enumerating versions. This way, I f
 <img src="/post/hackthebox-pc/Images/union2.png"
 	width="897"
 	height="539"
-	srcset="/post/hackthebox-pc/Images/union2_huaecbaa7ea0a0d6270efaf277e0545574_36007_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union2_huaecbaa7ea0a0d6270efaf277e0545574_36007_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union2_hu15771540082096904161.png 480w, /post/hackthebox-pc/Images/union2_hu9281464872257702133.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT sqlite_version();&ndash; -"
@@ -548,7 +545,7 @@ Using a query from <a class="link" href="https://github.com/swisskyrepo/Payloads
 <img src="/post/hackthebox-pc/Images/union3.png"
 	width="906"
 	height="544"
-	srcset="/post/hackthebox-pc/Images/union3_hu6643f6736667dd7b8d0a8a6e884ca40b_40969_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union3_hu6643f6736667dd7b8d0a8a6e884ca40b_40969_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union3_hu7455429271894537950.png 480w, /post/hackthebox-pc/Images/union3_hu9692726118543484644.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=&lsquo;table&rsquo; and tbl_name NOT like &lsquo;sqlite_%&rsquo;&ndash; -"
@@ -563,7 +560,7 @@ Next, enumerating the columns in table <code>accounts</code>:
 <img src="/post/hackthebox-pc/Images/union4.png"
 	width="894"
 	height="524"
-	srcset="/post/hackthebox-pc/Images/union4_hu0cd081d5f33f40633e6e187a8aea192b_42295_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union4_hu0cd081d5f33f40633e6e187a8aea192b_42295_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union4_hu17475523458385347992.png 480w, /post/hackthebox-pc/Images/union4_hu9764544042627140734.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT sql FROM sqlite_master WHERE type!=&lsquo;meta&rsquo; AND sql NOT NULL AND name =&lsquo;accounts&rsquo;&ndash; -"
@@ -578,7 +575,7 @@ Seeing <code>\n\t</code> simply refers to a newline, followed by tab indentation
 <img src="/post/hackthebox-pc/Images/union5.png"
 	width="889"
 	height="529"
-	srcset="/post/hackthebox-pc/Images/union5_hu3300dcd6266e0a59f6e7c7d4a1483a13_37337_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union5_hu3300dcd6266e0a59f6e7c7d4a1483a13_37337_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union5_hu18056286897693069536.png 480w, /post/hackthebox-pc/Images/union5_hu12679393788293283959.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT password FROM accounts&ndash; -"
@@ -593,7 +590,7 @@ Now with a password, we can find a matching username:
 <img src="/post/hackthebox-pc/Images/union6.png"
 	width="892"
 	height="529"
-	srcset="/post/hackthebox-pc/Images/union6_hucc58fbb9682e4f2c69a409bbca028ae1_35504_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union6_hucc58fbb9682e4f2c69a409bbca028ae1_35504_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union6_hu13472046415986624067.png 480w, /post/hackthebox-pc/Images/union6_hu14326665945629783211.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT username FROM accounts&ndash; -"
@@ -608,7 +605,7 @@ Although we have a username, this does not really seem like a password that a us
 <img src="/post/hackthebox-pc/Images/union7.png"
 	width="881"
 	height="518"
-	srcset="/post/hackthebox-pc/Images/union7_hude5b1a2e787fee515326be44b6ea5b97_36232_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/union7_hude5b1a2e787fee515326be44b6ea5b97_36232_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/union7_hu1732276450885305889.png 480w, /post/hackthebox-pc/Images/union7_hu13461539490516816459.png 1024w"
 	loading="lazy"
 	
 		alt="UNION SELECT username FROM accounts WHERE password=&lsquo;HereIsYourPassword1431&rsquo;&ndash; -"
@@ -699,7 +696,7 @@ Finally, we have a credential pair of <code>sau:HereIsYourPassWord1431</code>. F
 <img src="/post/hackthebox-pc/Images/20230520223533.png"
 	width="640"
 	height="368"
-	srcset="/post/hackthebox-pc/Images/20230520223533_hubadcb70170cbaa2a8691f6ee6892fc7c_12291_480x0_resize_box_3.png 480w, /post/hackthebox-pc/Images/20230520223533_hubadcb70170cbaa2a8691f6ee6892fc7c_12291_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-pc/Images/20230520223533_hu15142488741382281877.png 480w, /post/hackthebox-pc/Images/20230520223533_hu9364609495780974792.png 1024w"
 	loading="lazy"
 	
 	
@@ -804,7 +801,7 @@ A few basic credential attempts did not work.</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu501960eeac16eccd918d7d9edf7f2484_365098_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu7481452741760639705.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -828,7 +825,7 @@ A few basic credential attempts did not work.</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu23e19c6470d626aad1f7a9500cb54bd9_256718_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu4257021157125360887.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -852,7 +849,7 @@ A few basic credential attempts did not work.</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu25835b29ef861f1efeabd48984248f2d_313231_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -876,7 +873,7 @@ A few basic credential attempts did not work.</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7e3bb3ec151de280cadcbc3ccd76960b_293957_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7748615803054416032.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -900,7 +897,7 @@ A few basic credential attempts did not work.</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu3d443decdd598a8807502f48a4e7eec5_334811_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu5530218627868483871.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

@@ -2,23 +2,23 @@
 <html lang="en" dir="ltr">
     <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Enumeration initial nmap:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex.'><title>HackTheBox - Devvortex</title>
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex.htb/ |_http-server-header: nginx/1.18.0 (Ubuntu) Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 8.47 seconds We can note that there is a web server open on port 80, utilizing nginx. There is a redirection to devvortex.htb, so we should add this to /etc/hosts:
+'><title>HackTheBox - Devvortex</title>
 
 <link rel='canonical' href='http://localhost:1313/post/hackthebox-devvortex/'>
 
 <link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Devvortex'>
 <meta property='og:description' content='Enumeration initial nmap:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex.'>
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex.htb/ |_http-server-header: nginx/1.18.0 (Ubuntu) Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 8.47 seconds We can note that there is a web server open on port 80, utilizing nginx. There is a redirection to devvortex.htb, so we should add this to /etc/hosts:
+'>
 <meta property='og:url' content='http://localhost:1313/post/hackthebox-devvortex/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Joomla' /><meta property='article:tag' content='Webshell' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:tag' content='less' /><meta property='article:published_time' content='2024-04-27T10:42:02-05:00'/><meta property='article:modified_time' content='2024-04-27T10:42:02-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-devvortex/Devvortex.png' />
 <meta name="twitter:title" content="HackTheBox - Devvortex">
 <meta name="twitter:description" content="Enumeration initial nmap:
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex."><meta name="twitter:card" content="summary_large_image">
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 Nmap scan report for 10.129.162.96 Host is up (0.054s latency). PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA) | 256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA) |_ 256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519) 80/tcp open http nginx 1.18.0 (Ubuntu) |_http-title: Did not follow redirect to http://devvortex.htb/ |_http-server-header: nginx/1.18.0 (Ubuntu) Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 8.47 seconds We can note that there is a web server open on port 80, utilizing nginx. There is a redirection to devvortex.htb, so we should add this to /etc/hosts:
+"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-devvortex/Devvortex.png' />
-  
-
-
     </head>
     <body class="
     article-page
@@ -62,7 +62,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -246,8 +246,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/post/hackthebox-devvortex/">
-                <img src="/post/hackthebox-devvortex/Devvortex_hu23e19c6470d626aad1f7a9500cb54bd9_256718_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-devvortex/Devvortex_hu23e19c6470d626aad1f7a9500cb54bd9_256718_800x0_resize_box_3.png 800w, /post/hackthebox-devvortex/Devvortex_hu23e19c6470d626aad1f7a9500cb54bd9_256718_1600x0_resize_box_3.png 1600w"
+                <img src="/post/hackthebox-devvortex/Devvortex_hu602764544117436009.png"
+                        srcset="/post/hackthebox-devvortex/Devvortex_hu602764544117436009.png 800w, /post/hackthebox-devvortex/Devvortex_hu11709663025737389181.png 1600w"
                         width="800" 
                         height="650" 
                         loading="lazy"
@@ -443,7 +443,7 @@ There is a redirection to <code>devvortex.htb</code>, so we should add this to /
 <img src="/post/hackthebox-devvortex/Images/robotstxt.png"
 	width="553"
 	height="495"
-	srcset="/post/hackthebox-devvortex/Images/robotstxt_hu6832cbaaefdae234ca45659002662ada_48908_480x0_resize_box_3.png 480w, /post/hackthebox-devvortex/Images/robotstxt_hu6832cbaaefdae234ca45659002662ada_48908_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-devvortex/Images/robotstxt_hu1881245777170735693.png 480w, /post/hackthebox-devvortex/Images/robotstxt_hu4137240225815595601.png 1024w"
 	loading="lazy"
 	
 	
@@ -456,7 +456,7 @@ There is a redirection to <code>devvortex.htb</code>, so we should add this to /
 <p><img src="/post/hackthebox-devvortex/Images/joomla.png"
 	width="832"
 	height="327"
-	srcset="/post/hackthebox-devvortex/Images/joomla_hu44570b69c5636806a19c70d3ea9c84c2_75455_480x0_resize_box_3.png 480w, /post/hackthebox-devvortex/Images/joomla_hu44570b69c5636806a19c70d3ea9c84c2_75455_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-devvortex/Images/joomla_hu3985067319072200265.png 480w, /post/hackthebox-devvortex/Images/joomla_hu6732383409345146521.png 1024w"
 	loading="lazy"
 	
 	
@@ -474,7 +474,7 @@ We can visit this page manually, and find a username and password within:</p>
 <p><img src="/post/hackthebox-devvortex/Images/api.png"
 	width="978"
 	height="710"
-	srcset="/post/hackthebox-devvortex/Images/api_hu4b30a258b4c571508dea863a51b5ab50_65391_480x0_resize_box_3.png 480w, /post/hackthebox-devvortex/Images/api_hu4b30a258b4c571508dea863a51b5ab50_65391_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-devvortex/Images/api_hu17056531720794000081.png 480w, /post/hackthebox-devvortex/Images/api_hu16963938277288856143.png 1024w"
 	loading="lazy"
 	
 	
@@ -488,7 +488,7 @@ We can visit this page manually, and find a username and password within:</p>
 <p><img src="/post/hackthebox-devvortex/Images/admin.png"
 	width="1186"
 	height="683"
-	srcset="/post/hackthebox-devvortex/Images/admin_hu315ba59ca7cdc73d5c9a60ece5baa266_29035_480x0_resize_box_3.png 480w, /post/hackthebox-devvortex/Images/admin_hu315ba59ca7cdc73d5c9a60ece5baa266_29035_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-devvortex/Images/admin_hu8715528440435972919.png 480w, /post/hackthebox-devvortex/Images/admin_hu9744261569238107199.png 1024w"
 	loading="lazy"
 	
 	
@@ -544,7 +544,7 @@ We can visit this page manually, and find a username and password within:</p>
 <p><img src="/post/hackthebox-devvortex/Images/errorphp.png"
 	width="1210"
 	height="701"
-	srcset="/post/hackthebox-devvortex/Images/errorphp_hu9f165844a071818457ec1fd600882507_118687_480x0_resize_box_3.png 480w, /post/hackthebox-devvortex/Images/errorphp_hu9f165844a071818457ec1fd600882507_118687_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-devvortex/Images/errorphp_hu12693161238885656338.png 480w, /post/hackthebox-devvortex/Images/errorphp_hu7706181751173436215.png 1024w"
 	loading="lazy"
 	
 	
@@ -1150,7 +1150,7 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu25835b29ef861f1efeabd48984248f2d_313231_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1174,7 +1174,7 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-monitorstwo/MonitorsTwo.7bcf0cb787855b0537bc7c5327c0f7dd_hu024166abe3ac2c9d2978be07dc4c2b69_418807_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-monitorstwo/MonitorsTwo.7bcf0cb787855b0537bc7c5327c0f7dd_hu11328676933836087193.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1198,7 +1198,7 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu3d443decdd598a8807502f48a4e7eec5_334811_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu5530218627868483871.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1222,7 +1222,7 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu395bd5edbfd24d434ffdbc0f1375eb9f_446175_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu4137443262157332936.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1246,7 +1246,7 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7e3bb3ec151de280cadcbc3ccd76960b_293957_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7748615803054416032.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

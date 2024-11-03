@@ -35,14 +35,12 @@
       const images = container.querySelectorAll("img.gallery-image");
       for (const img of Array.from(images)) {
         const paragraph = img.closest("p");
-        if (!paragraph || !container.contains(paragraph))
-          continue;
+        if (!paragraph || !container.contains(paragraph)) continue;
         if (paragraph.textContent.trim() == "") {
           paragraph.classList.add("no-text");
         }
         let isNewLineImage = paragraph.classList.contains("no-text");
-        if (!isNewLineImage)
-          continue;
+        if (!isNewLineImage) continue;
         const hasLink = img.parentElement.tagName == "A";
         let el = img;
         const figure = document.createElement("figure");
@@ -217,8 +215,7 @@
     const toggleMenu = document.getElementById("toggle-menu");
     if (toggleMenu) {
       toggleMenu.addEventListener("click", () => {
-        if (document.getElementById("main-menu").classList.contains("transiting"))
-          return;
+        if (document.getElementById("main-menu").classList.contains("transiting")) return;
         document.body.classList.toggle("show-menu");
         slideToggle(document.getElementById("main-menu"), 300);
         toggleMenu.classList.toggle("is-active");
@@ -303,10 +300,8 @@
     }
     getSavedScheme() {
       const savedScheme = localStorage.getItem(this.localStorageKey);
-      if (savedScheme == "light" || savedScheme == "dark" || savedScheme == "auto")
-        return savedScheme;
-      else
-        return "auto";
+      if (savedScheme == "light" || savedScheme == "dark" || savedScheme == "auto") return savedScheme;
+      else return "auto";
     }
     bindMatchMedia() {
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
@@ -450,8 +445,7 @@
       if (articleTile) {
         let observer = new IntersectionObserver(async (entries, observer2) => {
           entries.forEach((entry) => {
-            if (!entry.isIntersecting)
-              return;
+            if (!entry.isIntersecting) return;
             observer2.unobserve(entry.target);
             const articles = entry.target.querySelectorAll("article.has-image");
             articles.forEach(async (articles2) => {
@@ -474,8 +468,7 @@
         copyButton.classList.add("copyCodeButton");
         highlight.appendChild(copyButton);
         const codeBlock = highlight.querySelector("code[data-lang]");
-        if (!codeBlock)
-          return;
+        if (!codeBlock) return;
         copyButton.addEventListener("click", () => {
           navigator.clipboard.writeText(codeBlock.textContent).then(() => {
             copyButton.textContent = copiedText;

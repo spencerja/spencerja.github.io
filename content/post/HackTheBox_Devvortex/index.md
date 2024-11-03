@@ -2,7 +2,7 @@
 title: "HackTheBox - Devvortex"
 date: 2024-04-27T10:42:02-05:00
 tags: ["Joomla","Webshell","MySQL","hashcat","less"]
-desription: "Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user's password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root."
+description: "Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user's password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root."
 image: "Devvortex.png"
 categories: ["Hack The Box"]
 ---

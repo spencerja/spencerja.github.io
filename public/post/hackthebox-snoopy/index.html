@@ -13,9 +13,6 @@
 <meta name="twitter:title" content="HackTheBox - Snoopy">
 <meta name="twitter:description" content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy&#39;s mailserver to our own IP address. While receiving Snoopy&#39;s mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user&#39;s authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our &#34;infected&#34; authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-snoopy/Snoopy.png' />
-  
-
-
     </head>
     <body class="
     article-page
@@ -59,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -243,8 +240,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/post/hackthebox-snoopy/">
-                <img src="/post/hackthebox-snoopy/Snoopy_hud07959f3cf61b04fdf0f95ac5d23e1cb_383611_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-snoopy/Snoopy_hud07959f3cf61b04fdf0f95ac5d23e1cb_383611_800x0_resize_box_3.png 800w, /post/hackthebox-snoopy/Snoopy_hud07959f3cf61b04fdf0f95ac5d23e1cb_383611_1600x0_resize_box_3.png 1600w"
+                <img src="/post/hackthebox-snoopy/Snoopy_hu7142032297605372832.png"
+                        srcset="/post/hackthebox-snoopy/Snoopy_hu7142032297605372832.png 800w, /post/hackthebox-snoopy/Snoopy_hu8528509556847445209.png 1600w"
                         width="800" 
                         height="606" 
                         loading="lazy"
@@ -358,7 +355,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/Homepage.png"
 	width="1340"
 	height="636"
-	srcset="/post/hackthebox-snoopy/Images/Homepage_hu92c40e302ccb0fb8c0f06f4cd02563ba_452975_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/Homepage_hu92c40e302ccb0fb8c0f06f4cd02563ba_452975_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/Homepage_hu8781228600077951250.png 480w, /post/hackthebox-snoopy/Images/Homepage_hu7274563352405482687.png 1024w"
 	loading="lazy"
 	
 		alt="Home page"
@@ -399,7 +396,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/announcement.png"
 	width="195"
 	height="172"
-	srcset="/post/hackthebox-snoopy/Images/announcement_huc6710fc85989fcfd3abe9c9e25c572c8_9918_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/announcement_huc6710fc85989fcfd3abe9c9e25c572c8_9918_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/announcement_hu12250351599526476772.png 480w, /post/hackthebox-snoopy/Images/announcement_hu11194144723279734738.png 1024w"
 	loading="lazy"
 	
 		alt="The pdf is signed off by Sally, part of SnoopySec PR"
@@ -474,7 +471,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/mmlogin.png"
 	width="1471"
 	height="685"
-	srcset="/post/hackthebox-snoopy/Images/mmlogin_hub0581bce11da98e4a00d3af183f9dc05_155780_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/mmlogin_hub0581bce11da98e4a00d3af183f9dc05_155780_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/mmlogin_hu5067389608087333534.png 480w, /post/hackthebox-snoopy/Images/mmlogin_hu15043767966663554395.png 1024w"
 	loading="lazy"
 	
 		alt="MatterMost landing page"
@@ -491,7 +488,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/passwd.png"
 	width="1606"
 	height="198"
-	srcset="/post/hackthebox-snoopy/Images/passwd_hua8c3616b87ac519dc247793eff5eba3b_15783_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/passwd_hua8c3616b87ac519dc247793eff5eba3b_15783_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/passwd_hu13291298459787161712.png 480w, /post/hackthebox-snoopy/Images/passwd_hu11130053045579082994.png 1024w"
 	loading="lazy"
 	
 		alt="Attempting to download /etc/passwd"
@@ -519,7 +516,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/passwd2.png"
 	width="1163"
 	height="111"
-	srcset="/post/hackthebox-snoopy/Images/passwd2_hu19013c6bcb3bad9544b7901faba39e5f_28290_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/passwd2_hu19013c6bcb3bad9544b7901faba39e5f_28290_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/passwd2_hu12881967033806127313.png 480w, /post/hackthebox-snoopy/Images/passwd2_hu297552318555570816.png 1024w"
 	loading="lazy"
 	
 		alt="Download filter bypass"
@@ -577,7 +574,7 @@
 <p><img src="/post/hackthebox-snoopy/Images/contact_notice.png"
 	width="1287"
 	height="100"
-	srcset="/post/hackthebox-snoopy/Images/contact_notice_hu3fb564d79c91e4580bafd45ddbe4a940_36573_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/contact_notice_hu3fb564d79c91e4580bafd45ddbe4a940_36573_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/contact_notice_hu13023503956593255888.png 480w, /post/hackthebox-snoopy/Images/contact_notice_hu16253553718896379995.png 1024w"
 	loading="lazy"
 	
 	
@@ -591,7 +588,7 @@ Returning back to the <code>mm.snoopy.htb</code> subdomain, we can deduce that r
 <p><img src="/post/hackthebox-snoopy/Images/FakeReset.png"
 	width="479"
 	height="195"
-	srcset="/post/hackthebox-snoopy/Images/FakeReset_hufcb5890b505627dc951229e1e7598fa6_15675_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/FakeReset_hufcb5890b505627dc951229e1e7598fa6_15675_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/FakeReset_hu3351362847819460560.png 480w, /post/hackthebox-snoopy/Images/FakeReset_hu17623776578456223971.png 1024w"
 	loading="lazy"
 	
 	
@@ -604,7 +601,7 @@ Returning back to the <code>mm.snoopy.htb</code> subdomain, we can deduce that r
 <p><img src="/post/hackthebox-snoopy/Images/RealReset.png"
 	width="435"
 	height="276"
-	srcset="/post/hackthebox-snoopy/Images/RealReset_hua9fc8d70ea64113fe4c3ea9f42996c01_21102_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/RealReset_hua9fc8d70ea64113fe4c3ea9f42996c01_21102_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/RealReset_hu7241900293373753165.png 480w, /post/hackthebox-snoopy/Images/RealReset_hu13262826264298033694.png 1024w"
 	loading="lazy"
 	
 	
@@ -816,7 +813,7 @@ In /etc/bind/named.conf.local:</p>
 <p><img src="/post/hackthebox-snoopy/Images/postfix1.png"
 	width="888"
 	height="252"
-	srcset="/post/hackthebox-snoopy/Images/postfix1_hu2c6f18910d8cb56335f984d0b89fe1de_27495_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/postfix1_hu2c6f18910d8cb56335f984d0b89fe1de_27495_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/postfix1_hu5912528851000456133.png 480w, /post/hackthebox-snoopy/Images/postfix1_hu17458862937488447743.png 1024w"
 	loading="lazy"
 	
 	
@@ -870,7 +867,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 <img src="/post/hackthebox-snoopy/Images/RealReset2.png"
 	width="454"
 	height="180"
-	srcset="/post/hackthebox-snoopy/Images/RealReset2_hu9d3ec1b6bd33c3872190d14a60f00ade_15130_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/RealReset2_hu9d3ec1b6bd33c3872190d14a60f00ade_15130_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/RealReset2_hu6577210460635694496.png 480w, /post/hackthebox-snoopy/Images/RealReset2_hu11604875812263109074.png 1024w"
 	loading="lazy"
 	
 	
@@ -951,7 +948,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 <p><img src="/post/hackthebox-snoopy/Images/RealReset3.png"
 	width="573"
 	height="462"
-	srcset="/post/hackthebox-snoopy/Images/RealReset3_huba2e9cf4ffe8c6433f737c1771efc49d_15637_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/RealReset3_huba2e9cf4ffe8c6433f737c1771efc49d_15637_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/RealReset3_hu782756782189595149.png 480w, /post/hackthebox-snoopy/Images/RealReset3_hu13011594676919676066.png 1024w"
 	loading="lazy"
 	
 	
@@ -967,7 +964,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 <p><img src="/post/hackthebox-snoopy/Images/mm1.png"
 	width="1307"
 	height="371"
-	srcset="/post/hackthebox-snoopy/Images/mm1_hu5fdddc800d9d506997c8a9957817d969_73751_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/mm1_hu5fdddc800d9d506997c8a9957817d969_73751_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/mm1_hu5498811720270082627.png 480w, /post/hackthebox-snoopy/Images/mm1_hu10943291526702653658.png 1024w"
 	loading="lazy"
 	
 	
@@ -980,7 +977,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 <p><img src="/post/hackthebox-snoopy/Images/mm2.png"
 	width="617"
 	height="345"
-	srcset="/post/hackthebox-snoopy/Images/mm2_hu1e915f791e06c636fc5048869bdf53ef_27601_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/mm2_hu1e915f791e06c636fc5048869bdf53ef_27601_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/mm2_hu6923736742695402225.png 480w, /post/hackthebox-snoopy/Images/mm2_hu7841100489945593070.png 1024w"
 	loading="lazy"
 	
 	
@@ -993,7 +990,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
 <p><img src="/post/hackthebox-snoopy/Images/mm3.png"
 	width="604"
 	height="576"
-	srcset="/post/hackthebox-snoopy/Images/mm3_hu90a74033d807823483a96b9e41d5bb02_31928_480x0_resize_box_3.png 480w, /post/hackthebox-snoopy/Images/mm3_hu90a74033d807823483a96b9e41d5bb02_31928_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-snoopy/Images/mm3_hu11873483026786706728.png 480w, /post/hackthebox-snoopy/Images/mm3_hu11612683030859789975.png 1024w"
 	loading="lazy"
 	
 	
@@ -1550,7 +1547,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-pilgrimage/Pilgrimage.a429f8be38cd5289d8586e659edf33e2_hu3ac6b8ba1be9f0f197acee68b2bc6c42_314037_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-pilgrimage/Pilgrimage.a429f8be38cd5289d8586e659edf33e2_hu469812373868972083.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1574,7 +1571,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hucfdd9eb173c0886a8604431711aec1ea_316610_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hu12179815748093413314.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1598,7 +1595,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1622,7 +1619,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu5e06ffde2f95e1276a1510a6a2985d71_363689_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu6397349716716905999.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1646,7 +1643,7 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12ac3957f7a126ac06ec9338f7d84355_333068_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12638892371061536788.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

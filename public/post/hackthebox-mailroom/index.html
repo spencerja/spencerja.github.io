@@ -13,9 +13,6 @@
 <meta name="twitter:title" content="HackTheBox - Mailroom">
 <meta name="twitter:description" content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-mailroom/Mailroom.png' />
-  
-
-
     </head>
     <body class="
     article-page
@@ -59,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -243,8 +240,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/post/hackthebox-mailroom/">
-                <img src="/post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_800x0_resize_box_3.png 800w, /post/hackthebox-mailroom/Mailroom_hu83fa4872cdc769af1a6c4264f0edd42d_354362_1600x0_resize_box_3.png 1600w"
+                <img src="/post/hackthebox-mailroom/Mailroom_hu18413552216358599540.png"
+                        srcset="/post/hackthebox-mailroom/Mailroom_hu18413552216358599540.png 800w, /post/hackthebox-mailroom/Mailroom_hu11974571504103669480.png 1600w"
                         width="800" 
                         height="606" 
                         loading="lazy"
@@ -352,7 +349,7 @@
 <p><img src="/post/hackthebox-mailroom/Images/ContactForm.png"
 	width="1499"
 	height="782"
-	srcset="/post/hackthebox-mailroom/Images/ContactForm_hu93fd37e0a7f491dcb89241e06a79e396_49737_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/ContactForm_hu93fd37e0a7f491dcb89241e06a79e396_49737_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-mailroom/Images/ContactForm_hu4930143828377922093.png 480w, /post/hackthebox-mailroom/Images/ContactForm_hu9480234641567890185.png 1024w"
 	loading="lazy"
 	
 		alt="Contact form"
@@ -367,7 +364,7 @@
 <p><img src="/post/hackthebox-mailroom/Images/SubmitResponse.png"
 	width="615"
 	height="136"
-	srcset="/post/hackthebox-mailroom/Images/SubmitResponse_hu027e2c4ea6401692cd29f1d9452381da_15179_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/SubmitResponse_hu027e2c4ea6401692cd29f1d9452381da_15179_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-mailroom/Images/SubmitResponse_hu14816248427878285175.png 480w, /post/hackthebox-mailroom/Images/SubmitResponse_hu5482756491922893469.png 1024w"
 	loading="lazy"
 	
 		alt="Submit Response"
@@ -390,7 +387,7 @@
 </div><p><img src="/post/hackthebox-mailroom/Images/xss.png"
 	width="506"
 	height="198"
-	srcset="/post/hackthebox-mailroom/Images/xss_hu594f6131c53ded32d5b0eea65e7b3d2e_11060_480x0_resize_box_3.png 480w, /post/hackthebox-mailroom/Images/xss_hu594f6131c53ded32d5b0eea65e7b3d2e_11060_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-mailroom/Images/xss_hu15102548895680960100.png 480w, /post/hackthebox-mailroom/Images/xss_hu4166859310785683627.png 1024w"
 	loading="lazy"
 	
 		alt="XSS Proof"
@@ -488,7 +485,7 @@ Using xss payload:</p>
 <p><img src="/post/hackthebox-mailroom/Images/GiteaStaffroom.PNG"
 	width="1168"
 	height="481"
-	srcset="/post/hackthebox-mailroom/Images/GiteaStaffroom_huc9c68d8ae9fb88f91455b3725af989fa_54143_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/GiteaStaffroom_huc9c68d8ae9fb88f91455b3725af989fa_54143_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/GiteaStaffroom_hu15035102273438720729.PNG 480w, /post/hackthebox-mailroom/Images/GiteaStaffroom_hu5139608653334912734.PNG 1024w"
 	loading="lazy"
 	
 		alt="Gitea repo"
@@ -504,7 +501,7 @@ Using xss payload:</p>
 <p><img src="/post/hackthebox-mailroom/Images/AuthphpChange.PNG"
 	width="1121"
 	height="646"
-	srcset="/post/hackthebox-mailroom/Images/AuthphpChange_hud0033e2d8e9c9f5b460be5c1f7a78d25_88369_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/AuthphpChange_hud0033e2d8e9c9f5b460be5c1f7a78d25_88369_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/AuthphpChange_hu2498305531453130342.PNG 480w, /post/hackthebox-mailroom/Images/AuthphpChange_hu3181095241264473757.PNG 1024w"
 	loading="lazy"
 	
 	
@@ -517,7 +514,7 @@ Using xss payload:</p>
 <p><img src="/post/hackthebox-mailroom/Images/Forbidden.PNG"
 	width="675"
 	height="207"
-	srcset="/post/hackthebox-mailroom/Images/Forbidden_hueee7013c59b147b0e237e52f593c64c2_26957_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Forbidden_hueee7013c59b147b0e237e52f593c64c2_26957_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/Forbidden_hu2874015432111199694.PNG 480w, /post/hackthebox-mailroom/Images/Forbidden_hu16509059291484536948.PNG 1024w"
 	loading="lazy"
 	
 	
@@ -857,7 +854,7 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 <p><img src="/post/hackthebox-mailroom/Images/Login.PNG"
 	width="1223"
 	height="742"
-	srcset="/post/hackthebox-mailroom/Images/Login_huf6e763f6db130018bf6df5c5f118efb0_82115_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Login_huf6e763f6db130018bf6df5c5f118efb0_82115_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/Login_hu11217321414036384889.PNG 480w, /post/hackthebox-mailroom/Images/Login_hu13283833229311462722.PNG 1024w"
 	loading="lazy"
 	
 		alt="Logging in with Tristan&rsquo;s credentials"
@@ -872,7 +869,7 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 <p><img src="/post/hackthebox-mailroom/Images/Verified.PNG"
 	width="721"
 	height="526"
-	srcset="/post/hackthebox-mailroom/Images/Verified_hu8d549e4a01909ee5c07165c387cddc3a_98348_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Verified_hu8d549e4a01909ee5c07165c387cddc3a_98348_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/Verified_hu13201463353832069181.PNG 480w, /post/hackthebox-mailroom/Images/Verified_hu1195657288025486442.PNG 1024w"
 	loading="lazy"
 	
 		alt="2FA redirects us to the dashboard, with the proper cookies."
@@ -888,7 +885,7 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 <p><img src="/post/hackthebox-mailroom/Images/Inspect1.PNG"
 	width="1283"
 	height="274"
-	srcset="/post/hackthebox-mailroom/Images/Inspect1_hu1f0791d867bc624f642734573b657ff8_64103_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Inspect1_hu1f0791d867bc624f642734573b657ff8_64103_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/Inspect1_hu14951476618218354978.PNG 480w, /post/hackthebox-mailroom/Images/Inspect1_hu334768701652618158.PNG 1024w"
 	loading="lazy"
 	
 	
@@ -1241,7 +1238,7 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </div><p><img src="/post/hackthebox-mailroom/Images/Top.PNG"
 	width="947"
 	height="250"
-	srcset="/post/hackthebox-mailroom/Images/Top_hu96b0acea388610508fb979a0a77db89a_106311_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/Top_hu96b0acea388610508fb979a0a77db89a_106311_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/Top_hu7114116820663933455.PNG 480w, /post/hackthebox-mailroom/Images/Top_hu11710566437717671024.PNG 1024w"
 	loading="lazy"
 	
 	
@@ -1393,7 +1390,7 @@ The next section has what looks to be probably the master password:</p>
 <p><img src="/post/hackthebox-mailroom/Images/KeepassVault.PNG"
 	width="1073"
 	height="223"
-	srcset="/post/hackthebox-mailroom/Images/KeepassVault_hu7e23e6d2c4fdc8e5c6be13ce2c68b15f_87685_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/KeepassVault_hu7e23e6d2c4fdc8e5c6be13ce2c68b15f_87685_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/KeepassVault_hu7326753431247763487.PNG 480w, /post/hackthebox-mailroom/Images/KeepassVault_hu5952836030422938906.PNG 1024w"
 	loading="lazy"
 	
 		alt="Keepass Vault"
@@ -1408,7 +1405,7 @@ The next section has what looks to be probably the master password:</p>
 <p><img src="/post/hackthebox-mailroom/Images/RootPass.PNG"
 	width="804"
 	height="372"
-	srcset="/post/hackthebox-mailroom/Images/RootPass_hu096e740ea4404b1d1aa3d6889fd9c577_94895_480x0_resize_box_3.PNG 480w, /post/hackthebox-mailroom/Images/RootPass_hu096e740ea4404b1d1aa3d6889fd9c577_94895_1024x0_resize_box_3.PNG 1024w"
+	srcset="/post/hackthebox-mailroom/Images/RootPass_hu9992513511076318098.PNG 480w, /post/hackthebox-mailroom/Images/RootPass_hu3514631341009244945.PNG 1024w"
 	loading="lazy"
 	
 	
@@ -1503,7 +1500,7 @@ The next section has what looks to be probably the master password:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu25835b29ef861f1efeabd48984248f2d_313231_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1527,7 +1524,7 @@ The next section has what looks to be probably the master password:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-cozyhosting/CozyHosting.5c10fb7439d426645511c0790ed3ccb2_hu57b040a445aedb3fdc2bc656dc9a4afd_278920_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-cozyhosting/CozyHosting.5c10fb7439d426645511c0790ed3ccb2_hu14458983025777190956.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1551,7 +1548,7 @@ The next section has what looks to be probably the master password:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu2821e9da4ab5851c83163c70bbdf7481_348069_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu4542438820556627261.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1575,7 +1572,7 @@ The next section has what looks to be probably the master password:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu501960eeac16eccd918d7d9edf7f2484_365098_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu7481452741760639705.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1599,7 +1596,7 @@ The next section has what looks to be probably the master password:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu395bd5edbfd24d434ffdbc0f1375eb9f_446175_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu4137443262157332936.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

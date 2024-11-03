@@ -13,9 +13,6 @@
 <meta name="twitter:title" content="HackTheBox - Drive">
 <meta name="twitter:description" content="Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database&#39;s password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user&#39;s password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-drive/Drive.png' />
-  
-
-
     </head>
     <body class="
     article-page
@@ -59,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu9f9ff13576eb7121750203f114cffc3e_12283_300x0_resize_q75_box.jpg" width="300"
+                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -243,8 +240,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/post/hackthebox-drive/">
-                <img src="/post/hackthebox-drive/Drive_hu501960eeac16eccd918d7d9edf7f2484_365098_800x0_resize_box_3.png"
-                        srcset="/post/hackthebox-drive/Drive_hu501960eeac16eccd918d7d9edf7f2484_365098_800x0_resize_box_3.png 800w, /post/hackthebox-drive/Drive_hu501960eeac16eccd918d7d9edf7f2484_365098_1600x0_resize_box_3.png 1600w"
+                <img src="/post/hackthebox-drive/Drive_hu9679367179647861327.png"
+                        srcset="/post/hackthebox-drive/Drive_hu9679367179647861327.png 800w, /post/hackthebox-drive/Drive_hu785330676078431141.png 1600w"
                         width="800" 
                         height="666" 
                         loading="lazy"
@@ -377,7 +374,7 @@
 <p><img src="/post/hackthebox-drive/Images/landingpage.png"
 	width="957"
 	height="610"
-	srcset="/post/hackthebox-drive/Images/landingpage_hue413d759f6d997543beb3e021bc91435_45695_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/landingpage_hue413d759f6d997543beb3e021bc91435_45695_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/landingpage_hu12979821747203843507.png 480w, /post/hackthebox-drive/Images/landingpage_hu18150590424832558462.png 1024w"
 	loading="lazy"
 	
 	
@@ -390,7 +387,7 @@
 <p><img src="/post/hackthebox-drive/Images/home1.png"
 	width="1747"
 	height="312"
-	srcset="/post/hackthebox-drive/Images/home1_huc32a4111785096c959f544353df9c8d2_25462_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/home1_huc32a4111785096c959f544353df9c8d2_25462_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/home1_hu913640840232345223.png 480w, /post/hackthebox-drive/Images/home1_hu397106786281705067.png 1024w"
 	loading="lazy"
 	
 	
@@ -405,7 +402,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/landingpage2.png"
 	width="864"
 	height="606"
-	srcset="/post/hackthebox-drive/Images/landingpage2_hudb456d692e2e482cb53a0f8db11d7d66_45314_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/landingpage2_hudb456d692e2e482cb53a0f8db11d7d66_45314_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/landingpage2_hu1252054435397311868.png 480w, /post/hackthebox-drive/Images/landingpage2_hu14989104037057906149.png 1024w"
 	loading="lazy"
 	
 	
@@ -418,7 +415,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/view1.png"
 	width="752"
 	height="459"
-	srcset="/post/hackthebox-drive/Images/view1_huf3cd7d63dd200b4732c42fcbce80ac1d_37590_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/view1_huf3cd7d63dd200b4732c42fcbce80ac1d_37590_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/view1_hu15262456809908293379.png 480w, /post/hackthebox-drive/Images/view1_hu13643999400009288099.png 1024w"
 	loading="lazy"
 	
 	
@@ -431,7 +428,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/upload1.png"
 	width="1197"
 	height="468"
-	srcset="/post/hackthebox-drive/Images/upload1_hu3158545d9dfd5bcb6d864db9cd20d630_33131_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/upload1_hu3158545d9dfd5bcb6d864db9cd20d630_33131_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/upload1_hu9118527013445787701.png 480w, /post/hackthebox-drive/Images/upload1_hu2852906669309810843.png 1024w"
 	loading="lazy"
 	
 	
@@ -445,7 +442,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/usernames.png"
 	width="613"
 	height="456"
-	srcset="/post/hackthebox-drive/Images/usernames_hu247eb7500f3f8ab52ca3bd0743a9a424_24832_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/usernames_hu247eb7500f3f8ab52ca3bd0743a9a424_24832_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/usernames_hu15183467364690822206.png 480w, /post/hackthebox-drive/Images/usernames_hu11628965451743423776.png 1024w"
 	loading="lazy"
 	
 	
@@ -536,7 +533,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/unauthorized.png"
 	width="527"
 	height="136"
-	srcset="/post/hackthebox-drive/Images/unauthorized_hu597b798534d385b16d8b5c8d0869166b_12143_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/unauthorized_hu597b798534d385b16d8b5c8d0869166b_12143_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/unauthorized_hu8793333650507176800.png 480w, /post/hackthebox-drive/Images/unauthorized_hu11630723902898305783.png 1024w"
 	loading="lazy"
 	
 	
@@ -549,7 +546,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/servererror.png"
 	width="513"
 	height="223"
-	srcset="/post/hackthebox-drive/Images/servererror_hud484effc2ba93cd4ff87843dcab9363e_15927_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/servererror_hud484effc2ba93cd4ff87843dcab9363e_15927_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/servererror_hu3854662734896427683.png 480w, /post/hackthebox-drive/Images/servererror_hu16821205882179070983.png 1024w"
 	loading="lazy"
 	
 	
@@ -562,7 +559,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <p><img src="/post/hackthebox-drive/Images/101.png"
 	width="970"
 	height="497"
-	srcset="/post/hackthebox-drive/Images/101_hu443ef8d9705659167b9a76c2fbfe50bc_60478_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/101_hu443ef8d9705659167b9a76c2fbfe50bc_60478_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/101_hu4334636787803548016.png 480w, /post/hackthebox-drive/Images/101_hu13899485502291405819.png 1024w"
 	loading="lazy"
 	
 	
@@ -661,7 +658,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <img src="/post/hackthebox-drive/Images/98.png"
 	width="861"
 	height="421"
-	srcset="/post/hackthebox-drive/Images/98_hu4eecc93c0198f7f7948591fff2a302b0_25120_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/98_hu4eecc93c0198f7f7948591fff2a302b0_25120_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/98_hu12988159044927188681.png 480w, /post/hackthebox-drive/Images/98_hu6590195994661288254.png 1024w"
 	loading="lazy"
 	
 	
@@ -688,7 +685,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <img src="/post/hackthebox-drive/Images/99.png"
 	width="863"
 	height="402"
-	srcset="/post/hackthebox-drive/Images/99_hu0c74270a8e29987c44d43c5d9884673c_29377_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/99_hu0c74270a8e29987c44d43c5d9884673c_29377_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/99_hu15756424184518678339.png 480w, /post/hackthebox-drive/Images/99_hu147444328996456436.png 1024w"
 	loading="lazy"
 	
 	
@@ -715,7 +712,7 @@ Due to password complexity requirements, registered with creds <code>asdf:HackTh
 <img src="/post/hackthebox-drive/Images/79.png"
 	width="960"
 	height="458"
-	srcset="/post/hackthebox-drive/Images/79_hu062a1a3bea267dffe2c32cbedfd6c2c9_57285_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/79_hu062a1a3bea267dffe2c32cbedfd6c2c9_57285_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/79_hu8570468429246710674.png 480w, /post/hackthebox-drive/Images/79_hu7598987611267314556.png 1024w"
 	loading="lazy"
 	
 	
@@ -841,7 +838,7 @@ In the gitea service, we can login as martin and we can see DoodleGrive source c
 <p><img src="/post/hackthebox-drive/Images/DriveSource.png"
 	width="1211"
 	height="591"
-	srcset="/post/hackthebox-drive/Images/DriveSource_huae11c56d285ba8df56ee3d574a1e5ea5_81220_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/DriveSource_huae11c56d285ba8df56ee3d574a1e5ea5_81220_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/DriveSource_hu15594232701359745214.png 480w, /post/hackthebox-drive/Images/DriveSource_hu16666816853550566904.png 1024w"
 	loading="lazy"
 	
 	
@@ -891,7 +888,7 @@ When we view the commit changes, we see alterations to <code>geeks_site/settings
 <p><img src="/post/hackthebox-drive/Images/gitchanges.png"
 	width="1172"
 	height="657"
-	srcset="/post/hackthebox-drive/Images/gitchanges_hucd8829f7eaed14040c207e11b3a3cabe_88077_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/gitchanges_hucd8829f7eaed14040c207e11b3a3cabe_88077_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/gitchanges_hu5976849224154721195.png 480w, /post/hackthebox-drive/Images/gitchanges_hu15084670830038779889.png 1024w"
 	loading="lazy"
 	
 	
@@ -904,7 +901,7 @@ When we view the commit changes, we see alterations to <code>geeks_site/settings
 <p><img src="/post/hackthebox-drive/Images/commithistory.png"
 	width="1132"
 	height="597"
-	srcset="/post/hackthebox-drive/Images/commithistory_hu634d8acccb39281c18e4d481a9754f88_81581_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/commithistory_hu634d8acccb39281c18e4d481a9754f88_81581_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/commithistory_hu17782490154124610131.png 480w, /post/hackthebox-drive/Images/commithistory_hu16170582520511589659.png 1024w"
 	loading="lazy"
 	
 	
@@ -1136,7 +1133,7 @@ Here it would be nice to look at gitea&rsquo;s commit timestamps, and we could n
 <img src="/post/hackthebox-drive/Images/vim.png"
 	width="936"
 	height="170"
-	srcset="/post/hackthebox-drive/Images/vim_huf2e128184336eb53882424b63cada3ff_48279_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/vim_huf2e128184336eb53882424b63cada3ff_48279_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/vim_hu11869143428703186270.png 480w, /post/hackthebox-drive/Images/vim_hu17984051257463895005.png 1024w"
 	loading="lazy"
 	
 	
@@ -1149,7 +1146,7 @@ Using strings, we can splice out string contents. It is a lot, so I still find i
 <img src="/post/hackthebox-drive/Images/vim2.png"
 	width="278"
 	height="108"
-	srcset="/post/hackthebox-drive/Images/vim2_hue80f9c71973bf63535e164f0f4dd1624_7456_480x0_resize_box_3.png 480w, /post/hackthebox-drive/Images/vim2_hue80f9c71973bf63535e164f0f4dd1624_7456_1024x0_resize_box_3.png 1024w"
+	srcset="/post/hackthebox-drive/Images/vim2_hu6703160217659966517.png 480w, /post/hackthebox-drive/Images/vim2_hu7262238756303788105.png 1024w"
 	loading="lazy"
 	
 	
@@ -1464,7 +1461,7 @@ here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-pc/PC.9698f9fd3d85128380dd064aec557744_huab04e65fab2e39d7ab0f3d51815d3af7_248053_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-pc/PC.9698f9fd3d85128380dd064aec557744_hu12859984063434525790.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1488,7 +1485,7 @@ here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu2821e9da4ab5851c83163c70bbdf7481_348069_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu4542438820556627261.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1512,7 +1509,7 @@ here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hub67fe2f1a37b4ddd8d67f8b532b1624d_359490_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1536,7 +1533,7 @@ here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu83fa4872cdc769af1a6c4264f0edd42d_354362_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu4146993554582274269.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1560,7 +1557,7 @@ here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-busqueda/Busqueda.fc4856cd6b9e5aa954d7face3968a69d_hucd7cd900a381e6f396b4d3fd74d99876_352215_250x150_fill_box_smart1_3.png" 
+                <img src="/post/hackthebox-busqueda/Busqueda.fc4856cd6b9e5aa954d7face3968a69d_hu12336566156959704981.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

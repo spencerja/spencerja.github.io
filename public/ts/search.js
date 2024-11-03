@@ -67,13 +67,11 @@
         charCount += end - item.start;
         i = j;
         lastIndex = end;
-        if (ellipsis && charCount > charLimit)
-          break;
+        if (ellipsis && charCount > charLimit) break;
       }
       if (lastIndex < str.length) {
         let end = str.length;
-        if (ellipsis)
-          end = Math.min(end, lastIndex + offset);
+        if (ellipsis) end = Math.min(end, lastIndex + offset);
         resultArray.push(`${replaceHTMLEnt(str.substring(lastIndex, end))}`);
         if (ellipsis && end != str.length) {
           resultArray.push(` [...]`);
@@ -109,16 +107,14 @@
             end: match.index + match[0].length
           });
         }
-        if (titleMatches.length > 0)
-          result.title = _Search.processMatches(result.title, titleMatches, false);
+        if (titleMatches.length > 0) result.title = _Search.processMatches(result.title, titleMatches, false);
         if (contentMatches.length > 0) {
           result.preview = _Search.processMatches(result.content, contentMatches);
         } else {
           result.preview = replaceHTMLEnt(result.content.substring(0, 140));
         }
         result.matchCount = titleMatches.length + contentMatches.length;
-        if (result.matchCount > 0)
-          results.push(result);
+        if (result.matchCount > 0) results.push(result);
       }
       return results.sort((a, b) => {
         return b.matchCount - a.matchCount;
@@ -157,8 +153,7 @@
         if (keywords === "") {
           return this.clear();
         }
-        if (lastSearch === keywords)
-          return;
+        if (lastSearch === keywords) return;
         lastSearch = keywords;
         this.doSearch(keywords.split(" "));
       };
