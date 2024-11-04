@@ -542,7 +542,7 @@ root@plantopia-4f0ea2e6b6415cf0-55ff95c748-sl457:/srv/app#
 Quite surprised there hadn't been more solves on this challenge, as I immediately recognized it as a recycled question from [a previous CTF](https://github.com/BaadMaro/CTF/tree/main/NahamCon%20CTF%202024/HelpfulDesk). This linked write-up is quite well made, so I recommend checking them out to see how this challenge is solved ;)
 
 -------------------
-#### PillowFight
+### PillowFight
 >PillowFight uses _**advanced AI/MLRegressionLearning***_ to combine two images of your choosing  
 >-note to investors this is not techically true at the moment we're using a python library but please give us money and we'll deliver it we promise.
 >
