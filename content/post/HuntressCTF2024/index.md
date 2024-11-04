@@ -353,7 +353,7 @@ Connection: close
 ```
 
 After a quick google search we might begin to suspect that this could be related to PyYAML deserialization attacks. There is a [HackTricks page](https://book.hacktricks.xyz/pentesting-web/deserialization/python-yaml-deserialization) that covers the basics of this. As a test, I used a sleep command:
-![](Y2K_Sleep.png)
+![](Images/Y2K_Sleep.png)
 (trust me bro the sleep happened)
 
 Also it's worth noting that there wasn't an error message here, so I have pretty high confidence that remote execution is possible here and we can use this approach to get the flag. There is a flag read example on HackTricks, but unfortunately I was getting attribute errors:
@@ -416,7 +416,7 @@ Now we can check with the `/api/admin/settings`:
 
 ![The configuration](Images/Plantopia_SettingsSetup.png)
 
-![The response](Plantopia_SettingsResponse.png)
+![The response](Images/Plantopia_SettingsResponse.png)
 
 Now we have it working as Admin. This request is also interesting because the "alert_command" key seems to be accepting shell command format. Potentially we can insert our own command here to run. If we remove sendmail we get the following error:
 ```json
@@ -494,7 +494,7 @@ An [ngrok account](https://ngrok.com/) must be created and a token assigned, but
 ```
 While running it gives a small interface with details and will list some connection information when they occur.
 
-![](ngrok.png)
+![](Images/ngrok.png)
 
 From [revshells](https://www.revshells.com/), we can grab a simple bash 1liner:
 ```json
@@ -550,7 +550,7 @@ Quite surprised there hadn't been more solves on this challenge, as I immediatel
 
 The Landing page here is a nice image combiner tool:
 
-![](PillowFight_LandingPage.png)
+![](Images/PillowFight_LandingPage.png)
 
 Once again we are seeing Python, and once again we are seeing API documentation? It's even Swagger-based again:
 
@@ -638,7 +638,7 @@ It looks like whitespace and quotation marks are replaced with nothing (removed)
 \/**/OR/**/1=1--
 ```
 
-![](MOVEit_Log1.png)
+![](Images/MOVEit_Log1.png)
 
 Unfortunately, this does not work. Seemingly this is because during the initialization there is no account creation in the database:
 ```python
@@ -1133,7 +1133,7 @@ Next, a regex to remove the xml format between binary sections:
 ```
 Since the binary sections are significantly larger than the xml between, we can look for the start/end characters and just replace a range as long as the range is smaller than the binary.
 
-![Applying a replace with "". Note how the size difference goes from 351101 to 289814.](Palimpsest_3.png)
+![Applying a replace with "". Note how the size difference goes from 351101 to 289814.](Images/Palimpsest_3.png)
 
 Lastly there is extra xml format at the end of the input I just removed manually. Now we can convert from hex, and save as an .mp4 file:
 
