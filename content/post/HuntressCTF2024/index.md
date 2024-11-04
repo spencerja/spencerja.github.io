@@ -941,6 +941,7 @@ We need to refresh the game display by running another attack
 We didn't lose HP, but this may be due to the enemy spider dying. As we don't see our hp value at 9999, I'm inclined to believe this is not the HP value. Moving to the 2nd:
 
 ![Also worth noting, entry 3 and 4 have turned to very different values. Clearly these are not pointing to hp either.](Images/KnightsQuestCheat4.png)
+
 Making an attack:
 
 ![](Images/KnightsQuestFight4.png)
