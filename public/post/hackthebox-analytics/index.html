@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server&#39;s docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges.'><title>HackTheBox - Analytics</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server's docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges.">
+<title>HackTheBox - Analytics</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-analytics/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-analytics/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Analytics'>
-<meta property='og:description' content='Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server&#39;s docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-analytics/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Analytics">
+<meta property='og:description' content="Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server's docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-analytics/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Remote Code Execution' /><meta property='article:tag' content='Metabase' /><meta property='article:tag' content='Docker' /><meta property='article:published_time' content='2024-03-22T19:35:09-05:00'/><meta property='article:modified_time' content='2024-03-22T19:35:09-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-analytics/Analytics.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Remote Code Execution' /><meta property='article:tag' content='Metabase' /><meta property='article:tag' content='Docker' /><meta property='article:published_time' content='2024-03-22T19:35:09-05:00'/><meta property='article:modified_time' content='2024-03-22T19:35:09-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-analytics/Analytics.png' />
 <meta name="twitter:title" content="HackTheBox - Analytics">
-<meta name="twitter:description" content="Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server&#39;s docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-analytics/Analytics.png' />
+<meta name="twitter:description" content="Analytics is an easy difficulty box hosting an outdated Metabase service, vulnerable to Remote Code Execution. By leveraging this, we can gain shell access to a web server's docker container, where login credentials are insecurely stored as environment variables. After using ssh to authenticate to the host machine, we can use kernel exploitis CVE-2023-2640 & CVE-2023-32629 to elevate to root privileges."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-analytics/Analytics.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,55 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#exposed-secret-token-allows-for-remote-code-execution-when-establishing-a-new-database-cve-2023-38646">Exposed secret token allows for Remote Code Execution when establishing a new Database (CVE-2023-38646)</a></li>
+        <li><a href="#enumerating-docker-container">Enumerating docker container</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +300,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +325,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -475,9 +504,9 @@ Taking a look at directory fuzzing, we can see <code>api</code> pages:</p>
 </span></span><span class="line"><span class="cl">&lt;...SNIP..&gt;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold">Foothold</h2>
-<h3 id="exposed-secret-token-allows-for-remote-code-execution-when-establishing-a-new-database-cve-2023-38646">Exposed secret token allows for Remote Code Execution when establishing a new Database (CVE-2023-38646)</h3>
-<p>Researching Metabase vulnerabilities, we can find <a class="link" href="https://www.metabase.com/blog/security-incident-summary"  target="_blank" rel="noopener"
+</div><h2 id="foothold">Foothold
+</h2><h3 id="exposed-secret-token-allows-for-remote-code-execution-when-establishing-a-new-database-cve-2023-38646">Exposed secret token allows for Remote Code Execution when establishing a new Database (CVE-2023-38646)
+</h3><p>Researching Metabase vulnerabilities, we can find <a class="link" href="https://www.metabase.com/blog/security-incident-summary"  target="_blank" rel="noopener"
     >this recent incident disclosure</a>. There is an admission that a private setup-token can actually be viewed upon accessing <code>/api/session/properties</code>. When visiting this page, we can find the setup-token for our target as well!</p>
 <p><img src="/post/hackthebox-analytics/Images/setup-token.png"
 	width="635"
@@ -585,8 +614,8 @@ On my netcat listener:</p>
 </span></span><span class="line"><span class="cl">2c83a4df89a6:/$ 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="enumerating-docker-container">Enumerating docker container</h3>
-<p>We can find out rather quickly that this is a docker container, based on the <code>.dockerenv</code> file:</p>
+</div><h3 id="enumerating-docker-container">Enumerating docker container
+</h3><p>We can find out rather quickly that this is a docker container, based on the <code>.dockerenv</code> file:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -708,8 +737,8 @@ Using this, we can ssh into the system outside of the docker container:</p>
 </span></span><span class="line"><span class="cl">metalytics@analytics:~$ 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<p>The next step was quite troublesome with no real indication of vulnerability. Since the CVE is so recent, most common vulnerability scanners do not pick up on it. However, if your eye is keen enough, you can pick up on the Ubuntu kernel version:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><p>The next step was quite troublesome with no real indication of vulnerability. Since the CVE is so recent, most common vulnerability scanners do not pick up on it. However, if your eye is keen enough, you can pick up on the Ubuntu kernel version:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -947,6 +976,10 @@ Using this, we can ssh into the system outside of the docker container:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1030,52 +1063,12 @@ Using this, we can ssh into the system outside of the docker container:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a></li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#exposed-secret-token-allows-for-remote-code-execution-when-establishing-a-new-database-cve-2023-38646">Exposed secret token allows for Remote Code Execution when establishing a new Database (CVE-2023-38646)</a></li>
-        <li><a href="#enumerating-docker-container">Enumerating docker container</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1087,8 +1080,6 @@ Using this, we can ssh into the system outside of the docker container:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

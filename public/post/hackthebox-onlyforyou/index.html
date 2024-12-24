@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.'><title>HackTheBox - OnlyForYou</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page's source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.">
+<title>HackTheBox - OnlyForYou</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-onlyforyou/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - OnlyForYou'>
-<meta property='og:description' content='OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - OnlyForYou">
+<meta property='og:description' content="OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page's source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-onlyforyou/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Chisel' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='Neo4j' /><meta property='article:tag' content='Cypher Injection' /><meta property='article:tag' content='pip' /><meta property='article:published_time' content='2023-08-26T12:27:15-05:00'/><meta property='article:modified_time' content='2023-08-26T12:27:15-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/OnlyForYou.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Chisel' /><meta property='article:tag' content='Port Forwarding' /><meta property='article:tag' content='Neo4j' /><meta property='article:tag' content='Cypher Injection' /><meta property='article:tag' content='pip' /><meta property='article:published_time' content='2023-08-26T12:27:15-05:00'/><meta property='article:modified_time' content='2023-08-26T12:27:15-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-onlyforyou/OnlyForYou.png' />
 <meta name="twitter:title" content="HackTheBox - OnlyForYou">
-<meta name="twitter:description" content="OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page&#39;s source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-onlyforyou/OnlyForYou.png' />
+<meta name="twitter:description" content="OnlyForYou is a medium difficulty box with a web server containing a main page and a beta/development subdomain. The subdomain source code is provided on its page, and reading through the code reveals an arbitrary file read vulnerability. Leveraging this to read the main page's source code, we can find another code injection vulnerability. Enumerating the internal ports open on the service shows a self-hosted GOG repository as well as an admin dashboard site, which we can interact using port forwarding techniques such as chisel. The database page within the dashboard is powered by Neo4j, and is vulnerable to Cypher injection. With credentials retrieved from the Neo4j database, we access a user who has sudo privileges to perform pip download as root. By inserting a malicious python package to the GOG repository, we can pip download it as root, resulting in privilege escalation."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-onlyforyou/OnlyForYou.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,68 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#exploring-subdomains">Exploring subdomains</a></li>
+        <li><a href="#analyzing-beta-site-source-code">Analyzing beta site source code</a></li>
+        <li><a href="#using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form</a></li>
+        <li><a href="#enumerating-the-system-as-www-data">Enumerating the system as www-data</a></li>
+        <li><a href="#cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#enumerating-as-user-john">Enumerating as user john</a></li>
+        <li><a href="#abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +313,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +338,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -376,8 +418,8 @@
 </span></span><span class="line"><span class="cl">Connection: keep-alive
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="exploring-subdomains">Exploring subdomains</h3>
-<div class="highlight"><div class="chroma">
+</div><h3 id="exploring-subdomains">Exploring subdomains
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -445,8 +487,8 @@ Viewing the subdomain, we see a beta site, and a button to download source code 
 	
 ></p>
 <p>If this had been related to a function (i.e: ?download=source), then it might be worth exploring directory traversal techniques.</p>
-<h3 id="analyzing-beta-site-source-code">Analyzing beta site source code</h3>
-<p>Checking the source zip that is given, we see right away that the server is utilizing python:</p>
+<h3 id="analyzing-beta-site-source-code">Analyzing beta site source code
+</h3><p>Checking the source zip that is given, we see right away that the server is utilizing python:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -589,8 +631,8 @@ Viewing the subdomain, we see a beta site, and a button to download source code 
 </span></span><span class="line"><span class="cl">dev:x:1001:1001::/home/dev:/bin/bash
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code</h3>
-<p>By defining the absolute path of the file we wish to access, we can still bypass the rudimentary filters placed. Note for later, the system has two users: john and dev.</p>
+</div><h3 id="using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code
+</h3><p>By defining the absolute path of the file we wish to access, we can still bypass the rudimentary filters placed. Note for later, the system has two users: john and dev.</p>
 <p>Looking for ssh keys, unfortunately we cannot acquire:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -952,9 +994,9 @@ Viewing the subdomain, we see a beta site, and a button to download source code 
 </span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">status</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold">Foothold</h2>
-<h3 id="command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form</h3>
-<p>Within <code>issecure</code>, the re.match follows a rather complex regex. To get a more thorough understanding as to what is passing or failing, the simplest approach is to use a <a class="link" href="https://regex101.com/"  target="_blank" rel="noopener"
+</div><h2 id="foothold">Foothold
+</h2><h3 id="command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form
+</h3><p>Within <code>issecure</code>, the re.match follows a rather complex regex. To get a more thorough understanding as to what is passing or failing, the simplest approach is to use a <a class="link" href="https://regex101.com/"  target="_blank" rel="noopener"
     >regex matcher</a></p>
 <p><img src="/post/hackthebox-onlyforyou/Images/regex1.png"
 	width="645"
@@ -1044,8 +1086,8 @@ We can see we need a string of letters or numbers (one <code>.- or _</code> allo
 </span></span><span class="line"><span class="cl">www-data
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="enumerating-the-system-as-www-data">Enumerating the system as www-data</h3>
-<p>Running netstat, we find unusual ports open:</p>
+</div><h3 id="enumerating-the-system-as-www-data">Enumerating the system as www-data
+</h3><p>Running netstat, we find unusual ports open:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1200,8 +1242,8 @@ on kali:</p>
 	
 ></p>
 <p>It looks like we can dump the entire table with a blank search, but how might we exploit this kind of database?</p>
-<h3 id="cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j</h3>
-<p>Fortunately, <a class="link" href="https://book.hacktricks.xyz/pentesting-web/sql-injection/cypher-injection-neo4j"  target="_blank" rel="noopener"
+<h3 id="cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j
+</h3><p>Fortunately, <a class="link" href="https://book.hacktricks.xyz/pentesting-web/sql-injection/cypher-injection-neo4j"  target="_blank" rel="noopener"
     >hacktricks has a page dedicated to cypher injection</a>.</p>
 <p>Probing which injectable query is being used was quite a pain, as it will often result in 500 error or no change. Eventually, however, I found a payload in which the server will send database information to my own listener:
 search payload:</p>
@@ -1299,9 +1341,9 @@ Eventually I learn to dump databases:</p>
 	
 ></p>
 <p>We now have credentials as <code>john:ThisIs4You</code>.</p>
-<h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="enumerating-as-user-john">Enumerating as user john</h3>
-<p>Now wish <code>ssh</code>, we can tunnel without the need for chisel</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="enumerating-as-user-john">Enumerating as user john
+</h3><p>Now wish <code>ssh</code>, we can tunnel without the need for chisel</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1345,8 +1387,8 @@ Eventually I learn to dump databases:</p>
 </span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="n">NOPASSWD</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">pip3</span> <span class="n">download</span> <span class="n">http</span>\<span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>\<span class="p">:</span><span class="mi">3000</span><span class="o">/*.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root</h3>
-<p>It looks like we can use <code>pip3</code> to download any repository zip as root. When researching what can be done about this, I find <a class="link" href="https://embracethered.com/blog/posts/2022/python-package-manager-install-and-download-vulnerability/"  target="_blank" rel="noopener"
+</div><h3 id="abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root
+</h3><p>It looks like we can use <code>pip3</code> to download any repository zip as root. When researching what can be done about this, I find <a class="link" href="https://embracethered.com/blog/posts/2022/python-package-manager-install-and-download-vulnerability/"  target="_blank" rel="noopener"
     >this article, Malicious Python Packages and Code Execution via pip download</a>. It seems that when pip is downloading/installing, <code>setup.py</code> is executed and in our case, will be done so as root. This allows us to supply malicious code in <code>setup.py</code>, and we can perform privilege escalation.</p>
 <p>Zipping the repo seems rather complicated, so I just cloned the repo, edited my paylod into setup.py, and followed instructions to comress/build:</p>
 <div class="highlight"><div class="chroma">
@@ -1508,8 +1550,8 @@ Eventually I learn to dump databases:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>The exploit worked, and now we have full access as root.</p>
-<h2 id="reflection">Reflection</h2>
-<p>This box felt particularly well-earned as the Cypher Injection segment ended up being a nightmare. An entirely unfamiliar database language, coupled with every injection attempt respond with <code>error 500</code>. It turned into a great learning experience, with a lot of skills/techniques challenged throughout the box. As usual, I found Privilege escalation, the abuse of <code>sudo pip3 download</code>, to be a really cool highlight of a method I had not known.</p>
+<h2 id="reflection">Reflection
+</h2><p>This box felt particularly well-earned as the Cypher Injection segment ended up being a nightmare. An entirely unfamiliar database language, coupled with every injection attempt respond with <code>error 500</code>. It turned into a great learning experience, with a lot of skills/techniques challenged throughout the box. As usual, I found Privilege escalation, the abuse of <code>sudo pip3 download</code>, to be a really cool highlight of a method I had not known.</p>
 
 </section>
 
@@ -1689,6 +1731,10 @@ Eventually I learn to dump databases:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1772,65 +1818,12 @@ Eventually I learn to dump databases:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#exploring-subdomains">Exploring subdomains</a></li>
-        <li><a href="#analyzing-beta-site-source-code">Analyzing beta site source code</a></li>
-        <li><a href="#using-arbitrary-file-read-to-retrieve-main-site-source-code">Using Arbitrary File Read to retrieve main site source code</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#command-injection-vulnerability-in-message-form">Command Injection vulnerability in message form</a></li>
-        <li><a href="#enumerating-the-system-as-www-data">Enumerating the system as www-data</a></li>
-        <li><a href="#cypher-injection-vulnerability-in-neo4j">Cypher Injection vulnerability in neo4j</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#enumerating-as-user-john">Enumerating as user john</a></li>
-        <li><a href="#abusing-pip3-download-to-execute-commands-as-root">Abusing pip3 download to execute commands as root</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1842,8 +1835,6 @@ Eventually I learn to dump databases:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

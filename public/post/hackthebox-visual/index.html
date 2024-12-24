@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.'><title>HackTheBox - Visual</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.">
+<title>HackTheBox - Visual</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-visual/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-visual/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Visual'>
-<meta property='og:description' content='Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-visual/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Visual">
+<meta property='og:description' content="Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-visual/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Visual Studio' /><meta property='article:tag' content='FullPowers' /><meta property='article:tag' content='GodPotato' /><meta property='article:tag' content='dotnet' /><meta property='article:published_time' content='2024-02-24T22:18:54-05:00'/><meta property='article:modified_time' content='2024-02-24T22:18:54-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-visual/Visual.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Visual Studio' /><meta property='article:tag' content='FullPowers' /><meta property='article:tag' content='GodPotato' /><meta property='article:tag' content='dotnet' /><meta property='article:published_time' content='2024-02-24T22:18:54-05:00'/><meta property='article:modified_time' content='2024-02-24T22:18:54-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-visual/Visual.png' />
 <meta name="twitter:title" content="HackTheBox - Visual">
-<meta name="twitter:description" content="Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-visual/Visual.png' />
+<meta name="twitter:description" content="Visual is a medium difficulty box, offering a service to compile Visual Studio projects from any git-based repository. By hosting our own git server, we can supply a malicious project, where we insert a reverse shell payload as a pre-build event. With the shell connection to the box, we can upload a reverse shell php file in the web root, and control as NT Authority\\Local Service. FullPowers allows us to retrieve extra privileges, and we can use GodPotato to escalate to SYSTEM level authority."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-visual/Visual.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,61 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building</a>
+          <ul>
+            <li><a href="#setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server</a></li>
+            <li><a href="#supplying-a-visual-studio-project">Supplying a Visual Studio project</a></li>
+            <li><a href="#creating-a-simple-dotnet-project">Creating a simple dotnet project</a></li>
+          </ul>
+        </li>
+        <li><a href="#exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a></li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +306,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +331,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -425,8 +460,8 @@ When we provide our system&rsquo;s IP address, we will receive a connection:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Unfortunately, the usefulness of this retrieval is limited since only port 80 is open.</p>
-<h3 id="troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building</h3>
-<p>Back to the website, we are detailed an error that reveals it is searching for a <code>.sln</code> file, the core component of a visual studio project
+<h3 id="troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building
+</h3><p>Back to the website, we are detailed an error that reveals it is searching for a <code>.sln</code> file, the core component of a visual studio project
 <img src="/post/hackthebox-visual/Images/repoerror.png"
 	width="778"
 	height="154"
@@ -460,8 +495,8 @@ Note that these HTB machines are isolated from the broad internet, so pulling fr
 </div><p>To set up gitea, I followed <a class="link" href="https://docs.gitea.com/installation/database-prep"  target="_blank" rel="noopener"
     >the preparations from this post.</a> The gitea binary/setup was retrieved from their main site, <a class="link" href="https://about.gitea.com/"  target="_blank" rel="noopener"
     >https://about.gitea.com/</a>. There are many release versions to select, so be sure it matches your system requirements.</p>
-<h4 id="setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server</h4>
-<p>Before anything, it is necessary to initialize mysql:</p>
+<h4 id="setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server
+</h4><p>Before anything, it is necessary to initialize mysql:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -579,8 +614,8 @@ After it all, we finally have our own gitea service set up and running:
 	
 >
 Now we can put whatever we want for an account, host our own repos, and even share them with whoever can access our system. Since I made this with the exclusive purpose of interacting with the box, I just made my account using the completely original <code>asdf</code> credentials.</p>
-<h4 id="supplying-a-visual-studio-project">Supplying a Visual Studio project</h4>
-<p>I don&rsquo;t typically do visual studio things, but I have an old Chip8 project that was built with visual studio. I cloned this repo, then submitted a copy to this local gitea server:
+<h4 id="supplying-a-visual-studio-project">Supplying a Visual Studio project
+</h4><p>I don&rsquo;t typically do visual studio things, but I have an old Chip8 project that was built with visual studio. I cloned this repo, then submitted a copy to this local gitea server:
 <img src="/post/hackthebox-visual/Images/test1.png"
 	width="594"
 	height="482"
@@ -642,8 +677,8 @@ When we send this to build, we can see a new error message:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>For whatever reason, it is unable to find dependencies in the Chip8 folder.. After moving files around and trying other simple renaming tactics, I was unable to get the Chip8 emulator to build.</p>
-<h4 id="creating-a-simple-dotnet-project">Creating a simple dotnet project</h4>
-<p>Next, I opted for a more simple project starting with a <a class="link" href="https://dotnet.microsoft.com/en-us/learn/dotnet/hello-world-tutorial/intro"  target="_blank" rel="noopener"
+<h4 id="creating-a-simple-dotnet-project">Creating a simple dotnet project
+</h4><p>Next, I opted for a more simple project starting with a <a class="link" href="https://dotnet.microsoft.com/en-us/learn/dotnet/hello-world-tutorial/intro"  target="_blank" rel="noopener"
     >basic dotnet tutorial</a>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -750,8 +785,8 @@ When we send this to build, we can see a new error message:</p>
 	
 >
 Now we can have the service build executables for us, but how can this be abused? The key hint is the emphasis on using visual studio.</p>
-<h3 id="exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event</h3>
-<p>Visual Studio supports <a class="link" href="https://learn.microsoft.com/en-us/visualstudio/ide/reference/pre-build-event-post-build-event-command-line-dialog-box?view=vs-2022"  target="_blank" rel="noopener"
+<h3 id="exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event
+</h3><p>Visual Studio supports <a class="link" href="https://learn.microsoft.com/en-us/visualstudio/ide/reference/pre-build-event-post-build-event-command-line-dialog-box?view=vs-2022"  target="_blank" rel="noopener"
     >pre-build event execution</a> that we can use to execute our own malicious scripts. The easiest way to do so is use Visual Studio&rsquo;s GUI, however I do not have this installed. I used <a class="link" href="https://learn.microsoft.com/en-us/visualstudio/ide/how-to-specify-build-events-csharp?view=vs-2022"  target="_blank" rel="noopener"
     >this article</a> as a reference to introduce manually. Very simply, we can add a reverse shell <code>bat</code> file to our repository, and edit the <code>csproj</code> file to call the file. <code>MyApp2.csproj</code>:</p>
 <div class="highlight"><div class="chroma">
@@ -822,8 +857,8 @@ Now when this is submitted for building, I receive a connection on my <code>nc</
 </span></span><span class="line"><span class="cl">PS C:\Windows\Temp\b492bdbeb505f5afab24f97c093323&gt; 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="lateral-movement">Lateral Movement</h2>
-<p>After some enumeration, there isn&rsquo;t much to be done with user <code>enox</code>, so I decide to insert a php reverse shell into the webroot directory. For Windows machines, service accounts will very commonly have the <code>SeImpersonate</code> privilege, which can be used in a potato attack to reach <code>NT Authority/SYSTEM</code> level privileges. The reverse shell used was obtained from <a class="link" href="https://github.com/Dhayalanb/windows-php-reverse-shell/tree/master"  target="_blank" rel="noopener"
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><p>After some enumeration, there isn&rsquo;t much to be done with user <code>enox</code>, so I decide to insert a php reverse shell into the webroot directory. For Windows machines, service accounts will very commonly have the <code>SeImpersonate</code> privilege, which can be used in a potato attack to reach <code>NT Authority/SYSTEM</code> level privileges. The reverse shell used was obtained from <a class="link" href="https://github.com/Dhayalanb/windows-php-reverse-shell/tree/master"  target="_blank" rel="noopener"
     >https://github.com/Dhayalanb/windows-php-reverse-shell/tree/master</a></p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -893,8 +928,8 @@ Now when this is submitted for building, I receive a connection on my <code>nc</
 </span></span><span class="line"><span class="cl">SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<p>Fortunately, there is a way to improve our privilege access. <a class="link" href="https://github.com/itm4n/FullPowers"  target="_blank" rel="noopener"
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><p>Fortunately, there is a way to improve our privilege access. <a class="link" href="https://github.com/itm4n/FullPowers"  target="_blank" rel="noopener"
     >FullPowers</a> is a tool we can use to recover the default privilege set of a service account, including SeImpersonate privilege. If we acquire this, we can launch a potato-style attack. Using FullPowers.exe:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1212,6 +1247,10 @@ Using GodPotato.exe, I execute a <code>bat</code> file consisting of a base64-en
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1295,58 +1334,12 @@ Using GodPotato.exe, I execute a <code>bat</code> file consisting of a base64-en
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#troubleshooting-the-git-repo-building">Troubleshooting the Git Repo building</a>
-          <ol>
-            <li><a href="#setting-up-a-self-hosted-gitea-server">Setting up a self-hosted Gitea server</a></li>
-            <li><a href="#supplying-a-visual-studio-project">Supplying a Visual Studio project</a></li>
-            <li><a href="#creating-a-simple-dotnet-project">Creating a simple dotnet project</a></li>
-          </ol>
-        </li>
-        <li><a href="#exploiting-vss-pre-build-event">Exploiting VS&rsquo;s pre-build event</a></li>
-      </ol>
-    </li>
-    <li><a href="#lateral-movement">Lateral Movement</a></li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1358,8 +1351,6 @@ Using GodPotato.exe, I execute a <code>bat</code> file consisting of a base64-en
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

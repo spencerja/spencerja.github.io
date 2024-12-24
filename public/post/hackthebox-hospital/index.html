@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.'><title>HackTheBox - Hospital</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user's credentials are cracked and we can access the system's web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.">
+<title>HackTheBox - Hospital</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-hospital/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-hospital/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Hospital'>
-<meta property='og:description' content='Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Hospital">
+<meta property='og:description' content="Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user's credentials are cracked and we can access the system's web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-hospital/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='PHP' /><meta property='article:tag' content='Upload Filter Bypass' /><meta property='article:tag' content='OverlayFS' /><meta property='article:tag' content='Hashcat' /><meta property='article:tag' content='GhostScript' /><meta property='article:tag' content='RDP' /><meta property='article:published_time' content='2024-04-13T17:57:00-06:00'/><meta property='article:modified_time' content='2024-04-13T17:57:00-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/Hospital.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='PHP' /><meta property='article:tag' content='Upload Filter Bypass' /><meta property='article:tag' content='OverlayFS' /><meta property='article:tag' content='Hashcat' /><meta property='article:tag' content='GhostScript' /><meta property='article:tag' content='RDP' /><meta property='article:published_time' content='2024-04-13T17:57:00-06:00'/><meta property='article:modified_time' content='2024-04-13T17:57:00-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-hospital/Hospital.png' />
 <meta name="twitter:title" content="HackTheBox - Hospital">
-<meta name="twitter:description" content="Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user&#39;s credentials are cracked and we can access the system&#39;s web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-hospital/Hospital.png' />
+<meta name="twitter:description" content="Hospital is a medium difficulty windows box with a twist. Newly registered web accounts are allowed to upload files with an incomplete blacklisting feature for security. After bypassing, we enter a Linux virtual environment, where we abuse OverlayFS to escalate to root. Once collecting password hashes from /etc/shadow, a user's credentials are cracked and we can access the system's web-based mail service. Another user is expecting a file for GhostScript from our compromised user, so we send a malicious .esp file that will execute a reverse shell. With shell access on the primary system, we can find credentials for our user and spy on their desktop activity via Remote Desktop Protocol. The user reveals the Administrator password, allowing us to authenticate as Administrator."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-hospital/Hospital.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,85 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold-1">Foothold 1</a>
+      <ul>
+        <li><a href="#abusing-file-upload-capabilities">Abusing file upload capabilities</a>
+          <ul>
+            <li><a href="#troubleshooting-php-payloads">Troubleshooting php payloads</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation-1">Privilege Escalation 1</a>
+      <ul>
+        <li><a href="#enumerating-linux-filesystem">Enumerating Linux filesystem</a></li>
+        <li><a href="#abusing-overlayfs">Abusing OverlayFS</a></li>
+      </ul>
+    </li>
+    <li><a href="#post-exploitation-collecting">Post-Exploitation Collecting</a>
+      <ul>
+        <li><a href="#cracking-password-hashes-from-shadow">Cracking password hashes from shadow</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold-2">Foothold 2</a>
+      <ul>
+        <li><a href="#accessing-roundcube-mail-service">Accessing roundcube mail service</a></li>
+        <li><a href="#rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation-2">Privilege Escalation 2</a>
+      <ul>
+        <li><a href="#login-credentials-discovered-in-bat-script">Login credentials discovered in bat script</a></li>
+        <li><a href="#spying-on-desktop-activity">Spying on desktop activity</a>
+          <ul>
+            <li><a href="#moving-input-to-notepad">Moving input to notepad:</a></li>
+            <li><a href="#tracking-parameters-via-the-post-request">Tracking parameters via the POST request:</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +330,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +355,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -631,9 +690,9 @@
 </span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold-1">Foothold 1</h2>
-<h3 id="abusing-file-upload-capabilities">Abusing file upload capabilities</h3>
-<p>If we try to upload a non-image file, we are redirected to a failure page. This is best visualized in burpsuite:</p>
+</div><h2 id="foothold-1">Foothold 1
+</h2><h3 id="abusing-file-upload-capabilities">Abusing file upload capabilities
+</h3><p>If we try to upload a non-image file, we are redirected to a failure page. This is best visualized in burpsuite:</p>
 <p><img src="/post/hackthebox-hospital/Images/fail.png"
 	width="689"
 	height="504"
@@ -703,8 +762,8 @@
 </span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.160.0] 6524
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="troubleshooting-php-payloads">Troubleshooting php payloads</h4>
-<p>My first thinking is that because this is a Windows machine, the php reverse shell is not working correctly since the payload is for Linux. We can see this when we look at the <code>$shell</code> line:</p>
+</div><h4 id="troubleshooting-php-payloads">Troubleshooting php payloads
+</h4><p>My first thinking is that because this is a Windows machine, the php reverse shell is not working correctly since the payload is for Linux. We can see this when we look at the <code>$shell</code> line:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -868,9 +927,9 @@ To transition into a reverse shell, I uploaded a bash script:</p>
 </span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="n">webserver</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">uploads</span><span class="o">$</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation-1">Privilege Escalation 1</h2>
-<h3 id="enumerating-linux-filesystem">Enumerating Linux filesystem</h3>
-<p>We can see a user <code>drwilliams</code> on the system, but no access to their home folder:</p>
+</div><h2 id="privilege-escalation-1">Privilege Escalation 1
+</h2><h3 id="enumerating-linux-filesystem">Enumerating Linux filesystem
+</h3><p>We can see a user <code>drwilliams</code> on the system, but no access to their home folder:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -993,8 +1052,8 @@ Unfortunately, there is nothing valuable in the MySQL database. Back on the Doma
 </span></span><span class="line"><span class="cl"><span class="mi">2023</span><span class="o">/</span><span class="mi">11</span><span class="o">/</span><span class="mi">19</span> <span class="mi">12</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">21</span> <span class="o">&gt;</span>  <span class="n">Done</span><span class="o">!</span> <span class="n">Tested</span> <span class="mi">5</span> <span class="n">usernames</span> <span class="p">(</span><span class="mi">1</span> <span class="n">valid</span><span class="p">)</span> <span class="ow">in</span> <span class="mf">0.072</span> <span class="n">seconds</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="abusing-overlayfs">Abusing OverlayFS</h3>
-<p>After extensive enumeration of files, I discover on a recent <a class="link" href="https://www.reddit.com/r/selfhosted/comments/15ecpck/ubuntu_local_privilege_escalation_cve20232640/"  target="_blank" rel="noopener"
+</div><h3 id="abusing-overlayfs">Abusing OverlayFS
+</h3><p>After extensive enumeration of files, I discover on a recent <a class="link" href="https://www.reddit.com/r/selfhosted/comments/15ecpck/ubuntu_local_privilege_escalation_cve20232640/"  target="_blank" rel="noopener"
     >ubuntu exploit using OverlayFS</a>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1027,9 +1086,9 @@ Unfortunately, there is nothing valuable in the MySQL database. Back on the Doma
 </span></span><span class="line"><span class="cl">root@webserver:/tmp#
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="post-exploitation-collecting">Post-Exploitation Collecting</h2>
-<h3 id="cracking-password-hashes-from-shadow">Cracking password hashes from shadow</h3>
-<p>Since we know <code>drwilliams</code> is a user on this linux virtual machine as well as a user in Active Directory, we can try to crack their /etc/shadow password and hope that it is the same for both services.</p>
+</div><h2 id="post-exploitation-collecting">Post-Exploitation Collecting
+</h2><h3 id="cracking-password-hashes-from-shadow">Cracking password hashes from shadow
+</h3><p>Since we know <code>drwilliams</code> is a user on this linux virtual machine as well as a user in Active Directory, we can try to crack their /etc/shadow password and hope that it is the same for both services.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1075,9 +1134,9 @@ Confirming that these credentials work for Active Directory:</p>
 </span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               [+] hospital.htb\drwilliams:qwe123!@#
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold-2">Foothold 2</h2>
-<h3 id="accessing-roundcube-mail-service">Accessing roundcube mail service</h3>
-<p>Unfortunately, drwilliams cannot connect remotely, and there are no interesting  smb shares. We can, however, use these credentials to login to the <code>roundcube</code> mailserver discovered earlier on port 443. When we enter, we see a singular email:</p>
+</div><h2 id="foothold-2">Foothold 2
+</h2><h3 id="accessing-roundcube-mail-service">Accessing roundcube mail service
+</h3><p>Unfortunately, drwilliams cannot connect remotely, and there are no interesting  smb shares. We can, however, use these credentials to login to the <code>roundcube</code> mailserver discovered earlier on port 443. When we enter, we see a singular email:</p>
 <p><img src="/post/hackthebox-hospital/Images/mail.png"
 	width="1443"
 	height="412"
@@ -1166,8 +1225,8 @@ Confirming that these credentials work for Active Directory:</p>
 </span></span><span class="line"><span class="cl">SMB         hospital.htb    445    DC               hospital.htb\Administrator                  badpwdcount: 0 desc: Built-in account for administering the computer/domain
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability</h3>
-<p>Back to the email message presented, it is clear they are utilizing <code>.esp</code> files, and a tool called Ghostscript. With a quick search, we can find that <a class="link" href="https://www.kroll.com/en/insights/publications/cyber/ghostscript-cve-2023-36664-remote-code-execution-vulnerability"  target="_blank" rel="noopener"
+</div><h3 id="rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability
+</h3><p>Back to the email message presented, it is clear they are utilizing <code>.esp</code> files, and a tool called Ghostscript. With a quick search, we can find that <a class="link" href="https://www.kroll.com/en/insights/publications/cyber/ghostscript-cve-2023-36664-remote-code-execution-vulnerability"  target="_blank" rel="noopener"
     >ghostscript has a very recent and very serious CVE disclosed</a>. There is a <a class="link" href="https://github.com/jakabakos/CVE-2023-36664-Ghostscript-command-injection"  target="_blank" rel="noopener"
     >proof-of-concept script</a> publicly available that we might try. For this, I used the <code>file.eps</code> included in the repository, and injected a powershell base64-encoded reverse shell using their exploit script:</p>
 <div class="highlight"><div class="chroma">
@@ -1214,9 +1273,9 @@ Confirming that these credentials work for Active Directory:</p>
 </span></span><span class="line"><span class="cl">hospital\drbrown
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation-2">Privilege Escalation 2</h2>
-<h3 id="login-credentials-discovered-in-bat-script">Login credentials discovered in bat script</h3>
-<p>We can find brown&rsquo;s password is in the ghostscript.bat, the same folder location our shell is dropped into:</p>
+</div><h2 id="privilege-escalation-2">Privilege Escalation 2
+</h2><h3 id="login-credentials-discovered-in-bat-script">Login credentials discovered in bat script
+</h3><p>We can find brown&rsquo;s password is in the ghostscript.bat, the same folder location our shell is dropped into:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1256,8 +1315,8 @@ Confirming that these credentials work for Active Directory:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Seeing Remote Desktop users means we can use <code>xfreerdp</code> or similar to establish a connection, which can be helpful for GUI interaction and general persistence in the event that our reverse shell breaks.</p>
-<h3 id="spying-on-desktop-activity">Spying on desktop activity</h3>
-<p>When we enter the RDP connection, we can see <code>drbrown</code> doing login activities.</p>
+<h3 id="spying-on-desktop-activity">Spying on desktop activity
+</h3><p>When we enter the RDP connection, we can see <code>drbrown</code> doing login activities.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1281,8 +1340,8 @@ Confirming that these credentials work for Active Directory:</p>
 	
 ></p>
 <p>On a loop, this user will open the webmail login page, type in &ldquo;Administrator&rdquo; as the user, and presumably the associated password as well. There are many ways to retrieve this password, but here are a couple of my choice ideas:</p>
-<h4 id="moving-input-to-notepad">Moving input to notepad:</h4>
-<p>The typing method is not checking the location on where it is typing, so we can wait for the login page to be reached, then switch over to Notepad.exe, and the full login credential will be displayed for all to see.</p>
+<h4 id="moving-input-to-notepad">Moving input to notepad:
+</h4><p>The typing method is not checking the location on where it is typing, so we can wait for the login page to be reached, then switch over to Notepad.exe, and the full login credential will be displayed for all to see.</p>
 <p><img src="/post/hackthebox-hospital/Images/notespy.png"
 	width="400"
 	height="119"
@@ -1295,8 +1354,8 @@ Confirming that these credentials work for Active Directory:</p>
 		data-flex-basis="806px"
 	
 ></p>
-<h4 id="tracking-parameters-via-the-post-request">Tracking parameters via the POST request:</h4>
-<p>We can use the network monitor tool builtin to Internet Explorer and, when the &ldquo;user&rdquo; is finished typing the credentials, we can press LOGIN and examine the Request body that was sent:</p>
+<h4 id="tracking-parameters-via-the-post-request">Tracking parameters via the POST request:
+</h4><p>We can use the network monitor tool builtin to Internet Explorer and, when the &ldquo;user&rdquo; is finished typing the credentials, we can press LOGIN and examine the Request body that was sent:</p>
 <p><img src="/post/hackthebox-hospital/Images/networkmon.png"
 	width="1026"
 	height="239"
@@ -1501,6 +1560,10 @@ These credentials are for the Administrator user on the system, where we can gra
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1584,82 +1647,12 @@ These credentials are for the Administrator user on the system, where we can gra
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a></li>
-    <li><a href="#foothold-1">Foothold 1</a>
-      <ol>
-        <li><a href="#abusing-file-upload-capabilities">Abusing file upload capabilities</a>
-          <ol>
-            <li><a href="#troubleshooting-php-payloads">Troubleshooting php payloads</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation-1">Privilege Escalation 1</a>
-      <ol>
-        <li><a href="#enumerating-linux-filesystem">Enumerating Linux filesystem</a></li>
-        <li><a href="#abusing-overlayfs">Abusing OverlayFS</a></li>
-      </ol>
-    </li>
-    <li><a href="#post-exploitation-collecting">Post-Exploitation Collecting</a>
-      <ol>
-        <li><a href="#cracking-password-hashes-from-shadow">Cracking password hashes from shadow</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold-2">Foothold 2</a>
-      <ol>
-        <li><a href="#accessing-roundcube-mail-service">Accessing roundcube mail service</a></li>
-        <li><a href="#rce-via-ghostscript-vulnerability">RCE via Ghostscript vulnerability</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation-2">Privilege Escalation 2</a>
-      <ol>
-        <li><a href="#login-credentials-discovered-in-bat-script">Login credentials discovered in bat script</a></li>
-        <li><a href="#spying-on-desktop-activity">Spying on desktop activity</a>
-          <ol>
-            <li><a href="#moving-input-to-notepad">Moving input to notepad:</a></li>
-            <li><a href="#tracking-parameters-via-the-post-request">Tracking parameters via the POST request:</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1671,8 +1664,6 @@ These credentials are for the Administrator user on the system, where we can gra
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

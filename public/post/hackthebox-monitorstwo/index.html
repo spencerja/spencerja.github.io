@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container&#39;s file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.'><title>HackTheBox - MonitorsTwo</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.">
+<title>HackTheBox - MonitorsTwo</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-monitorstwo/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-monitorstwo/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - MonitorsTwo'>
-<meta property='og:description' content='MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container&#39;s file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-monitorstwo/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - MonitorsTwo">
+<meta property='og:description' content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-monitorstwo/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cacti' /><meta property='article:tag' content='Remote Code Execution' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='SUID' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:published_time' content='2023-09-02T12:27:00-05:00'/><meta property='article:modified_time' content='2023-09-02T12:27:00-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-monitorstwo/MonitorsTwo.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cacti' /><meta property='article:tag' content='Remote Code Execution' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='SUID' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:published_time' content='2023-09-02T12:27:00-05:00'/><meta property='article:modified_time' content='2023-09-02T12:27:00-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-monitorstwo/MonitorsTwo.png' />
 <meta name="twitter:title" content="HackTheBox - MonitorsTwo">
-<meta name="twitter:description" content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container&#39;s file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-monitorstwo/MonitorsTwo.png' />
+<meta name="twitter:description" content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-monitorstwo/MonitorsTwo.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,63 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#utilizing-cve-2022-46169">Utilizing CVE 2022-46169</a></li>
+        <li><a href="#enumerating-docker-container">Enumerating docker container</a></li>
+        <li><a href="#connecting-to-mysql-database">Connecting to mysql database</a></li>
+        <li><a href="#escaping-the-docker-container">Escaping the docker container</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail</a></li>
+        <li><a href="#abusing-cve-2021-41091">Abusing CVE-2021-41091</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +308,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +333,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -425,9 +462,9 @@
 ></p>
 <p>A quick google search shows that cacti 1.2.22 has <a class="link" href="https://nvd.nist.gov/vuln/detail/cve-2022-46169"  target="_blank" rel="noopener"
     >a remote command execution vulnerability.</a> Utilizing this CVE, we can have remote code execution.</p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="utilizing-cve-2022-46169">Utilizing CVE 2022-46169</h3>
-<p>POC code obtained from <a class="link" href="https://github.com/sAsPeCt488/CVE-2022-46169"  target="_blank" rel="noopener"
+<h2 id="foothold">Foothold
+</h2><h3 id="utilizing-cve-2022-46169">Utilizing CVE 2022-46169
+</h3><p>POC code obtained from <a class="link" href="https://github.com/sAsPeCt488/CVE-2022-46169"  target="_blank" rel="noopener"
     >this github repository</a>
 Testing the POC with a curl command:</p>
 <div class="highlight"><div class="chroma">
@@ -489,8 +526,8 @@ Testing the POC with a curl command:</p>
 </span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">$</span> 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="enumerating-docker-container">Enumerating docker container</h3>
-<p>Looking at SUID privileges, we see a very dangerous SUID set in <code>capsh</code>:</p>
+</div><h3 id="enumerating-docker-container">Enumerating docker container
+</h3><p>Looking at SUID privileges, we see a very dangerous SUID set in <code>capsh</code>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -642,8 +679,8 @@ Testing the POC with a curl command:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>This script is attaching to the mysql database, and updating some settings. Let&rsquo;s see if we can attach to the database in the same fashion.</p>
-<h3 id="connecting-to-mysql-database">Connecting to mysql database</h3>
-<div class="highlight"><div class="chroma">
+<h3 id="connecting-to-mysql-database">Connecting to mysql database
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -781,8 +818,8 @@ Submitting the hash to a rainbow table does not generate a hit.</p>
 </span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 65c Fan: 34% Util:100% Core:1316MHz Mem:3004MHz Bus:16
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="escaping-the-docker-container">Escaping the docker container</h3>
-<p>We have a successful crack as <code>marcus:funkymonkey</code>. However, checking our shell&rsquo;s /etc/passwd shows that no user marcus currently exists:</p>
+</div><h3 id="escaping-the-docker-container">Escaping the docker container
+</h3><p>We have a successful crack as <code>marcus:funkymonkey</code>. However, checking our shell&rsquo;s /etc/passwd shows that no user marcus currently exists:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -866,9 +903,9 @@ Submitting the hash to a rainbow table does not generate a hit.</p>
 </span></span><span class="line"><span class="cl">marcus@monitorstwo:~$ 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail</h3>
-<p>We successfully login, and note that we are told we have some mail. For HackTheBox systems, this is usually no coincidence, so let&rsquo;s check the mail contents first.</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail
+</h3><p>We successfully login, and note that we are told we have some mail. For HackTheBox systems, this is usually no coincidence, so let&rsquo;s check the mail contents first.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -965,8 +1002,8 @@ Checking kernel version (CVE-2021-33033)</p>
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>The docker version is old, meaning CVE-2021-41091 is a potential target.</p>
-<h3 id="abusing-cve-2021-41091">Abusing CVE-2021-41091</h3>
-<p>We can get more information about CVE-2021-41091 <a class="link" href="https://www.cyberark.com/resources/threat-research-blog/how-docker-made-me-more-capable-and-the-host-less-secure"  target="_blank" rel="noopener"
+<h3 id="abusing-cve-2021-41091">Abusing CVE-2021-41091
+</h3><p>We can get more information about CVE-2021-41091 <a class="link" href="https://www.cyberark.com/resources/threat-research-blog/how-docker-made-me-more-capable-and-the-host-less-secure"  target="_blank" rel="noopener"
     >here, by the person who discovered the bug</a>. This exploit takes advantage that user id&rsquo;s within docker containers and outside the docker containers are shared. So we can create a file with a user inside the docker container, and when accessing the file from outside the docker container, the user id will be retained. This characteristic is normal for linux, but what is not normal is a regular user being able to enter the docker container&rsquo;s filesystem.
 This is ideal for our situation, where we control root from inside the container. The workflow will look something like this:</p>
 <ul>
@@ -1104,8 +1141,8 @@ Using <code>findmnt</code> to locate docker filesystems</li>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can see the privilege escalation was successful, we are now root and still outside of the docker container!</p>
-<h2 id="reflection">Reflection</h2>
-<p>While this box stayed true to the Easy ranking it achieved, I appreciated seeing a docker exploit such as this. Linux&rsquo;s UID handling and ownership is something I find to be quite interesting, especially in cases like these, where the permissions of a root user on a restricted environment can still be abused outside the scope. The article on CVE-2021-41091 was a blast to read, and I&rsquo;m glad I know more than before!</p>
+<h2 id="reflection">Reflection
+</h2><p>While this box stayed true to the Easy ranking it achieved, I appreciated seeing a docker exploit such as this. Linux&rsquo;s UID handling and ownership is something I find to be quite interesting, especially in cases like these, where the permissions of a root user on a restricted environment can still be abused outside the scope. The article on CVE-2021-41091 was a blast to read, and I&rsquo;m glad I know more than before!</p>
 
 </section>
 
@@ -1281,6 +1318,10 @@ Using <code>findmnt</code> to locate docker filesystems</li>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1364,60 +1405,12 @@ Using <code>findmnt</code> to locate docker filesystems</li>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a></li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#utilizing-cve-2022-46169">Utilizing CVE 2022-46169</a></li>
-        <li><a href="#enumerating-docker-container">Enumerating docker container</a></li>
-        <li><a href="#connecting-to-mysql-database">Connecting to mysql database</a></li>
-        <li><a href="#escaping-the-docker-container">Escaping the docker container</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail</a></li>
-        <li><a href="#abusing-cve-2021-41091">Abusing CVE-2021-41091</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1429,8 +1422,6 @@ Using <code>findmnt</code> to locate docker filesystems</li>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

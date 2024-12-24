@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user&#39;s password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root.'><title>HackTheBox - Devvortex</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user's password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root.">
+<title>HackTheBox - Devvortex</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-devvortex/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-devvortex/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Devvortex'>
-<meta property='og:description' content='Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user&#39;s password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-devvortex/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Devvortex">
+<meta property='og:description' content="Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user's password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-devvortex/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Joomla' /><meta property='article:tag' content='Webshell' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:tag' content='less' /><meta property='article:published_time' content='2024-04-27T10:42:02-05:00'/><meta property='article:modified_time' content='2024-04-27T10:42:02-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-devvortex/Devvortex.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Joomla' /><meta property='article:tag' content='Webshell' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:tag' content='less' /><meta property='article:published_time' content='2024-04-27T10:42:02-05:00'/><meta property='article:modified_time' content='2024-04-27T10:42:02-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-devvortex/Devvortex.png' />
 <meta name="twitter:title" content="HackTheBox - Devvortex">
-<meta name="twitter:description" content="Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user&#39;s password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-devvortex/Devvortex.png' />
+<meta name="twitter:description" content="Devvortex is an easy difficulty box, with an exposed private subdomain. The subdomain is utilizing a vulnerable version of Joomla, which we can use to view login credentials. As an admin of the site, we can edit php pages to a reverse or web shell. With access to the system, we can access all credentials in the mysql database, and crack a user's password. The user has sudo privileges on apport-cli, which uses less as a pager that we can abuse to escape into an interactive shell session as root."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-devvortex/Devvortex.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,64 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#enumerating-dev-subdomain">Enumerating dev subdomain</a></li>
+        <li><a href="#unauthorized-access-to-credentials-via-vulnerable-joomla-version">Unauthorized access to credentials via vulnerable Joomla version</a></li>
+        <li><a href="#creating-a-php-reverse-shell-by-editing-templates">Creating a php reverse shell by editing templates</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ul>
+        <li><a href="#reusing-credentials-to-access-mysql">Reusing credentials to access mysql</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#using-file-viewer-less-to-retain-a-privileged-shell-session">Using file viewer &rsquo;less&rsquo; to retain a privileged shell session</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +309,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +334,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -436,8 +474,8 @@ There is a redirection to <code>devvortex.htb</code>, so we should add this to /
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Using the raft wordlist was a bit of a poor choice, as it was producting quite a few false positives with words beginning with a dot.</p>
-<h3 id="enumerating-dev-subdomain">Enumerating dev subdomain</h3>
-<p>With basic enumeration, we can find interesting information in a <code>robots.txt</code> file. Robots.txt is used to tell automated web crawlers which subdomains are off-limits. This can help private data from being found in google searches, but it also gives us a good idea on what areas can contain sensitive information.
+<h3 id="enumerating-dev-subdomain">Enumerating dev subdomain
+</h3><p>With basic enumeration, we can find interesting information in a <code>robots.txt</code> file. Robots.txt is used to tell automated web crawlers which subdomains are off-limits. This can help private data from being found in google searches, but it also gives us a good idea on what areas can contain sensitive information.
 <img src="/post/hackthebox-devvortex/Images/robotstxt.png"
 	width="553"
 	height="495"
@@ -465,8 +503,8 @@ There is a redirection to <code>devvortex.htb</code>, so we should add this to /
 ></p>
 <p>We can read here that the version appears to be 4.2.x, as the latest changelog mentions such. When we search for joomla vulnerabilities, we find <a class="link" href="https://www.exploit-db.com/exploits/51334"  target="_blank" rel="noopener"
     >an information disclosure CVE</a> that might be relevant.</p>
-<h3 id="unauthorized-access-to-credentials-via-vulnerable-joomla-version">Unauthorized access to credentials via vulnerable Joomla version</h3>
-<p>The exploit script did not work for me, but we can see from the code that it fetches information from an exposed api endpoint:
+<h3 id="unauthorized-access-to-credentials-via-vulnerable-joomla-version">Unauthorized access to credentials via vulnerable Joomla version
+</h3><p>The exploit script did not work for me, but we can see from the code that it fetches information from an exposed api endpoint:
 <code>/api/index.php/v1/config/application?public=true</code>
 We can visit this page manually, and find a username and password within:</p>
 <p><img src="/post/hackthebox-devvortex/Images/api.png"
@@ -495,8 +533,8 @@ We can visit this page manually, and find a username and password within:</p>
 		data-flex-basis="416px"
 	
 ></p>
-<h3 id="creating-a-php-reverse-shell-by-editing-templates">Creating a php reverse shell by editing templates</h3>
-<p>The administrator is able to edit php templates via System &gt; Site Templates, and with this I can upload a php reverse shell. Getting php shell:</p>
+<h3 id="creating-a-php-reverse-shell-by-editing-templates">Creating a php reverse shell by editing templates
+</h3><p>The administrator is able to edit php templates via System &gt; Site Templates, and with this I can upload a php reverse shell. Getting php shell:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -597,9 +635,9 @@ We can visit this page manually, and find a username and password within:</p>
 </span></span><span class="line"><span class="cl"><span class="o">$</span> 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="lateral-movement">Lateral Movement</h2>
-<h3 id="reusing-credentials-to-access-mysql">Reusing credentials to access mysql</h3>
-<p>We need to improve the stability of the shell; my preferred way is using <code>script</code>, although python is common as well:</p>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="reusing-credentials-to-access-mysql">Reusing credentials to access mysql
+</h3><p>We need to improve the stability of the shell; my preferred way is using <code>script</code>, although python is common as well:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -914,9 +952,9 @@ Using netstat, we can see mysql is running on port 3306:</p>
 </span></span><span class="line"><span class="cl">logan@devvortex:~$ 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="using-file-viewer-less-to-retain-a-privileged-shell-session">Using file viewer &rsquo;less&rsquo; to retain a privileged shell session</h3>
-<p>Checking sudo privileges:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="using-file-viewer-less-to-retain-a-privileged-shell-session">Using file viewer &rsquo;less&rsquo; to retain a privileged shell session
+</h3><p>Checking sudo privileges:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1279,6 +1317,10 @@ Using netstat, we can see mysql is running on port 3306:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1362,61 +1404,12 @@ Using netstat, we can see mysql is running on port 3306:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#enumerating-dev-subdomain">Enumerating dev subdomain</a></li>
-        <li><a href="#unauthorized-access-to-credentials-via-vulnerable-joomla-version">Unauthorized access to credentials via vulnerable Joomla version</a></li>
-        <li><a href="#creating-a-php-reverse-shell-by-editing-templates">Creating a php reverse shell by editing templates</a></li>
-      </ol>
-    </li>
-    <li><a href="#lateral-movement">Lateral Movement</a>
-      <ol>
-        <li><a href="#reusing-credentials-to-access-mysql">Reusing credentials to access mysql</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#using-file-viewer-less-to-retain-a-privileged-shell-session">Using file viewer &rsquo;less&rsquo; to retain a privileged shell session</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1428,8 +1421,6 @@ Using netstat, we can see mysql is running on port 3306:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.'><title>HackTheBox - CozyHosting</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.">
+<title>HackTheBox - CozyHosting</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-cozyhosting/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-cozyhosting/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - CozyHosting'>
-<meta property='og:description' content='Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-cozyhosting/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - CozyHosting">
+<meta property='og:description' content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-cozyhosting/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Spring Boot' /><meta property='article:tag' content='Session Hijack' /><meta property='article:tag' content='ssh' /><meta property='article:tag' content='postgres' /><meta property='article:tag' content='java' /><meta property='article:published_time' content='2024-03-02T00:54:16-06:00'/><meta property='article:modified_time' content='2024-03-02T00:54:16-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-cozyhosting/CozyHosting.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Spring Boot' /><meta property='article:tag' content='Session Hijack' /><meta property='article:tag' content='ssh' /><meta property='article:tag' content='postgres' /><meta property='article:tag' content='java' /><meta property='article:published_time' content='2024-03-02T00:54:16-06:00'/><meta property='article:modified_time' content='2024-03-02T00:54:16-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-cozyhosting/CozyHosting.png' />
 <meta name="twitter:title" content="HackTheBox - CozyHosting">
 <meta name="twitter:description" content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-cozyhosting/CozyHosting.png' />
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-cozyhosting/CozyHosting.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,65 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#exploring-webpage">Exploring webpage</a></li>
+        <li><a href="#viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#rce-via-command-injection">RCE via command injection</a></li>
+        <li><a href="#user-enumeration">User Enumeration</a></li>
+        <li><a href="#cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#gtfobins-on-suid">GTFOBins on SUID</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +310,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +335,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -351,8 +390,8 @@
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">10.129.105.187 cozyhosting.htb
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="exploring-webpage">Exploring webpage</h3>
-<p>Viewing the webpage, there is not much more than a login page:</p>
+</div><h3 id="exploring-webpage">Exploring webpage
+</h3><p>Viewing the webpage, there is not much more than a login page:</p>
 <p><img src="/post/hackthebox-cozyhosting/Images/Login.png"
 	width="493"
 	height="445"
@@ -450,8 +489,8 @@
 		data-flex-basis="212px"
 	
 ></p>
-<h3 id="viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking</h3>
-<p>Looking at sessions, we can see all sessions, including the cookie and associated authentication. Among the list, there is a valid session for a certain user:</p>
+<h3 id="viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking
+</h3><p>Looking at sessions, we can see all sessions, including the cookie and associated authentication. Among the list, there is a valid session for a certain user:</p>
 <p><img src="/post/hackthebox-cozyhosting/Images/sessions.png"
 	width="642"
 	height="298"
@@ -527,9 +566,9 @@ In the url response:</p>
 <pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">http://cozyhosting.htb/admin?error=usage:%20ssh%20[-46AaCfGgKkMNnqsTtVvXxYy]%20[-B%20bind_interface]%20%20%20%20%20%20%20%20%20%20%20[-b%20bind_address]%20[-c%20cipher_spec]%20[-D%20[bind_address:]port]%20%20%20%20%20%20%20%20%20%20%20[-E%20log_file]%20[-e%20escape_char]%20[-F%20configfile]%20[-I%20pkcs11]%20%20%20%20%20%20%20%20%20%20%20[-i%20identity_file]%20[-J%20[user@]host[:port]]%20[-L%20address]%20%20%20%20%20%20%20%20%20%20%20[-l%20login_name]%20[-m%20mac_spec]%20[-O%20ctl_cmd]%20[-o%20option]%20[-p%20port]%20%20%20%20%20%20%20%20%20%20%20[-Q%20query_option]%20[-R%20address]%20[-S%20ctl_path]%20[-W%20host:port]%20%20%20%20%20%20%20%20%20%20%20[-w%20local_tun[:remote_tun]]%20destination%20[command%20[argument%20...]]/bin/bash:%20line%201:%20@127.0.0.1:%20command%20not%20found
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold">Foothold</h2>
-<h3 id="rce-via-command-injection">RCE via command injection</h3>
-<p>This error matches what we would expect when performing an invalid <code>ssh</code> operation in a shell session, suggesting the command is run as some sort of shell execute. Perhaps we can abuse this to achieve remote code execution?</p>
+</div><h2 id="foothold">Foothold
+</h2><h3 id="rce-via-command-injection">RCE via command injection
+</h3><p>This error matches what we would expect when performing an invalid <code>ssh</code> operation in a shell session, suggesting the command is run as some sort of shell execute. Perhaps we can abuse this to achieve remote code execution?</p>
 <p>One small problem, there is no witespace allowed in username field:</p>
 <p><img src="/post/hackthebox-cozyhosting/Images/whitespace.png"
 	width="732"
@@ -638,8 +677,8 @@ In the url response:</p>
 </span></span><span class="line"><span class="cl">app@cozyhosting:/app$
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="user-enumeration">User Enumeration</h3>
-<p>In the current working directory, we have a compiled jar file:</p>
+</div><h3 id="user-enumeration">User Enumeration
+</h3><p>In the current working directory, we have a compiled jar file:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -722,8 +761,8 @@ In the url response:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Here, we have credentials for postgres.</p>
-<h3 id="cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database</h3>
-<p>Connecting to postgres:</p>
+<h3 id="cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database
+</h3><p>Connecting to postgres:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -834,9 +873,9 @@ In the url response:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>It does indeed work as josh&rsquo;s password. If it hadn&rsquo;t the next guess would be for root, which also might not allow ssh authentication. By default, root authentication over ssh is not allowed.</p>
-<h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="gtfobins-on-suid">GTFOBins on SUID</h3>
-<p>Josh can ssh as root:</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="gtfobins-on-suid">GTFOBins on SUID
+</h3><p>Josh can ssh as root:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1058,6 +1097,10 @@ In the url response:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1141,62 +1184,12 @@ In the url response:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#exploring-webpage">Exploring webpage</a></li>
-        <li><a href="#viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#rce-via-command-injection">RCE via command injection</a></li>
-        <li><a href="#user-enumeration">User Enumeration</a></li>
-        <li><a href="#cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#gtfobins-on-suid">GTFOBins on SUID</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1208,8 +1201,6 @@ In the url response:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

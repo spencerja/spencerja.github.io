@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.'><title>HackTheBox - Manager</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
+<title>HackTheBox - Manager</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-manager/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-manager/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Manager'>
-<meta property='og:description' content='Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-manager/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Manager">
+<meta property='og:description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-manager/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Kerbrute' /><meta property='article:tag' content='MSSQL' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='Active Directory Certificate Services' /><meta property='article:tag' content='certipy' /><meta property='article:published_time' content='2024-03-16T06:05:15-06:00'/><meta property='article:modified_time' content='2024-03-16T06:05:15-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-manager/Manager.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Kerbrute' /><meta property='article:tag' content='MSSQL' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='Active Directory Certificate Services' /><meta property='article:tag' content='certipy' /><meta property='article:published_time' content='2024-03-16T06:05:15-06:00'/><meta property='article:modified_time' content='2024-03-16T06:05:15-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-manager/Manager.png' />
 <meta name="twitter:title" content="HackTheBox - Manager">
 <meta name="twitter:description" content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-manager/Manager.png' />
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-manager/Manager.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,76 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#probing-active-directory">Probing Active Directory</a></li>
+        <li><a href="#enumerating-the-website">Enumerating The Website</a></li>
+        <li><a href="#returning-to-active-directory-attacks">Returning to Active Directory Attacks</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#enumeration-through-mssql">Enumeration through MSSQL</a></li>
+        <li><a href="#enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound</a>
+          <ul>
+            <li><a href="#running-sharphound">Running SharpHound</a></li>
+            <li><a href="#initializing-bloodhound">Initializing BloodHound</a></li>
+            <li><a href="#raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access</a></li>
+          </ul>
+        </li>
+        <li><a href="#exploiting-ad-certificate-services">Exploiting AD Certificate Services</a>
+          <ul>
+            <li><a href="#using-esc7-attack-2">Using ESC7 attack #2:</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +321,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +346,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -463,8 +513,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>From the nmap scanning, we can see this is a domain controller for Active Directory. There are a lot of open ports associated with active directory (ldap, smb, rpc) so we have a wide attack surface to work with.</p>
-<h3 id="probing-active-directory">Probing Active Directory</h3>
-<p>Firstly checking SMB for anonymous authentication:</p>
+<h3 id="probing-active-directory">Probing Active Directory
+</h3><p>Firstly checking SMB for anonymous authentication:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -543,8 +593,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Once again, there is no more interesting information. Since there is a web page open on port 80, I decided to take a look at the website.</p>
-<h3 id="enumerating-the-website">Enumerating The Website</h3>
-<p><img src="/post/hackthebox-manager/Images/landingpage.png"
+<h3 id="enumerating-the-website">Enumerating The Website
+</h3><p><img src="/post/hackthebox-manager/Images/landingpage.png"
 	width="1198"
 	height="571"
 	srcset="/post/hackthebox-manager/Images/landingpage_hu9984910990627510565.png 480w, /post/hackthebox-manager/Images/landingpage_hu6432412787970967267.png 1024w"
@@ -616,8 +666,8 @@ The web page is a static html. Checking the other listed pages also only shows h
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Here we still only see the static webpages, and also js/css files. Nothing interesting once again</p>
-<h3 id="returning-to-active-directory-attacks">Returning to Active Directory Attacks</h3>
-<p>While obtaining only a username gives limited information, we can also try to AS-REP roast with just usernames. To gather some legitimate usernames, we can enumerate valid users through Kerberos Pre-Authentication (Kerbrute).</p>
+<h3 id="returning-to-active-directory-attacks">Returning to Active Directory Attacks
+</h3><p>While obtaining only a username gives limited information, we can also try to AS-REP roast with just usernames. To gather some legitimate usernames, we can enumerate valid users through Kerberos Pre-Authentication (Kerbrute).</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -799,9 +849,9 @@ With valid credentials, we can dump users to find any we in the kerbrute:</p>
 </span></span><span class="line"><span class="cl">Administrator
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold">Foothold</h2>
-<h3 id="enumeration-through-mssql">Enumeration through MSSQL</h3>
-<p>The user operator can log into the mysql server:</p>
+</div><h2 id="foothold">Foothold
+</h2><h3 id="enumeration-through-mssql">Enumeration through MSSQL
+</h3><p>The user operator can log into the mysql server:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -889,8 +939,8 @@ With valid credentials, we can dump users to find any we in the kerbrute:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can see the authentication is done as the system, DC01$. Typically, passwords for this account will be a very long string of random characters, completely unfeasible to crack. After a quick attempt at cracking using the <code>rockyou</code> wordlist, I gave up on this approach.</p>
-<h3 id="enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem</h3>
-<p>Also using <code>xp_dirtree</code>, we can browse the file system. Since we didn&rsquo;t see much in the web directory from the oustide perspective, I decided to check if maybe I can see more by looking at the filesystem:</p>
+<h3 id="enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem
+</h3><p>Also using <code>xp_dirtree</code>, we can browse the file system. Since we didn&rsquo;t see much in the web directory from the oustide perspective, I decided to check if maybe I can see more by looking at the filesystem:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1042,10 +1092,10 @@ With this, we can use evil-winrm to authenticate:</p>
 </span></span><span class="line"><span class="cl">*Evil-WinRM* PS C:\Users\Raven\Documents&gt;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound</h3>
-<h4 id="running-sharphound">Running SharpHound</h4>
-<p>Active Directory can be very complex to navigate. Fortunately, the tool <code>bloodhound</code> can perform a lot of the enumerations, and organize it visually for us to analyze. The first step is to upload <code>SharpHound.exe</code>, the data collection tool, onto the box.</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound
+</h3><h4 id="running-sharphound">Running SharpHound
+</h4><p>Active Directory can be very complex to navigate. Fortunately, the tool <code>bloodhound</code> can perform a lot of the enumerations, and organize it visually for us to analyze. The first step is to upload <code>SharpHound.exe</code>, the data collection tool, onto the box.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1122,8 +1172,8 @@ With this, we can use evil-winrm to authenticate:</p>
 </span></span><span class="line"><span class="cl"><span class="n">Info</span><span class="p">:</span> <span class="n">Download</span> <span class="n">successful</span><span class="o">!</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="initializing-bloodhound">Initializing BloodHound</h4>
-<p>Bloodhound relies on <code>neo4j</code>, so we must first start <code>neo4j</code> service. Currently, kali linux does not ship with <code>neo4j</code> installed, so it might need to be installed as well.</p>
+</div><h4 id="initializing-bloodhound">Initializing BloodHound
+</h4><p>Bloodhound relies on <code>neo4j</code>, so we must first start <code>neo4j</code> service. Currently, kali linux does not ship with <code>neo4j</code> installed, so it might need to be installed as well.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1184,8 +1234,8 @@ With this, we can use evil-winrm to authenticate:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Bloodhound is already in my PATH, but this is not the default.</p>
-<h4 id="raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access</h4>
-<p>Exploring bloodhound, we can see Raven is a part of this group Certificate Service Dcom Access.</p>
+<h4 id="raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access
+</h4><p>Exploring bloodhound, we can see Raven is a part of this group Certificate Service Dcom Access.</p>
 <p><img src="/post/hackthebox-manager/Images/Bloodhounding.png"
 	width="1089"
 	height="409"
@@ -1199,8 +1249,8 @@ With this, we can use evil-winrm to authenticate:</p>
 	
 ></p>
 <p>Note that this relationship exists because Raven is a member of a group, that are members of a group, that are members of a group. Bloodhound tells us this information very easily, but this can be challenging to navigate manually. Thus, is the power of bloodhound visualization!</p>
-<h3 id="exploiting-ad-certificate-services">Exploiting AD Certificate Services</h3>
-<p>This group is something I don&rsquo;t know much about, but doing short research shows some articles mentioning <a class="link" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation"  target="_blank" rel="noopener"
+<h3 id="exploiting-ad-certificate-services">Exploiting AD Certificate Services
+</h3><p>This group is something I don&rsquo;t know much about, but doing short research shows some articles mentioning <a class="link" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation"  target="_blank" rel="noopener"
     >AD Certificate Services for privilege escalation</a>. Another article <a class="link" href="https://redfoxsec.com/blog/exploiting-active-directory-certificate-services-ad-cs/"  target="_blank" rel="noopener"
     >here</a>. We can use <code>certipy</code> to enumerate the certificate services:</p>
 <div class="highlight"><div class="chroma">
@@ -1252,8 +1302,8 @@ With this, we can use evil-winrm to authenticate:</p>
 </div>
 </div><p>It looks like our user Raven has dangerous permissions over the template &ldquo;ESC7&rdquo;. Very fortunately, the hacktricks article mentioned earlier has a list of commands for <a class="link" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation#vulnerable-certificate-authority-access-control-esc7"  target="_blank" rel="noopener"
     >exploiting ESC7</a>.</p>
-<h4 id="using-esc7-attack-2">Using ESC7 attack #2:</h4>
-<p>Note that because the box seems to reset certificate changes frequently, the following commands must be performed at a relatively fast pace, or else the later commands will result in permission failures.
+<h4 id="using-esc7-attack-2">Using ESC7 attack #2:
+</h4><p>Note that because the box seems to reset certificate changes frequently, the following commands must be performed at a relatively fast pace, or else the later commands will result in permission failures.
 First is to add Raven as an officer:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1591,6 +1641,10 @@ First is to add Raven as an officer:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1674,73 +1728,12 @@ First is to add Raven as an officer:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#probing-active-directory">Probing Active Directory</a></li>
-        <li><a href="#enumerating-the-website">Enumerating The Website</a></li>
-        <li><a href="#returning-to-active-directory-attacks">Returning to Active Directory Attacks</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#enumeration-through-mssql">Enumeration through MSSQL</a></li>
-        <li><a href="#enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound</a>
-          <ol>
-            <li><a href="#running-sharphound">Running SharpHound</a></li>
-            <li><a href="#initializing-bloodhound">Initializing BloodHound</a></li>
-            <li><a href="#raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access</a></li>
-          </ol>
-        </li>
-        <li><a href="#exploiting-ad-certificate-services">Exploiting AD Certificate Services</a>
-          <ol>
-            <li><a href="#using-esc7-attack-2">Using ESC7 attack #2:</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1752,8 +1745,6 @@ First is to add Raven as an officer:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

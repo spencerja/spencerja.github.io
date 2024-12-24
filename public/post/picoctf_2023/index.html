@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e
-Upon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:
-'><title>PicoCTF_2023</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
+<title>PicoCTF_2023</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/picoctf_2023/'>
+<link rel='canonical' href='http://localhost:1313/post/picoctf_2023/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='PicoCTF_2023'>
-<meta property='og:description' content='Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e
-Upon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:
-'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/picoctf_2023/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="PicoCTF_2023">
+<meta property='og:description' content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
+<meta property='og:url' content='http://localhost:1313/post/picoctf_2023/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Pwn' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Web' /><meta property='article:published_time' content='2023-03-28T21:15:25-05:00'/><meta property='article:modified_time' content='2023-03-28T21:15:25-05:00'/>
 <meta name="twitter:title" content="PicoCTF_2023">
-<meta name="twitter:description" content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e
-Upon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:
-">
+<meta name="twitter:description" content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
     </head>
     <body class="
     article-page
@@ -75,13 +70,14 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -101,6 +97,7 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -122,6 +119,7 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -147,6 +145,7 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -162,7 +161,6 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -173,7 +171,6 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -184,7 +181,6 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -194,31 +190,12 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -226,7 +203,7 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -234,13 +211,81 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#binary-exploitation">Binary Exploitation</a>
+      <ul>
+        <li><a href="#tic-tac">tic-tac</a>
+          <ul>
+            <li><a href="#potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</a></li>
+          </ul>
+        </li>
+        <li><a href="#two-sum">two-sum</a></li>
+      </ul>
+    </li>
+    <li><a href="#forensics">Forensics</a>
+      <ul>
+        <li><a href="#hideme">hideme</a></li>
+      </ul>
+    </li>
+    <li><a href="#general-skills">General Skills</a>
+      <ul>
+        <li><a href="#chrono">chrono</a></li>
+        <li><a href="#money-ware">money-ware</a></li>
+        <li><a href="#permissions">Permissions</a></li>
+        <li><a href="#repititions">Repititions</a></li>
+        <li><a href="#special">Special</a></li>
+        <li><a href="#specialer">Specialer</a></li>
+        <li><a href="#useless">Useless</a></li>
+      </ul>
+    </li>
+    <li><a href="#web">Web</a>
+      <ul>
+        <li><a href="#findme">findme</a></li>
+        <li><a href="#matchtheregex">MatchTheRegex</a></li>
+        <li><a href="#more_sqli">More_SQLi</a></li>
+        <li><a href="#soap">SOAP</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -264,6 +309,9 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -286,14 +334,15 @@ Upon ssh into machine, we see txtreader binary and flag.txt file, however we don
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="binary-exploitation">Binary Exploitation</h2>
-<h3 id="tic-tac">tic-tac</h3>
-<blockquote>
+    <h2 id="binary-exploitation">Binary Exploitation
+</h2><h3 id="tic-tac">tic-tac
+</h3><blockquote>
 <p>Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. <code>ssh</code> to <code>saturn.picoctf.net:62983</code>, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as <code>ctf-player</code> with the password, <code>d137d16e</code></p>
 </blockquote>
 <hr>
@@ -452,13 +501,13 @@ Making the link loop, <code>linker.sh</code>:</p>
 </div>
 </div><p>Overall while this method works, it is not very reliable. Sometimes you can get lucky and the flag is read after a few minutes of running, other times it had not succeeded once in the full 15min duration of the instance.</p>
 <p>picoCTF{ToctoU_!s_3a5y_f482a247}</p>
-<h4 id="potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</h4>
-<p>It might be possible to &ldquo;fix&rdquo; the race for us, resulting in very reliable success of flag read. <a class="link" href="https://www.usenix.org/legacy/events/fast08/tech/full_papers/tsafrir/tsafrir_html/index.html"  target="_blank" rel="noopener"
+<h4 id="potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?
+</h4><p>It might be possible to &ldquo;fix&rdquo; the race for us, resulting in very reliable success of flag read. <a class="link" href="https://www.usenix.org/legacy/events/fast08/tech/full_papers/tsafrir/tsafrir_html/index.html"  target="_blank" rel="noopener"
     >This post</a>  describes using a filesystem maze too large for the system to handle in memory at once, allowing for a more clear window of opportunity for us to switch targets.
 The maze consists of many nested folders, containing symlinks pointing to another batch of nested folders. After repeating for x times, the final link points to the file we own. The maze is too large to be placed in the filesystem cache, and this process results in slower navigation and an increased delay between the action of checking permissions and the action of reading the file contents.</p>
 <p>While I did not have time to utilize this trick on tic-tac, it might be worth exploring on another CTF challenge.</p>
-<h3 id="two-sum">two-sum</h3>
-<blockquote>
+<h3 id="two-sum">two-sum
+</h3><blockquote>
 <p>Can you solve this? What two positive numbers can make this possible: <code>n1 &gt; n1 + n2 OR n2 &gt; n1 + n2</code> Enter them here <code>nc saturn.picoctf.net 56856</code>. <a class="link" href="https://artifacts.picoctf.net/c/455/flag.c"  target="_blank" rel="noopener"
     >Source</a></p>
 </blockquote>
@@ -486,9 +535,9 @@ The maze consists of many nested folders, containing symlinks pointing to anothe
 </div>
 </div><p>Note that despite entering 5 555 555 555, it shows that we entered number 1 260 588 259. When we provided a number above the acceptable limit the value overflowed, and our result is something much lower. Now when the 1 260 588 259 is added together, it is still lower than our original input 5 555 555 555. Overflow achieved!</p>
 <p><code>picoCTF{Tw0_Sum_Integer_Bu773R_0v3rfl0w_fe14e9e9}</code></p>
-<h2 id="forensics">Forensics</h2>
-<h3 id="hideme">hideme</h3>
-<blockquote>
+<h2 id="forensics">Forensics
+</h2><h3 id="hideme">hideme
+</h3><blockquote>
 <p>Every file gets a flag. The SOC analyst saw one image been sent back and forth between two people. They decided to investigate and found out that there was more than what meets the eye <a class="link" href="https://artifacts.picoctf.net/c/493/flag.png"  target="_blank" rel="noopener"
     >here</a>.</p>
 </blockquote>
@@ -679,9 +728,9 @@ We can verify this ourselves with xxd:</p>
 		data-flex-basis="2893px"
 	
 ></p>
-<h2 id="general-skills">General Skills</h2>
-<h3 id="chrono">chrono</h3>
-<blockquote>
+<h2 id="general-skills">General Skills
+</h2><h3 id="chrono">chrono
+</h3><blockquote>
 <p>How to automate tasks to run at intervals on linux servers?
 Additional details will be available after launching your challenge instance</p>
 </blockquote>
@@ -720,8 +769,8 @@ Additional details will be available after launching your challenge instance</p>
 </span></span><span class="line"><span class="cl"># picoCTF{Sch3DUL7NG_T45K3_L1NUX_7754e199}
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="money-ware">money-ware</h3>
-<blockquote>
+</div><h3 id="money-ware">money-ware
+</h3><blockquote>
 <p>Flag format: picoCTF{Malwarename}
 The first letter of the malware name should be capitalized and the rest lowercase.
 Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz7153HMuxXTuR2R1t78mGSdzaAtNbBWX</code>. He doesn’t seem to understand what is going on and asks you for advice. Can you identify what malware he’s being a victim of?</p>
@@ -738,8 +787,8 @@ Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz
 <p>The title of the article plainly tells us the malware at play is based on the infamous ransomeware Petya, but we can also follow the link to learn more about it.</p>
 <p>We are told the answer to the flag is the malware involved, so we can submit the flag by inserting &ldquo;Petya&rdquo; into the picoCTF flag format.
 picoCTF{Petya}</p>
-<h3 id="permissions">Permissions</h3>
-<blockquote>
+<h3 id="permissions">Permissions
+</h3><blockquote>
 <p>Can you read files in the root file?</p>
 <p>Additional details will be available after launching your challenge instance.</p>
 </blockquote>
@@ -864,8 +913,8 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span><span class="line"><span class="cl">~
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="repititions">Repititions</h3>
-<blockquote>
+</div><h3 id="repititions">Repititions
+</h3><blockquote>
 <p>Can you make sense of this file? Download the file <a class="link" href="https://artifacts.picoctf.net/c/475/enc_flag"  target="_blank" rel="noopener"
     >here</a>.</p>
 </blockquote>
@@ -918,8 +967,8 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Finally after 6 rounds of decoding, the flag appears in plaintext.</p>
-<h3 id="special">Special</h3>
-<blockquote>
+<h3 id="special">Special
+</h3><blockquote>
 <p>Don&rsquo;t power users get tired of making spelling mistakes in the shell? Not anymore! Enter Special, the Spell Checked Interface for Affecting Linux. Now, every word is properly spelled and capitalized&hellip; automatically and behind-the-scenes! Be the first to test Special in beta, and feel free to tell us all about how Special streamlines every development process that you face. When your co-workers see your amazing shell interface, just tell them: That&rsquo;s Special (TM) Start your instance to see connection details.</p>
 <p>Additional details will be available after launching your challenge instance.</p>
 </blockquote>
@@ -1053,8 +1102,8 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Now we are free!</p>
-<h3 id="specialer">Specialer</h3>
-<blockquote>
+<h3 id="specialer">Specialer
+</h3><blockquote>
 <p>Reception of Special has been cool to say the least. That&rsquo;s why we made an exclusive version of Special, called Secure Comprehensive Interface for Affecting Linux Empirically Rad, or just &lsquo;Specialer&rsquo;. With Specialer, we really tried to remove the distractions from using a shell. Yes, we took out spell checker because of everybody&rsquo;s complaining. But we think you will be excited about our new, reduced feature set for keeping you focused on what needs it the most. Please start an instance to test your very own copy of Specialer.</p>
 <p>Additional details will be available after launching your challenge instance.</p>
 </blockquote>
@@ -1169,8 +1218,8 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span><span class="line"><span class="cl">return 0 picoCTF{y0u_d0n7_4ppr3c1473_wh47_w3r3_d01ng_h3r3_38f5cc78}
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="useless">Useless</h3>
-<blockquote>
+</div><h3 id="useless">Useless
+</h3><blockquote>
 <p>There&rsquo;s an interesting script in the user&rsquo;s home directory</p>
 <p>Additional details will be available after launching your challenge instance.</p>
 </blockquote>
@@ -1372,9 +1421,9 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Turns out a man page exists, and our flag was placed here as well. Great..</p>
-<h2 id="web">Web</h2>
-<h3 id="findme">findme</h3>
-<blockquote>
+<h2 id="web">Web
+</h2><h3 id="findme">findme
+</h3><blockquote>
 <p>Help us test the form by submiting the username as <code>test</code> and password as <code>test!</code> The website running <a class="link" href="http://saturn.picoctf.net:54197/"  target="_blank" rel="noopener"
     >here</a></p>
 </blockquote>
@@ -1449,8 +1498,8 @@ First login request:</p>
 </span></span><span class="line"><span class="cl">picoCTF{proxies_all_the_way_01e748db}
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="matchtheregex">MatchTheRegex</h3>
-<blockquote>
+</div><h3 id="matchtheregex">MatchTheRegex
+</h3><blockquote>
 <p>How about trying to match a regular expression The website is running <a class="link" href="http://saturn.picoctf.net:49351/"  target="_blank" rel="noopener"
     >here</a>.</p>
 </blockquote>
@@ -1526,8 +1575,8 @@ Playing with the provided hint a little more, I get a successful match by being 
 ></p>
 <p>Despite being a regex based search, and the commented page source including the ^ marker for the beginning of a line, including the ^ in our search causes it to fail..
 <code>picoCTF{succ3ssfully_matchtheregex_f89ea585}</code></p>
-<h3 id="more_sqli">More_SQLi</h3>
-<blockquote>
+<h3 id="more_sqli">More_SQLi
+</h3><blockquote>
 <p>Can you find the flag on this website. Try to find the flag <a class="link" href="http://saturn.picoctf.net:53241/"  target="_blank" rel="noopener"
     >here</a></p>
 </blockquote>
@@ -1669,8 +1718,8 @@ After bypassing login, we see a table of information:</p>
 ></p>
 <p>And with that, we have our flag.
 <code>picoCTF{G3tting_5QL_1nJ3c7I0N_l1k3_y0u_sh0ulD_62aa7500}</code></p>
-<h3 id="soap">SOAP</h3>
-<blockquote>
+<h3 id="soap">SOAP
+</h3><blockquote>
 <p>The web project was rushed and no security assessment was done. Can you read the /etc/passwd file? <a class="link" href="http://saturn.picoctf.net:55566/"  target="_blank" rel="noopener"
     >Web Portal</a></p>
 </blockquote>
@@ -1879,6 +1928,10 @@ After bypassing login, we see a table of information:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1962,78 +2015,12 @@ After bypassing login, we see a table of information:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#binary-exploitation">Binary Exploitation</a>
-      <ol>
-        <li><a href="#tic-tac">tic-tac</a>
-          <ol>
-            <li><a href="#potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</a></li>
-          </ol>
-        </li>
-        <li><a href="#two-sum">two-sum</a></li>
-      </ol>
-    </li>
-    <li><a href="#forensics">Forensics</a>
-      <ol>
-        <li><a href="#hideme">hideme</a></li>
-      </ol>
-    </li>
-    <li><a href="#general-skills">General Skills</a>
-      <ol>
-        <li><a href="#chrono">chrono</a></li>
-        <li><a href="#money-ware">money-ware</a></li>
-        <li><a href="#permissions">Permissions</a></li>
-        <li><a href="#repititions">Repititions</a></li>
-        <li><a href="#special">Special</a></li>
-        <li><a href="#specialer">Specialer</a></li>
-        <li><a href="#useless">Useless</a></li>
-      </ol>
-    </li>
-    <li><a href="#web">Web</a>
-      <ol>
-        <li><a href="#findme">findme</a></li>
-        <li><a href="#matchtheregex">MatchTheRegex</a></li>
-        <li><a href="#more_sqli">More_SQLi</a></li>
-        <li><a href="#soap">SOAP</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -2045,8 +2032,6 @@ After bypassing login, we see a table of information:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

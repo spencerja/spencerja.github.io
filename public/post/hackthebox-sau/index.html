@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Sau is an easy difficulty box with a filtered http port 80, with another open tcp port 55555. The open port serves as a webpage for a request-buckets project, which has been discosed as vulnerable to SSRF. Using this, we can access the different web service on port 80, and learn that it is also using an outdated open-source project Maltrail. The Maltrail version is vulnerable to Command Injection during the login process, and so we can chain these two exploits to achieve Remote Code Execution. When establishing a reverse shell, we are user puma, which has dangerous sudo privileges. The systemctl service we can initiate as sudo is using less, which allows us to spawn a privileged shell session as root.'><title>HackTheBox - Sau</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Sau is an easy difficulty box with a filtered http port 80, with another open tcp port 55555. The open port serves as a webpage for a request-buckets project, which has been discosed as vulnerable to SSRF. Using this, we can access the different web service on port 80, and learn that it is also using an outdated open-source project Maltrail. The Maltrail version is vulnerable to Command Injection during the login process, and so we can chain these two exploits to achieve Remote Code Execution. When establishing a reverse shell, we are user puma, which has dangerous sudo privileges. The systemctl service we can initiate as sudo is using less, which allows us to spawn a privileged shell session as root.">
+<title>HackTheBox - Sau</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-sau/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-sau/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Sau'>
-<meta property='og:description' content='Sau is an easy difficulty box with a filtered http port 80, with another open tcp port 55555. The open port serves as a webpage for a request-buckets project, which has been discosed as vulnerable to SSRF. Using this, we can access the different web service on port 80, and learn that it is also using an outdated open-source project Maltrail. The Maltrail version is vulnerable to Command Injection during the login process, and so we can chain these two exploits to achieve Remote Code Execution. When establishing a reverse shell, we are user puma, which has dangerous sudo privileges. The systemctl service we can initiate as sudo is using less, which allows us to spawn a privileged shell session as root.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-sau/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Sau">
+<meta property='og:description' content="Sau is an easy difficulty box with a filtered http port 80, with another open tcp port 55555. The open port serves as a webpage for a request-buckets project, which has been discosed as vulnerable to SSRF. Using this, we can access the different web service on port 80, and learn that it is also using an outdated open-source project Maltrail. The Maltrail version is vulnerable to Command Injection during the login process, and so we can chain these two exploits to achieve Remote Code Execution. When establishing a reverse shell, we are user puma, which has dangerous sudo privileges. The systemctl service we can initiate as sudo is using less, which allows us to spawn a privileged shell session as root.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-sau/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='sudo' /><meta property='article:tag' content='less' /><meta property='article:published_time' content='2024-01-06T10:32:21-06:00'/><meta property='article:modified_time' content='2024-01-06T10:32:21-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-sau/Sau.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='sudo' /><meta property='article:tag' content='less' /><meta property='article:published_time' content='2024-01-06T10:32:21-06:00'/><meta property='article:modified_time' content='2024-01-06T10:32:21-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-sau/Sau.png' />
 <meta name="twitter:title" content="HackTheBox - Sau">
 <meta name="twitter:description" content="Sau is an easy difficulty box with a filtered http port 80, with another open tcp port 55555. The open port serves as a webpage for a request-buckets project, which has been discosed as vulnerable to SSRF. Using this, we can access the different web service on port 80, and learn that it is also using an outdated open-source project Maltrail. The Maltrail version is vulnerable to Command Injection during the login process, and so we can chain these two exploits to achieve Remote Code Execution. When establishing a reverse shell, we are user puma, which has dangerous sudo privileges. The systemctl service we can initiate as sudo is using less, which allows us to spawn a privileged shell session as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-sau/Sau.png' />
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-sau/Sau.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,73 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#enumerating-web-service-on-port-55555">Enumerating web service on port 55555</a></li>
+        <li><a href="#testing-ssrf-disclosed-for-request-baskets">Testing SSRF disclosed for request-baskets</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#using-ssrf-to-enumerate-the-firewalled-web-service">Using SSRF to enumerate the firewalled web service</a></li>
+        <li><a href="#chain-exploiting-request-baskets-ssrf-and-maltrails-command-injection-for-rce">Chain exploiting request-basket&rsquo;s SSRF and Maltrail&rsquo;s Command Injection for RCE</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#stabilizing-reverse-shell">Stabilizing reverse shell</a></li>
+        <li><a href="#checking-for-additional-users-on-the-system">Checking for additional users on the system</a></li>
+        <li><a href="#checking-sudo-privileges">Checking sudo privileges</a></li>
+        <li><a href="#abusing-priveleged-less-session-to-spawn-a-root-shell">Abusing priveleged less session to spawn a root shell</a></li>
+      </ul>
+    </li>
+    <li><a href="#alternative-information-gathering">Alternative information gathering</a>
+      <ul>
+        <li><a href="#finding-the-usage-of-less-through-help-menu">Finding the usage of less through help menu</a></li>
+        <li><a href="#using-gtfobins-to-discover-how-to-abuse-less-or-systemctl">Using GTFOBins to discover how to abuse less or systemctl</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +318,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +343,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -459,8 +506,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Ports 80 and 8338 are filtered, which is rather unusual. They could just be closed, or perhaps a firewall is placed and prohibiting interaction with these ports. We can see an unusual open port 55555. Nmap enumeration output is rather confusing, but we can see that this has some http capabilities.</p>
-<h3 id="enumerating-web-service-on-port-55555">Enumerating web service on port 55555</h3>
-<p>Viewing in firefox:</p>
+<h3 id="enumerating-web-service-on-port-55555">Enumerating web service on port 55555
+</h3><p>Viewing in firefox:</p>
 <p><img src="/post/hackthebox-sau/images/landingpage.png"
 	width="1420"
 	height="481"
@@ -526,8 +573,8 @@
 		data-flex-basis="1443px"
 	
 ></p>
-<h3 id="testing-ssrf-disclosed-for-request-baskets">Testing SSRF disclosed for request-baskets</h3>
-<p>The version is also detailed as 1.2.1, however the most recent release is v1.2.3. We can explore github release notes to see what was changed between versions, but unfortunately there is not mention of security flaws/vulnerabilities. However, using google to search version 1.2.1 provides us with <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-27163"  target="_blank" rel="noopener"
+<h3 id="testing-ssrf-disclosed-for-request-baskets">Testing SSRF disclosed for request-baskets
+</h3><p>The version is also detailed as 1.2.1, however the most recent release is v1.2.3. We can explore github release notes to see what was changed between versions, but unfortunately there is not mention of security flaws/vulnerabilities. However, using google to search version 1.2.1 provides us with <a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2023-27163"  target="_blank" rel="noopener"
     >CVE-2023-27163</a>, an SSRF type vulnerability that can be used to access internal/restricted pages.
 There are two ideas I have for using this vulnerability. In initial nmap scanning, ports 80 and 8338 were displayed as filtered, perhaps this is something that cannot be accessed externally but can be reached through an SSRF approach. Alternatively, we might access an admin page requiring accessibility we normally don&rsquo;t have. When reaching /web/baskets, it expects us to supply a master token:</p>
 <p><img src="/post/hackthebox-sau/images/admin1.png"
@@ -584,9 +631,9 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 	
 ></p>
 <p>It looks horrendously broken for now, but the important part is that we are able to access the internal web service despite being behind a firewall.</p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="using-ssrf-to-enumerate-the-firewalled-web-service">Using SSRF to enumerate the firewalled web service</h3>
-<p>From the webpage footer, we can understand that this service is using Maltrail v0.53:</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="using-ssrf-to-enumerate-the-firewalled-web-service">Using SSRF to enumerate the firewalled web service
+</h3><p>From the webpage footer, we can understand that this service is using Maltrail v0.53:</p>
 <p><img src="/post/hackthebox-sau/images/maltrail1.png"
 	width="391"
 	height="96"
@@ -667,8 +714,8 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>The user-agent is curl as expected, and very importantly the host is <code>10.10.14.155</code>, our victim&rsquo;s IP.</p>
-<h3 id="chain-exploiting-request-baskets-ssrf-and-maltrails-command-injection-for-rce">Chain exploiting request-basket&rsquo;s SSRF and Maltrail&rsquo;s Command Injection for RCE</h3>
-<p>Now to generate a reverse shell. For this, I used the busybox nc payload from <a class="link" href="https://www.revshells.com/"  target="_blank" rel="noopener"
+<h3 id="chain-exploiting-request-baskets-ssrf-and-maltrails-command-injection-for-rce">Chain exploiting request-basket&rsquo;s SSRF and Maltrail&rsquo;s Command Injection for RCE
+</h3><p>Now to generate a reverse shell. For this, I used the busybox nc payload from <a class="link" href="https://www.revshells.com/"  target="_blank" rel="noopener"
     >revshells</a>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -699,9 +746,9 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span><span class="line"><span class="cl">uid=1001(puma) gid=1001(puma) groups=1001(puma)
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="stabilizing-reverse-shell">Stabilizing reverse shell</h3>
-<p>Currently, the reverse shell has limited capabilities. We can improve the stability with <code>script</code>:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="stabilizing-reverse-shell">Stabilizing reverse shell
+</h3><p>Currently, the reverse shell has limited capabilities. We can improve the stability with <code>script</code>:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -734,8 +781,8 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>fg</code> returns the reverse shell to foreground, and now we have a stable, interactive session on the victim host.</p>
-<h3 id="checking-for-additional-users-on-the-system">Checking for additional users on the system</h3>
-<p>We can see that we are user <code>puma</code>, and notably user 1001. Since user creations typically start with number 1000, there is likely another created user on the system. We can figure this out by checking /etc/passwd:</p>
+<h3 id="checking-for-additional-users-on-the-system">Checking for additional users on the system
+</h3><p>We can see that we are user <code>puma</code>, and notably user 1001. Since user creations typically start with number 1000, there is likely another created user on the system. We can figure this out by checking /etc/passwd:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -815,8 +862,8 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Unexpectedly, there is no user with id number 1000. Considering this is an easy difficulty box, the likely conclusion is that lateral movement won&rsquo;t be necessary for completion.</p>
-<h3 id="checking-sudo-privileges">Checking sudo privileges</h3>
-<p>Enumerating our sudo authorization, we can see our user <code>puma</code> has some command allowances without requiring a password:</p>
+<h3 id="checking-sudo-privileges">Checking sudo privileges
+</h3><p>Enumerating our sudo authorization, we can see our user <code>puma</code> has some command allowances without requiring a password:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -838,8 +885,8 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>This is very good for us, considering we don&rsquo;t know puma&rsquo;s password currently.</p>
-<h3 id="abusing-priveleged-less-session-to-spawn-a-root-shell">Abusing priveleged less session to spawn a root shell</h3>
-<p>Trying out the command:</p>
+<h3 id="abusing-priveleged-less-session-to-spawn-a-root-shell">Abusing priveleged less session to spawn a root shell
+</h3><p>Trying out the command:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -922,9 +969,9 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>There is some disorienting echoing going on, but when I input the <code>!bash</code> command and hit enter, I am dropped into a root session! With this, we have fully compromised the system.</p>
-<h2 id="alternative-information-gathering">Alternative information gathering</h2>
-<h3 id="finding-the-usage-of-less-through-help-menu">Finding the usage of less through help menu</h3>
-<p>We can also figure out very easily that the sudo command we are using is indeed utilizing <code>less</code>. By pressing <code>h</code> for help, we are given the summary of less commands:</p>
+<h2 id="alternative-information-gathering">Alternative information gathering
+</h2><h3 id="finding-the-usage-of-less-through-help-menu">Finding the usage of less through help menu
+</h3><p>We can also figure out very easily that the sudo command we are using is indeed utilizing <code>less</code>. By pressing <code>h</code> for help, we are given the summary of less commands:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -987,8 +1034,8 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
 </span></span><span class="line"><span class="cl">HELP -- Press RETURN for more, or q when done
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="using-gtfobins-to-discover-how-to-abuse-less-or-systemctl">Using GTFOBins to discover how to abuse less or systemctl</h3>
-<p>If we happen to be unfamiliar with this form of <code>less</code> escape, we can refer to <a class="link" href="https://gtfobins.github.io/gtfobins/less/"  target="_blank" rel="noopener"
+</div><h3 id="using-gtfobins-to-discover-how-to-abuse-less-or-systemctl">Using GTFOBins to discover how to abuse less or systemctl
+</h3><p>If we happen to be unfamiliar with this form of <code>less</code> escape, we can refer to <a class="link" href="https://gtfobins.github.io/gtfobins/less/"  target="_blank" rel="noopener"
     >gtfobins</a>. Additionally if we had trouble recognizing less, <a class="link" href="https://gtfobins.github.io/gtfobins/systemctl/#sudo"  target="_blank" rel="noopener"
     >gtfobins also mentions it on systemctl&rsquo;s page</a></p>
 
@@ -1162,6 +1209,10 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1245,70 +1296,12 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#enumerating-web-service-on-port-55555">Enumerating web service on port 55555</a></li>
-        <li><a href="#testing-ssrf-disclosed-for-request-baskets">Testing SSRF disclosed for request-baskets</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#using-ssrf-to-enumerate-the-firewalled-web-service">Using SSRF to enumerate the firewalled web service</a></li>
-        <li><a href="#chain-exploiting-request-baskets-ssrf-and-maltrails-command-injection-for-rce">Chain exploiting request-basket&rsquo;s SSRF and Maltrail&rsquo;s Command Injection for RCE</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#stabilizing-reverse-shell">Stabilizing reverse shell</a></li>
-        <li><a href="#checking-for-additional-users-on-the-system">Checking for additional users on the system</a></li>
-        <li><a href="#checking-sudo-privileges">Checking sudo privileges</a></li>
-        <li><a href="#abusing-priveleged-less-session-to-spawn-a-root-shell">Abusing priveleged less session to spawn a root shell</a></li>
-      </ol>
-    </li>
-    <li><a href="#alternative-information-gathering">Alternative information gathering</a>
-      <ol>
-        <li><a href="#finding-the-usage-of-less-through-help-menu">Finding the usage of less through help menu</a></li>
-        <li><a href="#using-gtfobins-to-discover-how-to-abuse-less-or-systemctl">Using GTFOBins to discover how to abuse less or systemctl</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1320,8 +1313,6 @@ There are two ideas I have for using this vulnerability. In initial nmap scannin
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

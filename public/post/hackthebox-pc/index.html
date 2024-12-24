@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.'><title>HackTheBox - PC</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
+<title>HackTheBox - PC</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-pc/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-pc/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - PC'>
-<meta property='og:description' content='PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-pc/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - PC">
+<meta property='og:description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-pc/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gRPC' /><meta property='article:tag' content='Postman' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='pyLoad' /><meta property='article:tag' content='CSRF' /><meta property='article:published_time' content='2023-10-07T10:18:48-05:00'/><meta property='article:modified_time' content='2023-10-07T10:18:48-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-pc/PC.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gRPC' /><meta property='article:tag' content='Postman' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='pyLoad' /><meta property='article:tag' content='CSRF' /><meta property='article:published_time' content='2023-10-07T10:18:48-05:00'/><meta property='article:modified_time' content='2023-10-07T10:18:48-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-pc/PC.png' />
 <meta name="twitter:title" content="HackTheBox - PC">
 <meta name="twitter:description" content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-pc/PC.png' />
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-pc/PC.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,60 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#interacting-with-grpc-via-postman">Interacting with gRPC via Postman</a></li>
+        <li><a href="#sql-injection-in-getinfo-function">SQL Injection in getInfo function</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#internal-web-server-pyload">Internal web server pyLoad</a></li>
+        <li><a href="#rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +305,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +330,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -347,8 +381,8 @@
 While I initially started enumeration with grpc_cli and <a class="link" href="https://medium.com/@at_ishikawa/use-grpc-cli-to-request-a-grpc-server-37219b33c94b"  target="_blank" rel="noopener"
     >this resource</a>, I had a lot of trouble passing a login token and switched to <a class="link" href="https://www.postman.com/"  target="_blank" rel="noopener"
     >Postman API</a>. As such, I will cover only using Postman from the beginning.</p>
-<h3 id="interacting-with-grpc-via-postman">Interacting with gRPC via Postman</h3>
-<p>To use, simply extract the tarball and run <code>Postman</code> binary:</p>
+<h3 id="interacting-with-grpc-via-postman">Interacting with gRPC via Postman
+</h3><p>To use, simply extract the tarball and run <code>Postman</code> binary:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -426,7 +460,7 @@ Now when we supply the URL, API methods will be loaded automatically thanks to s
 	srcset="/post/hackthebox-pc/Images/servicereflection_hu2934358200560003693.png 480w, /post/hackthebox-pc/Images/servicereflection_hu12958003457715558609.png 1024w"
 	loading="lazy"
 	
-		alt="Viewing SimpleApp&rsquo;s functions"
+		alt="Viewing SimpleApps functions"
 	
 	
 		class="gallery-image" 
@@ -509,15 +543,15 @@ Finally, we can use the getInfo function. &ldquo;Use Example Message&rdquo; will
 		data-flex-basis="386px"
 	
 ></p>
-<h3 id="sql-injection-in-getinfo-function">SQL Injection in getInfo function</h3>
-<p>After trying several things, we might learn that this API is vulnerable to SQL injection. In the below example, I use UNION injection to insert the number &lsquo;1&rsquo; in the response:
+<h3 id="sql-injection-in-getinfo-function">SQL Injection in getInfo function
+</h3><p>After trying several things, we might learn that this API is vulnerable to SQL injection. In the below example, I use UNION injection to insert the number &lsquo;1&rsquo; in the response:
 <img src="/post/hackthebox-pc/Images/union1.png"
 	width="876"
 	height="549"
 	srcset="/post/hackthebox-pc/Images/union1_hu1963647622275191660.png 480w, /post/hackthebox-pc/Images/union1_hu8502230647594623502.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT 1&ndash; -"
+		alt="UNION SELECT 1 -"
 	
 	
 		class="gallery-image" 
@@ -532,7 +566,7 @@ First, we can determine the database type by enumerating versions. This way, I f
 	srcset="/post/hackthebox-pc/Images/union2_hu15771540082096904161.png 480w, /post/hackthebox-pc/Images/union2_hu9281464872257702133.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT sqlite_version();&ndash; -"
+		alt="UNION SELECT sqlite_version(); -"
 	
 	
 		class="gallery-image" 
@@ -548,7 +582,7 @@ Using a query from <a class="link" href="https://github.com/swisskyrepo/Payloads
 	srcset="/post/hackthebox-pc/Images/union3_hu7455429271894537950.png 480w, /post/hackthebox-pc/Images/union3_hu9692726118543484644.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=&lsquo;table&rsquo; and tbl_name NOT like &lsquo;sqlite_%&rsquo;&ndash; -"
+		alt="UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=table and tbl_name NOT like sqlite_% -"
 	
 	
 		class="gallery-image" 
@@ -563,7 +597,7 @@ Next, enumerating the columns in table <code>accounts</code>:
 	srcset="/post/hackthebox-pc/Images/union4_hu17475523458385347992.png 480w, /post/hackthebox-pc/Images/union4_hu9764544042627140734.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT sql FROM sqlite_master WHERE type!=&lsquo;meta&rsquo; AND sql NOT NULL AND name =&lsquo;accounts&rsquo;&ndash; -"
+		alt="UNION SELECT sql FROM sqlite_master WHERE type!=meta AND sql NOT NULL AND name =accounts -"
 	
 	
 		class="gallery-image" 
@@ -578,7 +612,7 @@ Seeing <code>\n\t</code> simply refers to a newline, followed by tab indentation
 	srcset="/post/hackthebox-pc/Images/union5_hu18056286897693069536.png 480w, /post/hackthebox-pc/Images/union5_hu12679393788293283959.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT password FROM accounts&ndash; -"
+		alt="UNION SELECT password FROM accounts -"
 	
 	
 		class="gallery-image" 
@@ -593,7 +627,7 @@ Now with a password, we can find a matching username:
 	srcset="/post/hackthebox-pc/Images/union6_hu13472046415986624067.png 480w, /post/hackthebox-pc/Images/union6_hu14326665945629783211.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT username FROM accounts&ndash; -"
+		alt="UNION SELECT username FROM accounts -"
 	
 	
 		class="gallery-image" 
@@ -608,7 +642,7 @@ Although we have a username, this does not really seem like a password that a us
 	srcset="/post/hackthebox-pc/Images/union7_hu1732276450885305889.png 480w, /post/hackthebox-pc/Images/union7_hu13461539490516816459.png 1024w"
 	loading="lazy"
 	
-		alt="UNION SELECT username FROM accounts WHERE password=&lsquo;HereIsYourPassword1431&rsquo;&ndash; -"
+		alt="UNION SELECT username FROM accounts WHERE password=HereIsYourPassword1431 -"
 	
 	
 		class="gallery-image" 
@@ -633,9 +667,9 @@ Finally, we have a credential pair of <code>sau:HereIsYourPassWord1431</code>. F
 </span></span><span class="line"><span class="cl"><span class="nv">uid</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span> <span class="nv">groups</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="internal-web-server-pyload">Internal web server pyLoad</h3>
-<p>Enumerating open ports, we find an internal port not available to us earlier:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="internal-web-server-pyload">Internal web server pyLoad
+</h3><p>Enumerating open ports, we find an internal port not available to us earlier:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -706,8 +740,8 @@ Finally, we have a credential pair of <code>sau:HereIsYourPassWord1431</code>. F
 	
 >
 A few basic credential attempts did not work.</p>
-<h3 id="rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)</h3>
-<p>Searching a little more, I find <a class="link" href="https://huntr.dev/bounties/3fd606f7-83e1-4265-b083-2e1889a05e65/"  target="_blank" rel="noopener"
+<h3 id="rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)
+</h3><p>Searching a little more, I find <a class="link" href="https://huntr.dev/bounties/3fd606f7-83e1-4265-b083-2e1889a05e65/"  target="_blank" rel="noopener"
     >this report on unauthenticated RCE in pyLoad</a>. Although I wasn&rsquo;t finding an easy way to see pyLoad&rsquo;s version number, the exploit does not seem volitile, and so I gave it a shot. Note that the payload has been altered to be <code>pyimport os;os.system(&quot;chmod +s /bin/bash&quot;)</code>, which is different from the article.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -755,8 +789,8 @@ A few basic credential attempts did not work.</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Looks like pyLoad is vulnerable, and we are now root!</p>
-<h2 id="reflection">Reflection</h2>
-<p>I found this box to be simple and clean, without much distractions. Interacting with gRPC was the biggest challenge, and I still find it annoying that using grpc-cli was so problematic. However, once the worst is passed, exploiting the vulnerabilities was quite stress-free.</p>
+<h2 id="reflection">Reflection
+</h2><p>I found this box to be simple and clean, without much distractions. Interacting with gRPC was the biggest challenge, and I still find it annoying that using grpc-cli was so problematic. However, once the worst is passed, exploiting the vulnerabilities was quite stress-free.</p>
 
 </section>
 
@@ -932,6 +966,10 @@ A few basic credential attempts did not work.</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1015,57 +1053,12 @@ A few basic credential attempts did not work.</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#interacting-with-grpc-via-postman">Interacting with gRPC via Postman</a></li>
-        <li><a href="#sql-injection-in-getinfo-function">SQL Injection in getInfo function</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#internal-web-server-pyload">Internal web server pyLoad</a></li>
-        <li><a href="#rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1077,8 +1070,6 @@ A few basic credential attempts did not work.</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

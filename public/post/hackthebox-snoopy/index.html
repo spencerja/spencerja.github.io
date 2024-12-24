@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy&#39;s mailserver to our own IP address. While receiving Snoopy&#39;s mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user&#39;s authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our &#34;infected&#34; authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.'><title>HackTheBox - Snoopy</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.">
+<title>HackTheBox - Snoopy</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-snoopy/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-snoopy/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Snoopy'>
-<meta property='og:description' content='Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy&#39;s mailserver to our own IP address. While receiving Snoopy&#39;s mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user&#39;s authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our &#34;infected&#34; authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-snoopy/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Snoopy">
+<meta property='og:description' content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-snoopy/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='DNS' /><meta property='article:tag' content='Postfix' /><meta property='article:tag' content='Zone Transfer' /><meta property='article:tag' content='nsupdate' /><meta property='article:tag' content='MatterMost' /><meta property='article:tag' content='SSH Honeypot' /><meta property='article:tag' content='Cowrie' /><meta property='article:tag' content='git' /><meta property='article:tag' content='ClamAV' /><meta property='article:tag' content='clamscan' /><meta property='article:published_time' content='2023-09-23T11:09:31-05:00'/><meta property='article:modified_time' content='2023-09-23T11:09:31-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-snoopy/Snoopy.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='DNS' /><meta property='article:tag' content='Postfix' /><meta property='article:tag' content='Zone Transfer' /><meta property='article:tag' content='nsupdate' /><meta property='article:tag' content='MatterMost' /><meta property='article:tag' content='SSH Honeypot' /><meta property='article:tag' content='Cowrie' /><meta property='article:tag' content='git' /><meta property='article:tag' content='ClamAV' /><meta property='article:tag' content='clamscan' /><meta property='article:published_time' content='2023-09-23T11:09:31-05:00'/><meta property='article:modified_time' content='2023-09-23T11:09:31-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-snoopy/Snoopy.png' />
 <meta name="twitter:title" content="HackTheBox - Snoopy">
-<meta name="twitter:description" content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy&#39;s mailserver to our own IP address. While receiving Snoopy&#39;s mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user&#39;s authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our &#34;infected&#34; authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-snoopy/Snoopy.png' />
+<meta name="twitter:description" content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-snoopy/Snoopy.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,74 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer</a></li>
+        <li><a href="#file-read-vulnerability-in-download">File Read Vulnerability in download</a></li>
+        <li><a href="#snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated</a></li>
+        <li><a href="#enumerating-dns-bind-configurations">Enumerating DNS bind configurations</a></li>
+        <li><a href="#updating-mailsnoopyhtb">Updating mail.snoopy.htb</a></li>
+        <li><a href="#using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories</a></li>
+        <li><a href="#using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ul>
+        <li><a href="#leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +319,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +344,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>Initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -407,8 +455,8 @@
 		data-flex-basis="272px"
 	
 ></p>
-<h3 id="enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer</h3>
-<p>With the DNS server name, we can attempt a zone transfer with <code>dig</code> to determine all subdomains:</p>
+<h3 id="enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer
+</h3><p>With the DNS server name, we can attempt a zone transfer with <code>dig</code> to determine all subdomains:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -483,8 +531,8 @@
 	
 ></p>
 <p>Trying weak credentials does not work, so it seems there is not much we can do here.</p>
-<h3 id="file-read-vulnerability-in-download">File Read Vulnerability in download</h3>
-<p>Returning to the download function, we can explore directory traversal techniques for a file read vulnerability. There is still a resulting download occurring, but the size is 0:</p>
+<h3 id="file-read-vulnerability-in-download">File Read Vulnerability in download
+</h3><p>Returning to the download function, we can explore directory traversal techniques for a file read vulnerability. There is still a resulting download occurring, but the size is 0:</p>
 <p><img src="/post/hackthebox-snoopy/Images/passwd.png"
 	width="1606"
 	height="198"
@@ -569,8 +617,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Even though it is delivered as a zip, we are still sent the contents of /etc/passwd. From the passwd file we can see users on the box including <code>sbrown</code>, likely the account name for the PR contact Sally Brown.</p>
-<h3 id="snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated</h3>
-<p>Further enumeration of source code files did not provide more insight, however when we explore the contact page of <code>snoopy.htb</code> we see an interesting notice:</p>
+<h3 id="snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated
+</h3><p>Further enumeration of source code files did not provide more insight, however when we explore the contact page of <code>snoopy.htb</code> we see an interesting notice:</p>
 <p><img src="/post/hackthebox-snoopy/Images/contact_notice.png"
 	width="1287"
 	height="100"
@@ -611,8 +659,8 @@ Returning back to the <code>mm.snoopy.htb</code> subdomain, we can deduce that r
 	
 ></p>
 <p>If we could potentially set the mailserver to our own controlled machine, we might be able to receive these password reset emails. Using the file read vulnerability previously discovered, we can enumerate the DNS bind files:</p>
-<h3 id="enumerating-dns-bind-configurations">Enumerating DNS bind configurations</h3>
-<p>Checking /etc/bind/named.conf:</p>
+<h3 id="enumerating-dns-bind-configurations">Enumerating DNS bind configurations
+</h3><p>Checking /etc/bind/named.conf:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -696,8 +744,8 @@ In /etc/bind/named.conf.local:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can see DNS updates are allowed with the rndc-key. So now we should be able to send the DNS an update, telling that the mailserver is associated with our IP address. Then when we reset the password, we will be sent the reset link.</p>
-<h3 id="updating-mailsnoopyhtb">Updating mail.snoopy.htb</h3>
-<p>making our key file:</p>
+<h3 id="updating-mailsnoopyhtb">Updating mail.snoopy.htb
+</h3><p>making our key file:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -793,8 +841,8 @@ In /etc/bind/named.conf.local:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>The first query to <code>mail.snoopy.htb</code> is done before updating, and we see the <code>NXDOMAIN</code> error. However, after sending the nsupdate and querying again, we are shown address 10.10.14.114.</p>
-<h3 id="using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email</h3>
-<p>After updating, we can send a reset email to ourselves successfully. However, just listening on the mail port is insufficient:</p>
+<h3 id="using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email
+</h3><p>After updating, we can send a reset email to ourselves successfully. However, just listening on the mail port is insufficient:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -958,9 +1006,9 @@ After spending more time troubleshooting, I learn that because the mail is inten
 	
 ></p>
 <p>Now we can authenticate as <code>sbrown</code>!</p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories</h3>
-<p>Inside the mattermost server, we can see a discussion mentioning a provisioning channel. On the channels tab, we can see the <code>Server Provisioning</code> channel and server_provision command as well.</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories
+</h3><p>Inside the mattermost server, we can see a discussion mentioning a provisioning channel. On the channels tab, we can see the <code>Server Provisioning</code> channel and server_provision command as well.</p>
 <p><img src="/post/hackthebox-snoopy/Images/mm1.png"
 	width="1307"
 	height="371"
@@ -1016,8 +1064,8 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span><span class="line"><span class="cl">SSH-2.0-paramiko_3.1.0
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot</h3>
-<p>There is an ssh authentication request, but we are not seeing any details from our netcat listener. To better understand the connection attempt, I set up an ssh honeypot with <a class="link" href="https://github.com/cowrie/cowrie"  target="_blank" rel="noopener"
+</div><h3 id="using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot
+</h3><p>There is an ssh authentication request, but we are not seeing any details from our netcat listener. To better understand the connection attempt, I set up an ssh honeypot with <a class="link" href="https://github.com/cowrie/cowrie"  target="_blank" rel="noopener"
     >Cowrie</a>.</p>
 <p>First, using docker to install Cowrie:</p>
 <div class="highlight"><div class="chroma">
@@ -1089,9 +1137,9 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We now have credentials as <code>cbrown:sn00pedcr3dential!!!</code> and can use this to access the system!</p>
-<h2 id="lateral-movement">Lateral Movement</h2>
-<h3 id="leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository</h3>
-<p>Checking sudo privs:</p>
+<h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository
+</h3><p>Checking sudo privs:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1269,9 +1317,9 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span><span class="line"><span class="cl">sbrown@snoopy:~$
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys</h3>
-<p>Checking for sudo privileges:</p>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys
+</h3><p>Checking for sudo privileges:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1491,8 +1539,8 @@ After spending more time troubleshooting, I learn that because the mail is inten
 </span></span><span class="line"><span class="cl">root@snoopy:~# 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="reflection">Reflection</h2>
-<p>I enjoyed the learning process for this box a considerable amount. Even from the beginning of enumerating DNS config files and setting up a mail server, this challenge gave me the opportunity to learn many new things! Although it was revealed to be mostly unintended, I appreciated how there were several possible paths to root. It was fun to discuss with others the ideas they had to manipulate the <code>clamscan</code> behaviors.</p>
+</div><h2 id="reflection">Reflection
+</h2><p>I enjoyed the learning process for this box a considerable amount. Even from the beginning of enumerating DNS config files and setting up a mail server, this challenge gave me the opportunity to learn many new things! Although it was revealed to be mostly unintended, I appreciated how there were several possible paths to root. It was fun to discuss with others the ideas they had to manipulate the <code>clamscan</code> behaviors.</p>
 
 </section>
 
@@ -1678,6 +1726,10 @@ After spending more time troubleshooting, I learn that because the mail is inten
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1761,71 +1813,12 @@ After spending more time troubleshooting, I learn that because the mail is inten
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer</a></li>
-        <li><a href="#file-read-vulnerability-in-download">File Read Vulnerability in download</a></li>
-        <li><a href="#snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated</a></li>
-        <li><a href="#enumerating-dns-bind-configurations">Enumerating DNS bind configurations</a></li>
-        <li><a href="#updating-mailsnoopyhtb">Updating mail.snoopy.htb</a></li>
-        <li><a href="#using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories</a></li>
-        <li><a href="#using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot</a></li>
-      </ol>
-    </li>
-    <li><a href="#lateral-movement">Lateral Movement</a>
-      <ol>
-        <li><a href="#leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1837,8 +1830,6 @@ After spending more time troubleshooting, I learn that because the mail is inten
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

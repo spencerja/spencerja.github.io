@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root'><title>HackTheBox - Pilgrimage</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user's login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root">
+<title>HackTheBox - Pilgrimage</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-pilgrimage/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Pilgrimage'>
-<meta property='og:description' content='Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Pilgrimage">
+<meta property='og:description' content="Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user's login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-pilgrimage/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='git' /><meta property='article:tag' content='git-dumper' /><meta property='article:tag' content='ImageMagick' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Cyberchef' /><meta property='article:tag' content='binwalk' /><meta property='article:published_time' content='2023-11-25T11:34:42-06:00'/><meta property='article:modified_time' content='2023-11-25T11:34:42-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/Pilgrimage.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='git' /><meta property='article:tag' content='git-dumper' /><meta property='article:tag' content='ImageMagick' /><meta property='article:tag' content='Arbitrary File Read' /><meta property='article:tag' content='Cyberchef' /><meta property='article:tag' content='binwalk' /><meta property='article:published_time' content='2023-11-25T11:34:42-06:00'/><meta property='article:modified_time' content='2023-11-25T11:34:42-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-pilgrimage/Pilgrimage.png' />
 <meta name="twitter:title" content="HackTheBox - Pilgrimage">
-<meta name="twitter:description" content="Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user&#39;s login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-pilgrimage/Pilgrimage.png' />
+<meta name="twitter:description" content="Pilgrimage is an easy difficulty box with an exposed git repository available on the webpage. We can use git-dumper, and learn that uploaded images are processed by a vulnerable version of ImageMagick. We can abuse this to retrieve the SQLite database contents, which contain a user's login credentials. Entering the system, we learn a script running as root will analyze incoming image files with binwalk. By leveraging a recent binwalk CVE, we can supply a malicious png file and achieve remote code execution as root"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-pilgrimage/Pilgrimage.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,66 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
+        <li><a href="#discovery-of-git-filesystem">Discovery of git filesystem</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold-1">Foothold</a>
+      <ul>
+        <li><a href="#file-read-via-imagemagick">File Read via ImageMagick</a></li>
+        <li><a href="#retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#enumeration-as-emily">Enumeration as emily</a></li>
+        <li><a href="#remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +311,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +336,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="foothold">Foothold</h2>
-<p>Initial nmap:</p>
+    <h2 id="foothold">Foothold
+</h2><p>Initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -367,8 +407,8 @@
 </span></span><span class="line"><span class="cl">10.10.11.219 pilgrimage.htb
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="enumerating-web-service">Enumerating Web Service</h3>
-<p>Visiting the page, we can see it is an image shrinker. We are given the option to upload images, and the files will be presumable compressed and returned to us.</p>
+</div><h3 id="enumerating-web-service">Enumerating Web Service
+</h3><p>Visiting the page, we can see it is an image shrinker. We are given the option to upload images, and the files will be presumable compressed and returned to us.</p>
 <p><img src="/post/hackthebox-pilgrimage/Images/landingpage.png"
 	width="1433"
 	height="593"
@@ -435,8 +475,8 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>From this, we might get an idea of how this process is being done. First, uploaded files are placed in <code>/tmp/</code>, a compression operation is performed and saved to <code>/shrunk/</code>, and the link is sent back to us. There is a possibility that this allows for a race condition, where we might upload a php script, have it saved in <code>/tmp/</code> and execute the script before the shrinking operation is done and the file is cleaned up. Unfortunately, this does not work presumably because the uploaded files are being renamed using some method we don&rsquo;t know.</p>
-<h3 id="discovery-of-git-filesystem">Discovery of git filesystem</h3>
-<p>If we return to nmap after adding our /etc/hosts entry, we might see interesting new information:</p>
+<h3 id="discovery-of-git-filesystem">Discovery of git filesystem
+</h3><p>If we return to nmap after adding our /etc/hosts entry, we might see interesting new information:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -570,9 +610,9 @@
 </span></span><span class="line"><span class="cl">drwxr-xr-x 4 kali kali     4096 Nov 19 15:14 vendor
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="foothold-1">Foothold</h2>
-<h3 id="file-read-via-imagemagick">File Read via ImageMagick</h3>
-<p>On the index page, we can see the upload checks being done, and what is done to compress:</p>
+</div><h2 id="foothold-1">Foothold
+</h2><h3 id="file-read-via-imagemagick">File Read via ImageMagick
+</h3><p>On the index page, we can see the upload checks being done, and what is done to compress:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -852,8 +892,8 @@ To save the file, we can curl again, or visit the page in browser and select &ld
 </span></span><span class="line"><span class="cl"><span class="o">&lt;...</span><span class="nx">SNIP</span><span class="o">...&gt;</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick</h3>
-<p>Preparing image:</p>
+</div><h3 id="retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick
+</h3><p>Preparing image:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1042,9 +1082,9 @@ If the file is too large to translate, you can try to cut out the long sequences
 		data-flex-basis="223px"
 	
 ></p>
-<h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="enumeration-as-emily">Enumeration as emily</h3>
-<p>With these credentials, we can access ssh:</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="enumeration-as-emily">Enumeration as emily
+</h3><p>With these credentials, we can access ssh:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1144,8 +1184,8 @@ Running <code>binwalk</code> will get us the version, and we can search for vuln
 </div>
 </div><p>With a quick google search, we can find an <a class="link" href="https://www.exploit-db.com/exploits/51249"  target="_blank" rel="noopener"
     >exploit-db post on this</a>.</p>
-<h3 id="remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability</h3>
-<p>The exploit script takes an input image, an attack IP address, and an attacker port number:</p>
+<h3 id="remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability
+</h3><p>The exploit script takes an input image, an attack IP address, and an attacker port number:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1224,8 +1264,8 @@ Running <code>binwalk</code> will get us the version, and we can search for vuln
 </span></span><span class="line"><span class="cl">root
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="reflection">Reflection</h2>
-<p>I particularly enjoy boxes focused around a particular theme, in this situation: image manipulation. I appreciate how this box keeps it mostly simple while showcasing a couple recent CVEs related to extremely common image tools. Retrieving a password from the database directly in this manner was unintuitive for me, as clearly the database file was messy to work with. However with knowing the username we look for, it is easy to identify.</p>
+</div><h2 id="reflection">Reflection
+</h2><p>I particularly enjoy boxes focused around a particular theme, in this situation: image manipulation. I appreciate how this box keeps it mostly simple while showcasing a couple recent CVEs related to extremely common image tools. Retrieving a password from the database directly in this manner was unintuitive for me, as clearly the database file was messy to work with. However with knowing the username we look for, it is easy to identify.</p>
 
 </section>
 
@@ -1401,6 +1441,10 @@ Running <code>binwalk</code> will get us the version, and we can search for vuln
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1484,63 +1528,12 @@ Running <code>binwalk</code> will get us the version, and we can search for vuln
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
-        <li><a href="#discovery-of-git-filesystem">Discovery of git filesystem</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold-1">Foothold</a>
-      <ol>
-        <li><a href="#file-read-via-imagemagick">File Read via ImageMagick</a></li>
-        <li><a href="#retrieving-database-file-via-imagemagick">Retrieving database file via ImageMagick</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#enumeration-as-emily">Enumeration as emily</a></li>
-        <li><a href="#remote-code-execution-via-binwalk-vulnerability">Remote Code Execution via Binwalk vulnerability</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1552,8 +1545,6 @@ Running <code>binwalk</code> will get us the version, and we can search for vuln
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

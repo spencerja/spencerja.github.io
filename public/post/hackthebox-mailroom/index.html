@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.'><title>HackTheBox - Mailroom</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box's root user.">
+<title>HackTheBox - Mailroom</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-mailroom/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Mailroom'>
-<meta property='og:description' content='Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Mailroom">
+<meta property='og:description' content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box's root user.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-mailroom/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Keepass' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='XSS' /><meta property='article:tag' content='NoSQL Injection' /><meta property='article:tag' content='strace' /><meta property='article:published_time' content='2023-08-19T22:25:45-05:00'/><meta property='article:modified_time' content='2023-08-19T22:25:45-05:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/Mailroom.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Gitea' /><meta property='article:tag' content='Keepass' /><meta property='article:tag' content='Command Injection' /><meta property='article:tag' content='XSS' /><meta property='article:tag' content='NoSQL Injection' /><meta property='article:tag' content='strace' /><meta property='article:published_time' content='2023-08-19T22:25:45-05:00'/><meta property='article:modified_time' content='2023-08-19T22:25:45-05:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-mailroom/Mailroom.png' />
 <meta name="twitter:title" content="HackTheBox - Mailroom">
-<meta name="twitter:description" content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-mailroom/Mailroom.png' />
+<meta name="twitter:description" content="Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box's root user."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-mailroom/Mailroom.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,82 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form</a></li>
+        <li><a href="#sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain</a>
+          <ul>
+            <li><a href="#information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain</a></li>
+        <li><a href="#abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials</a></li>
+      </ul>
+    </li>
+    <li><a href="#access-as-user-tristan">Access as user tristan</a>
+      <ul>
+        <li><a href="#enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding</a></li>
+        <li><a href="#remote-code-execution-through-command-injection">Remote Code Execution through Command Injection</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ul>
+        <li><a href="#enumerating-docker-container-as-www-data">Enumerating docker container as www-data</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#enumerating-system-as-matthew">Enumerating system as matthew</a></li>
+        <li><a href="#using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time</a></li>
+        <li><a href="#acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password</a></li>
+      </ul>
+    </li>
+    <li><a href="#reflection">Reflection</a></li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +327,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +352,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -344,8 +400,8 @@
 </span></span><span class="line"><span class="cl"># Nmap done at Sun Apr 16 09:31:00 2023 -- 1 IP address (1 host up) scanned in 7.58 seconds
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form</h3>
-<p>Exploring the webpages, we find a contact page that allows us to submit questions.</p>
+</div><h3 id="xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form
+</h3><p>Exploring the webpages, we find a contact page that allows us to submit questions.</p>
 <p><img src="/post/hackthebox-mailroom/Images/ContactForm.png"
 	width="1499"
 	height="782"
@@ -439,8 +495,8 @@ Using xss payload:</p>
 </span></span><span class="line"><span class="cl">Upgrade-Insecure-Requests: <span class="m">1</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain</h3>
-<p>The machine successfully reaches out, but we don&rsquo;t see any cookies. While exploring this, I had also ran subdomain enumeration:</p>
+</div><h3 id="sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain
+</h3><p>The machine successfully reaches out, but we don&rsquo;t see any cookies. While exploring this, I had also ran subdomain enumeration:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -497,8 +553,8 @@ Using xss payload:</p>
 	
 ></p>
 <p>In the <code>auth.php</code> file, we can see a change noted as &ldquo;fixed path bug &amp; email spam&rdquo;. The change looks potentially interesting, so we can we can check the changes with this commit.</p>
-<h4 id="information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked</h4>
-<p><img src="/post/hackthebox-mailroom/Images/AuthphpChange.PNG"
+<h4 id="information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked
+</h4><p><img src="/post/hackthebox-mailroom/Images/AuthphpChange.PNG"
 	width="1121"
 	height="646"
 	srcset="/post/hackthebox-mailroom/Images/AuthphpChange_hu2498305531453130342.PNG 480w, /post/hackthebox-mailroom/Images/AuthphpChange_hu3181095241264473757.PNG 1024w"
@@ -523,9 +579,9 @@ Using xss payload:</p>
 		data-flex-basis="782px"
 	
 ></p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain</h3>
-<p>Recalling the XSS trick discovered earlier, we were able to redirect someone&rsquo;s or something&rsquo;s session back to our machine, although there were no cookies for that main site. Perhaps this exploited session is able to access this subdomain for us?</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain
+</h3><p>Recalling the XSS trick discovered earlier, we were able to redirect someone&rsquo;s or something&rsquo;s session back to our machine, although there were no cookies for that main site. Perhaps this exploited session is able to access this subdomain for us?</p>
 <p>This exploit idea is also covered in <a class="link" href="https://0xdf.gitlab.io/2021/03/20/htb-crossfit.html"  target="_blank" rel="noopener"
     >write-ups for crossfit</a>, an insane difficulty box previously retired. The idea is to abuse XSS to perform requests as an authorized user, then relay the information back to our machine in the form of http post requests.</p>
 <p>Instead of crafting a new XSS payload every time, it is easier to write an XSS that retrieves a script from our local machine and then executes it:
@@ -675,8 +731,8 @@ at.js (inspired from 0xdf&rsquo;s crossfit writeup):</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>It looks like we need to submit a valid username/password combination.</p>
-<h3 id="abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials</h3>
-<p>The Gitea source code tells us this is mongodb, so when I explore noSQL injection, we see that this is vulnerable:</p>
+<h3 id="abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials
+</h3><p>The Gitea source code tells us this is mongodb, so when I explore noSQL injection, we see that this is vulnerable:</p>
 <p>edits in at.js</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -812,9 +868,9 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </span></span><span class="line"><span class="cl">tristan@mailroom:~$
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="access-as-user-tristan">Access as user tristan</h2>
-<h3 id="enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding</h3>
-<p>The ssh banner also tells us we have mail, which is will be the 2FA notifications we have been sending during our mongoDB regex adventures.</p>
+</div><h2 id="access-as-user-tristan">Access as user tristan
+</h2><h3 id="enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding
+</h3><p>The ssh banner also tells us we have mail, which is will be the 2FA notifications we have been sending during our mongoDB regex adventures.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -857,7 +913,7 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 	srcset="/post/hackthebox-mailroom/Images/Login_hu11217321414036384889.PNG 480w, /post/hackthebox-mailroom/Images/Login_hu13283833229311462722.PNG 1024w"
 	loading="lazy"
 	
-		alt="Logging in with Tristan&rsquo;s credentials"
+		alt="Logging in with Tristans credentials"
 	
 	
 		class="gallery-image" 
@@ -909,8 +965,8 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </span></span><span class="line"><span class="cl">  <span class="nv">$contents</span> <span class="o">=</span> <span class="nx">shell_exec</span><span class="p">(</span><span class="s2">&#34;cat /var/www/mailroom/inquiries/</span><span class="si">$inquiryId</span><span class="s2">.html&#34;</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="remote-code-execution-through-command-injection">Remote Code Execution through Command Injection</h3>
-<p>While there is some filtering done with the <code>preg_replace</code> function, it is not thorough enough. We can execute commands nested in this through use of the backtick, `.</p>
+</div><h3 id="remote-code-execution-through-command-injection">Remote Code Execution through Command Injection
+</h3><p>While there is some filtering done with the <code>preg_replace</code> function, it is not thorough enough. We can execute commands nested in this through use of the backtick, `.</p>
 <p><img src="/CommandExecution.png"
 	
 	
@@ -1007,9 +1063,9 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </span></span><span class="line"><span class="cl">www-data
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="lateral-movement">Lateral Movement</h2>
-<h3 id="enumerating-docker-container-as-www-data">Enumerating docker container as www-data</h3>
-<p>Enumerating this session shows us we are not in the same box, but instead a compartmentalized container:</p>
+</div><h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="enumerating-docker-container-as-www-data">Enumerating docker container as www-data
+</h3><p>Enumerating this session shows us we are not in the same box, but instead a compartmentalized container:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1209,9 +1265,9 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>We can finally get the <code>user.txt</code> from matthew&rsquo;s home dir.</p>
-<h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="enumerating-system-as-matthew">Enumerating system as matthew</h3>
-<p>Also found in matthew&rsquo;s home dir, is a keepass file.</p>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="enumerating-system-as-matthew">Enumerating system as matthew
+</h3><p>Also found in matthew&rsquo;s home dir, is a keepass file.</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1223,8 +1279,8 @@ Now we can do the same for passwords, but it&rsquo;s good to remember the charac
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Finding <code>personal.kdbx.lock</code> is a clear indicator that keepass vault is currently being accessed. Monitoring the folder for a little bit, we can see the lock file appear and disappear very frequently. It seems someone is accessing the keepass vault regularly. If we can perhaps spy on the session that is accessing this vault, we might be able to watch the password being input.</p>
-<h3 id="using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time</h3>
-<p><a class="link" href="https://jvns.ca/blog/2014/02/17/spying-on-ssh-with-strace/"  target="_blank" rel="noopener"
+<h3 id="using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time
+</h3><p><a class="link" href="https://jvns.ca/blog/2014/02/17/spying-on-ssh-with-strace/"  target="_blank" rel="noopener"
     >This article covers strace and how it might be used to leak ssh passwords.</a> If we know the process ID that is accessing this kdbx, we can utilize this strategy.</p>
 <p>To watch processes in real time, I use <code>top</code>:</p>
 <div class="highlight"><div class="chroma">
@@ -1384,8 +1440,8 @@ The next section has what looks to be probably the master password:</p>
 </span></span><span class="line"><span class="cl">read(0, &#34;\n&#34;, 8192)                     = 1
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password</h3>
-<p>The line <code>&quot;\10&quot;</code> sticks out as odd, since this is reporting 1 character/keystroke at a time. If we exclude that input, the password becomes <code>!sEcUr3p4$$w01rd9</code>.  Trying this password does not work, but looking at the password itself the <code>1</code> seems out of place: the password appears to be the words <code>secure</code> and <code>password</code>. Omitting <code>1</code> gives us a working password: <code>!sEcUr3p4$$w0rd9</code>, and now the <code>\10</code> character becomes more clear: the user must have inputted a 1 as a mistake, then deleted it with backspace. The deletion keystroke appeared in the trace as <code>\10</code>, and the password was fixed for login purposes.</p>
+</div><h3 id="acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password
+</h3><p>The line <code>&quot;\10&quot;</code> sticks out as odd, since this is reporting 1 character/keystroke at a time. If we exclude that input, the password becomes <code>!sEcUr3p4$$w01rd9</code>.  Trying this password does not work, but looking at the password itself the <code>1</code> seems out of place: the password appears to be the words <code>secure</code> and <code>password</code>. Omitting <code>1</code> gives us a working password: <code>!sEcUr3p4$$w0rd9</code>, and now the <code>\10</code> character becomes more clear: the user must have inputted a 1 as a mistake, then deleted it with backspace. The deletion keystroke appeared in the trace as <code>\10</code>, and the password was fixed for login purposes.</p>
 <p>Viewing the keepass vault shows multiple password entries, but one is clearly more noteworthy than the rest: the root account.</p>
 <p><img src="/post/hackthebox-mailroom/Images/KeepassVault.PNG"
 	width="1073"
@@ -1454,8 +1510,8 @@ The next section has what looks to be probably the master password:</p>
 </span></span><span class="line"><span class="cl">            <span class="n">send_human</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;!sEcUr3p4$$w01</span><span class="se">\010</span><span class="s1">rd9&#39;</span><span class="p">)</span>  <span class="c1"># \010 is a del character</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="reflection">Reflection</h2>
-<p>As my first live hard box completion, I was thoroughly impressed by the complexity of the attack chain leveraged to gain a foothold. Between the constant abuse of XSS to the extremely frequent <code>kpcli</code> processes, this box might not be the most realistic, but I enjoyed every trick utilized throughout. I also appreciated the &ldquo;leaked code&rdquo; viewable on the git subdomain, and how it is used to showcase multiple different code vulnerabilities used at different spots within this box.</p>
+</div><h2 id="reflection">Reflection
+</h2><p>As my first live hard box completion, I was thoroughly impressed by the complexity of the attack chain leveraged to gain a foothold. Between the constant abuse of XSS to the extremely frequent <code>kpcli</code> processes, this box might not be the most realistic, but I enjoyed every trick utilized throughout. I also appreciated the &ldquo;leaked code&rdquo; viewable on the git subdomain, and how it is used to showcase multiple different code vulnerabilities used at different spots within this box.</p>
 
 </section>
 
@@ -1631,6 +1687,10 @@ The next section has what looks to be probably the master password:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1714,79 +1774,12 @@ The next section has what looks to be probably the master password:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#xss-vulnerability-found-in-contact-submission-form">XSS vulnerability found in contact submission form</a></li>
-        <li><a href="#sensitive-gitea-repository-accessible-in-a-subdomain">Sensitive Gitea repository accessible in a subdomain</a>
-          <ol>
-            <li><a href="#information-on-a-private-subdomain-is-leaked">Information on a private subdomain is leaked</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#leveraging-xss-to-reach-the-private-subdomain">Leveraging XSS to reach the private subdomain</a></li>
-        <li><a href="#abusing-nosql-injection-to-leak-credentials">Abusing NoSQL injection to leak credentials</a></li>
-      </ol>
-    </li>
-    <li><a href="#access-as-user-tristan">Access as user tristan</a>
-      <ol>
-        <li><a href="#enumerating-the-private-webpage-directly-through-port-forwarding">Enumerating the private webpage directly through port forwarding</a></li>
-        <li><a href="#remote-code-execution-through-command-injection">Remote Code Execution through Command Injection</a></li>
-      </ol>
-    </li>
-    <li><a href="#lateral-movement">Lateral Movement</a>
-      <ol>
-        <li><a href="#enumerating-docker-container-as-www-data">Enumerating docker container as www-data</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#enumerating-system-as-matthew">Enumerating system as matthew</a></li>
-        <li><a href="#using-strace-to-monitor-processes-in-real-time">Using strace to monitor processes in real time</a></li>
-        <li><a href="#acessing-the-keepass-vault--troubleshooting-the-password">Acessing the keepass vault &amp; troubleshooting the password</a></li>
-      </ol>
-    </li>
-    <li><a href="#reflection">Reflection</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1798,8 +1791,6 @@ The next section has what looks to be probably the master password:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy
-For this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:
-'><title>HackTheBox_Cyber_Apocalypse_2023</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy\nFor this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:\n">
+<title>HackTheBox_Cyber_Apocalypse_2023</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox_cyber_apocalypse_2023/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox_cyber_apocalypse_2023/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox_Cyber_Apocalypse_2023'>
-<meta property='og:description' content='Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy
-For this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:
-'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox_cyber_apocalypse_2023/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox_Cyber_Apocalypse_2023">
+<meta property='og:description' content="Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy\nFor this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:\n">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox_cyber_apocalypse_2023/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Forensics' /><meta property='article:tag' content='Misc' /><meta property='article:tag' content='Web' /><meta property='article:tag' content='Pwn' /><meta property='article:published_time' content='2023-03-25T19:01:05-05:00'/><meta property='article:modified_time' content='2023-03-25T19:01:05-05:00'/>
 <meta name="twitter:title" content="HackTheBox_Cyber_Apocalypse_2023">
-<meta name="twitter:description" content="Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy
-For this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:
-">
+<meta name="twitter:description" content="Forensics Extraterrestrial Persistence There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence? Difficulty: very easy\nFor this challenge we are provided with a small persistence.sh script. Within the code, we see base64 encoded information being directed to a file service.service, then being called:\n">
     </head>
     <body class="
     article-page
@@ -75,13 +70,14 @@ For this challenge we are provided with a small persistence.sh script. Within th
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -101,6 +97,7 @@ For this challenge we are provided with a small persistence.sh script. Within th
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -122,6 +119,7 @@ For this challenge we are provided with a small persistence.sh script. Within th
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -147,6 +145,7 @@ For this challenge we are provided with a small persistence.sh script. Within th
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -162,7 +161,6 @@ For this challenge we are provided with a small persistence.sh script. Within th
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -173,7 +171,6 @@ For this challenge we are provided with a small persistence.sh script. Within th
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -184,7 +181,6 @@ For this challenge we are provided with a small persistence.sh script. Within th
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -194,31 +190,12 @@ For this challenge we are provided with a small persistence.sh script. Within th
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -226,7 +203,7 @@ For this challenge we are provided with a small persistence.sh script. Within th
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -234,13 +211,75 @@ For this challenge we are provided with a small persistence.sh script. Within th
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#forensics">Forensics</a>
+      <ul>
+        <li><a href="#extraterrestrial-persistence">Extraterrestrial Persistence</a></li>
+      </ul>
+    </li>
+    <li><a href="#misc">Misc</a>
+      <ul>
+        <li><a href="#hijack">Hijack</a></li>
+        <li><a href="#janken">Janken</a></li>
+        <li><a href="#nehebkaus-trap">Nehebkaus Trap</a></li>
+        <li><a href="#persistence">Persistence</a></li>
+        <li><a href="#restricted">Restricted</a></li>
+      </ul>
+    </li>
+    <li><a href="#pwn">Pwn</a>
+      <ul>
+        <li><a href="#labyrinth">Labyrinth</a></li>
+      </ul>
+    </li>
+    <li><a href="#web">Web</a>
+      <ul>
+        <li><a href="#drobots">Drobots</a></li>
+        <li><a href="#gunhead">Gunhead</a></li>
+        <li><a href="#orbital">Orbital</a></li>
+        <li><a href="#passman">Passman</a></li>
+        <li><a href="#trapped-source">Trapped Source</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -264,6 +303,9 @@ For this challenge we are provided with a small persistence.sh script. Within th
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -286,14 +328,15 @@ For this challenge we are provided with a small persistence.sh script. Within th
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="forensics">Forensics</h2>
-<h3 id="extraterrestrial-persistence">Extraterrestrial Persistence</h3>
-<blockquote>
+    <h2 id="forensics">Forensics
+</h2><h3 id="extraterrestrial-persistence">Extraterrestrial Persistence
+</h3><blockquote>
 <p>There is a rumor that aliens have developed a persistence mechanism that is impossible to detect. After investigating her recently compromised Linux server, Pandora found a possible sample of this mechanism. Can you analyze it and find out how they install their persistence?
 <strong>Difficulty: very easy</strong></p>
 </blockquote>
@@ -347,9 +390,9 @@ For this challenge we are provided with a small persistence.sh script. Within th
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Just like that, we find the flag: <code>HTB{th3s3_4l13nS_4r3_s00000_b4s1c}</code></p>
-<h2 id="misc">Misc</h2>
-<h3 id="hijack">Hijack</h3>
-<blockquote>
+<h2 id="misc">Misc
+</h2><h3 id="hijack">Hijack
+</h3><blockquote>
 <p>The security of the alien spacecrafts did not prove very robust, and you have gained access to an interface allowing you to upload a new configuration to their ship&rsquo;s Thermal Control System. Can you take advantage of the situation without raising any suspicion?
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -540,8 +583,8 @@ Testing the exploit:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>HTB{1s_1t_ju5t_m3_0r_iS_1t_g3tTing_h0t_1n_h3r3?}</code></p>
-<h3 id="janken">Janken</h3>
-<blockquote>
+<h3 id="janken">Janken
+</h3><blockquote>
 <p>As you approach an ancient tomb, you&rsquo;re met with a wise guru who guards its entrance. In order to proceed, he challenges you to a game of Janken, a variation of rock paper scissors with a unique twist. But there&rsquo;s a catch: you must win 100 rounds in a row to pass. Fail to do so, and you&rsquo;ll be denied entry.
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -708,8 +751,8 @@ Testing the exploit:</p>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>HTB{r0ck_p4p3R_5tr5tr_l0g1c_buG}</code></p>
-<h3 id="nehebkaus-trap">Nehebkaus Trap</h3>
-<blockquote>
+<h3 id="nehebkaus-trap">Nehebkaus Trap
+</h3><blockquote>
 <p>In search of the ancient relic, you go looking for the Pharaoh&rsquo;s tomb inside the pyramids. A giant granite block falls and blocks your exit, and the walls start closing in! You are trapped. Can you make it out alive and continue your quest?
 <strong>Difficulty: medium</strong></p>
 </blockquote>
@@ -888,8 +931,8 @@ The snake is our first subtle hint, we are likely trapped in a python jail! Ther
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>HTB{y0u_d3f34t3d_th3_sn4k3_g0d!}</code></p>
-<h3 id="persistence">Persistence</h3>
-<blockquote>
+<h3 id="persistence">Persistence
+</h3><blockquote>
 <p>Thousands of years ago, sending a GET request to <strong>/flag</strong> would grant immense power and wisdom. Now it&rsquo;s broken and usually returns random data, but keep trying, and you might get lucky&hellip; Legends say it works once every 1000 tries.
 <strong>Difficulty: very easy</strong></p>
 </blockquote>
@@ -936,8 +979,8 @@ Eventually, we see the results pop out at us.</p>
 </div><p>The flag information includes only HTB and the content in brackets. A cleaner grep would have extracted only the flag.
 Overall, it seems output of the flag is based on a ~0.1% chance. On average, you will get the flag within 1000 requests but not always.
 <code>HTB{y0u_h4v3_p0w3rfuL_sCr1pt1ng_ab1lit13S!}</code></p>
-<h3 id="restricted">Restricted</h3>
-<blockquote>
+<h3 id="restricted">Restricted
+</h3><blockquote>
 <p>You &rsquo;re still trying to collect information for your research on the alien relic. Scientists contained the memories of ancient egyptian mummies into small chips, where they could store and replay them at will. Many of these mummies were part of the battle against the aliens and you suspect their memories may reveal hints to the location of the relic and the underground vessels. You managed to get your hands on one of these chips but after you connected to it, any attempt to access its internal data proved futile. The software containing all these memories seems to be running on a restricted environment which limits your access. Can you find a way to escape the restricted environment?
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -1024,9 +1067,9 @@ Overall, it seems output of the flag is based on a ~0.1% chance. On average, you
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>HTB{r35tr1ct10n5_4r3_p0w3r1355}</code></p>
-<h2 id="pwn">Pwn</h2>
-<h3 id="labyrinth">Labyrinth</h3>
-<blockquote>
+<h2 id="pwn">Pwn
+</h2><h3 id="labyrinth">Labyrinth
+</h3><blockquote>
 <p>You find yourself trapped in a mysterious labyrinth, with only one chance to escape. Choose the correct door wisely, for the wrong choice could have deadly consequences.
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -1855,9 +1898,9 @@ Overall, it seems output of the flag is based on a ~0.1% chance. On average, you
 </div>
 </div><p>We managed to get the flag, but working out the address ended up as guess-and-check for me.
 <code>HTB{3sc4p3_fr0m_4b0v3}</code></p>
-<h2 id="web">Web</h2>
-<h3 id="drobots">Drobots</h3>
-<blockquote>
+<h2 id="web">Web
+</h2><h3 id="drobots">Drobots
+</h3><blockquote>
 <p>Pandora&rsquo;s latest mission as part of her reconnaissance training is to infiltrate the Drobots firm that was suspected of engaging in illegal activities. Can you help pandora with this task?
 <strong>Difficulty: very easy</strong></p>
 </blockquote>
@@ -1908,8 +1951,8 @@ Just like that, we are in. And the flag is first up on the table.</p>
 	
 ></p>
 <p><code>HTB{p4r4m3t3r1z4t10n_1s_1mp0rt4nt!!!}</code></p>
-<h3 id="gunhead">Gunhead</h3>
-<blockquote>
+<h3 id="gunhead">Gunhead
+</h3><blockquote>
 <p>During Pandora&rsquo;s training, the Gunhead AI combat robot had been tampered with and was now malfunctioning, causing it to become uncontrollable. With the situation escalating rapidly, Pandora used her hacking skills to infiltrate the managing system of Gunhead and urgently needs to take it down.
 <strong>Difficulty: very easy</strong></p>
 </blockquote>
@@ -2041,8 +2084,8 @@ Testing with id:</p>
 	
 ></p>
 <p><code>HTB{4lw4y5_54n1t1z3_u53r_1nput!!!}</code></p>
-<h3 id="orbital">Orbital</h3>
-<blockquote>
+<h3 id="orbital">Orbital
+</h3><blockquote>
 <p>In order to decipher the alien communication that held the key to their location, she needed access to a decoder with advanced capabilities - a decoder that only The Orbital firm possessed. Can you get your hands on the decoder?
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -2723,8 +2766,8 @@ Request:</p>
 	
 ></p>
 <p>Flag <code>HTB{T1m3_b4$3d_$ql1_4r3_fun!!!}</code></p>
-<h3 id="passman">Passman</h3>
-<blockquote>
+<h3 id="passman">Passman
+</h3><blockquote>
 <p>Pandora discovered the presence of a mole within the ministry. To proceed with caution, she must obtain the master control password for the ministry, which is stored in a password manager. Can you hack into the password manager?
 <strong>Difficulty: easy</strong></p>
 </blockquote>
@@ -2834,8 +2877,8 @@ Starting with a post request to register a new user:</p>
 	
 ></p>
 <p><code>HTB{1d0r5_4r3_s1mpl3_4nd_1mp4ctful!!}</code></p>
-<h3 id="trapped-source">Trapped Source</h3>
-<blockquote>
+<h3 id="trapped-source">Trapped Source
+</h3><blockquote>
 <p>Intergalactic Ministry of Spies tested Pandora&rsquo;s movement and intelligence abilities. She found herself locked in a room with no apparent means of escape. Her task was to unlock the door and make her way out. Can you help her in opening the door?
 <strong>Difficutly: very easy</strong></p>
 </blockquote>
@@ -3051,6 +3094,10 @@ Starting with a post request to register a new user:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -3134,72 +3181,12 @@ Starting with a post request to register a new user:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#forensics">Forensics</a>
-      <ol>
-        <li><a href="#extraterrestrial-persistence">Extraterrestrial Persistence</a></li>
-      </ol>
-    </li>
-    <li><a href="#misc">Misc</a>
-      <ol>
-        <li><a href="#hijack">Hijack</a></li>
-        <li><a href="#janken">Janken</a></li>
-        <li><a href="#nehebkaus-trap">Nehebkaus Trap</a></li>
-        <li><a href="#persistence">Persistence</a></li>
-        <li><a href="#restricted">Restricted</a></li>
-      </ol>
-    </li>
-    <li><a href="#pwn">Pwn</a>
-      <ol>
-        <li><a href="#labyrinth">Labyrinth</a></li>
-      </ol>
-    </li>
-    <li><a href="#web">Web</a>
-      <ol>
-        <li><a href="#drobots">Drobots</a></li>
-        <li><a href="#gunhead">Gunhead</a></li>
-        <li><a href="#orbital">Orbital</a></li>
-        <li><a href="#passman">Passman</a></li>
-        <li><a href="#trapped-source">Trapped Source</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -3211,8 +3198,6 @@ Starting with a post request to register a new user:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>

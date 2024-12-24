@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user&#39;s setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.'><title>HackTheBox - Keeper</title>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.">
+<title>HackTheBox - Keeper</title>
 
-<link rel='canonical' href='https://yuwenmichael.netlify.app/post/hackthebox-keeper/'>
+<link rel='canonical' href='http://localhost:1313/post/hackthebox-keeper/'>
 
-<link rel="stylesheet" href="/scss/style.min.59703bed5f69041ffba70837d909b8000139e78c5201b54e051ae44c256c2d69.css"><meta property='og:title' content='HackTheBox - Keeper'>
-<meta property='og:description' content='Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user&#39;s setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.'>
-<meta property='og:url' content='https://yuwenmichael.netlify.app/post/hackthebox-keeper/'>
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Keeper">
+<meta property='og:description' content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.">
+<meta property='og:url' content='http://localhost:1313/post/hackthebox-keeper/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='KeePass' /><meta property='article:tag' content='BestPractical' /><meta property='article:tag' content='putty' /><meta property='article:published_time' content='2024-02-10T07:29:34-06:00'/><meta property='article:modified_time' content='2024-02-10T07:29:34-06:00'/><meta property='og:image' content='https://yuwenmichael.netlify.app/post/hackthebox-keeper/Keeper.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='KeePass' /><meta property='article:tag' content='BestPractical' /><meta property='article:tag' content='putty' /><meta property='article:published_time' content='2024-02-10T07:29:34-06:00'/><meta property='article:modified_time' content='2024-02-10T07:29:34-06:00'/><meta property='og:image' content='http://localhost:1313/post/hackthebox-keeper/Keeper.png' />
 <meta name="twitter:title" content="HackTheBox - Keeper">
-<meta name="twitter:description" content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user&#39;s setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://yuwenmichael.netlify.app/post/hackthebox-keeper/Keeper.png' />
+<meta name="twitter:description" content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/post/hackthebox-keeper/Keeper.png' />
     </head>
     <body class="
     article-page
@@ -70,13 +71,14 @@
             <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,6 +98,7 @@
                         href='https://app.hackthebox.com/profile/1202496'
                         target="_blank"
                         title="HackTheBox"
+                        rel="me"
                     >
                         
                         
@@ -117,6 +120,7 @@
                         href='https://ctftime.org/team/217710'
                         target="_blank"
                         title="Team"
+                        rel="me"
                     >
                         
                         
@@ -142,6 +146,7 @@
                         href='https://tryhackme.com/p/spencerj'
                         target="_blank"
                         title="TryHackMe"
+                        rel="me"
                     >
                         
                         
@@ -157,7 +162,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -168,7 +172,6 @@
         </li>
         
         
-
         <li >
             <a href='/post' >
                 
@@ -179,7 +182,6 @@
         </li>
         
         
-
         <li >
             <a href='/awards' >
                 
@@ -189,31 +191,12 @@
             </a>
         </li>
         
+        <li class="menu-bottom-section">
+            <ol class="menu">
 
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M4 5h7" />
-  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
-  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
-  <path d="M12 20l4 -9l4 9" />
-  <path d="M19.1 18h-6.2" />
-</svg>
-
-
-
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://yuwenmichael.netlify.app/" selected>English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -221,7 +204,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,13 +212,64 @@
 
 
 
-                    <span>Dark Mode</span>
-                </li>
-            
-        </div>
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
+      </ul>
+    </li>
+    <li><a href="#foothold">Foothold</a>
+      <ul>
+        <li><a href="#login-via-default-credentials">Login via default credentials</a></li>
+        <li><a href="#system-access-via-unsecure-storage-of-passwords">System access via unsecure storage of passwords</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#leveraging-keepass-cve-2023-32784">Leveraging Keepass CVE 2023-32784</a></li>
+        <li><a href="#root-access-via-putty-key">Root access via PuTTY Key</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
@@ -275,6 +309,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,13 +334,14 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="enumeration">Enumeration</h2>
-<p>initial nmap:</p>
+    <h2 id="enumeration">Enumeration
+</h2><p>initial nmap:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -353,8 +391,8 @@
 		data-flex-basis="595px"
 	
 ></p>
-<h3 id="enumerating-web-service">Enumerating Web Service</h3>
-<p>We see text that directs us to <code>tickets.keeper.htb/rt/</code>. This appears to be a subdomain for a DNS of <code>keeper.htb</code>, and needs to first be added to our /etc/hosts file:</p>
+<h3 id="enumerating-web-service">Enumerating Web Service
+</h3><p>We see text that directs us to <code>tickets.keeper.htb/rt/</code>. This appears to be a subdomain for a DNS of <code>keeper.htb</code>, and needs to first be added to our /etc/hosts file:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -393,9 +431,9 @@ Now visiting tickets:</p>
 		data-flex-basis="963px"
 	
 ></p>
-<h2 id="foothold">Foothold</h2>
-<h3 id="login-via-default-credentials">Login via default credentials</h3>
-<p>We see a basic ticket management website asking for login credentials. On this page, we can learn that it is using BestPractical services. When we try default login credentials for BestPractical services (root:password), we find that we are able to login!</p>
+<h2 id="foothold">Foothold
+</h2><h3 id="login-via-default-credentials">Login via default credentials
+</h3><p>We see a basic ticket management website asking for login credentials. On this page, we can learn that it is using BestPractical services. When we try default login credentials for BestPractical services (root:password), we find that we are able to login!</p>
 <p><img src="/post/hackthebox-keeper/Images/RTataglance.png"
 	width="827"
 	height="655"
@@ -422,8 +460,8 @@ Now visiting tickets:</p>
 	
 ></p>
 <p>We see a name of Lise Nørgaard that we might want to remember. The ticket mentions keepass, a service used to store passwords. A very juicy target indeed.</p>
-<h3 id="system-access-via-unsecure-storage-of-passwords">System access via unsecure storage of passwords</h3>
-<p>We can view the conversation history between Lise and rt:</p>
+<h3 id="system-access-via-unsecure-storage-of-passwords">System access via unsecure storage of passwords
+</h3><p>We can view the conversation history between Lise and rt:</p>
 <p><img src="/post/hackthebox-keeper/Images/conversation.png"
 	width="890"
 	height="550"
@@ -506,9 +544,9 @@ Now visiting tickets:</p>
 </span></span><span class="line"><span class="cl">lnorgaard@keeper:~$ 
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="privilege-escalation">Privilege Escalation</h2>
-<h3 id="leveraging-keepass-cve-2023-32784">Leveraging Keepass CVE 2023-32784</h3>
-<p>We are able to authenticate! We might notice that <code>lnorgaard</code> is notified of mail. This can be very interesting for most HTB systems, however in this case it is only the email receipt for the previously discovered ticket.
+</div><h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="leveraging-keepass-cve-2023-32784">Leveraging Keepass CVE 2023-32784
+</h3><p>We are able to authenticate! We might notice that <code>lnorgaard</code> is notified of mail. This can be very interesting for most HTB systems, however in this case it is only the email receipt for the previously discovered ticket.
 Within the home folder, we can find an interesting zip:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -761,8 +799,8 @@ Within the home folder, we can find an interesting zip:</p>
 </div>
 </div><p>The password is looking a little odd to say the least. After reviewing their example, it looks like the program often cannot distinguish the first few characters. We know lnogaard is Danish based on her ticket profile, so it is possible that these words not English. Searching on google for <code>**dgr*d med fl*de</code> eventually leads to something that might be a popular phrase: Rødgrød Med Fløde. Firstly starting with no caps, we get a hit.
 <code>rødgrød med fløde</code></p>
-<h3 id="root-access-via-putty-key">Root access via PuTTY Key</h3>
-<p><img src="/post/hackthebox-keeper/Images/vault1.png"
+<h3 id="root-access-via-putty-key">Root access via PuTTY Key
+</h3><p><img src="/post/hackthebox-keeper/Images/vault1.png"
 	width="965"
 	height="406"
 	srcset="/post/hackthebox-keeper/Images/vault1_hu9658442772167483771.png 480w, /post/hackthebox-keeper/Images/vault1_hu11083062852261709616.png 1024w"
@@ -1086,6 +1124,10 @@ Within the home folder, we can find an interesting zip:</p>
         
         2024 Spencer&#39;s Blog
     </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
     </section>
 </footer>
 
@@ -1169,61 +1211,12 @@ Within the home folder, we can find an interesting zip:</p>
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#enumeration">Enumeration</a>
-      <ol>
-        <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
-      </ol>
-    </li>
-    <li><a href="#foothold">Foothold</a>
-      <ol>
-        <li><a href="#login-via-default-credentials">Login via default credentials</a></li>
-        <li><a href="#system-access-via-unsecure-storage-of-passwords">System access via unsecure storage of passwords</a></li>
-      </ol>
-    </li>
-    <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
-        <li><a href="#leveraging-keepass-cve-2023-32784">Leveraging Keepass CVE 2023-32784</a></li>
-        <li><a href="#root-access-via-putty-key">Root access via PuTTY Key</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -1235,8 +1228,6 @@ Within the home folder, we can find an interesting zip:</p>
         document.head.appendChild(customFont);
     }());
 </script>
-
-
 
     </body>
 </html>
