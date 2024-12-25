@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
 <title>HackTheBox - PC</title>
 
-<link rel='canonical' href='https://spencerja.github.io/post/hackthebox-pc/'>
+<link rel='canonical' href='/post/hackthebox-pc/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - PC">
 <meta property='og:description' content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.">
-<meta property='og:url' content='https://spencerja.github.io/post/hackthebox-pc/'>
+<meta property='og:url' content='/post/hackthebox-pc/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gRPC' /><meta property='article:tag' content='Postman' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='pyLoad' /><meta property='article:tag' content='CSRF' /><meta property='article:published_time' content='2023-10-07T10:18:48-05:00'/><meta property='article:modified_time' content='2023-10-07T10:18:48-05:00'/><meta property='og:image' content='https://spencerja.github.io/post/hackthebox-pc/PC.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gRPC' /><meta property='article:tag' content='Postman' /><meta property='article:tag' content='SQLite' /><meta property='article:tag' content='SQL Injection' /><meta property='article:tag' content='pyLoad' /><meta property='article:tag' content='CSRF' /><meta property='article:published_time' content='2023-10-07T10:18:48-05:00'/><meta property='article:modified_time' content='2023-10-07T10:18:48-05:00'/><meta property='og:image' content='/post/hackthebox-pc/PC.png' />
 <meta name="twitter:title" content="HackTheBox - PC">
 <meta name="twitter:description" content="PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://spencerja.github.io/post/hackthebox-pc/PC.png' />
+    <meta name="twitter:image" content='/post/hackthebox-pc/PC.png' />
     </head>
     <body class="
     article-page
@@ -77,7 +77,7 @@
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
                         rel="me"
                     >
                         
@@ -241,21 +241,21 @@
         
         <div class="widget--toc">
             <nav id="TableOfContents">
-  <ol>
+  <ul>
     <li><a href="#enumeration">Enumeration</a>
-      <ol>
+      <ul>
         <li><a href="#interacting-with-grpc-via-postman">Interacting with gRPC via Postman</a></li>
         <li><a href="#sql-injection-in-getinfo-function">SQL Injection in getInfo function</a></li>
-      </ol>
+      </ul>
     </li>
     <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
+      <ul>
         <li><a href="#internal-web-server-pyload">Internal web server pyLoad</a></li>
         <li><a href="#rce-as-root-from-pyload-vulnerability-cve-2023-0297">RCE as root from pyLoad vulnerability (CVE-2023-0297)</a></li>
-      </ol>
+      </ul>
     </li>
     <li><a href="#reflection">Reflection</a></li>
-  </ol>
+  </ul>
 </nav>
         </div>
     </section>

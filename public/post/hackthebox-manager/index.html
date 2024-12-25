@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
 <title>HackTheBox - Manager</title>
 
-<link rel='canonical' href='https://spencerja.github.io/post/hackthebox-manager/'>
+<link rel='canonical' href='/post/hackthebox-manager/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Manager">
 <meta property='og:description' content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials.">
-<meta property='og:url' content='https://spencerja.github.io/post/hackthebox-manager/'>
+<meta property='og:url' content='/post/hackthebox-manager/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Kerbrute' /><meta property='article:tag' content='MSSQL' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='Active Directory Certificate Services' /><meta property='article:tag' content='certipy' /><meta property='article:published_time' content='2024-03-16T06:05:15-06:00'/><meta property='article:modified_time' content='2024-03-16T06:05:15-06:00'/><meta property='og:image' content='https://spencerja.github.io/post/hackthebox-manager/Manager.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Kerbrute' /><meta property='article:tag' content='MSSQL' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='Active Directory Certificate Services' /><meta property='article:tag' content='certipy' /><meta property='article:published_time' content='2024-03-16T06:05:15-06:00'/><meta property='article:modified_time' content='2024-03-16T06:05:15-06:00'/><meta property='og:image' content='/post/hackthebox-manager/Manager.png' />
 <meta name="twitter:title" content="HackTheBox - Manager">
 <meta name="twitter:description" content="Manager is a medium difficulty box relying on Active Directory. We can discover common usernames in use by utilizing Kerbrute with a general username list. The service account Operator has been set up with a weak password that can be easily guessed. Upon authenticating to the MSSQL service using the operator account, we can enumerate the filesystem with xp_dirtree and find a critical backup zip is insecurely placed in the web filesystem, allowing us to access and download directly. We can log on remotely with credentials placed in the backup, and use bloodhound for enumeration. Our compromised user is in a group associated with the AD Certificate Services, and using certipy we discover a template attack we might use to acquire Administrator credentials."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://spencerja.github.io/post/hackthebox-manager/Manager.png' />
+    <meta name="twitter:image" content='/post/hackthebox-manager/Manager.png' />
     </head>
     <body class="
     article-page
@@ -77,7 +77,7 @@
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="Github"
+                        title="GitHub"
                         rel="me"
                     >
                         
@@ -241,37 +241,37 @@
         
         <div class="widget--toc">
             <nav id="TableOfContents">
-  <ol>
+  <ul>
     <li><a href="#enumeration">Enumeration</a>
-      <ol>
+      <ul>
         <li><a href="#probing-active-directory">Probing Active Directory</a></li>
         <li><a href="#enumerating-the-website">Enumerating The Website</a></li>
         <li><a href="#returning-to-active-directory-attacks">Returning to Active Directory Attacks</a></li>
-      </ol>
+      </ul>
     </li>
     <li><a href="#foothold">Foothold</a>
-      <ol>
+      <ul>
         <li><a href="#enumeration-through-mssql">Enumeration through MSSQL</a></li>
         <li><a href="#enumerating-the-web-server-filesystem">Enumerating The Web Server Filesystem</a></li>
-      </ol>
+      </ul>
     </li>
     <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ol>
+      <ul>
         <li><a href="#active-directory-enumeration-via-bloodhound">Active Directory Enumeration via Bloodhound</a>
-          <ol>
+          <ul>
             <li><a href="#running-sharphound">Running SharpHound</a></li>
             <li><a href="#initializing-bloodhound">Initializing BloodHound</a></li>
             <li><a href="#raven-is-a-member-of-certificate-service-dcom-access">Raven is a member of Certificate Service Dcom Access</a></li>
-          </ol>
+          </ul>
         </li>
         <li><a href="#exploiting-ad-certificate-services">Exploiting AD Certificate Services</a>
-          <ol>
+          <ul>
             <li><a href="#using-esc7-attack-2">Using ESC7 attack #2:</a></li>
-          </ol>
+          </ul>
         </li>
-      </ol>
+      </ul>
     </li>
-  </ol>
+  </ul>
 </nav>
         </div>
     </section>
