@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="en" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.">
 <title>HackTheBox - Keeper</title>
 
-<link rel='canonical' href='/post/hackthebox-keeper/'>
+<link rel='canonical' href='https://spencerja.github.io/post/hackthebox-keeper/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Keeper">
 <meta property='og:description' content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root.">
-<meta property='og:url' content='/post/hackthebox-keeper/'>
+<meta property='og:url' content='https://spencerja.github.io/post/hackthebox-keeper/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='KeePass' /><meta property='article:tag' content='BestPractical' /><meta property='article:tag' content='putty' /><meta property='article:published_time' content='2024-02-10T07:29:34-06:00'/><meta property='article:modified_time' content='2024-02-10T07:29:34-06:00'/><meta property='og:image' content='/post/hackthebox-keeper/Keeper.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='KeePass' /><meta property='article:tag' content='BestPractical' /><meta property='article:tag' content='putty' /><meta property='article:published_time' content='2024-02-10T07:29:34-06:00'/><meta property='article:modified_time' content='2024-02-10T07:29:34-06:00'/><meta property='og:image' content='https://spencerja.github.io/post/hackthebox-keeper/Keeper.png' />
 <meta name="twitter:title" content="HackTheBox - Keeper">
 <meta name="twitter:description" content="Keeper is an easy box that keeps to the very basics of misconfiguration issues, no complex abuse needed. To start, the webservice is left vulnerable through default credentials being unchanged. Within the web service, a user's setup password is in plain view. The password is also unchanged, allowing us to authenticate via SSH as the user. From here, we can use a recent KeePass vulnerability to leak the keepass master password from an error dump file. After accessing the keepass vault, we find a PuTTY RSA key in the notes, which we can use to authenticate as root."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='/post/hackthebox-keeper/Keeper.png' />
+    <meta name="twitter:image" content='https://spencerja.github.io/post/hackthebox-keeper/Keeper.png' />
     </head>
     <body class="
     article-page
@@ -77,7 +77,7 @@
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="GitHub"
+                        title="Github"
                         rel="me"
                     >
                         
@@ -241,25 +241,25 @@
         
         <div class="widget--toc">
             <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#enumeration">Enumeration</a>
-      <ul>
+      <ol>
         <li><a href="#enumerating-web-service">Enumerating Web Service</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#foothold">Foothold</a>
-      <ul>
+      <ol>
         <li><a href="#login-via-default-credentials">Login via default credentials</a></li>
         <li><a href="#system-access-via-unsecure-storage-of-passwords">System access via unsecure storage of passwords</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ul>
+      <ol>
         <li><a href="#leveraging-keepass-cve-2023-32784">Leveraging Keepass CVE 2023-32784</a></li>
         <li><a href="#root-access-via-putty-key">Root access via PuTTY Key</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
         </div>
     </section>

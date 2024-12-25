@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="en" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
 <title>HackTheBox - Appsanity</title>
 
-<link rel='canonical' href='/post/hackthebox-appsanity/'>
+<link rel='canonical' href='https://spencerja.github.io/post/hackthebox-appsanity/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Appsanity">
 <meta property='og:description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
-<meta property='og:url' content='/post/hackthebox-appsanity/'>
+<meta property='og:url' content='https://spencerja.github.io/post/hackthebox-appsanity/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='/post/hackthebox-appsanity/Appsanity.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='https://spencerja.github.io/post/hackthebox-appsanity/Appsanity.png' />
 <meta name="twitter:title" content="HackTheBox - Appsanity">
 <meta name="twitter:description" content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='/post/hackthebox-appsanity/Appsanity.png' />
+    <meta name="twitter:image" content='https://spencerja.github.io/post/hackthebox-appsanity/Appsanity.png' />
     </head>
     <body class="
     article-page
@@ -77,7 +77,7 @@
                     <a 
                         href='https://github.com/spencerja'
                         target="_blank"
-                        title="GitHub"
+                        title="Github"
                         rel="me"
                     >
                         
@@ -241,9 +241,9 @@
         
         <div class="widget--toc">
             <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#enumeration">Enumeration</a>
-      <ul>
+      <ol>
         <li><a href="#enumerating-account-registration">Enumerating account registration</a></li>
         <li><a href="#discovery-of-portal-subdomain">Discovery of portal subdomain</a></li>
         <li><a href="#examining-authenitcation-token">Examining authenitcation token</a></li>
@@ -253,32 +253,32 @@
         <li><a href="#remote-connection-possible-in-prescription-link-submission">Remote connection possible in Prescription Link submission</a></li>
         <li><a href="#ssrf-potential-in-prescription-link">SSRF potential in Prescription Link</a></li>
         <li><a href="#fuzzing-internal-ports-via-ssrf">Fuzzing internal ports via SSRF</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#foothold">Foothold</a>
-      <ul>
+      <ol>
         <li><a href="#remote-shell-access-via-ssrf--lfi-vulnerabilities">Remote Shell access via SSRF + LFI vulnerabilities</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#lateral-movement">Lateral Movement</a>
-      <ul>
+      <ol>
         <li><a href="#enumerating-the-examinationpanel">Enumerating the ExaminationPanel</a></li>
         <li><a href="#analyzing-examinationmanagementdll">Analyzing ExaminationManagement.dll</a></li>
-      </ul>
+      </ol>
     </li>
     <li><a href="#privilege-escalation">Privilege Escalation</a>
-      <ul>
+      <ol>
         <li><a href="#discovery-of-reports-management-console">Discovery of Reports Management Console</a></li>
         <li><a href="#analysis-of-reportmanagementexe">Analysis of ReportManagement.exe</a>
-          <ul>
+          <ol>
             <li><a href="#setting-up-process-monitor-in-windows">Setting up Process Monitor in Windows</a></li>
             <li><a href="#using-process-monitor-to-track-each-command">Using Process Monitor to track each command</a></li>
-          </ul>
+          </ol>
         </li>
         <li><a href="#abusing-remotemanagement-via-dll-hijacking">Abusing RemoteManagement via DLL hijacking</a></li>
-      </ul>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
         </div>
     </section>
