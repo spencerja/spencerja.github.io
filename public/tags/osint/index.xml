@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>OSINT on Spencer&#39;s Blog</title>
-        <link>//localhost:1313/tags/osint/</link>
+        <link>/tags/osint/</link>
         <description>Recent content in OSINT on Spencer&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Sat, 18 Nov 2023 10:18:48 -0500</lastBuildDate><atom:link href="//localhost:1313/tags/osint/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 18 Nov 2023 10:18:48 -0500</lastBuildDate><atom:link href="/tags/osint/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>1337UP CTF</title>
-        <link>//localhost:1313/post/1337up-ctf/</link>
+        <link>/post/1337up-ctf/</link>
         <pubDate>Sat, 18 Nov 2023 10:18:48 -0500</pubDate>
         
-        <guid>//localhost:1313/post/1337up-ctf/</guid>
+        <guid>/post/1337up-ctf/</guid>
         <description>&lt;h2 id=&#34;web&#34;&gt;Web
 &lt;/h2&gt;&lt;h3 id=&#34;ctfc&#34;&gt;CTFC
 &lt;/h3&gt;&lt;blockquote&gt;
@@ -96,10 +96,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;when we enter the page, we are prompted to create an account. There are no limitations, so creating an account is very simple. When we enter, we see two challenges associated to the first 2 entries in the database:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/chall.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/chall.png&#34;
 	width=&#34;925&#34;
 	height=&#34;717&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/chall_hu5498920412502027544.png 480w, //localhost:1313/post/1337up-ctf/Images/chall_hu8216071503747432951.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/chall_hu5498920412502027544.png 480w, /post/1337up-ctf/Images/chall_hu8216071503747432951.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -109,10 +109,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;The third challenge is not there, but notice the &amp;ldquo;release&amp;rdquo; is set to &amp;ldquo;False&amp;rdquo; for the third one. When trying to answer questions for the one listed, we see the answers match what we expect from the database:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/cryptocat.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/cryptocat.png&#34;
 	width=&#34;835&#34;
 	height=&#34;469&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/cryptocat_hu11962926885360317813.png 480w, //localhost:1313/post/1337up-ctf/Images/cryptocat_hu13153300459589956858.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/cryptocat_hu11962926885360317813.png 480w, /post/1337up-ctf/Images/cryptocat_hu13153300459589956858.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -122,10 +122,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;If we analyze our request using Burp proxy or perhaps just with Firefox&amp;rsquo;s Network tool, we can see the request data being sent:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/networkrequest.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/networkrequest.png&#34;
 	width=&#34;948&#34;
 	height=&#34;233&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/networkrequest_hu4497488386912987334.png 480w, //localhost:1313/post/1337up-ctf/Images/networkrequest_hu11450976670789320774.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/networkrequest_hu4497488386912987334.png 480w, /post/1337up-ctf/Images/networkrequest_hu11450976670789320774.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -145,10 +145,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;If we modify this request to &lt;code&gt;&amp;quot;_id:3&amp;quot;&lt;/code&gt;, then perhaps we can send a request to the 3rd challenge. However, the answer will be the flag, which we do not know. Since this is NoSQL, we might be able to abuse &lt;a class=&#34;link&#34; href=&#34;https://book.hacktricks.xyz/pentesting-web/nosql-injection#extract-data-information&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;NoSQL Injection&lt;/a&gt; combined with regex queries to leak the flag. The concept goes as follows: using regex wildcards, we can generate a passing result despite knowing none of the characters. We can sequentially guess a single character 1 request at a time, and whenever we land on a correct one, the check will once again pass. For this, I copied my network request directly to &lt;code&gt;curl&lt;/code&gt; although utilizing a tool such as Brupsuite will have a cleaner look to manage:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/copycurl.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/copycurl.png&#34;
 	width=&#34;995&#34;
 	height=&#34;233&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/copycurl_hu18429906071922113792.png 480w, //localhost:1313/post/1337up-ctf/Images/copycurl_hu5212618089273167940.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/copycurl_hu18429906071922113792.png 480w, /post/1337up-ctf/Images/copycurl_hu5212618089273167940.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -275,10 +275,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;The first photo is a simple lizard on a fence:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/picture.jpg&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/picture.jpg&#34;
 	width=&#34;5184&#34;
 	height=&#34;3456&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/picture_hu17459129952803054511.jpg 480w, //localhost:1313/post/1337up-ctf/Images/picture_hu680669865149384228.jpg 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/picture_hu17459129952803054511.jpg 480w, /post/1337up-ctf/Images/picture_hu680669865149384228.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -307,10 +307,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;We can see the artist is named &lt;code&gt;fl0pfl0p5&lt;/code&gt;. A quick google search for the name reveals an &lt;code&gt;about.me&lt;/code&gt; page, and a reddit account. Delving further into reddit in particular, we can see another reddit page of interest:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/redditsearch.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/redditsearch.png&#34;
 	width=&#34;844&#34;
 	height=&#34;578&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/redditsearch_hu12160101660346986618.png 480w, //localhost:1313/post/1337up-ctf/Images/redditsearch_hu11764394324734418788.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/redditsearch_hu12160101660346986618.png 480w, /post/1337up-ctf/Images/redditsearch_hu11764394324734418788.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -321,10 +321,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;In the &lt;a class=&#34;link&#34; href=&#34;https://www.reddit.com/r/DailyCodingDose/comments/15l73xa/comment/k1d8b6v/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;2nd post&lt;/a&gt;, we see a different named user created a github page under the name &lt;code&gt;fl0pfl0p5&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/fl0pgithub.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/fl0pgithub.png&#34;
 	width=&#34;844&#34;
 	height=&#34;578&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/fl0pgithub_hu8058557054469637109.png 480w, //localhost:1313/post/1337up-ctf/Images/fl0pgithub_hu12996659614109641400.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/fl0pgithub_hu8058557054469637109.png 480w, /post/1337up-ctf/Images/fl0pgithub_hu12996659614109641400.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -334,10 +334,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;The github page itself is not useful, but does have a cute dead end. A hello world script has a commit &amp;ldquo;removed hardcoded secret&amp;rdquo;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/secretcommit.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/secretcommit.png&#34;
 	width=&#34;945&#34;
 	height=&#34;472&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/secretcommit_hu13355580549308438441.png 480w, //localhost:1313/post/1337up-ctf/Images/secretcommit_hu18022686732596021554.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/secretcommit_hu13355580549308438441.png 480w, /post/1337up-ctf/Images/secretcommit_hu18022686732596021554.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -348,10 +348,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;The important information from the reddit post is we now have a different username connected, &lt;code&gt;m4r64r1n3&lt;/code&gt;.  We can find that this person has a &lt;a class=&#34;link&#34; href=&#34;https://nitter.net/m4r64r1n3&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;twitter account&lt;/a&gt; as well, and if you&amp;rsquo;re paying careful attention you might also note that the account was created in September, the same time where all previous activity has been happening.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/twitter1.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/twitter1.png&#34;
 	width=&#34;363&#34;
 	height=&#34;507&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/twitter1_hu17688052110981622899.png 480w, //localhost:1313/post/1337up-ctf/Images/twitter1_hu12046948936138338503.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/twitter1_hu17688052110981622899.png 480w, /post/1337up-ctf/Images/twitter1_hu12046948936138338503.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -362,10 +362,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;We can see that this person &lt;a class=&#34;link&#34; href=&#34;https://nitter.net/m4r64r1n3/status/1706488480753242352#m&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;posted a different picture&lt;/a&gt; on the twitter account. Analyzing with &lt;code&gt;exiftool&lt;/code&gt; does not give us more information, but when we image search via google, we can find it is associated with a new blog page, and a 3rd username. Note that in order to see this result, I had to select &amp;ldquo;Find Image Source&amp;rdquo; on the image results page.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/exactmatches.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/exactmatches.png&#34;
 	width=&#34;1069&#34;
 	height=&#34;385&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/exactmatches_hu7777128514249589777.png 480w, //localhost:1313/post/1337up-ctf/Images/exactmatches_hu10735431310785465931.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/exactmatches_hu7777128514249589777.png 480w, /post/1337up-ctf/Images/exactmatches_hu10735431310785465931.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -376,10 +376,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;When we visit the &lt;a class=&#34;link&#34; href=&#34;https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;blog page&lt;/a&gt;, we see an interesting anonymous comment: &amp;ldquo;I don&amp;rsquo;t think it&amp;rsquo;s a good idea to share your location online.&amp;rdquo; Wise words indeed.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/anoncomment.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/anoncomment.png&#34;
 	width=&#34;893&#34;
 	height=&#34;772&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/anoncomment_hu13799451448797382995.png 480w, //localhost:1313/post/1337up-ctf/Images/anoncomment_hu4658930347838877701.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/anoncomment_hu13799451448797382995.png 480w, /post/1337up-ctf/Images/anoncomment_hu4658930347838877701.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -390,10 +390,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;There is no location disclosure here anymore though, but perhaps it has been saved in the web archives. When we check the &lt;a class=&#34;link&#34; href=&#34;https://archive.org/web/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;wayback machine&lt;/a&gt;, we can see an archive conveniently placed on October 2, 1 day before this comment about sharing a location.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/waybackmachine.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/waybackmachine.png&#34;
 	width=&#34;1206&#34;
 	height=&#34;375&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/waybackmachine_hu15490592858844966741.png 480w, //localhost:1313/post/1337up-ctf/Images/waybackmachine_hu10835580206581209981.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/waybackmachine_hu15490592858844966741.png 480w, /post/1337up-ctf/Images/waybackmachine_hu10835580206581209981.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -404,10 +404,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;When we &lt;a class=&#34;link&#34; href=&#34;https://web.archive.org/web/20231002010103/https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;view the archive&lt;/a&gt;, we see the flag!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/wayback.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/wayback.png&#34;
 	width=&#34;954&#34;
 	height=&#34;521&#34;
-	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/wayback_hu12232704319679834200.png 480w, //localhost:1313/post/1337up-ctf/Images/wayback_hu5334788372078723140.png 1024w&#34;
+	srcset=&#34;/post/1337up-ctf/Images/wayback_hu12232704319679834200.png 480w, /post/1337up-ctf/Images/wayback_hu5334788372078723140.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -421,10 +421,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
         </item>
         <item>
         <title>UIUCTF_2023</title>
-        <link>//localhost:1313/post/uiuctf_2023/</link>
+        <link>/post/uiuctf_2023/</link>
         <pubDate>Mon, 03 Jul 2023 11:37:04 -0500</pubDate>
         
-        <guid>//localhost:1313/post/uiuctf_2023/</guid>
+        <guid>/post/uiuctf_2023/</guid>
         <description>&lt;h2 id=&#34;misc&#34;&gt;Misc
 &lt;/h2&gt;&lt;h3 id=&#34;corny-kernel&#34;&gt;Corny Kernel
 &lt;/h3&gt;&lt;blockquote&gt;
@@ -661,10 +661,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Provided image:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/uiuctf_2023/images/chicago.jpeg&#34;
+&lt;p&gt;&lt;img src=&#34;/post/uiuctf_2023/images/chicago.jpeg&#34;
 	width=&#34;4032&#34;
 	height=&#34;3024&#34;
-	srcset=&#34;//localhost:1313/post/uiuctf_2023/images/chicago_hu8867760377871744853.jpeg 480w, //localhost:1313/post/uiuctf_2023/images/chicago_hu18198296667976670140.jpeg 1024w&#34;
+	srcset=&#34;/post/uiuctf_2023/images/chicago_hu8867760377871744853.jpeg 480w, /post/uiuctf_2023/images/chicago_hu18198296667976670140.jpeg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;chicago.jpeg&#34;
@@ -705,10 +705,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Provided image:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/uiuctf_2023/images/chal.jpg&#34;
+&lt;p&gt;&lt;img src=&#34;/post/uiuctf_2023/images/chal.jpg&#34;
 	width=&#34;3024&#34;
 	height=&#34;4032&#34;
-	srcset=&#34;//localhost:1313/post/uiuctf_2023/images/chal_hu962314130818679427.jpg 480w, //localhost:1313/post/uiuctf_2023/images/chal_hu1687258251584232499.jpg 1024w&#34;
+	srcset=&#34;/post/uiuctf_2023/images/chal_hu962314130818679427.jpg 480w, /post/uiuctf_2023/images/chal_hu1687258251584232499.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;chall.jpg&#34;
@@ -721,10 +721,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;The image contains a lot of items, but only a couple stand out as interesting. The first being an insurance letter with the return address in plain sight. Trying &lt;code&gt;uiuctf{16530}&lt;/code&gt; did not pass, so this address is not it. The other letter, however, has the mail address hidden but the mail barcode is shown in plain sight. &lt;a class=&#34;link&#34; href=&#34;https://postalpro.usps.com/mailing/intelligent-mail-barcode&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Intelligent Mail Barcodes&lt;/a&gt; are used by the USPS to sort mail delivery quickly and easily. If we can decode this, we might be able to learn Jonah&amp;rsquo;s zip code. We can convert the barcode using this decoder key, then submitting it to an online decoder tool:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/uiuctf_2023/images/decoder_key.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/uiuctf_2023/images/decoder_key.png&#34;
 	width=&#34;435&#34;
 	height=&#34;194&#34;
-	srcset=&#34;//localhost:1313/post/uiuctf_2023/images/decoder_key_hu15881053902232403787.png 480w, //localhost:1313/post/uiuctf_2023/images/decoder_key_hu1192639586211430208.png 1024w&#34;
+	srcset=&#34;/post/uiuctf_2023/images/decoder_key_hu15881053902232403787.png 480w, /post/uiuctf_2023/images/decoder_key_hu1192639586211430208.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;decoder_key.png&#34;
@@ -739,10 +739,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;code&gt;FDFFDDFFDDDDFFDDDFFDDDDDFFDDDFFDDDFFDDFDFDDFFDDFDDFF&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Using &lt;a class=&#34;link&#34; href=&#34;https://www.dcode.fr/barcode-postnet&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;dcode.fr to decode&lt;/a&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/uiuctf_2023/images/decoded.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/uiuctf_2023/images/decoded.png&#34;
 	width=&#34;1018&#34;
 	height=&#34;668&#34;
-	srcset=&#34;//localhost:1313/post/uiuctf_2023/images/decoded_hu6886624712182865936.png 480w, //localhost:1313/post/uiuctf_2023/images/decoded_hu6908746106404465087.png 1024w&#34;
+	srcset=&#34;/post/uiuctf_2023/images/decoded_hu6886624712182865936.png 480w, /post/uiuctf_2023/images/decoded_hu6908746106404465087.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;decoded.png&#34;
@@ -759,10 +759,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
         </item>
         <item>
         <title>NahamConCTF_2023</title>
-        <link>//localhost:1313/post/nahamconctf_2023/</link>
+        <link>/post/nahamconctf_2023/</link>
         <pubDate>Sun, 18 Jun 2023 20:41:32 -0500</pubDate>
         
-        <guid>//localhost:1313/post/nahamconctf_2023/</guid>
+        <guid>/post/nahamconctf_2023/</guid>
         <description>&lt;h2 id=&#34;warmup&#34;&gt;Warmup
 &lt;/h2&gt;&lt;h3 id=&#34;fast-hands&#34;&gt;Fast Hands
 &lt;/h3&gt;&lt;blockquote&gt;
@@ -771,10 +771,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;We are given a button to Capture The Flag:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141050.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616141050.png&#34;
 	width=&#34;418&#34;
 	height=&#34;119&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141050_hu17602236590389709139.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616141050_hu8610206567782135126.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616141050_hu17602236590389709139.png 480w, /post/nahamconctf_2023/images/20230616141050_hu8610206567782135126.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616141050.png&#34;
@@ -787,10 +787,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;Clicking the button opens a new window that closes rather abruptly. The challenge prompt suggests we be quick, so I am thinking a &lt;code&gt;curl&lt;/code&gt; request might be good since the contents do not close. Right clicking does not, however, allow me to copy a link url.
 I decided to see how this action is behaving when redirected through burp:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141445.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616141445.png&#34;
 	width=&#34;1022&#34;
 	height=&#34;286&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141445_hu11296472470772976090.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616141445_hu2673055718321961467.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616141445_hu11296472470772976090.png 480w, /post/nahamconctf_2023/images/20230616141445_hu2673055718321961467.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616141445.png&#34;
@@ -803,10 +803,10 @@ I decided to see how this action is behaving when redirected through burp:&lt;/p
 &gt;&lt;/p&gt;
 &lt;p&gt;Interception does indeed work great. We can see on click, we are redirected to /capture_the_flag.html.&lt;/p&gt;
 &lt;p&gt;When we manually follow the link:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141617.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616141617.png&#34;
 	width=&#34;874&#34;
 	height=&#34;161&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141617_hu11965746761896407620.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616141617_hu5953788332780818781.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616141617_hu11965746761896407620.png 480w, /post/nahamconctf_2023/images/20230616141617_hu5953788332780818781.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616141617.png&#34;
@@ -871,10 +871,10 @@ I decided to see how this action is behaving when redirected through burp:&lt;/p
 &lt;hr&gt;
 &lt;p&gt;Visiting the page gives us a very non-interactive page where we might buy glasses.
 Checking the source code with ctrl+U is an absolute mess. However, since everything I interact with does not take me anywhere new, I want to view html code on the page. Using right click to inspect has an interesting interaction:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615234612.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615234612.png&#34;
 	width=&#34;525&#34;
 	height=&#34;155&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615234612_hu7132239225272918884.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615234612_hu4573795720626956932.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615234612_hu7132239225272918884.png 480w, /post/nahamconctf_2023/images/20230615234612_hu4573795720626956932.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615234612.png&#34;
@@ -906,10 +906,10 @@ Checking the source code with ctrl+U is an absolute mess. However, since everyth
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Here is the same selection displayed on the webpage:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615234853.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615234853.png&#34;
 	width=&#34;600&#34;
 	height=&#34;195&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615234853_hu9360879710809762801.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615234853_hu16884123713412668358.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615234853_hu9360879710809762801.png 480w, /post/nahamconctf_2023/images/20230615234853_hu16884123713412668358.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615234853.png&#34;
@@ -1072,10 +1072,10 @@ Checking the source code with ctrl+U is an absolute mess. However, since everyth
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Within the google sheet, we see a hidden sheet if we check the bottom left:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615161723.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615161723.png&#34;
 	width=&#34;273&#34;
 	height=&#34;121&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615161723_hu6404910133801271460.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615161723_hu1669402232739835506.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615161723_hu6404910133801271460.png 480w, /post/nahamconctf_2023/images/20230615161723_hu1669402232739835506.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615161723.png&#34;
@@ -1087,10 +1087,10 @@ Checking the source code with ctrl+U is an absolute mess. However, since everyth
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;It seems there is no way to view this as long as it is owned by somebody else, but it is possible to clone it into my own google sheet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615161942.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615161942.png&#34;
 	width=&#34;513&#34;
 	height=&#34;548&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615161942_hu15786077037483143604.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615161942_hu7924707645876570461.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615161942_hu15786077037483143604.png 480w, /post/nahamconctf_2023/images/20230615161942_hu7924707645876570461.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615161942.png&#34;
@@ -1102,10 +1102,10 @@ Checking the source code with ctrl+U is an absolute mess. However, since everyth
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Under our copied version, we can make the hidden sheet viewable. Within the hidden sheet seems to be a formula importing from another sheet, only viewable after turning on formulas (&lt;code&gt;View&lt;/code&gt; -&amp;gt; &lt;code&gt;Show&lt;/code&gt; -&amp;gt; &lt;code&gt;Formulas&lt;/code&gt;).&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615162221.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615162221.png&#34;
 	width=&#34;935&#34;
 	height=&#34;197&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615162221_hu5342264454107641064.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615162221_hu15443964319445149956.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615162221_hu5342264454107641064.png 480w, /post/nahamconctf_2023/images/20230615162221_hu15443964319445149956.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615162221.png&#34;
@@ -1126,10 +1126,10 @@ Checking the source code with ctrl+U is an absolute mess. However, since everyth
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;It isn&amp;rsquo;t obvious until I had exported, but it appears the flag was buried deep within the title name of the second sheet project. This can be verified using browser view, the flag is also present on hovering over the window:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615162731.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615162731.png&#34;
 	width=&#34;547&#34;
 	height=&#34;64&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615162731_hu3803344413944780576.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615162731_hu16807096555331210404.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615162731_hu3803344413944780576.png 480w, /post/nahamconctf_2023/images/20230615162731_hu16807096555331210404.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615162731.png&#34;
@@ -1898,10 +1898,10 @@ Also notable is the &lt;code&gt;tail -f&lt;/code&gt; . The -f flag is a live fol
 &lt;hr&gt;
 &lt;p&gt;First challenge places us on a golf course, at some kind of ceremony/speech.
 The first object of interest is the large event banner, containing the phrase &amp;ldquo;all Thailand Premier Championship&amp;rdquo;. There is more text, Road to (something), that I was unable to accurately read.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615163821.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615163821.png&#34;
 	width=&#34;537&#34;
 	height=&#34;484&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615163821_hu10836530790636469723.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615163821_hu12785617918239920796.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615163821_hu10836530790636469723.png 480w, /post/nahamconctf_2023/images/20230615163821_hu12785617918239920796.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615163821.png&#34;
@@ -1915,10 +1915,10 @@ The first object of interest is the large event banner, containing the phrase &a
 &lt;p&gt;Searching for &lt;code&gt;all Thailand&lt;/code&gt;, we quickly see a webpage for a &lt;a class=&#34;link&#34; href=&#34;https://www.allthailandgolftour.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;golf tour org&lt;/a&gt;. It seems like the right track. One common word that I found appearing was Singha, which might be matching in our image&amp;rsquo;s banner: &amp;ldquo;Road to Singha (something)&amp;rdquo;. The final word was still not readable for me, but this is enough to go on. Searching the golf tour website, I found &lt;a class=&#34;link&#34; href=&#34;https://www.youtube.com/embed/-HSBJw_06XQ?rel=0&amp;amp;wmode=transparent&amp;amp;autoplay=1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;all Thailand Premier Championship - Road to Singha Masters&lt;/a&gt; located on the media page. Following the link takes us to a video, and right away in the video we are given a location&amp;ndash;Singha Park in Khon Kaen.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164252.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615164252.png&#34;
 	width=&#34;357&#34;
 	height=&#34;233&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164252_hu506928876712483512.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615164252_hu13223410266014081390.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615164252_hu506928876712483512.png 480w, /post/nahamconctf_2023/images/20230615164252_hu13223410266014081390.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615164252.png&#34;
@@ -1929,10 +1929,10 @@ The first object of interest is the large event banner, containing the phrase &a
 		data-flex-basis=&#34;367px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164335.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615164335.png&#34;
 	width=&#34;423&#34;
 	height=&#34;253&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164335_hu524896829699230448.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615164335_hu10067587471139383404.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615164335_hu524896829699230448.png 480w, /post/nahamconctf_2023/images/20230615164335_hu10067587471139383404.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615164335.png&#34;
@@ -1944,10 +1944,10 @@ The first object of interest is the large event banner, containing the phrase &a
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;I found the tolerance to be rather strict, so I ended up locating the same exact capture on Google Maps as well.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164520.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615164520.png&#34;
 	width=&#34;526&#34;
 	height=&#34;311&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615164520_hu2755895493591371799.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615164520_hu9329722535499064504.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615164520_hu2755895493591371799.png 480w, /post/nahamconctf_2023/images/20230615164520_hu9329722535499064504.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615164520.png&#34;
@@ -1969,10 +1969,10 @@ The first object of interest is the large event banner, containing the phrase &a
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;The second challenge places us on a large boat near a dock, with vehicles on it. Unfortunately, boats very commonly travel internationally, so things such as language/flags on the boat may not give us interesting information. The land appears to have some unusual architecture, so I decided to screencap this region and see what a google image search can give me.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1516-50-43.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/2023-06-1516-50-43.png&#34;
 	width=&#34;1210&#34;
 	height=&#34;403&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1516-50-43_hu14198263368655490640.png 480w, //localhost:1313/post/nahamconctf_2023/images/2023-06-1516-50-43_hu4684996654646967856.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/2023-06-1516-50-43_hu14198263368655490640.png 480w, /post/nahamconctf_2023/images/2023-06-1516-50-43_hu4684996654646967856.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Screenshot from 2023-06-15 16-50-43.png&#34;
@@ -1986,10 +1986,10 @@ The first object of interest is the large event banner, containing the phrase &a
 &lt;p&gt;Very quickly I find a very similar capture, labeling it &lt;a class=&#34;link&#34; href=&#34;http://50yearsinitaly.blogspot.com/2012/11/napoleons-elba-hideaway.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;Napoleon&amp;rsquo;s Elba Hideaway&lt;/a&gt;.
 The article notes that this location is in Portoferraio, Italy.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615165719.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615165719.png&#34;
 	width=&#34;327&#34;
 	height=&#34;155&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615165719_hu6101862436576848423.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615165719_hu15143476740200782147.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615165719_hu6101862436576848423.png 480w, /post/nahamconctf_2023/images/20230615165719_hu15143476740200782147.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615165719.png&#34;
@@ -2000,10 +2000,10 @@ The article notes that this location is in Portoferraio, Italy.&lt;/p&gt;
 		data-flex-basis=&#34;506px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615165808.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615165808.png&#34;
 	width=&#34;601&#34;
 	height=&#34;343&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615165808_hu15411848168222197941.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615165808_hu2137836552872449017.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615165808_hu15411848168222197941.png 480w, /post/nahamconctf_2023/images/20230615165808_hu2137836552872449017.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615165808.png&#34;
@@ -2015,10 +2015,10 @@ The article notes that this location is in Portoferraio, Italy.&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Once again, the pointing at the dock itself is not specific enough. After a bit more trial and error, I find the exact location:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170122.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615170122.png&#34;
 	width=&#34;472&#34;
 	height=&#34;308&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170122_hu5219627275537723545.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615170122_hu14852017444810964557.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615170122_hu5219627275537723545.png 480w, /post/nahamconctf_2023/images/20230615170122_hu14852017444810964557.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615170122.png&#34;
@@ -2039,10 +2039,10 @@ The article notes that this location is in Portoferraio, Italy.&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;We are now in a park. Notably, there are large buildings on all sides of the park. We must be in not only a major city, but a city with a sizeable space dedicated to a grassy open park. My first inclination is New York City with its quite sizeable Central Park. Checking the terrain map, the Sheep Meadow location is a wide grassy area. I look for a street view and know right away that this is a match.
 From chall3:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170757.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615170757.png&#34;
 	width=&#34;914&#34;
 	height=&#34;467&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170757_hu15723920937948977576.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615170757_hu9863571668784769327.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615170757_hu15723920937948977576.png 480w, /post/nahamconctf_2023/images/20230615170757_hu9863571668784769327.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615170757.png&#34;
@@ -2054,10 +2054,10 @@ From chall3:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;From Sheep Meadow street view:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170908.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615170908.png&#34;
 	width=&#34;594&#34;
 	height=&#34;296&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615170908_hu17626629319471114189.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615170908_hu6300709813158746228.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615170908_hu17626629319471114189.png 480w, /post/nahamconctf_2023/images/20230615170908_hu6300709813158746228.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615170908.png&#34;
@@ -2069,10 +2069,10 @@ From chall3:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Once again, finding the same view location as the challenge:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615171150.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615171150.png&#34;
 	width=&#34;366&#34;
 	height=&#34;310&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615171150_hu16081354895809648132.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615171150_hu1624901779917299202.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615171150_hu16081354895809648132.png 480w, /post/nahamconctf_2023/images/20230615171150_hu1624901779917299202.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615171150.png&#34;
@@ -2093,10 +2093,10 @@ From chall3:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;In the final Geosint challenge, we are given a drone shot of what seems to be a suburban area setting. We are too far away do identify anything such as the language on signs or country flags, but we can note the very large number of train track lanes. Some buildings in the distance appear to have uncommon architecture, but not enough for me to draw any conclusions. My first guess is to take the most eye-catching building and see what image searches can do for me.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1517-16-51.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/2023-06-1517-16-51.png&#34;
 	width=&#34;659&#34;
 	height=&#34;367&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1517-16-51_hu18234396525249952909.png 480w, //localhost:1313/post/nahamconctf_2023/images/2023-06-1517-16-51_hu7578993864822600070.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/2023-06-1517-16-51_hu18234396525249952909.png 480w, /post/nahamconctf_2023/images/2023-06-1517-16-51_hu7578993864822600070.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Screenshot from 2023-06-15 17-16-51.png&#34;
@@ -2108,10 +2108,10 @@ From chall3:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;From this image, it was quickly identified as Bratislava Castle of Bratislava, Slovakia. This location does not match geographically, but the building&amp;rsquo;s design and colors match very well. The second building I searched for is the neighboring church-like building.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1517-27-17.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/2023-06-1517-27-17.png&#34;
 	width=&#34;192&#34;
 	height=&#34;318&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/2023-06-1517-27-17_hu18032428658248435708.png 480w, //localhost:1313/post/nahamconctf_2023/images/2023-06-1517-27-17_hu8281390338809339237.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/2023-06-1517-27-17_hu18032428658248435708.png 480w, /post/nahamconctf_2023/images/2023-06-1517-27-17_hu8281390338809339237.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Screenshot from 2023-06-15 17-27-17.png&#34;
@@ -2124,10 +2124,10 @@ From chall3:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;There were several identical matches for seemingly different buildings. However, one in particular mentions a castle with it in combination. &lt;a class=&#34;link&#34; href=&#34;https://www.komoot.com/highlight/3217858&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;this web posting&lt;/a&gt; seems to be reviewing it as a bike trail. Examining the geography in a google map search for &lt;code&gt;Schloss Ebenfurth&lt;/code&gt;, it instantly became clear that this is the same location as the challenge.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615173152.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615173152.png&#34;
 	width=&#34;433&#34;
 	height=&#34;233&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615173152_hu4328516349617501117.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615173152_hu3671770735385602622.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615173152_hu4328516349617501117.png 480w, /post/nahamconctf_2023/images/20230615173152_hu3671770735385602622.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615173152.png&#34;
@@ -2138,10 +2138,10 @@ From chall3:&lt;/p&gt;
 		data-flex-basis=&#34;446px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615173224.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615173224.png&#34;
 	width=&#34;564&#34;
 	height=&#34;329&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615173224_hu10555400248589947752.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615173224_hu8800167095152976666.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615173224_hu10555400248589947752.png 480w, /post/nahamconctf_2023/images/20230615173224_hu8800167095152976666.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615173224.png&#34;
@@ -2163,10 +2163,10 @@ From chall3:&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;Entering the website we see a pretty well-constructed page promoting &lt;code&gt;Hidden Figures&lt;/code&gt;, a pretty popular book/movie. None of the links take us to other pages, so there is little to be explored.
 Early on, I noticed that folder directory &lt;code&gt;/assets/&lt;/code&gt; is free to view. I thought perhaps there might be something hidden here, or in another commonly used folder type?&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616185356.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616185356.png&#34;
 	width=&#34;1820&#34;
 	height=&#34;458&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616185356_hu17091823093477718468.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616185356_hu14753804815501705053.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616185356_hu17091823093477718468.png 480w, /post/nahamconctf_2023/images/20230616185356_hu14753804815501705053.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616185356.png&#34;
@@ -2244,10 +2244,10 @@ Extracting with binwalk:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Viewing the hidden PNG image:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230617121633.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230617121633.png&#34;
 	width=&#34;1700&#34;
 	height=&#34;116&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230617121633_hu3441202308961360056.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230617121633_hu5117293524192417705.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230617121633_hu3441202308961360056.png 480w, /post/nahamconctf_2023/images/20230617121633_hu5117293524192417705.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230617121633.png&#34;
@@ -2266,10 +2266,10 @@ Extracting with binwalk:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;We are prompted to choose a username to log in. No password asked. Firstly trying admin, of course we are not allowed. So I go with my old friend &lt;code&gt;asdf&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615153302.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615153302.png&#34;
 	width=&#34;483&#34;
 	height=&#34;207&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615153302_hu12401132303088314162.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615153302_hu6294443826789364444.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615153302_hu12401132303088314162.png 480w, /post/nahamconctf_2023/images/20230615153302_hu6294443826789364444.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615153302.png&#34;
@@ -2281,10 +2281,10 @@ Extracting with binwalk:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;On login, it tells us that only admin can see the flag:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173145.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616173145.png&#34;
 	width=&#34;482&#34;
 	height=&#34;192&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173145_hu7393832208866158326.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616173145_hu8054624348227470677.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616173145_hu7393832208866158326.png 480w, /post/nahamconctf_2023/images/20230616173145_hu8054624348227470677.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616173145.png&#34;
@@ -2298,10 +2298,10 @@ Extracting with binwalk:&lt;/p&gt;
 &lt;p&gt;With how little content is on these pages, there is pretty much nothing else to consider other than editing the given cookie:
 &lt;code&gt;token=eyJhbGciOiJNRDVfSE1BQyJ9.eyJ1c2VybmFtZSI6ImFzZGYifQ.SKkdg9_2EbXj67FcZNnXIg&lt;/code&gt;
 Based on the cookie having 3 sections separated by dots, I immediately recognize this as a JWT. Using jwt.io to decode:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173339.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616173339.png&#34;
 	width=&#34;1178&#34;
 	height=&#34;521&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173339_hu6859061640641877783.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616173339_hu13750255246226924978.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616173339_hu6859061640641877783.png 480w, /post/nahamconctf_2023/images/20230616173339_hu13750255246226924978.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616173339.png&#34;
@@ -2328,10 +2328,10 @@ Based on the cookie having 3 sections separated by dots, I immediately recognize
 &lt;/div&gt;&lt;p&gt;Converting back to base64, our new token looks like this
 &lt;code&gt;eyJhbGciOiJNRDVfSE1BQyJ9.ewogICJ1c2VybmFtZSI6ICJhZG1pbiIKfQ.SKkdg9_2EbXj67FcZNnXIg&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;When I edit the cookie, it gives me an interesting new error:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173646.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616173646.png&#34;
 	width=&#34;938&#34;
 	height=&#34;86&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616173646_hu16178423462212437339.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616173646_hu6096890753136663098.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616173646_hu16178423462212437339.png 480w, /post/nahamconctf_2023/images/20230616173646_hu6096890753136663098.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616173646.png&#34;
@@ -2423,10 +2423,10 @@ Based on the cookie having 3 sections separated by dots, I immediately recognize
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;The secret key is &lt;code&gt;fsrwjcfszegvsyfa&lt;/code&gt;
 Now to generate a valid signature for our forged jwt. Using the first 2 base64 encoded segments, we perform HMAC-MD5 hashing, then convert from hex back to base64:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616174953.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616174953.png&#34;
 	width=&#34;1106&#34;
 	height=&#34;439&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616174953_hu1780411787314534197.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616174953_hu6782218997246644206.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616174953_hu1780411787314534197.png 480w, /post/nahamconctf_2023/images/20230616174953_hu6782218997246644206.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616174953.png&#34;
@@ -2447,10 +2447,10 @@ Now to generate a valid signature for our forged jwt. Using the first 2 base64 e
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Upon refreshing the page, we get the flag.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141001.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616141001.png&#34;
 	width=&#34;493&#34;
 	height=&#34;244&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616141001_hu16897681129568436626.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616141001_hu4475734941208441322.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616141001_hu16897681129568436626.png 480w, /post/nahamconctf_2023/images/20230616141001_hu4475734941208441322.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616141001.png&#34;
@@ -2469,10 +2469,10 @@ Now to generate a valid signature for our forged jwt. Using the first 2 base64 e
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Firstly, we are greeted with a sign-in page&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616165433.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616165433.png&#34;
 	width=&#34;366&#34;
 	height=&#34;491&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616165433_hu7769757932286518676.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616165433_hu502520786581116217.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616165433_hu7769757932286518676.png 480w, /post/nahamconctf_2023/images/20230616165433_hu502520786581116217.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616165433.png&#34;
@@ -2484,10 +2484,10 @@ Now to generate a valid signature for our forged jwt. Using the first 2 base64 e
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Typical admin:admin guesses do not work, so after making a new account&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616165611.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616165611.png&#34;
 	width=&#34;1110&#34;
 	height=&#34;399&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616165611_hu18138042967213493087.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616165611_hu4712117253275817106.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616165611_hu18138042967213493087.png 480w, /post/nahamconctf_2023/images/20230616165611_hu4712117253275817106.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616165611.png&#34;
@@ -2503,10 +2503,10 @@ Now to generate a valid signature for our forged jwt. Using the first 2 base64 e
 &lt;code&gt;http://challenge.nahamcon.com:32053/?success=Task%20created&lt;/code&gt;
 Editing the success= component will affect what is being displayed in green. After playing for a bit, I noticed that this is actually vulnerable to SSTI:
 &lt;code&gt;http://challenge.nahamcon.com:32053/?success={{7*7}}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616154856.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616154856.png&#34;
 	width=&#34;712&#34;
 	height=&#34;179&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616154856_hu11513414978327234135.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616154856_hu8097426181497659647.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616154856_hu11513414978327234135.png 480w, /post/nahamconctf_2023/images/20230616154856_hu8097426181497659647.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616154856.png&#34;
@@ -2621,10 +2621,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Unfortunately, opening a sqlite file is a bit tricky with the RCE that I am currently using. Moreover, dots are still blacklisted. It is fortunate that this folder only has one file, so we can use wildcard * to select &lt;code&gt;db.sqlite&lt;/code&gt; without using dot. When I try &lt;code&gt;cat /usr/src/app/DB/*&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616172048.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616172048.png&#34;
 	width=&#34;1265&#34;
 	height=&#34;85&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616172048_hu7177675040539749091.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616172048_hu7133356982165736633.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616172048_hu7177675040539749091.png 480w, /post/nahamconctf_2023/images/20230616172048_hu7133356982165736633.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616172048.png&#34;
@@ -2702,10 +2702,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;code&gt;flag{7b5b91c60796488148ddf3b227735979}&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;As a side note, we have the password for &lt;code&gt;admin&lt;/code&gt; now too, and can log in.
 &lt;code&gt;admin:T2dUL6Z#S9KH%x%i&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616172852.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616172852.png&#34;
 	width=&#34;1121&#34;
 	height=&#34;372&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616172852_hu9295678517331716289.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616172852_hu3810270833212618813.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616172852_hu9295678517331716289.png 480w, /post/nahamconctf_2023/images/20230616172852_hu3810270833212618813.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616172852.png&#34;
@@ -2723,10 +2723,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Firstly comes logging in. After trying and failing a few easy guesses like admin:admin, I made my own account with username &lt;code&gt;asdf&lt;/code&gt;. Upon entering we are led to a blog post:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615231203.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615231203.png&#34;
 	width=&#34;1218&#34;
 	height=&#34;712&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615231203_hu2016050719957999891.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615231203_hu14765815825195728369.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615231203_hu2016050719957999891.png 480w, /post/nahamconctf_2023/images/20230615231203_hu14765815825195728369.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615231203.png&#34;
@@ -2746,10 +2746,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;lt;script&amp;gt;alert(&amp;#39;XSS&amp;#39;);&amp;lt;/script&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615231619.png&#34;
+&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615231619.png&#34;
 	width=&#34;1113&#34;
 	height=&#34;456&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615231619_hu13536866873016769211.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615231619_hu16673593163855891616.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615231619_hu13536866873016769211.png 480w, /post/nahamconctf_2023/images/20230615231619_hu16673593163855891616.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615231619.png&#34;
@@ -2774,10 +2774,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;This XSS generates an image pointing to my webhook.site link, and adds the user&amp;rsquo;s &lt;code&gt;document.cookie&lt;/code&gt; to the end of the url. And so, when a victim views this page, the image will attempt to be loaded by visiting my webhook. The webhook will log the request information and with it, I will be able to see whatever cookies are associated with the victim&amp;rsquo;s session.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615230950.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615230950.png&#34;
 	width=&#34;1102&#34;
 	height=&#34;428&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615230950_hu8664303040376913390.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615230950_hu15556859809465727075.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615230950_hu8664303040376913390.png 480w, /post/nahamconctf_2023/images/20230615230950_hu15556859809465727075.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615230950.png&#34;
@@ -2805,10 +2805,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;When visiting /admin while having the token, we can find the flag.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615230911.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230615230911.png&#34;
 	width=&#34;1134&#34;
 	height=&#34;211&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230615230911_hu11059865186760526650.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230615230911_hu1266101176135921621.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230615230911_hu11059865186760526650.png 480w, /post/nahamconctf_2023/images/20230615230911_hu1266101176135921621.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230615230911.png&#34;
@@ -2827,10 +2827,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Visiting the website, there is a form to fill out custom information. Upon submitting data, we are generated a pdf webpage:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616151436.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/nahamconctf_2023/images/20230616151436.png&#34;
 	width=&#34;632&#34;
 	height=&#34;606&#34;
-	srcset=&#34;//localhost:1313/post/nahamconctf_2023/images/20230616151436_hu6134942456412677867.png 480w, //localhost:1313/post/nahamconctf_2023/images/20230616151436_hu14060364282115699684.png 1024w&#34;
+	srcset=&#34;/post/nahamconctf_2023/images/20230616151436_hu6134942456412677867.png 480w, /post/nahamconctf_2023/images/20230616151436_hu14060364282115699684.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230616151436.png&#34;
@@ -3009,10 +3009,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
         </item>
         <item>
         <title>N00bzCTF_2023</title>
-        <link>//localhost:1313/post/n00bzctf_2023/</link>
+        <link>/post/n00bzctf_2023/</link>
         <pubDate>Wed, 14 Jun 2023 20:25:09 -0500</pubDate>
         
-        <guid>//localhost:1313/post/n00bzctf_2023/</guid>
+        <guid>/post/n00bzctf_2023/</guid>
         <description>&lt;h2 id=&#34;misc&#34;&gt;Misc
 &lt;/h2&gt;&lt;h3 id=&#34;amazing-song-lyrics&#34;&gt;Amazing Song Lyrics
 &lt;/h3&gt;&lt;blockquote&gt;
@@ -3022,10 +3022,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/chall.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/chall.png&#34;
 	width=&#34;481&#34;
 	height=&#34;426&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/chall_hu8048679920431655891.png 480w, //localhost:1313/post/n00bzctf_2023/images/chall_hu1238616566508288431.png 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/chall_hu8048679920431655891.png 480w, /post/n00bzctf_2023/images/chall_hu1238616566508288431.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;chall.png&#34;
@@ -3038,10 +3038,10 @@ After spending a good amount of time looking for ways to bypass the filter, I ev
 &gt;&lt;/p&gt;
 &lt;p&gt;The image is a pictogram for certain sign languages, but what language? I am no expert in sign language so I begin with random google searching.
 A brief search for American Sign Language alphabet gives me hand shapes that look similar:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/original-1456065-2.jpg&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/original-1456065-2.jpg&#34;
 	width=&#34;350&#34;
 	height=&#34;263&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/original-1456065-2_hu9780541344432410234.jpg 480w, //localhost:1313/post/n00bzctf_2023/images/original-1456065-2_hu8999599864779763784.jpg 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/original-1456065-2_hu9780541344432410234.jpg 480w, /post/n00bzctf_2023/images/original-1456065-2_hu8999599864779763784.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;original-1456065-2.jpg&#34;
@@ -3078,10 +3078,10 @@ A brief search for American Sign Language alphabet gives me hand shapes that loo
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Visiting the site we are met with a Google form:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609144916.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/20230609144916.png&#34;
 	width=&#34;600&#34;
 	height=&#34;468&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609144916_hu16784053226341820019.png 480w, //localhost:1313/post/n00bzctf_2023/images/20230609144916_hu5139932894291445382.png 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/20230609144916_hu16784053226341820019.png 480w, /post/n00bzctf_2023/images/20230609144916_hu5139932894291445382.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230609144916.png&#34;
@@ -3117,10 +3117,10 @@ indeed &lt;code&gt;areroplane&lt;/code&gt; doesn&amp;rsquo;t work, however this 
 &lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/mission_moon.webp&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/mission_moon.webp&#34;
 	width=&#34;1200&#34;
 	height=&#34;794&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/mission_moon_hu15211952018294804255.webp 480w, //localhost:1313/post/n00bzctf_2023/images/mission_moon_hu425942528528589661.webp 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/mission_moon_hu15211952018294804255.webp 480w, /post/n00bzctf_2023/images/mission_moon_hu425942528528589661.webp 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;mission_moon.webp&#34;
@@ -3191,10 +3191,10 @@ With a mission name in mind, I visited the blog.jatan.space site mentioned, and 
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;Following the link:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609180928.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/20230609180928.png&#34;
 	width=&#34;332&#34;
 	height=&#34;505&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609180928_hu9520368178980679348.png 480w, //localhost:1313/post/n00bzctf_2023/images/20230609180928_hu5245823824367726460.png 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/20230609180928_hu9520368178980679348.png 480w, /post/n00bzctf_2023/images/20230609180928_hu5245823824367726460.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230609180928.png&#34;
@@ -3216,10 +3216,10 @@ With a mission name in mind, I visited the blog.jatan.space site mentioned, and 
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;We are not on the member list. But perhaps if we change the secret_phrase?
 After a couple guesses, we successfully get in with &lt;code&gt;secret_phrase=radical&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609181218.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/n00bzctf_2023/images/20230609181218.png&#34;
 	width=&#34;359&#34;
 	height=&#34;391&#34;
-	srcset=&#34;//localhost:1313/post/n00bzctf_2023/images/20230609181218_hu2140635315932000403.png 480w, //localhost:1313/post/n00bzctf_2023/images/20230609181218_hu4766915873524889783.png 1024w&#34;
+	srcset=&#34;/post/n00bzctf_2023/images/20230609181218_hu2140635315932000403.png 480w, /post/n00bzctf_2023/images/20230609181218_hu4766915873524889783.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Pasted image 20230609181218.png&#34;
