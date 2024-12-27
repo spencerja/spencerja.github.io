@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Exiftool on Spencer&#39;s Blog</title>
-        <link>/tags/exiftool/</link>
+        <link>//localhost:1313/tags/exiftool/</link>
         <description>Recent content in Exiftool on Spencer&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Sat, 18 Nov 2023 10:18:48 -0500</lastBuildDate><atom:link href="/tags/exiftool/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 18 Nov 2023 10:18:48 -0500</lastBuildDate><atom:link href="//localhost:1313/tags/exiftool/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>1337UP CTF</title>
-        <link>/post/1337up-ctf/</link>
+        <link>//localhost:1313/post/1337up-ctf/</link>
         <pubDate>Sat, 18 Nov 2023 10:18:48 -0500</pubDate>
         
-        <guid>/post/1337up-ctf/</guid>
+        <guid>//localhost:1313/post/1337up-ctf/</guid>
         <description>&lt;h2 id=&#34;web&#34;&gt;Web
 &lt;/h2&gt;&lt;h3 id=&#34;ctfc&#34;&gt;CTFC
 &lt;/h3&gt;&lt;blockquote&gt;
@@ -96,10 +96,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;when we enter the page, we are prompted to create an account. There are no limitations, so creating an account is very simple. When we enter, we see two challenges associated to the first 2 entries in the database:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/chall.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/chall.png&#34;
 	width=&#34;925&#34;
 	height=&#34;717&#34;
-	srcset=&#34;/post/1337up-ctf/Images/chall_hu5498920412502027544.png 480w, /post/1337up-ctf/Images/chall_hu8216071503747432951.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/chall_hu5498920412502027544.png 480w, //localhost:1313/post/1337up-ctf/Images/chall_hu8216071503747432951.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -109,10 +109,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;The third challenge is not there, but notice the &amp;ldquo;release&amp;rdquo; is set to &amp;ldquo;False&amp;rdquo; for the third one. When trying to answer questions for the one listed, we see the answers match what we expect from the database:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/cryptocat.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/cryptocat.png&#34;
 	width=&#34;835&#34;
 	height=&#34;469&#34;
-	srcset=&#34;/post/1337up-ctf/Images/cryptocat_hu11962926885360317813.png 480w, /post/1337up-ctf/Images/cryptocat_hu13153300459589956858.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/cryptocat_hu11962926885360317813.png 480w, //localhost:1313/post/1337up-ctf/Images/cryptocat_hu13153300459589956858.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -122,10 +122,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;If we analyze our request using Burp proxy or perhaps just with Firefox&amp;rsquo;s Network tool, we can see the request data being sent:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/networkrequest.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/networkrequest.png&#34;
 	width=&#34;948&#34;
 	height=&#34;233&#34;
-	srcset=&#34;/post/1337up-ctf/Images/networkrequest_hu4497488386912987334.png 480w, /post/1337up-ctf/Images/networkrequest_hu11450976670789320774.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/networkrequest_hu4497488386912987334.png 480w, //localhost:1313/post/1337up-ctf/Images/networkrequest_hu11450976670789320774.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -145,10 +145,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;If we modify this request to &lt;code&gt;&amp;quot;_id:3&amp;quot;&lt;/code&gt;, then perhaps we can send a request to the 3rd challenge. However, the answer will be the flag, which we do not know. Since this is NoSQL, we might be able to abuse &lt;a class=&#34;link&#34; href=&#34;https://book.hacktricks.xyz/pentesting-web/nosql-injection#extract-data-information&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;NoSQL Injection&lt;/a&gt; combined with regex queries to leak the flag. The concept goes as follows: using regex wildcards, we can generate a passing result despite knowing none of the characters. We can sequentially guess a single character 1 request at a time, and whenever we land on a correct one, the check will once again pass. For this, I copied my network request directly to &lt;code&gt;curl&lt;/code&gt; although utilizing a tool such as Brupsuite will have a cleaner look to manage:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/copycurl.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/copycurl.png&#34;
 	width=&#34;995&#34;
 	height=&#34;233&#34;
-	srcset=&#34;/post/1337up-ctf/Images/copycurl_hu18429906071922113792.png 480w, /post/1337up-ctf/Images/copycurl_hu5212618089273167940.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/copycurl_hu18429906071922113792.png 480w, //localhost:1313/post/1337up-ctf/Images/copycurl_hu5212618089273167940.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -275,10 +275,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;p&gt;The first photo is a simple lizard on a fence:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/picture.jpg&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/picture.jpg&#34;
 	width=&#34;5184&#34;
 	height=&#34;3456&#34;
-	srcset=&#34;/post/1337up-ctf/Images/picture_hu17459129952803054511.jpg 480w, /post/1337up-ctf/Images/picture_hu680669865149384228.jpg 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/picture_hu17459129952803054511.jpg 480w, //localhost:1313/post/1337up-ctf/Images/picture_hu680669865149384228.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -307,10 +307,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;We can see the artist is named &lt;code&gt;fl0pfl0p5&lt;/code&gt;. A quick google search for the name reveals an &lt;code&gt;about.me&lt;/code&gt; page, and a reddit account. Delving further into reddit in particular, we can see another reddit page of interest:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/redditsearch.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/redditsearch.png&#34;
 	width=&#34;844&#34;
 	height=&#34;578&#34;
-	srcset=&#34;/post/1337up-ctf/Images/redditsearch_hu12160101660346986618.png 480w, /post/1337up-ctf/Images/redditsearch_hu11764394324734418788.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/redditsearch_hu12160101660346986618.png 480w, //localhost:1313/post/1337up-ctf/Images/redditsearch_hu11764394324734418788.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -321,10 +321,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;In the &lt;a class=&#34;link&#34; href=&#34;https://www.reddit.com/r/DailyCodingDose/comments/15l73xa/comment/k1d8b6v/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;2nd post&lt;/a&gt;, we see a different named user created a github page under the name &lt;code&gt;fl0pfl0p5&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/fl0pgithub.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/fl0pgithub.png&#34;
 	width=&#34;844&#34;
 	height=&#34;578&#34;
-	srcset=&#34;/post/1337up-ctf/Images/fl0pgithub_hu8058557054469637109.png 480w, /post/1337up-ctf/Images/fl0pgithub_hu12996659614109641400.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/fl0pgithub_hu8058557054469637109.png 480w, //localhost:1313/post/1337up-ctf/Images/fl0pgithub_hu12996659614109641400.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -334,10 +334,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;The github page itself is not useful, but does have a cute dead end. A hello world script has a commit &amp;ldquo;removed hardcoded secret&amp;rdquo;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/secretcommit.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/secretcommit.png&#34;
 	width=&#34;945&#34;
 	height=&#34;472&#34;
-	srcset=&#34;/post/1337up-ctf/Images/secretcommit_hu13355580549308438441.png 480w, /post/1337up-ctf/Images/secretcommit_hu18022686732596021554.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/secretcommit_hu13355580549308438441.png 480w, //localhost:1313/post/1337up-ctf/Images/secretcommit_hu18022686732596021554.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -348,10 +348,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;The important information from the reddit post is we now have a different username connected, &lt;code&gt;m4r64r1n3&lt;/code&gt;.  We can find that this person has a &lt;a class=&#34;link&#34; href=&#34;https://nitter.net/m4r64r1n3&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;twitter account&lt;/a&gt; as well, and if you&amp;rsquo;re paying careful attention you might also note that the account was created in September, the same time where all previous activity has been happening.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/twitter1.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/twitter1.png&#34;
 	width=&#34;363&#34;
 	height=&#34;507&#34;
-	srcset=&#34;/post/1337up-ctf/Images/twitter1_hu17688052110981622899.png 480w, /post/1337up-ctf/Images/twitter1_hu12046948936138338503.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/twitter1_hu17688052110981622899.png 480w, //localhost:1313/post/1337up-ctf/Images/twitter1_hu12046948936138338503.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -362,10 +362,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;We can see that this person &lt;a class=&#34;link&#34; href=&#34;https://nitter.net/m4r64r1n3/status/1706488480753242352#m&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;posted a different picture&lt;/a&gt; on the twitter account. Analyzing with &lt;code&gt;exiftool&lt;/code&gt; does not give us more information, but when we image search via google, we can find it is associated with a new blog page, and a 3rd username. Note that in order to see this result, I had to select &amp;ldquo;Find Image Source&amp;rdquo; on the image results page.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/exactmatches.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/exactmatches.png&#34;
 	width=&#34;1069&#34;
 	height=&#34;385&#34;
-	srcset=&#34;/post/1337up-ctf/Images/exactmatches_hu7777128514249589777.png 480w, /post/1337up-ctf/Images/exactmatches_hu10735431310785465931.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/exactmatches_hu7777128514249589777.png 480w, //localhost:1313/post/1337up-ctf/Images/exactmatches_hu10735431310785465931.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -376,10 +376,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;When we visit the &lt;a class=&#34;link&#34; href=&#34;https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;blog page&lt;/a&gt;, we see an interesting anonymous comment: &amp;ldquo;I don&amp;rsquo;t think it&amp;rsquo;s a good idea to share your location online.&amp;rdquo; Wise words indeed.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/anoncomment.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/anoncomment.png&#34;
 	width=&#34;893&#34;
 	height=&#34;772&#34;
-	srcset=&#34;/post/1337up-ctf/Images/anoncomment_hu13799451448797382995.png 480w, /post/1337up-ctf/Images/anoncomment_hu4658930347838877701.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/anoncomment_hu13799451448797382995.png 480w, //localhost:1313/post/1337up-ctf/Images/anoncomment_hu4658930347838877701.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -390,10 +390,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;There is no location disclosure here anymore though, but perhaps it has been saved in the web archives. When we check the &lt;a class=&#34;link&#34; href=&#34;https://archive.org/web/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;wayback machine&lt;/a&gt;, we can see an archive conveniently placed on October 2, 1 day before this comment about sharing a location.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/waybackmachine.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/waybackmachine.png&#34;
 	width=&#34;1206&#34;
 	height=&#34;375&#34;
-	srcset=&#34;/post/1337up-ctf/Images/waybackmachine_hu15490592858844966741.png 480w, /post/1337up-ctf/Images/waybackmachine_hu10835580206581209981.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/waybackmachine_hu15490592858844966741.png 480w, //localhost:1313/post/1337up-ctf/Images/waybackmachine_hu10835580206581209981.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -404,10 +404,10 @@ The unmodified curl request looks like this:&lt;/p&gt;
 &gt;&lt;/p&gt;
 &lt;p&gt;When we &lt;a class=&#34;link&#34; href=&#34;https://web.archive.org/web/20231002010103/https://v1ck1pictures.blogspot.com/2023/09/just-little-bird.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;view the archive&lt;/a&gt;, we see the flag!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/1337up-ctf/Images/wayback.png&#34;
+&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/1337up-ctf/Images/wayback.png&#34;
 	width=&#34;954&#34;
 	height=&#34;521&#34;
-	srcset=&#34;/post/1337up-ctf/Images/wayback_hu12232704319679834200.png 480w, /post/1337up-ctf/Images/wayback_hu5334788372078723140.png 1024w&#34;
+	srcset=&#34;//localhost:1313/post/1337up-ctf/Images/wayback_hu12232704319679834200.png 480w, //localhost:1313/post/1337up-ctf/Images/wayback_hu5334788372078723140.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	

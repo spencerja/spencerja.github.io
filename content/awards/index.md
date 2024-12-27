@@ -51,12 +51,17 @@ Completed introductory pro lab Dante. Dante is a small network of 14 machines on
 ![](images/Dante.png)
 
 ## TryHackMe
-### Completed TryHackMe's Advent of Cyber 2022
+### Advent of Cyber 2022
 My first cybersecurity "certificate" of completion! The content was fundamental but still had a lot of knowlege to give.
 
 ![](images/THM-D4VXZVJ05K.png)
 
-### Completed TryHackMe's Advent of Cyber 2023
+### Advent of Cyber 2023
 AoC is quickly becoming my annual tradition; it was very satisfying seeing how far I've come throughout the year, and how much more knowledge I've gained since the previous year's advent.
 
 ![](images/THM-4MBPZUYXL6.png)
+
+### Advent of Cyber 2024
+Once again some good challenges. I found Day19, the Frida showcase, to be my favorite of the set.
+
+![](images/THM-HI6XDVOVW4.png)

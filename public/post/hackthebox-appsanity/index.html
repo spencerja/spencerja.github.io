@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
-    <head><meta charset='utf-8'>
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
 <title>HackTheBox - Appsanity</title>
 
-<link rel='canonical' href='/post/hackthebox-appsanity/'>
+<link rel='canonical' href='//localhost:1313/post/hackthebox-appsanity/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Appsanity">
 <meta property='og:description' content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user.">
-<meta property='og:url' content='/post/hackthebox-appsanity/'>
+<meta property='og:url' content='//localhost:1313/post/hackthebox-appsanity/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='/post/hackthebox-appsanity/Appsanity.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Cookie' /><meta property='article:tag' content='Magic Byte' /><meta property='article:tag' content='Upload Bypass' /><meta property='article:tag' content='SSRF' /><meta property='article:tag' content='LFI' /><meta property='article:tag' content='DLL Analysis' /><meta property='article:tag' content='dnSpy' /><meta property='article:tag' content='Exe Analysis' /><meta property='article:tag' content='ProcMon' /><meta property='article:tag' content='DLL Hijack' /><meta property='article:published_time' content='2024-03-09T20:49:21-06:00'/><meta property='article:modified_time' content='2024-03-09T20:49:21-06:00'/><meta property='og:image' content='//localhost:1313/post/hackthebox-appsanity/Appsanity.png' />
 <meta name="twitter:title" content="HackTheBox - Appsanity">
 <meta name="twitter:description" content="Appsanity is a hard difficulty box with a flawed patient registration system. Any user can register as a privileged doctor account by altering the hidden Accttype variable. With a doctor account, the login cookies can be transferred to authenticate on a doctor-only subdomain. In this subdomain, we are able to upload a malicious .aspx file by appending a PDF magic byte to bypass the upload filter. The malicious .aspx file can be accessed by using SSRF techniques on another submission form that allows for website links. Using this method to achieve RCE, we are able to establish a reverse shell onto the system. Once inside, we might find a suspicious custom .dll file. When disassembled, it becomes apparent that a secret credential is stored as a reg key. The reg key is also used as another user's credentials, which we can now access as well. Lastly for privilege escalation, we might notice an interactive RemoteManagement console is expecting a certain dll, and we can perform DLL hijacking to perform RCE as the Administrator user."><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='/post/hackthebox-appsanity/Appsanity.png' />
+    <meta name="twitter:image" content='//localhost:1313/post/hackthebox-appsanity/Appsanity.png' />
     </head>
     <body class="
     article-page
@@ -68,7 +68,7 @@
         
         
         <div class="site-meta">
-            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h1 class="site-name"><a href="//localhost:1313/">Spencer&#39;s Blog</a></h1>
             <h2 class="site-description"></h2>
         </div>
     </header><ol class="menu-social">
@@ -1886,7 +1886,7 @@ We can add a dummy externalupload.dll and see how the program behaves in ProcMon
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.799eb5847effe83ae252baf7b2236f0c3752b0188dd0985faa7efc75ea805b29.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
