@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu15825637002793526326.jpg" width="300"
+                        <img src="/img/avatar_hu_f26bce75556ad0f0.jpg" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -245,7 +245,7 @@
       <ul>
         <li><a href="#tic-tac">tic-tac</a>
           <ul>
-            <li><a href="#potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</a></li>
+            <li><a href="#potential-solutionreliable-race-fixing">Potential Solution&ndash;Reliable race fixing?</a></li>
           </ul>
         </li>
         <li><a href="#two-sum">two-sum</a></li>
@@ -343,8 +343,7 @@
     <h2 id="binary-exploitation">Binary Exploitation
 </h2><h3 id="tic-tac">tic-tac
 </h3><blockquote>
-<p>Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. <code>ssh</code> to <code>saturn.picoctf.net:62983</code>, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as <code>ctf-player</code> with the password, <code>d137d16e</code></p>
-</blockquote>
+<p>Someone created a program to read text files; we think the program reads files with root privileges but apparently it only accepts to read files that are owned by the user running it. <code>ssh</code> to <code>saturn.picoctf.net:62983</code>, and run the binary named &ldquo;txtreader&rdquo; once connected. Login as <code>ctf-player</code> with the password, <code>d137d16e</code></p></blockquote>
 <hr>
 <p>Upon ssh into machine, we see <code>txtreader</code> binary and flag.txt file, however we don&rsquo;t have permissions to read them. Fortunately, they also give us the pre-compiled code for <code>txtreader</code> so that we might get a better idea on what&rsquo;s going on:</p>
 <div class="highlight"><div class="chroma">
@@ -501,7 +500,7 @@ Making the link loop, <code>linker.sh</code>:</p>
 </div>
 </div><p>Overall while this method works, it is not very reliable. Sometimes you can get lucky and the flag is read after a few minutes of running, other times it had not succeeded once in the full 15min duration of the instance.</p>
 <p>picoCTF{ToctoU_!s_3a5y_f482a247}</p>
-<h4 id="potential-solution--reliable-race-fixing">Potential Solution&ndash;Reliable race fixing?
+<h4 id="potential-solutionreliable-race-fixing">Potential Solution&ndash;Reliable race fixing?
 </h4><p>It might be possible to &ldquo;fix&rdquo; the race for us, resulting in very reliable success of flag read. <a class="link" href="https://www.usenix.org/legacy/events/fast08/tech/full_papers/tsafrir/tsafrir_html/index.html"  target="_blank" rel="noopener"
     >This post</a>  describes using a filesystem maze too large for the system to handle in memory at once, allowing for a more clear window of opportunity for us to switch targets.
 The maze consists of many nested folders, containing symlinks pointing to another batch of nested folders. After repeating for x times, the final link points to the file we own. The maze is too large to be placed in the filesystem cache, and this process results in slower navigation and an increased delay between the action of checking permissions and the action of reading the file contents.</p>
@@ -509,8 +508,7 @@ The maze consists of many nested folders, containing symlinks pointing to anothe
 <h3 id="two-sum">two-sum
 </h3><blockquote>
 <p>Can you solve this? What two positive numbers can make this possible: <code>n1 &gt; n1 + n2 OR n2 &gt; n1 + n2</code> Enter them here <code>nc saturn.picoctf.net 56856</code>. <a class="link" href="https://artifacts.picoctf.net/c/455/flag.c"  target="_blank" rel="noopener"
-    >Source</a></p>
-</blockquote>
+    >Source</a></p></blockquote>
 <hr>
 <p>Essentially, we need a result where combining two positive numbers results in a smaller number. Sounds impossible, right? We can achieve this by causing an integer overflow, or inputting two large numbers that will overflow the &ldquo;limit&rdquo; and come back as a lower value result.</p>
 <div class="highlight"><div class="chroma">
@@ -539,8 +537,7 @@ The maze consists of many nested folders, containing symlinks pointing to anothe
 </h2><h3 id="hideme">hideme
 </h3><blockquote>
 <p>Every file gets a flag. The SOC analyst saw one image been sent back and forth between two people. They decided to investigate and found out that there was more than what meets the eye <a class="link" href="https://artifacts.picoctf.net/c/493/flag.png"  target="_blank" rel="noopener"
-    >here</a>.</p>
-</blockquote>
+    >here</a>.</p></blockquote>
 <hr>
 <p>Downloading the file shows flag.png. Exiftool tells me there&rsquo;s more to this image than first shown:</p>
 <div class="highlight"><div class="chroma">
@@ -717,7 +714,7 @@ We can verify this ourselves with xxd:</p>
 <p><img src="/post/picoctf_2023/images/20230314175651.png"
 	width="1290"
 	height="107"
-	srcset="/post/picoctf_2023/images/20230314175651_hu17536430409447541330.png 480w, /post/picoctf_2023/images/20230314175651_hu18409166027791681679.png 1024w"
+	srcset="/post/picoctf_2023/images/20230314175651_hu_33573d9d88aa01cd.png 480w, /post/picoctf_2023/images/20230314175651_hu_45e759b9c7491d74.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -732,8 +729,7 @@ We can verify this ourselves with xxd:</p>
 </h2><h3 id="chrono">chrono
 </h3><blockquote>
 <p>How to automate tasks to run at intervals on linux servers?
-Additional details will be available after launching your challenge instance</p>
-</blockquote>
+Additional details will be available after launching your challenge instance</p></blockquote>
 <hr>
 <p>For this challenge, we are given a hint toward how linux servers might automate tasks.</p>
 <p>Firstly, we are required to connect to the challenge machine via ssh:</p>
@@ -773,8 +769,7 @@ Additional details will be available after launching your challenge instance</p>
 </h3><blockquote>
 <p>Flag format: picoCTF{Malwarename}
 The first letter of the malware name should be capitalized and the rest lowercase.
-Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz7153HMuxXTuR2R1t78mGSdzaAtNbBWX</code>. He doesn’t seem to understand what is going on and asks you for advice. Can you identify what malware he’s being a victim of?</p>
-</blockquote>
+Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz7153HMuxXTuR2R1t78mGSdzaAtNbBWX</code>. He doesn’t seem to understand what is going on and asks you for advice. Can you identify what malware he’s being a victim of?</p></blockquote>
 <hr>
 <p>In this challenge, we are given a bitcoin address, and information that this address is used to siphon money from an innocent friend&rsquo;s bitcoin wallet. Since blockchain transactions are publicly disclosed, we can view the activity associated with this wallet on a quick Google search.</p>
 <p><a class="link" href="https://www.bitcoinabuse.com"  target="_blank" rel="noopener"
@@ -782,16 +777,14 @@ Your friend just got hacked and has been asked to pay some bitcoins to <code>1Mz
 <p>Searching this address we see several reports for multiple abuse types. Since we know our friend had been hacked, the abuse type is likely a ransomeware attack. The first report against this address is labeled ransomeware, and provides a link where we might learn more:</p>
 <blockquote>
 <p>More information here: <a class="link" href="https://blog.avira.com/petya-strikes-back/"  target="_blank" rel="noopener"
-    >https://blog.avira.com/petya-strikes-back/</a></p>
-</blockquote>
+    >https://blog.avira.com/petya-strikes-back/</a></p></blockquote>
 <p>The title of the article plainly tells us the malware at play is based on the infamous ransomeware Petya, but we can also follow the link to learn more about it.</p>
 <p>We are told the answer to the flag is the malware involved, so we can submit the flag by inserting &ldquo;Petya&rdquo; into the picoCTF flag format.
 picoCTF{Petya}</p>
 <h3 id="permissions">Permissions
 </h3><blockquote>
 <p>Can you read files in the root file?</p>
-<p>Additional details will be available after launching your challenge instance.</p>
-</blockquote>
+<p>Additional details will be available after launching your challenge instance.</p></blockquote>
 <hr>
 <p>This challenge asks us to read a file in the /root directory. Files located here are typically under the highest access protections possible, requiring only root permissions and rejecting any other non-super user.</p>
 <p>Firstly, we are required to connect to the challenge machine via ssh:</p>
@@ -916,8 +909,7 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </div><h3 id="repititions">Repititions
 </h3><blockquote>
 <p>Can you make sense of this file? Download the file <a class="link" href="https://artifacts.picoctf.net/c/475/enc_flag"  target="_blank" rel="noopener"
-    >here</a>.</p>
-</blockquote>
+    >here</a>.</p></blockquote>
 <hr>
 <p>Here we are tasked with making sense of a file. Following the link prompts us to download a file called <code>enc_flag</code>. Enc is almost certainly shorthand for encoded, meaning our flag will probably need to go through some decoding processes.</p>
 <div class="highlight"><div class="chroma">
@@ -970,8 +962,7 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 <h3 id="special">Special
 </h3><blockquote>
 <p>Don&rsquo;t power users get tired of making spelling mistakes in the shell? Not anymore! Enter Special, the Spell Checked Interface for Affecting Linux. Now, every word is properly spelled and capitalized&hellip; automatically and behind-the-scenes! Be the first to test Special in beta, and feel free to tell us all about how Special streamlines every development process that you face. When your co-workers see your amazing shell interface, just tell them: That&rsquo;s Special (TM) Start your instance to see connection details.</p>
-<p>Additional details will be available after launching your challenge instance.</p>
-</blockquote>
+<p>Additional details will be available after launching your challenge instance.</p></blockquote>
 <hr>
 <p>When we first enter, we might be inclined to check what is in our home:</p>
 <div class="highlight"><div class="chroma">
@@ -1105,8 +1096,7 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 <h3 id="specialer">Specialer
 </h3><blockquote>
 <p>Reception of Special has been cool to say the least. That&rsquo;s why we made an exclusive version of Special, called Secure Comprehensive Interface for Affecting Linux Empirically Rad, or just &lsquo;Specialer&rsquo;. With Specialer, we really tried to remove the distractions from using a shell. Yes, we took out spell checker because of everybody&rsquo;s complaining. But we think you will be excited about our new, reduced feature set for keeping you focused on what needs it the most. Please start an instance to test your very own copy of Specialer.</p>
-<p>Additional details will be available after launching your challenge instance.</p>
-</blockquote>
+<p>Additional details will be available after launching your challenge instance.</p></blockquote>
 <hr>
 <p>Upon entering, we might want to look around. However, we instantly come up with a problem:</p>
 <div class="highlight"><div class="chroma">
@@ -1221,8 +1211,7 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </div><h3 id="useless">Useless
 </h3><blockquote>
 <p>There&rsquo;s an interesting script in the user&rsquo;s home directory</p>
-<p>Additional details will be available after launching your challenge instance.</p>
-</blockquote>
+<p>Additional details will be available after launching your challenge instance.</p></blockquote>
 <hr>
 <p>For this challenge we are given a simple script, and told to explore the script to obtain the flag.</p>
 <p>Firstly, we are required to connect to the challenge machine via ssh:</p>
@@ -1425,8 +1414,7 @@ We can revisit to see that, once the proper name is supplied, <code>vi</code> co
 </h2><h3 id="findme">findme
 </h3><blockquote>
 <p>Help us test the form by submiting the username as <code>test</code> and password as <code>test!</code> The website running <a class="link" href="http://saturn.picoctf.net:54197/"  target="_blank" rel="noopener"
-    >here</a></p>
-</blockquote>
+    >here</a></p></blockquote>
 <hr>
 <p>Upon logging in, we cycle through a couple blank pages very quickly before landing at <code>http://saturn.picoctf.net:54197/home</code>. The page contains a search bar and a small note:
 &ldquo;I was redirected here by a friend of mine but i couldnt find anything. Help me search for flags :-)&rdquo;</p>
@@ -1435,7 +1423,7 @@ First login request:</p>
 <p><img src="/post/picoctf_2023/images/20230327201435.png"
 	width="795"
 	height="333"
-	srcset="/post/picoctf_2023/images/20230327201435_hu15506622703165451714.png 480w, /post/picoctf_2023/images/20230327201435_hu5147261684006859904.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327201435_hu_a26cc6f42a83b9c4.png 480w, /post/picoctf_2023/images/20230327201435_hu_30c2e7813f6ad2fb.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1450,7 +1438,7 @@ First login request:</p>
 <p><img src="/post/picoctf_2023/images/20230327201546.png"
 	width="748"
 	height="292"
-	srcset="/post/picoctf_2023/images/20230327201546_hu14709979164987476217.png 480w, /post/picoctf_2023/images/20230327201546_hu6899080163056471006.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327201546_hu_d9d18c01ff2a0db.png 480w, /post/picoctf_2023/images/20230327201546_hu_c95f2742fa9bcdd8.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1465,7 +1453,7 @@ First login request:</p>
 <p><img src="/post/picoctf_2023/images/20230327201622.png"
 	width="757"
 	height="293"
-	srcset="/post/picoctf_2023/images/20230327201622_hu12742024698248473121.png 480w, /post/picoctf_2023/images/20230327201622_hu9841261375081466767.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327201622_hu_e354248d91c7d50e.png 480w, /post/picoctf_2023/images/20230327201622_hu_2640becb21fcb903.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1501,8 +1489,7 @@ First login request:</p>
 </div><h3 id="matchtheregex">MatchTheRegex
 </h3><blockquote>
 <p>How about trying to match a regular expression The website is running <a class="link" href="http://saturn.picoctf.net:49351/"  target="_blank" rel="noopener"
-    >here</a>.</p>
-</blockquote>
+    >here</a>.</p></blockquote>
 <hr>
 <p>Going to the page, we see an input box to input our search. Based on the name, my first thought is that this will be a regular expression search, where we must input a regex term that will hit positive for specifically the flag. After trying several different regex queries, I&rsquo;m not having any luck. Looking at the page source, I notice a hint displayed in comments:</p>
 <div class="highlight"><div class="chroma">
@@ -1546,7 +1533,7 @@ In regex searches, ^ refers to the start of a line and $ refers to the end of a 
 <p><img src="/post/picoctf_2023/images/20230327204033.png"
 	width="412"
 	height="389"
-	srcset="/post/picoctf_2023/images/20230327204033_hu17707727331521816520.png 480w, /post/picoctf_2023/images/20230327204033_hu2790173058666885558.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327204033_hu_11541544c744f09f.png 480w, /post/picoctf_2023/images/20230327204033_hu_b916fccfa9550119.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1562,7 +1549,7 @@ Playing with the provided hint a little more, I get a successful match by being 
 <p><img src="/post/picoctf_2023/images/20230327204320.png"
 	width="410"
 	height="376"
-	srcset="/post/picoctf_2023/images/20230327204320_hu8715539586496339253.png 480w, /post/picoctf_2023/images/20230327204320_hu5084801361851729214.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327204320_hu_ba3bd2f6aeae141f.png 480w, /post/picoctf_2023/images/20230327204320_hu_e83bf0137fc4588d.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1578,8 +1565,7 @@ Playing with the provided hint a little more, I get a successful match by being 
 <h3 id="more_sqli">More_SQLi
 </h3><blockquote>
 <p>Can you find the flag on this website. Try to find the flag <a class="link" href="http://saturn.picoctf.net:53241/"  target="_blank" rel="noopener"
-    >here</a></p>
-</blockquote>
+    >here</a></p></blockquote>
 <hr>
 <p>Thanks to <a class="link" href="https://ctftime.org/writeup/21125"  target="_blank" rel="noopener"
     >sergyperov</a> for the helpful writeup!</p>
@@ -1603,7 +1589,7 @@ After bypassing login, we see a table of information:</p>
 <p><img src="/post/picoctf_2023/images/20230328074137.png"
 	width="588"
 	height="579"
-	srcset="/post/picoctf_2023/images/20230328074137_hu14992552188465062685.png 480w, /post/picoctf_2023/images/20230328074137_hu11831130007920494916.png 1024w"
+	srcset="/post/picoctf_2023/images/20230328074137_hu_8e53c9f7de025556.png 480w, /post/picoctf_2023/images/20230328074137_hu_26693021a340adf3.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1627,7 +1613,7 @@ After bypassing login, we see a table of information:</p>
 </div><p><img src="/post/picoctf_2023/images/20230328074947.png"
 	width="579"
 	height="336"
-	srcset="/post/picoctf_2023/images/20230328074947_hu5945281423997108436.png 480w, /post/picoctf_2023/images/20230328074947_hu17975780395891712340.png 1024w"
+	srcset="/post/picoctf_2023/images/20230328074947_hu_532baa25a2f09156.png 480w, /post/picoctf_2023/images/20230328074947_hu_12fbbb70d69a526b.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1651,7 +1637,7 @@ After bypassing login, we see a table of information:</p>
 </div><p><img src="/post/picoctf_2023/images/20230328075303.png"
 	width="581"
 	height="361"
-	srcset="/post/picoctf_2023/images/20230328075303_hu14750942444971219211.png 480w, /post/picoctf_2023/images/20230328075303_hu18140223874852906026.png 1024w"
+	srcset="/post/picoctf_2023/images/20230328075303_hu_c2d8d3da980b6cd9.png 480w, /post/picoctf_2023/images/20230328075303_hu_30f73691d7f49fa8.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1675,7 +1661,7 @@ After bypassing login, we see a table of information:</p>
 </div><p><img src="/post/picoctf_2023/images/20230328080123.png"
 	width="583"
 	height="596"
-	srcset="/post/picoctf_2023/images/20230328080123_hu17038243672052735548.png 480w, /post/picoctf_2023/images/20230328080123_hu9641391122867148473.png 1024w"
+	srcset="/post/picoctf_2023/images/20230328080123_hu_386df2d70fa9a50d.png 480w, /post/picoctf_2023/images/20230328080123_hu_8f92bde35527bc31.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1705,7 +1691,7 @@ After bypassing login, we see a table of information:</p>
 </div><p><img src="/post/picoctf_2023/images/20230328080756.png"
 	width="577"
 	height="453"
-	srcset="/post/picoctf_2023/images/20230328080756_hu4683722048447642114.png 480w, /post/picoctf_2023/images/20230328080756_hu4973488470222044226.png 1024w"
+	srcset="/post/picoctf_2023/images/20230328080756_hu_45b6b632e3ea549d.png 480w, /post/picoctf_2023/images/20230328080756_hu_220ffcefb63e159d.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1721,14 +1707,13 @@ After bypassing login, we see a table of information:</p>
 <h3 id="soap">SOAP
 </h3><blockquote>
 <p>The web project was rushed and no security assessment was done. Can you read the /etc/passwd file? <a class="link" href="http://saturn.picoctf.net:55566/"  target="_blank" rel="noopener"
-    >Web Portal</a></p>
-</blockquote>
+    >Web Portal</a></p></blockquote>
 <hr>
 <p>Visiting the page we  3 cards, each with an interactable <code>Details</code> button:</p>
 <p><img src="/post/picoctf_2023/images/20230327205408.png"
 	width="1121"
 	height="604"
-	srcset="/post/picoctf_2023/images/20230327205408_hu10953726462331349976.png 480w, /post/picoctf_2023/images/20230327205408_hu9951778753051621380.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327205408_hu_728c989dfa93738a.png 480w, /post/picoctf_2023/images/20230327205408_hu_159c48fb976776e3.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1743,7 +1728,7 @@ After bypassing login, we see a table of information:</p>
 <p><img src="/post/picoctf_2023/images/20230327205640.png"
 	width="1903"
 	height="615"
-	srcset="/post/picoctf_2023/images/20230327205640_hu7845032725672777069.png 480w, /post/picoctf_2023/images/20230327205640_hu808979667671939515.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327205640_hu_772d7e12a7b06b66.png 480w, /post/picoctf_2023/images/20230327205640_hu_50b8b4229067bc34.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1777,7 +1762,7 @@ After bypassing login, we see a table of information:</p>
 <p><img src="/post/picoctf_2023/images/20230327210246.png"
 	width="1126"
 	height="388"
-	srcset="/post/picoctf_2023/images/20230327210246_hu13880035990363357287.png 480w, /post/picoctf_2023/images/20230327210246_hu10462037924062582120.png 1024w"
+	srcset="/post/picoctf_2023/images/20230327210246_hu_6e28f8769fadc23b.png 480w, /post/picoctf_2023/images/20230327210246_hu_86322139da38656e.png 1024w"
 	loading="lazy"
 	
 		alt="image"
@@ -1843,7 +1828,7 @@ After bypassing login, we see a table of information:</p>
         
         
             <div class="article-image">
-                <img src="/post/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu2497031440356620825.png" 
+                <img src="/post/huntress-ctf-2024/HuntressCTF_Banner.6181f047aa18073aac2b72b3a0aa3ba2_hu_22e5010ff1cdf2b3.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1867,7 +1852,7 @@ After bypassing login, we see a table of information:</p>
         
         
             <div class="article-image">
-                <img src="/post/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.d1ff26ab7326bd1a79b6d1e0a52f6aa6_hu13886050347455417942.jpg" 
+                <img src="/post/hackthebox-cyber-apocalypse-2024/ca-2024-ctf-background.d1ff26ab7326bd1a79b6d1e0a52f6aa6_hu_8efc792cbfed2e6c.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1926,7 +1911,7 @@ After bypassing login, we see a table of information:</p>
         
             2023 - 
         
-        2024 Spencer&#39;s Blog
+        2025 Spencer&#39;s Blog
     </section>
     
     <section class="powerby">
