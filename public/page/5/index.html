@@ -11,7 +11,7 @@
 <meta property='og:description' content="">
 <meta property='og:url' content='/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-02-18T20:43:13-06:00 '/>
+<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-02-28T19:07:18-06:00 '/>
 <meta name="twitter:title" content="Spencer's Blog">
 <meta name="twitter:description" content=""><link rel="alternate" type="application/rss&#43;xml" href="/index.xml">
     </head>
@@ -263,7 +263,7 @@
                     <a href="/archives/#2025">
                         
                             <span class="year">2025</span>
-                            <span class="count">1</span>
+                            <span class="count">2</span>
                         
                     </a> 
                 </div>
@@ -312,6 +312,10 @@
         
             <a href="/categories/ctf/" class="font_size_10">
                 CTF
+            </a>
+        
+            <a href="/categories/letsdefend/" class="font_size_2">
+                LetsDefend
             </a>
         
     </div>
@@ -371,8 +375,8 @@
                 OSINT
             </a>
         
-            <a href="/tags/docker/" class="font_size_3">
-                Docker
+            <a href="/tags/cyberchef/" class="font_size_3">
+                CyberChef
             </a>
         
     </div>
@@ -389,6 +393,75 @@
     
 
     <section class="article-list">
+        
+            
+<article class="has-image">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-pc/">
+                <img src="/post/hackthebox-pc/PC_hu_6cc3fc700c7ccac2.png"
+                        srcset="/post/hackthebox-pc/PC_hu_6cc3fc700c7ccac2.png 800w, /post/hackthebox-pc/PC_hu_7b023751b7e54da.png 1600w"
+                        width="800" 
+                        height="606" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - PC" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-pc/">HackTheBox - PC</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PC is an easy difficulty box with only an exposed gRPC API. After finding a way to interact with the service, we can find a very basic SQL injection vulnerability that allows us to leak login credentials. Once logged in via SSH, we find an internal port running the web application pyLoad. The pyLoad version is vulnerable to unauthenticated RCE, which we can use to execute actions as root.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 07, 2023</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+</article>
         
             
 <article class="has-image">
@@ -653,75 +726,6 @@
   <path d="M18 16.496v1.504l1 1" />
 </svg>
                 <time class="article-time--published">Aug 26, 2023</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-</article>
-        
-            
-<article class="has-image">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/post/hackthebox-mailroom/">
-                <img src="/post/hackthebox-mailroom/Mailroom_hu_c65e29fbd2755e0e.png"
-                        srcset="/post/hackthebox-mailroom/Mailroom_hu_c65e29fbd2755e0e.png 800w, /post/hackthebox-mailroom/Mailroom_hu_f05ba2c1f9591ba2.png 1600w"
-                        width="800" 
-                        height="606" 
-                        loading="lazy"
-                        alt="Featured image of post HackTheBox - Mailroom" />
-                
-            </a>
-        </div>
-    
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/hack-the-box/" >
-                Hack the Box
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/post/hackthebox-mailroom/">HackTheBox - Mailroom</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            Mailroom is a hard difficulty box with a contact form vulnerable to XSS as well as a publicly accessible gitea repository for a private web server on the box. Using XSS combined with XMLHttpRequest, we can make our xss victim access the private web page on our behalf.  By reviewing the source code, we can identify a NoSQL injection vulnerability that allows us to leak login credentials for a user. The login credentials are re-used as login credentials to the Mailroom machine, allowing us to view the page now through port forwarding. The private website also contains a command injection vulnerability, which allows us to explore the docker container it operates. We find more user credentials enumerating the gitea config, and we see this user possesses a keepass vault that is frequently being accessed. Using strace, we can spy on the inputs being supplied and retrieve the vault password. The vault contains credentials for the box&#39;s root user.
-        </h3>
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">Aug 19, 2023</time>
             </div>
         
 

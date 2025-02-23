@@ -1,6 +1,8 @@
 ---
 title: "Let's Defend: Obfuscated HTA"
 description: "A small writeup for analysis of an Obfuscated HTA file challenge from LetsDefend."
+categories: "LetsDefend"
+tags: ["HTML", "HTA", "Malware", "ROT13", "CyberChef"]
 date: 2025-02-18T20:43:13-06:00
 image: ldef.png
 math: 
