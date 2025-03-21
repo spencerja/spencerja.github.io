@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Ransomware on Spencer&#39;s Blog</title>
+        <link>/tags/ransomware/</link>
+        <description>Recent content in Ransomware on Spencer&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Fri, 14 Mar 2025 21:12:35 -0600</lastBuildDate><atom:link href="/tags/ransomware/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Let&#39;s Defend: Risen Ransomware</title>
+        <link>/post/lets-defend-risen-ransomware/</link>
+        <pubDate>Fri, 14 Mar 2025 21:12:35 -0600</pubDate>
+        
+        <guid>/post/lets-defend-risen-ransomware/</guid>
+        <description>&lt;img src="/post/lets-defend-risen-ransomware/ldef.png" alt="Featured image of post Let&#39;s Defend: Risen Ransomware" /&gt;&lt;h2 id=&#34;description&#34;&gt;Description
+&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;You are a cybersecurity analyst at a mid-sized tech company. One morning, you receive multiple reports from employees stating that they are unable to access their files. Upon investigation, you discover that all files have been encrypted and appended with a new extension. A ransom note left on the desktop demands payment in cryptocurrency to decrypt the files. The ransomware responsible for this attack is known as Risen Ransomware. Your task is to analyze the Risen Ransomware.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;h2 id=&#34;investigation&#34;&gt;Investigation
+&lt;/h2&gt;&lt;p&gt;In PE Studio, we can review indicators to get an overview of potentially suspicious discoveries.
+&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/indicators.png&#34;
+	width=&#34;916&#34;
+	height=&#34;205&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/indicators_hu_be33e011192f9f25.png 480w, /post/lets-defend-risen-ransomware/images/indicators_hu_fb550fe8e02c96be.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;446&#34;
+		data-flex-basis=&#34;1072px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;We see among the required libraries for this exists Restart Manager. For ransomeware purposes, Restart Manager is leveraged to force close files so that they are no longer locked, and can be overwritten as encypted/ransomed. This technique is covered in more detail on the &lt;a class=&#34;link&#34; href=&#34;https://www.acronis.com/en-us/blog/posts/conti-ransomware/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Conti Ransomeware blog from Acronis&lt;/a&gt;. The string for an Onion link URL also stands out quite obviously here.&lt;/p&gt;
+&lt;p&gt;There are several imports, including the ability to locate/write over files, the ability to enumerate/terminate running processes, and of course the key to ransomeware attacks, the encryption functions.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/imports.png&#34;
+	width=&#34;272&#34;
+	height=&#34;534&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/imports_hu_9d51cd24b7edf780.png 480w, /post/lets-defend-risen-ransomware/images/imports_hu_1b0e4db0d4e5596e.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;50&#34;
+		data-flex-basis=&#34;122px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Strings have several fragments that suggest malicious activity, such as the reference to a function IsEncrypt:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/isencrypt.png&#34;
+	width=&#34;438&#34;
+	height=&#34;509&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/isencrypt_hu_a777d3e790bd3866.png 480w, /post/lets-defend-risen-ransomware/images/isencrypt_hu_77a4933cecb91ccb.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;86&#34;
+		data-flex-basis=&#34;206px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Also interesting to see in strings is the measures taken to remove backup/restoration methods:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/vssadmin.png&#34;
+	width=&#34;616&#34;
+	height=&#34;239&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/vssadmin_hu_c070af108716671a.png 480w, /post/lets-defend-risen-ransomware/images/vssadmin_hu_6e525b16cef4c93b.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;257&#34;
+		data-flex-basis=&#34;618px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Several registry keys are modified:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/regtamper.png&#34;
+	width=&#34;1214&#34;
+	height=&#34;418&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/regtamper_hu_efb654ed0d12f7b0.png 480w, /post/lets-defend-risen-ransomware/images/regtamper_hu_a74d2116b3f51ddf.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;290&#34;
+		data-flex-basis=&#34;697px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Persistence via scheduled task also found:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/c SCHTASKS.exe /Create /RU &amp;#34;NT AUTHORITY\SYSTEM&amp;#34; /sc onstart /TN &amp;#34;SystemDefense&amp;#34; /TR &amp;#34;%s&amp;#34; /F
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;The entire ransom note is also extracted in strings:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/ransome.png&#34;
+	width=&#34;1323&#34;
+	height=&#34;540&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/ransome_hu_16ec999188113c5d.png 480w, /post/lets-defend-risen-ransomware/images/ransome_hu_c368f6b303b040d4.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;245&#34;
+		data-flex-basis=&#34;588px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Lastly we see the contact information strings:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;return deQueue
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;http://s2wk77h653qn54csf4gp52orhem4y72dgxsquxulf255pcymazeepbyd.onion/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;dectokyo@cock.li
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;dectokyo@onionmail.org , TELEGRAM:@tokyosupp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Proof Setup
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;risen1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Adobe Photoshop
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Adobe Photoshop 2020
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;The inclusion of photoshop seems to suggest that this ransomware might have masqueraded as a free installer for Adobe Photoshop.&lt;/p&gt;
+&lt;h2 id=&#34;answers&#34;&gt;Answers
+&lt;/h2&gt;&lt;h3 id=&#34;1-which-text-file-was-opened-by-the-malware-after-initializing-a-critical-section&#34;&gt;1. Which text file was opened by the malware after initializing a critical section?
+&lt;/h3&gt;&lt;p&gt;In IDA, we see an &lt;code&gt;InitializeCriticalSection&lt;/code&gt; call, immediately followed by a &lt;code&gt;CreateFileW&lt;/code&gt; for RisenLogs.txt&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/risentext.png&#34;
+	width=&#34;394&#34;
+	height=&#34;304&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/risentext_hu_b812cc86f64babfc.png 480w, /post/lets-defend-risen-ransomware/images/risentext_hu_2348415a814f8716.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;129&#34;
+		data-flex-basis=&#34;311px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;2-what-is-the-mutex-that-was-created-by-the-malware&#34;&gt;2. What is the mutex that was created by the malware?
+&lt;/h3&gt;&lt;p&gt;Immediately following the RisenLogs.txt, we see the CreateMutexA for &lt;code&gt;RISEN_MUTEX&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/mutex.png&#34;
+	width=&#34;357&#34;
+	height=&#34;365&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/mutex_hu_37d9b34c000a722.png 480w, /post/lets-defend-risen-ransomware/images/mutex_hu_bfc3ca6c310f4ab1.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;97&#34;
+		data-flex-basis=&#34;234px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;3-how-many-countries-system-languages-does-the-malware-prevent-itself-from-running-in&#34;&gt;3. How many countries (system languages) does the malware prevent itself from running in?
+&lt;/h3&gt;&lt;p&gt;Immediately following &lt;code&gt;GetSystemDefaultUILanguage&lt;/code&gt;, we see 5 consecutive compares, which jump(skip) if the language matches.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/langcomp.png&#34;
+	width=&#34;660&#34;
+	height=&#34;402&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/langcomp_hu_666f0c023020ad16.png 480w, /post/lets-defend-risen-ransomware/images/langcomp_hu_66e1d5421d4fc30e.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;164&#34;
+		data-flex-basis=&#34;394px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;Using &lt;a class=&#34;link&#34; href=&#34;http://www1.cs.columbia.edu/~lok/csharp/refdocs/System.Globalization/types/CultureInfo.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;System.Globalization.CultureInfo Class documentation&lt;/a&gt; I tried identifying the triggering languages, but the results appear more random than I had hoped.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;0x0441: sw-KE (Swahili - Kenya)&lt;/li&gt;
+&lt;li&gt;0x3009: en-ZW (English - Zimbabwe)&lt;/li&gt;
+&lt;li&gt;0x2009: en-JM (English - Jamaica)&lt;/li&gt;
+&lt;li&gt;0x0429: fa-IR (Farsi - Iran)&lt;/li&gt;
+&lt;li&gt;0x200A: es-VE (Spanish - Venezuela)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;4-what-is-the-address-of-getsysteminfo-in-hex&#34;&gt;4. What is the address of GetSystemInfo? (In Hex)
+&lt;/h3&gt;&lt;p&gt;We can use IDA cross references functionality to find this call location rather than hunting through the tree.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/getsysteminfo.png&#34;
+	width=&#34;595&#34;
+	height=&#34;213&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/getsysteminfo_hu_5fb2b8c9947af9a5.png 480w, /post/lets-defend-risen-ransomware/images/getsysteminfo_hu_4c533cc614e1a181.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;279&#34;
+		data-flex-basis=&#34;670px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;0x404B51&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;5-what-is-the-first-api-that-is-resolved-in-the-sub_403120-function&#34;&gt;5. What is the first API that is resolved in the sub_403120 function?
+&lt;/h3&gt;&lt;p&gt;Moving to subroutine at 0x403120:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/403120.png&#34;
+	width=&#34;674&#34;
+	height=&#34;557&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/403120_hu_840756d64eccc5fe.png 480w, /post/lets-defend-risen-ransomware/images/403120_hu_39c0e0200a55182a.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;121&#34;
+		data-flex-basis=&#34;290px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;IsWow64Process&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;6-what-is-the-scheduled-task-name-created-by-the-malware&#34;&gt;6. What is the scheduled task name created by the malware?
+&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/task.png&#34;
+	width=&#34;1320&#34;
+	height=&#34;279&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/task_hu_d5ede5cd773bb655.png 480w, /post/lets-defend-risen-ransomware/images/task_hu_9e71596307afaeae.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;473&#34;
+		data-flex-basis=&#34;1135px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;We can see the schtask arguments created here, with a task name &lt;code&gt;SystemDefense&lt;/code&gt;. Also worth noting that this could be found in strings.&lt;/p&gt;
+&lt;h3 id=&#34;7-what-is-the-array-name-that-contains-the-volume-used-by-the-ransomware-to-encrypt-files&#34;&gt;7. What is the array name that contains the volume used by the ransomware to encrypt files?
+&lt;/h3&gt;&lt;p&gt;Within the &lt;code&gt;main&lt;/code&gt; tree, we can see a drive letter Q:\ mov&amp;rsquo;d after the ransomware encryption begins:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-risen-ransomware/images/offset.png&#34;
+	width=&#34;662&#34;
+	height=&#34;347&#34;
+	srcset=&#34;/post/lets-defend-risen-ransomware/images/offset_hu_284e765bcb2e3a53.png 480w, /post/lets-defend-risen-ransomware/images/offset_hu_a62a46c3858901ac.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;190&#34;
+		data-flex-basis=&#34;457px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;The question here is looking for the offset reference used: &lt;code&gt;off_44CB08&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;8-what-is-the-telegram-username-of-the-threat-actor&#34;&gt;8. What is the Telegram username of the threat actor?
+&lt;/h3&gt;&lt;p&gt;This can be found in the &lt;code&gt;main&lt;/code&gt; function in IDA. The information was also discovered earlier in the strings:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;dectokyo@onionmail.org , TELEGRAM:@tokyosupp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;impact&#34;&gt;Impact
+&lt;/h2&gt;&lt;p&gt;It might be worth noting that this file hash has been reported to VirusTotal beginning in March of 2024, nearly a year ago. &lt;a class=&#34;link&#34; href=&#34;https://www.virustotal.com/gui/file/350ba69da5c837dcb7dad72ced74396456d520fb917fb408c069d0dc726c6c66/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.virustotal.com/gui/file/350ba69da5c837dcb7dad72ced74396456d520fb917fb408c069d0dc726c6c66/&lt;/a&gt; The file provided may have been a ransomware object originally found in the wild.&lt;/p&gt;
+&lt;p&gt;A key aspect of ransomware is that the victim&amp;rsquo;s files are (reversibly) encrypted, and only the threat actor knows the key to decryption. While we see the overall behavior from this file appears as real ransomware, the previous investigation did not find any C2 domain that may have been used to receive encryption keys or sensitive files from victims. Attempts to analyze the sample dynamically has resulted in memory errors, and the VirusTotal sandbox behaviors also suggest Windows Werfault (crashing) is happening there as well. &lt;code&gt;UPX&lt;/code&gt; was identified as a domain within the VirusTotal sandbox, so maybe it is possible that this file hash was manually unpacked by a different malware analyst in a way that broke the functionality of the ransomware.&lt;/p&gt;
+&lt;p&gt;VirusTotal labels this malware as &amp;ldquo;BlackHunt&amp;rdquo;, and an investigation of the supplied contacts shows articles related on a ransomware campaign for Black Hunt 2.0 with patterns that appear similar to this sample: &lt;a class=&#34;link&#34; href=&#34;https://www.pcrisk.com/removal-guides/27326-black-hunt-2-0-ransomware&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.pcrisk.com/removal-guides/27326-black-hunt-2-0-ransomware&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

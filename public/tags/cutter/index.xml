@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Cutter on Spencer&#39;s Blog</title>
-        <link>//localhost:1313/tags/cutter/</link>
+        <link>/tags/cutter/</link>
         <description>Recent content in Cutter on Spencer&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Sat, 22 Feb 2025 20:59:02 -0600</lastBuildDate><atom:link href="//localhost:1313/tags/cutter/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 22 Feb 2025 20:59:02 -0600</lastBuildDate><atom:link href="/tags/cutter/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Let&#39;s Defend: Linux Downloader</title>
-        <link>//localhost:1313/post/lets-defend-linux-downloader/</link>
+        <link>/post/lets-defend-linux-downloader/</link>
         <pubDate>Sat, 22 Feb 2025 20:59:02 -0600</pubDate>
         
-        <guid>//localhost:1313/post/lets-defend-linux-downloader/</guid>
-        <description>&lt;img src="//localhost:1313/post/lets-defend-linux-downloader/ldef.png" alt="Featured image of post Let&#39;s Defend: Linux Downloader" /&gt;&lt;blockquote&gt;
+        <guid>/post/lets-defend-linux-downloader/</guid>
+        <description>&lt;img src="/post/lets-defend-linux-downloader/ldef.png" alt="Featured image of post Let&#39;s Defend: Linux Downloader" /&gt;&lt;blockquote&gt;
 &lt;p&gt;Your team has identified unusual network activity originating from a Linux server within the corporate network. The server is continuously making outbound connections to a suspicious IP address. Upon further investigation, it appears that a downloader malware has been installed on the server, potentially downloading and executing malicious payloads.&lt;/p&gt;&lt;/blockquote&gt;
 &lt;h2 id=&#34;investigation&#34;&gt;Investigation
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;Strings&lt;/code&gt; can show some interesting functions in use, such as netowrking behavior in &lt;code&gt;connect&lt;/code&gt;, &lt;code&gt;send&lt;/code&gt;, &lt;code&gt;recv&lt;/code&gt;, &lt;code&gt;setsockopt&lt;/code&gt;, &lt;code&gt;socket&lt;/code&gt;. There is a sleep, and an interesting syscall as well. We can start by going through the questions/answers then piecing together how this binary behaves.&lt;/p&gt;
@@ -86,10 +86,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Alternatively using &lt;code&gt;Cutter&lt;/code&gt; we can view disassembly of the binary. We can find this IP address loaded soon after &lt;code&gt;main&lt;/code&gt; is run:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/ip.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/ip.png&#34;
 	width=&#34;604&#34;
 	height=&#34;251&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/ip_hu_46870d52526d68e0.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/ip_hu_7d367b915722b439.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/ip_hu_46870d52526d68e0.png 480w, /post/lets-defend-linux-downloader/images/ip_hu_7d367b915722b439.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -109,10 +109,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Once again also found using &lt;code&gt;Cutter&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/tmplog.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/tmplog.png&#34;
 	width=&#34;426&#34;
 	height=&#34;68&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/tmplog_hu_62c2f48b085d1e1f.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/tmplog_hu_7fc7352828d8f6d8.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/tmplog_hu_62c2f48b085d1e1f.png 480w, /post/lets-defend-linux-downloader/images/tmplog_hu_7fc7352828d8f6d8.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -124,10 +124,10 @@
 &lt;h3 id=&#34;3-what-system-call-number-is-used-in-the-program&#34;&gt;3. What system call number is used in the program?
 &lt;/h3&gt;&lt;p&gt;When we search for syscall invokes, we can see &lt;code&gt;edi&lt;/code&gt; is set to 319 right before it is sent. Syscall 319 points to &lt;code&gt;memfd_create&lt;/code&gt;, which acts to &lt;a class=&#34;link&#34; href=&#34;https://man7.org/linux/man-pages/man2/memfd_create.2.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;create a modifiable file existing in memory&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/syscall.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/syscall.png&#34;
 	width=&#34;950&#34;
 	height=&#34;337&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/syscall_hu_6eec70c987b53b09.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/syscall_hu_4c84c9f24c2939d9.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/syscall_hu_6eec70c987b53b09.png 480w, /post/lets-defend-linux-downloader/images/syscall_hu_4c84c9f24c2939d9.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -138,10 +138,10 @@
 &gt;&lt;/p&gt;
 &lt;h3 id=&#34;4-what-string-is-sent-first-to-the-connected-socket&#34;&gt;4. What string is sent first to the connected socket?
 &lt;/h3&gt;&lt;p&gt;In the &lt;code&gt;main&lt;/code&gt; function we can see the first &lt;code&gt;sym.imp.send&lt;/code&gt; function after a sleep:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/socksend.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/socksend.png&#34;
 	width=&#34;1050&#34;
 	height=&#34;472&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/socksend_hu_bfeb1826246b022b.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/socksend_hu_78485fbf7f6964ca.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/socksend_hu_bfeb1826246b022b.png 480w, /post/lets-defend-linux-downloader/images/socksend_hu_78485fbf7f6964ca.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -151,10 +151,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;We can see prior to the send, a &lt;code&gt;mov esi, str.l64&lt;/code&gt;. We can confirm this is the entirety of the string by pivoting to the string in disassembly view:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/strl64.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/strl64.png&#34;
 	width=&#34;422&#34;
 	height=&#34;96&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/strl64_hu_97e2fa38a8c14d12.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/strl64_hu_6690f4417412dd2f.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/strl64_hu_97e2fa38a8c14d12.png 480w, /post/lets-defend-linux-downloader/images/strl64_hu_6690f4417412dd2f.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -165,10 +165,10 @@
 &gt;&lt;/p&gt;
 &lt;h3 id=&#34;5-what-num-of-xor-operation-is-performed-on-each-byte-of-received-data-before-it-is-written-to-sys_fd-in-hex&#34;&gt;5. What num of xor operation is performed on each byte of received data before it is written to sys_fd (in hex)?
 &lt;/h3&gt;&lt;p&gt;Looking for &lt;code&gt;xor&lt;/code&gt; events we mainly want to look for one that isn&amp;rsquo;t xor&amp;rsquo;ing itself for a value reset. We can find the following &lt;code&gt;xor&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/xor.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/xor.png&#34;
 	width=&#34;631&#34;
 	height=&#34;235&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/xor_hu_63db913eb3ebfdcf.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/xor_hu_1be6f60cc0dde364.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/xor_hu_63db913eb3ebfdcf.png 480w, /post/lets-defend-linux-downloader/images/xor_hu_1be6f60cc0dde364.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -180,10 +180,10 @@
 &lt;p&gt;The &lt;code&gt;xor&lt;/code&gt; value here is &lt;code&gt;0x99&lt;/code&gt;, or number value 153.&lt;/p&gt;
 &lt;h3 id=&#34;6-what-environment-variable-is-set-before-executing-the-new-program-and-what-value-is-assigned-to-it&#34;&gt;6. What environment variable is set before executing the new program, and what value is assigned to it?
 &lt;/h3&gt;&lt;p&gt;We can see a call to &lt;code&gt;setenv&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/setenv.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/setenv.png&#34;
 	width=&#34;919&#34;
 	height=&#34;205&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/setenv_hu_b8253cb23c4648d5.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/setenv_hu_3ba7f0b2804ba27b.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/setenv_hu_b8253cb23c4648d5.png 480w, /post/lets-defend-linux-downloader/images/setenv_hu_3ba7f0b2804ba27b.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -193,10 +193,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;We can see the name is set to &lt;code&gt;0x400ced&lt;/code&gt; Unfortunately I had trouble identifying the intended path statically, and only found the solution after running in a debugger and checking the &lt;code&gt;rdi&lt;/code&gt; details:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/cwd.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/cwd.png&#34;
 	width=&#34;904&#34;
 	height=&#34;261&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/cwd_hu_4d432b88123d6ef6.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/cwd_hu_dbbb5a5a4716fa24.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/cwd_hu_4d432b88123d6ef6.png 480w, /post/lets-defend-linux-downloader/images/cwd_hu_dbbb5a5a4716fa24.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -208,10 +208,10 @@
 &lt;p&gt;The apparent answer is &lt;code&gt;CWD&lt;/code&gt;.&lt;/p&gt;
 &lt;h3 id=&#34;7-what-is-the-value-of-argva0-used-in-the-fexecve-call&#34;&gt;7. What is the value of argva[0] used in the fexecve call?
 &lt;/h3&gt;&lt;p&gt;We can see qword for str.kworker_0:2 immediately prior to the fexec:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/fexecve.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/fexecve.png&#34;
 	width=&#34;654&#34;
 	height=&#34;251&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/fexecve_hu_943df19d4f65e0da.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/fexecve_hu_4a10f9de31960d63.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/fexecve_hu_943df19d4f65e0da.png 480w, /post/lets-defend-linux-downloader/images/fexecve_hu_4a10f9de31960d63.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -221,10 +221,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Again pivoting to the str location gives us the full string:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/kworker.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/kworker.png&#34;
 	width=&#34;431&#34;
 	height=&#34;106&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/kworker_hu_ef947b077ae1d578.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/kworker_hu_1ec0c6547e0a234a.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/kworker_hu_ef947b077ae1d578.png 480w, /post/lets-defend-linux-downloader/images/kworker_hu_1ec0c6547e0a234a.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -236,10 +236,10 @@
 &lt;p&gt;&lt;code&gt;[kworker/0:2]&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id=&#34;8-how-many-seconds-does-the-program-take-if-the-initial-connection-attempt-fails&#34;&gt;8. How many seconds does the program take if the initial connection attempt fails?
 &lt;/h3&gt;&lt;p&gt;Going back to the &lt;code&gt;sleep&lt;/code&gt; function after the socket connect:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/sleep.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/lets-defend-linux-downloader/images/sleep.png&#34;
 	width=&#34;791&#34;
 	height=&#34;253&#34;
-	srcset=&#34;//localhost:1313/post/lets-defend-linux-downloader/images/sleep_hu_f1d0fa36bbb912d2.png 480w, //localhost:1313/post/lets-defend-linux-downloader/images/sleep_hu_6ab8a550515daaf4.png 1024w&#34;
+	srcset=&#34;/post/lets-defend-linux-downloader/images/sleep_hu_f1d0fa36bbb912d2.png 480w, /post/lets-defend-linux-downloader/images/sleep_hu_6ab8a550515daaf4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	

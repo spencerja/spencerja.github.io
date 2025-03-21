@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>SQLite on Spencer&#39;s Blog</title>
-        <link>//localhost:1313/tags/sqlite/</link>
+        <link>/tags/sqlite/</link>
         <description>Recent content in SQLite on Spencer&#39;s Blog</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Sat, 06 Apr 2024 17:54:57 -0500</lastBuildDate><atom:link href="//localhost:1313/tags/sqlite/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 06 Apr 2024 17:54:57 -0500</lastBuildDate><atom:link href="/tags/sqlite/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>HackTheBox - Codify</title>
-        <link>//localhost:1313/post/hackthebox-codify/</link>
+        <link>/post/hackthebox-codify/</link>
         <pubDate>Sat, 06 Apr 2024 17:54:57 -0500</pubDate>
         
-        <guid>//localhost:1313/post/hackthebox-codify/</guid>
-        <description>&lt;img src="//localhost:1313/post/hackthebox-codify/Codify.png" alt="Featured image of post HackTheBox - Codify" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
+        <guid>/post/hackthebox-codify/</guid>
+        <description>&lt;img src="/post/hackthebox-codify/Codify.png" alt="Featured image of post HackTheBox - Codify" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
 &lt;/h2&gt;&lt;p&gt;Initial nmap:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -81,10 +81,10 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;h3 id=&#34;enumerating-port-80-web-service&#34;&gt;Enumerating port 80 web service
 &lt;/h3&gt;&lt;p&gt;When we visit the webpage on port 80, we see this is a node.js sandbox. This already sounds very dangerous, as we can supply whatever code we want and, if it is poorly sanitized, we might &amp;ldquo;break out&amp;rdquo; of the sandbox and execute shell commands on the system.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/LandingPage.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/LandingPage.png&#34;
 	width=&#34;1113&#34;
 	height=&#34;625&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/LandingPage_hu_7ad39154586a73d6.png 480w, //localhost:1313/post/hackthebox-codify/Images/LandingPage_hu_acc88f14af9fafd4.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/LandingPage_hu_7ad39154586a73d6.png 480w, /post/hackthebox-codify/Images/LandingPage_hu_acc88f14af9fafd4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Landing Page&#34;
@@ -97,10 +97,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;Common &lt;a class=&#34;link&#34; href=&#34;https://www.netspi.com/blog/technical/web-application-penetration-testing/escape-nodejs-sandboxes/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;sandbox escapes for Node.js&lt;/a&gt; make use of &lt;code&gt;child_process&lt;/code&gt; or &lt;code&gt;fs&lt;/code&gt;. However, when we follow the &lt;code&gt;limitations&lt;/code&gt; link, we can see that these are the two modules that are blacklisted:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/limitations.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/limitations.png&#34;
 	width=&#34;1151&#34;
 	height=&#34;664&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/limitations_hu_a77f5ce97f07ed32.png 480w, //localhost:1313/post/hackthebox-codify/Images/limitations_hu_bd0bf63528b55177.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/limitations_hu_a77f5ce97f07ed32.png 480w, /post/hackthebox-codify/Images/limitations_hu_bd0bf63528b55177.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -111,10 +111,10 @@
 &gt;&lt;/p&gt;
 &lt;p&gt;Someone very familiar with node.js might be able to craft their sandbox escape from scratch. I, however, am not. When reading the About section, we learn that this sandbox is utilizing a public github project &lt;a class=&#34;link&#34; href=&#34;https://github.com/patriksimek/vm2/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;vm2&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/about.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/about.png&#34;
 	width=&#34;1137&#34;
 	height=&#34;222&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/about_hu_3f4b2243ba4a1bb.png 480w, //localhost:1313/post/hackthebox-codify/Images/about_hu_3c115824040c928f.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/about_hu_3f4b2243ba4a1bb.png 480w, /post/hackthebox-codify/Images/about_hu_3c115824040c928f.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -124,10 +124,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;In the project&amp;rsquo;s Readme, we can see a notice that the project has known critical vulnerabilities, and has been abandoned with the issues unresolved.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/discontinued.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/discontinued.png&#34;
 	width=&#34;844&#34;
 	height=&#34;181&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/discontinued_hu_cbb6caebd7f5f782.png 480w, //localhost:1313/post/hackthebox-codify/Images/discontinued_hu_236386bb0a42f419.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/discontinued_hu_cbb6caebd7f5f782.png 480w, /post/hackthebox-codify/Images/discontinued_hu_236386bb0a42f419.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -137,10 +137,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Under the github project&amp;rsquo;s &lt;code&gt;Security&lt;/code&gt; tab, we can find multiple sandbox escape issues, all unresolved:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/security.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/security.png&#34;
 	width=&#34;431&#34;
 	height=&#34;439&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/security_hu_d8e66beaeac9cd39.png 480w, //localhost:1313/post/hackthebox-codify/Images/security_hu_86834265227e5e09.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/security_hu_d8e66beaeac9cd39.png 480w, /post/hackthebox-codify/Images/security_hu_86834265227e5e09.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -195,10 +195,10 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;When I run the script, Promise is shown, suggesting the script is likely working.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-codify/Images/touch.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-codify/Images/touch.png&#34;
 	width=&#34;649&#34;
 	height=&#34;587&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-codify/Images/touch_hu_e402e9aac520425d.png 480w, //localhost:1313/post/hackthebox-codify/Images/touch_hu_74e367aa39fd4f59.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-codify/Images/touch_hu_e402e9aac520425d.png 480w, /post/hackthebox-codify/Images/touch_hu_74e367aa39fd4f59.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -771,11 +771,11 @@ This password is for root. We can log in with a simple &lt;code&gt;su&lt;/code&g
         </item>
         <item>
         <title>HackTheBox - Drive</title>
-        <link>//localhost:1313/post/hackthebox-drive/</link>
+        <link>/post/hackthebox-drive/</link>
         <pubDate>Sat, 17 Feb 2024 19:46:53 -0600</pubDate>
         
-        <guid>//localhost:1313/post/hackthebox-drive/</guid>
-        <description>&lt;img src="//localhost:1313/post/hackthebox-drive/Drive.png" alt="Featured image of post HackTheBox - Drive" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
+        <guid>/post/hackthebox-drive/</guid>
+        <description>&lt;img src="/post/hackthebox-drive/Drive.png" alt="Featured image of post HackTheBox - Drive" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
 &lt;/h2&gt;&lt;p&gt;initial nmap:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -844,10 +844,10 @@ This password is for root. We can log in with a simple &lt;code&gt;su&lt;/code&g
 &lt;/div&gt;
 &lt;/div&gt;&lt;h3 id=&#34;exploring-webapp&#34;&gt;Exploring Webapp
 &lt;/h3&gt;&lt;p&gt;We see what is presumably a Google Drive clone, named &lt;code&gt;Doodle Grive&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/landingpage.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/landingpage.png&#34;
 	width=&#34;957&#34;
 	height=&#34;610&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/landingpage_hu_a600acdde6add55b.png 480w, //localhost:1313/post/hackthebox-drive/Images/landingpage_hu_4640df2f1f87d13c.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/landingpage_hu_a600acdde6add55b.png 480w, /post/hackthebox-drive/Images/landingpage_hu_4640df2f1f87d13c.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -857,10 +857,10 @@ This password is for root. We can log in with a simple &lt;code&gt;su&lt;/code&g
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;Entering home turns out to be a little different than the main page:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/home1.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/home1.png&#34;
 	width=&#34;1747&#34;
 	height=&#34;312&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/home1_hu_9a37d25c5f3d32d2.png 480w, //localhost:1313/post/hackthebox-drive/Images/home1_hu_ad18a6a6d8c74ae6.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/home1_hu_9a37d25c5f3d32d2.png 480w, /post/hackthebox-drive/Images/home1_hu_ad18a6a6d8c74ae6.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -872,10 +872,10 @@ This password is for root. We can log in with a simple &lt;code&gt;su&lt;/code&g
 &lt;p&gt;Trying to view the file redirects us to login, so it looks like we must create an account.
 Due to password complexity requirements, registered with creds &lt;code&gt;asdf:HackTheBoxDrive&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;After registering, we see the landing page options have changed. We have the option to upload a file, or view currently posted files, shown in the previous image.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/landingpage2.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/landingpage2.png&#34;
 	width=&#34;864&#34;
 	height=&#34;606&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/landingpage2_hu_447e4b6f24d05e84.png 480w, //localhost:1313/post/hackthebox-drive/Images/landingpage2_hu_ccc592377cc5632c.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/landingpage2_hu_447e4b6f24d05e84.png 480w, /post/hackthebox-drive/Images/landingpage2_hu_ccc592377cc5632c.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -885,10 +885,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;When viewing the welcome post, I notice the url info as well as how the text is generated after clicking &lt;code&gt;Just View&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/view1.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/view1.png&#34;
 	width=&#34;752&#34;
 	height=&#34;459&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/view1_hu_fc0f2353d8513cfa.png 480w, //localhost:1313/post/hackthebox-drive/Images/view1_hu_1dbcd0602e488e20.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/view1_hu_fc0f2353d8513cfa.png 480w, /post/hackthebox-drive/Images/view1_hu_1dbcd0602e488e20.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -898,10 +898,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;The 100 might be a beginning number sequence related to each post view. It is possible that this could be susceptible to IDOR. Trying the upload feature, we see the rules applied to our submissions: it must have ASCII MIME type and be under 2MB in size. Uploaded contents are only treated as text, so there is not much to be gained from this feature.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/upload1.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/upload1.png&#34;
 	width=&#34;1197&#34;
 	height=&#34;468&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/upload1_hu_c5f6dbbb477beda4.png 480w, //localhost:1313/post/hackthebox-drive/Images/upload1_hu_67c6680ec2de8baa.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/upload1_hu_c5f6dbbb477beda4.png 480w, /post/hackthebox-drive/Images/upload1_hu_67c6680ec2de8baa.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -912,10 +912,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &gt;&lt;/p&gt;
 &lt;h4 id=&#34;leaking-registered-usernames&#34;&gt;Leaking registered usernames
 &lt;/h4&gt;&lt;p&gt;If we try to create a test group and then edit the group, we can find that all established users are suggested to add, leaking all usernames associated with Doodle Grive.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/usernames.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/usernames.png&#34;
 	width=&#34;613&#34;
 	height=&#34;456&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/usernames_hu_67a9c9cd7734d5ac.png 480w, //localhost:1313/post/hackthebox-drive/Images/usernames_hu_ef82b7eda98df396.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/usernames_hu_67a9c9cd7734d5ac.png 480w, /post/hackthebox-drive/Images/usernames_hu_ef82b7eda98df396.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1003,10 +1003,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &lt;/div&gt;&lt;p&gt;It is worth noting that each visiting directory also has a &lt;code&gt;/&amp;lt;dir&amp;gt;/block&lt;/code&gt; variant. Although I am not too familiar, perhaps this is a product of the web service being utilized?&lt;/p&gt;
 &lt;h4 id=&#34;abusing-idor-to-view-private-messages&#34;&gt;Abusing IDOR to view private messages
 &lt;/h4&gt;&lt;p&gt;Whe we try to abuse IDOR on views, we are presented with &lt;code&gt;unauthorized&lt;/code&gt; flag:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/unauthorized.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/unauthorized.png&#34;
 	width=&#34;527&#34;
 	height=&#34;136&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/unauthorized_hu_e04a47d133204122.png 480w, //localhost:1313/post/hackthebox-drive/Images/unauthorized_hu_20a4758bc7e5cefb.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/unauthorized_hu_e04a47d133204122.png 480w, /post/hackthebox-drive/Images/unauthorized_hu_20a4758bc7e5cefb.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1016,10 +1016,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;If we try to access a file not produced already, we receive a different message:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/servererror.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/servererror.png&#34;
 	width=&#34;513&#34;
 	height=&#34;223&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/servererror_hu_25e878b417e914fd.png 480w, //localhost:1313/post/hackthebox-drive/Images/servererror_hu_8342c5a88435fe21.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/servererror_hu_25e878b417e914fd.png 480w, /post/hackthebox-drive/Images/servererror_hu_8342c5a88435fe21.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1029,10 +1029,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;We can leak all file numbers associated with created files if we utilize a tool like &lt;code&gt;ffuf&lt;/code&gt;. However, it appears it is not necessary. We might eventually find that we can successfully IDOR to unauthorized files using the &lt;code&gt;/&amp;lt;dir&amp;gt;/block&lt;/code&gt; variant:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/101.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/101.png&#34;
 	width=&#34;970&#34;
 	height=&#34;497&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/101_hu_128614c11a7fecf1.png 480w, //localhost:1313/post/hackthebox-drive/Images/101_hu_15705126053c4578.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/101_hu_128614c11a7fecf1.png 480w, /post/hackthebox-drive/Images/101_hu_15705126053c4578.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1128,10 +1128,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Since viewing these files requires a login, we must supply the sessionid cookie from our browser session. We also need the &lt;code&gt;-r&lt;/code&gt; flag to follow the 301 redirect. Now viewing the other files:
 98:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/98.png&#34;
+&lt;img src=&#34;/post/hackthebox-drive/Images/98.png&#34;
 	width=&#34;861&#34;
 	height=&#34;421&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/98_hu_19fa88973d5f19f6.png 480w, //localhost:1313/post/hackthebox-drive/Images/98_hu_7c60a07f551187ab.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/98_hu_19fa88973d5f19f6.png 480w, /post/hackthebox-drive/Images/98_hu_7c60a07f551187ab.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1155,10 +1155,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;99:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/99.png&#34;
+&lt;img src=&#34;/post/hackthebox-drive/Images/99.png&#34;
 	width=&#34;863&#34;
 	height=&#34;402&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/99_hu_ffe08d8abc8acdda.png 480w, //localhost:1313/post/hackthebox-drive/Images/99_hu_4100cf8525562925.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/99_hu_ffe08d8abc8acdda.png 480w, /post/hackthebox-drive/Images/99_hu_4100cf8525562925.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1182,10 +1182,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;79:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/79.png&#34;
+&lt;img src=&#34;/post/hackthebox-drive/Images/79.png&#34;
 	width=&#34;960&#34;
 	height=&#34;458&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/79_hu_65516f125fb988b7.png 480w, //localhost:1313/post/hackthebox-drive/Images/79_hu_d863d1b700981e4d.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/79_hu_65516f125fb988b7.png 480w, /post/hackthebox-drive/Images/79_hu_d863d1b700981e4d.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1308,10 +1308,10 @@ Due to password complexity requirements, registered with creds &lt;code&gt;asdf:
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Now our kali machine is listening on local port 3000, and will forward requests to &lt;code&gt;drive.htb&lt;/code&gt;&amp;rsquo;s local port 3000.
 In the gitea service, we can login as martin and we can see DoodleGrive source code:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/DriveSource.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/DriveSource.png&#34;
 	width=&#34;1211&#34;
 	height=&#34;591&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/DriveSource_hu_b6c7bec69eae52c0.png 480w, //localhost:1313/post/hackthebox-drive/Images/DriveSource_hu_56df2f90d8c40ccc.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/DriveSource_hu_b6c7bec69eae52c0.png 480w, /post/hackthebox-drive/Images/DriveSource_hu_56df2f90d8c40ccc.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1358,10 +1358,10 @@ In the gitea service, we can login as martin and we can see DoodleGrive source c
 &lt;/h3&gt;&lt;p&gt;Before we get too far, it is worth noting the most recent commit on this gitea service:
 &lt;code&gt;retruning to the default Djnago hashers due to problems in Bcrypt hashers&lt;/code&gt;
 When we view the commit changes, we see alterations to &lt;code&gt;geeks_site/settings.py&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/gitchanges.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/gitchanges.png&#34;
 	width=&#34;1172&#34;
 	height=&#34;657&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/gitchanges_hu_25d77d2baacbed9b.png 480w, //localhost:1313/post/hackthebox-drive/Images/gitchanges_hu_e783730f60a63608.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/gitchanges_hu_25d77d2baacbed9b.png 480w, /post/hackthebox-drive/Images/gitchanges_hu_e783730f60a63608.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1371,10 +1371,10 @@ When we view the commit changes, we see alterations to &lt;code&gt;geeks_site/se
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;We can see here that this is related to how data in the SQL database is being stored. It seems for some time they were using BCrypt hashes, which is very robust at the expense of processing power. However, it looks like they have recently switched to SHA256. Checking the commit history, we see that at one point they were using SHA1, which is massively easier to crack than SHA256 or Bcrypt:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/commithistory.png&#34;
+&lt;p&gt;&lt;img src=&#34;/post/hackthebox-drive/Images/commithistory.png&#34;
 	width=&#34;1132&#34;
 	height=&#34;597&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/commithistory_hu_98a18328ba810a79.png 480w, //localhost:1313/post/hackthebox-drive/Images/commithistory_hu_ca071cbf965f1e43.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/commithistory_hu_98a18328ba810a79.png 480w, /post/hackthebox-drive/Images/commithistory_hu_ca071cbf965f1e43.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1603,10 +1603,10 @@ Here it would be nice to look at gitea&amp;rsquo;s commit timestamps, and we cou
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;It mentions credentials, but the email doesn&amp;rsquo;t seem to exist on the box. Fortunately, since this is a binary (and non-stripped!), the user/password check should be baked-in. We can try strings to find this, but with a quick check into vim, I find it very fast by searching for password:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/vim.png&#34;
+&lt;img src=&#34;/post/hackthebox-drive/Images/vim.png&#34;
 	width=&#34;936&#34;
 	height=&#34;170&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/vim_hu_b1b744159b3b3cdc.png 480w, //localhost:1313/post/hackthebox-drive/Images/vim_hu_fe9489b78f66b1b3.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/vim_hu_b1b744159b3b3cdc.png 480w, /post/hackthebox-drive/Images/vim_hu_fe9489b78f66b1b3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1616,10 +1616,10 @@ Here it would be nice to look at gitea&amp;rsquo;s commit timestamps, and we cou
 	
 &gt;
 Using strings, we can splice out string contents. It is a lot, so I still find it best to save it to another file, open and vim and search this way:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-drive/Images/vim2.png&#34;
+&lt;img src=&#34;/post/hackthebox-drive/Images/vim2.png&#34;
 	width=&#34;278&#34;
 	height=&#34;108&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-drive/Images/vim2_hu_d8d04e84ad7e5130.png 480w, //localhost:1313/post/hackthebox-drive/Images/vim2_hu_844c8e5bf1bcf1d4.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-drive/Images/vim2_hu_d8d04e84ad7e5130.png 480w, /post/hackthebox-drive/Images/vim2_hu_844c8e5bf1bcf1d4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
@@ -1892,11 +1892,11 @@ here we have creds as &lt;code&gt;moriarty:findMeIfY0uC@nMr.Holmz!&lt;/code&gt;&
         </item>
         <item>
         <title>HackTheBox - PC</title>
-        <link>//localhost:1313/post/hackthebox-pc/</link>
+        <link>/post/hackthebox-pc/</link>
         <pubDate>Sat, 07 Oct 2023 10:18:48 -0500</pubDate>
         
-        <guid>//localhost:1313/post/hackthebox-pc/</guid>
-        <description>&lt;img src="//localhost:1313/post/hackthebox-pc/PC.png" alt="Featured image of post HackTheBox - PC" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
+        <guid>/post/hackthebox-pc/</guid>
+        <description>&lt;img src="/post/hackthebox-pc/PC.png" alt="Featured image of post HackTheBox - PC" /&gt;&lt;h2 id=&#34;enumeration&#34;&gt;Enumeration
 &lt;/h2&gt;&lt;p&gt;Initial nmap:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -1984,10 +1984,10 @@ While I initially started enumeration with grpc_cli and &lt;a class=&#34;link&#3
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;The GUI will open up, and we can create an account or skip for now:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/PostLaunch.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/PostLaunch.png&#34;
 	width=&#34;1283&#34;
 	height=&#34;605&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/PostLaunch_hu_7e33cae2b2f108e8.png 480w, //localhost:1313/post/hackthebox-pc/Images/PostLaunch_hu_8684730ed486d99e.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/PostLaunch_hu_7e33cae2b2f108e8.png 480w, /post/hackthebox-pc/Images/PostLaunch_hu_8684730ed486d99e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Skipping Postman Registration&#34;
@@ -1999,10 +1999,10 @@ While I initially started enumeration with grpc_cli and &lt;a class=&#34;link&#3
 	
 &gt;
 We can set up our request first by selecting gRPC:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/setgrpc.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/setgrpc.png&#34;
 	width=&#34;1229&#34;
 	height=&#34;458&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/setgrpc_hu_65a595a51bcb9791.png 480w, //localhost:1313/post/hackthebox-pc/Images/setgrpc_hu_53fb78edfc71d3d8.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/setgrpc_hu_65a595a51bcb9791.png 480w, /post/hackthebox-pc/Images/setgrpc_hu_53fb78edfc71d3d8.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Selecting gRPC request type&#34;
@@ -2014,10 +2014,10 @@ We can set up our request first by selecting gRPC:
 	
 &gt;
 Now when we supply the URL, API methods will be loaded automatically thanks to server reflection query:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/servicereflection.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/servicereflection.png&#34;
 	width=&#34;898&#34;
 	height=&#34;422&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/servicereflection_hu_6446b02456a1ac84.png 480w, //localhost:1313/post/hackthebox-pc/Images/servicereflection_hu_3dc874336236b40e.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/servicereflection_hu_6446b02456a1ac84.png 480w, /post/hackthebox-pc/Images/servicereflection_hu_3dc874336236b40e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Viewing SimpleApp’s functions&#34;
@@ -2029,10 +2029,10 @@ Now when we supply the URL, API methods will be loaded automatically thanks to s
 	
 &gt;
 First, we can try to register a user. Once again, the query is made easy with Postman&amp;rsquo;s &amp;ldquo;use example message&amp;rdquo; feature. It will create for us a structured JSON message with all necessary parameters. For my account, I edited the example to have a username/password of &lt;code&gt;asdf&lt;/code&gt;.
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/register.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/register.png&#34;
 	width=&#34;899&#34;
 	height=&#34;628&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/register_hu_31fe90d9a9c9b00b.png 480w, //localhost:1313/post/hackthebox-pc/Images/register_hu_95ad86d6e423b889.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/register_hu_31fe90d9a9c9b00b.png 480w, /post/hackthebox-pc/Images/register_hu_95ad86d6e423b889.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Registering asdf&#34;
@@ -2044,10 +2044,10 @@ First, we can try to register a user. Once again, the query is made easy with Po
 	
 &gt;
 Next, we can log in. The server responds with giving us an id number. Notice also, the Trailers tab. This will contain our login token, which we must supply for logged-in activities.
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/login1.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/login1.png&#34;
 	width=&#34;874&#34;
 	height=&#34;560&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/login1_hu_ddc29a4f84767e4c.png 480w, //localhost:1313/post/hackthebox-pc/Images/login1_hu_60f58d0b16dd791c.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/login1_hu_ddc29a4f84767e4c.png 480w, /post/hackthebox-pc/Images/login1_hu_60f58d0b16dd791c.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Logging in as asdf&#34;
@@ -2059,10 +2059,10 @@ Next, we can log in. The server responds with giving us an id number. Notice als
 	
 &gt;
 Selecting the Trailers tab we can view:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/login2.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/login2.png&#34;
 	width=&#34;897&#34;
 	height=&#34;184&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/login2_hu_2febd2dcc6bbc737.png 480w, //localhost:1313/post/hackthebox-pc/Images/login2_hu_f1844a443a092dfb.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/login2_hu_2febd2dcc6bbc737.png 480w, /post/hackthebox-pc/Images/login2_hu_f1844a443a092dfb.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Viewing login token&#34;
@@ -2074,10 +2074,10 @@ Selecting the Trailers tab we can view:
 	
 &gt;
 To use this token, we can go to the Metadata tab, and add the key as &amp;rsquo;token&amp;rsquo; and the value the copied value from Trailers, omitting the b&amp;rsquo;&amp;rsquo;.
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/login3.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/login3.png&#34;
 	width=&#34;894&#34;
 	height=&#34;307&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/login3_hu_9d4009a59890d843.png 480w, //localhost:1313/post/hackthebox-pc/Images/login3_hu_956b191f84c76019.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/login3_hu_9d4009a59890d843.png 480w, /post/hackthebox-pc/Images/login3_hu_956b191f84c76019.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Adding login token to Metadata&#34;
@@ -2089,10 +2089,10 @@ To use this token, we can go to the Metadata tab, and add the key as &amp;rsquo;
 	
 &gt;
 Finally, we can use the getInfo function. &amp;ldquo;Use Example Message&amp;rdquo; will again auto-suggest a valid JSON request, that we can use to supply our own id value:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/getinfo1.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/getinfo1.png&#34;
 	width=&#34;870&#34;
 	height=&#34;540&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/getinfo1_hu_147603ff8f63f7d5.png 480w, //localhost:1313/post/hackthebox-pc/Images/getinfo1_hu_75d38f4563801d18.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/getinfo1_hu_147603ff8f63f7d5.png 480w, /post/hackthebox-pc/Images/getinfo1_hu_75d38f4563801d18.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Checking our number&#34;
@@ -2105,10 +2105,10 @@ Finally, we can use the getInfo function. &amp;ldquo;Use Example Message&amp;rdq
 &gt;&lt;/p&gt;
 &lt;h3 id=&#34;sql-injection-in-getinfo-function&#34;&gt;SQL Injection in getInfo function
 &lt;/h3&gt;&lt;p&gt;After trying several things, we might learn that this API is vulnerable to SQL injection. In the below example, I use UNION injection to insert the number &amp;lsquo;1&amp;rsquo; in the response:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union1.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union1.png&#34;
 	width=&#34;876&#34;
 	height=&#34;549&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union1_hu_5d14f64fd09bc85e.png 480w, //localhost:1313/post/hackthebox-pc/Images/union1_hu_7d781579ee86b72e.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union1_hu_5d14f64fd09bc85e.png 480w, /post/hackthebox-pc/Images/union1_hu_7d781579ee86b72e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT 1– -&#34;
@@ -2120,10 +2120,10 @@ Finally, we can use the getInfo function. &amp;ldquo;Use Example Message&amp;rdq
 	
 &gt;
 First, we can determine the database type by enumerating versions. This way, I find that the service is using sqlite:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union2.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union2.png&#34;
 	width=&#34;897&#34;
 	height=&#34;539&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union2_hu_877cd7f740910d06.png 480w, //localhost:1313/post/hackthebox-pc/Images/union2_hu_45c75413c58d5ed5.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union2_hu_877cd7f740910d06.png 480w, /post/hackthebox-pc/Images/union2_hu_45c75413c58d5ed5.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT sqlite_version();– -&#34;
@@ -2136,10 +2136,10 @@ First, we can determine the database type by enumerating versions. This way, I f
 &gt;
 Using a query from &lt;a class=&#34;link&#34; href=&#34;https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/SQLite%20Injection.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;PayloadAllTheThings&lt;/a&gt;, I am able to dump databases. We are likely already seeing &lt;code&gt;messages&lt;/code&gt;, and &lt;code&gt;accounts&lt;/code&gt; will have interesting information.
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union3.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union3.png&#34;
 	width=&#34;906&#34;
 	height=&#34;544&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union3_hu_927743da3062424d.png 480w, //localhost:1313/post/hackthebox-pc/Images/union3_hu_d81a1c96677f3340.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union3_hu_927743da3062424d.png 480w, /post/hackthebox-pc/Images/union3_hu_d81a1c96677f3340.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT group_concat(tbl_name) FROM sqlite_master WHERE type=‘table’ and tbl_name NOT like ‘sqlite_%’– -&#34;
@@ -2151,10 +2151,10 @@ Using a query from &lt;a class=&#34;link&#34; href=&#34;https://github.com/swiss
 	
 &gt;
 Next, enumerating the columns in table &lt;code&gt;accounts&lt;/code&gt;:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union4.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union4.png&#34;
 	width=&#34;894&#34;
 	height=&#34;524&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union4_hu_febe57dc8fd45d51.png 480w, //localhost:1313/post/hackthebox-pc/Images/union4_hu_6d6a4e033d41a49.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union4_hu_febe57dc8fd45d51.png 480w, /post/hackthebox-pc/Images/union4_hu_6d6a4e033d41a49.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT sql FROM sqlite_master WHERE type!=‘meta’ AND sql NOT NULL AND name =‘accounts’– -&#34;
@@ -2166,10 +2166,10 @@ Next, enumerating the columns in table &lt;code&gt;accounts&lt;/code&gt;:
 	
 &gt;
 Seeing &lt;code&gt;\n\t&lt;/code&gt; simply refers to a newline, followed by tab indentation. There are 2 column entries, &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt;. First, finding &lt;code&gt;password&lt;/code&gt;:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union5.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union5.png&#34;
 	width=&#34;889&#34;
 	height=&#34;529&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union5_hu_3e8d864c12ef7dbf.png 480w, //localhost:1313/post/hackthebox-pc/Images/union5_hu_2d15c32ded787781.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union5_hu_3e8d864c12ef7dbf.png 480w, /post/hackthebox-pc/Images/union5_hu_2d15c32ded787781.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT password FROM accounts– -&#34;
@@ -2181,10 +2181,10 @@ Seeing &lt;code&gt;\n\t&lt;/code&gt; simply refers to a newline, followed by tab
 	
 &gt;
 Now with a password, we can find a matching username:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union6.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union6.png&#34;
 	width=&#34;892&#34;
 	height=&#34;529&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union6_hu_6fc38bd245213f62.png 480w, //localhost:1313/post/hackthebox-pc/Images/union6_hu_d104ffcc461089e4.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union6_hu_6fc38bd245213f62.png 480w, /post/hackthebox-pc/Images/union6_hu_d104ffcc461089e4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT username FROM accounts– -&#34;
@@ -2196,10 +2196,10 @@ Now with a password, we can find a matching username:
 	
 &gt;
 Although we have a username, this does not really seem like a password that a user &amp;lsquo;admin&amp;rsquo; would have. With my current injection, I am just retrieving the first entry in the &lt;code&gt;username&lt;/code&gt; field. However, we can be extra sure to match the username &amp;amp; password by using WHERE:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/union7.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/union7.png&#34;
 	width=&#34;881&#34;
 	height=&#34;518&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/union7_hu_4fb644482d916edf.png 480w, //localhost:1313/post/hackthebox-pc/Images/union7_hu_d2c130fcc008496c.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/union7_hu_4fb644482d916edf.png 480w, /post/hackthebox-pc/Images/union7_hu_d2c130fcc008496c.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;UNION SELECT username FROM accounts WHERE password=‘HereIsYourPassword1431’– -&#34;
@@ -2287,10 +2287,10 @@ Finally, we have a credential pair of &lt;code&gt;sau:HereIsYourPassWord1431&lt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;Now when we visit &lt;code&gt;localhost:8000&lt;/code&gt; in our browser, we can see the web login page:
-&lt;img src=&#34;//localhost:1313/post/hackthebox-pc/Images/20230520223533.png&#34;
+&lt;img src=&#34;/post/hackthebox-pc/Images/20230520223533.png&#34;
 	width=&#34;640&#34;
 	height=&#34;368&#34;
-	srcset=&#34;//localhost:1313/post/hackthebox-pc/Images/20230520223533_hu_1d3a673b5e1e4aad.png 480w, //localhost:1313/post/hackthebox-pc/Images/20230520223533_hu_2cc93ca79a64053.png 1024w&#34;
+	srcset=&#34;/post/hackthebox-pc/Images/20230520223533_hu_1d3a673b5e1e4aad.png 480w, /post/hackthebox-pc/Images/20230520223533_hu_2cc93ca79a64053.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
