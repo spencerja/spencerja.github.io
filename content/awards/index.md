@@ -10,6 +10,20 @@ toc: true
 ![](images/Comptia.png)
 
 ## CTFs
+
+### NahamCon CTF 2025
+Participated once again in NahamCon CTF and placed at 201st. There were a couple really interesting challenge solutions that I learned from
+![](images/nahamctf-2.png)
+
+
+### HTB Cyber Apocalypse 2025
+The team placed 427th in the 2025 iteration of Cyber Apocalypse! There was a very diverse category distribution, but we still had fun learning where we could.
+![](images/CA2025.png)
+
+### n00bz CTF 2024
+Placed 23rd on n00bz CTF. Was really fun with several challenges we were able to overcome!
+![](images/n00bz.png)
+
 ### Huntress CTF 2024
 Everyone has been super busy lately, but a couple of us managed to get into Huntress CTF and snagged a nice 127th place! This ctf lasted 30 days and had a very large challenge pool. Naturally, some challenges were particularly great! I rather enjoyed Permission To Proxy, MOVEable, Zippy, and Palimpsest!
 ![](images/Huntress_Certificate_2.png)
@@ -20,7 +34,7 @@ Everyone has been super busy lately, but a couple of us managed to get into Hunt
 
 
 ### Nahamcon 2023
-74th place out of 2522! My contribution was 3749 points out of the team's 7425 :)
+74th place out of 2522! Very happy to show improvements with the team!
 
 ![](images/nahamcon.png)
 
