@@ -3,6 +3,9 @@ title: "Trophies"
 toc: true
 ---
 ## Certificates
+### Introduction to Malware Binary Triage (IMBT) by InvokeRE
+![](images/imbt.png)
+
 ### OSCP by Offensive Security
 ![](images/Cert.png)
 
