@@ -57,6 +57,11 @@ Achieved the Holo tier in HTB Seasons III. For this, I completed all box challen
 
 ![](images/holo3.png)
 
+### HTB Seasons 8
+Achieved Holo rank again in HTB Seasons 8. This requires >90% completion rate for 13 consecutive weeks of new box releases: 4 Easy, 4 Medium, 3 Hard and 2 Insane difficulty machines.
+
+![](images/HTB_Season_8.png)
+
 ### Achieved Pro Hacker Rank
 After completing 14/20 active boxes, I earned Pro Hacker rank on HTB
 
