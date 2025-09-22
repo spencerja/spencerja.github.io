@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination.">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC16 exploitation combination.">
 <title>HackTheBox - Fluffy</title>
 
 <link rel='canonical' href='/post/hackthebox-fluffy/'>
 
 <link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="HackTheBox - Fluffy">
-<meta property='og:description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination.">
+<meta property='og:description' content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC16 exploitation combination.">
 <meta property='og:url' content='/post/hackthebox-fluffy/'>
 <meta property='og:site_name' content='Spencer&#39;s Blog'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Active Directory' /><meta property='article:tag' content='Netexec' /><meta property='article:tag' content='Certipy' /><meta property='article:tag' content='Bloodhound' /><meta property='article:tag' content='ADCS' /><meta property='article:tag' content='SMB' /><meta property='article:tag' content='ACL' /><meta property='article:tag' content='DACL' /><meta property='article:published_time' content='2025-09-20T22:28:58-05:00'/><meta property='article:modified_time' content='2025-09-20T22:28:58-05:00'/><meta property='og:image' content='/post/hackthebox-fluffy/Images/Banner.png' />
 <meta name="twitter:title" content="HackTheBox - Fluffy">
-<meta name="twitter:description" content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2+ESC3 exploitation combination."><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC16 exploitation combination."><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='/post/hackthebox-fluffy/Images/Banner.png' />
     </head>
     <body class="
@@ -258,7 +258,7 @@
     <li><a href="#privilege-escalation">Privilege Escalation</a>
       <ul>
         <li><a href="#enumerating-adcs-with-certipy">Enumerating ADCS with Certipy</a></li>
-        <li><a href="#leveraging-certipy-to-abuse-esc2esc3">Leveraging Certipy to abuse ESC2+ESC3</a></li>
+        <li><a href="#leveraging-certipy-to-abuse-esc16">Leveraging Certipy to abuse ESC16</a></li>
       </ul>
     </li>
   </ul>
@@ -305,7 +305,7 @@
     
         
         <h3 class="article-subtitle">
-            Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC2&#43;ESC3 exploitation combination.
+            Fluffy is an easy difficulty box focused on Active Directory exploitation. After finding notes on vulnerabilites intended to patch, we can exploit one as it is not yet fixed. From there, Bloodhound assists with showing excessive ACL permissions that allow us to create shadow credentials on service accounts, including ca_svc the certificate authority account. Certificates are misconfigured, allowing us to elevate to Administrator permissions via ESC16 exploitation combination.
         </h3>
         
     </div>
@@ -1062,8 +1062,8 @@
 </span></span><span class="line"><span class="cl">[*] Wrote JSON output to &#39;20250527044711_Certipy.json&#39;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="leveraging-certipy-to-abuse-esc2esc3">Leveraging Certipy to abuse ESC2+ESC3
-</h3><p>From the output, we can see Certificate 32 is vulnerable to ESC2+ESC3:</p>
+</div><h3 id="leveraging-certipy-to-abuse-esc16">Leveraging Certipy to abuse ESC16
+</h3><p>From the output, we can see Certificate 0 is vulnerable to ESC16:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1080,22 +1080,58 @@
 </span><span class="lnt">12
 </span><span class="lnt">13
 </span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl">    <span class="s2">&#34;32&#34;</span><span class="err">:</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Template Name&#34;</span><span class="p">:</span> <span class="s2">&#34;User&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Display Name&#34;</span><span class="p">:</span> <span class="s2">&#34;User&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Certificate Authorities&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">        <span class="s2">&#34;fluffy-DC01-CA&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="p">],</span>
-</span></span><span class="line"><span class="cl"> <span class="err">&lt;...SNIP...&gt;</span>
-</span></span><span class="line"><span class="cl">      <span class="nt">&#34;[+] User Enrollable Principals&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">        <span class="s2">&#34;FLUFFY.HTB\\Domain Users&#34;</span>
-</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Certificate Authorities&#34;</span><span class="err">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;0&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;CA Name&#34;</span><span class="p">:</span> <span class="s2">&#34;fluffy-DC01-CA&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;DNS Name&#34;</span><span class="p">:</span> <span class="s2">&#34;DC01.fluffy.htb&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Certificate Subject&#34;</span><span class="p">:</span> <span class="s2">&#34;CN=fluffy-DC01-CA, DC=fluffy, DC=htb&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="err">&lt;...SNIP...&gt;</span>      
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Permissions&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;Owner&#34;</span><span class="p">:</span> <span class="s2">&#34;FLUFFY.HTB\\Administrators&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;Access Rights&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;1&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Domain Admins&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Enterprise Admins&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Administrators&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;2&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Domain Admins&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Enterprise Admins&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Administrators&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">          <span class="nt">&#34;512&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;FLUFFY.HTB\\Cert Publishers&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;[!] Vulnerabilities&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC16&#34;</span><span class="p">:</span> <span class="s2">&#34;Security Extension is disabled.&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
 </span></span><span class="line"><span class="cl">      <span class="nt">&#34;[*] Remarks&#34;</span><span class="p">:</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC2 Target Template&#34;</span><span class="p">:</span> <span class="s2">&#34;Template can be targeted as part of ESC2 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1.&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC3 Target Template&#34;</span><span class="p">:</span> <span class="s2">&#34;Template can be targeted as part of ESC3 exploitation. This is not a vulnerability by itself. See the wiki for more details. Template has schema version 1.&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;ESC16&#34;</span><span class="p">:</span> <span class="s2">&#34;Other prerequisites may be required for this to be exploitable. See the wiki for more details.&#34;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span><span class="err">,</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>The wiki mentioned is the following: <a class="link" href="https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation"  target="_blank" rel="noopener"
@@ -1121,7 +1157,7 @@
 </span></span><span class="line"><span class="cl">[*] Successfully updated &#39;ca_svc&#39;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>Next requesting the &ldquo;Any Purpose&rdquo; certificate:</p>
+</div><p>Next requesting the certificate under the UPN context Administrator:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1173,7 +1209,7 @@
 </span></span><span class="line"><span class="cl">[*] Successfully updated &#39;ca_svc&#39;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>Next, requesting a certificate on behalf of the Administrator:</p>
+</div><p>Next, attempting to authenticate using the Administrator pfx:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1206,7 +1242,7 @@
 </span></span><span class="line"><span class="cl">[*] Got hash for &#39;administrator@fluffy.htb&#39;: aad3b435b51404eeaad3b435b51404ee:8da83a3fa618b6e3a00e93f676c92a6e
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>Now we can authenticate as admin!</p>
+</div><p>Now we can access the host as admin!</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
